@@ -1,0 +1,13 @@
+import(xtable)
+import(tcltk)
+import(plyr)
+importFrom("relimp", showData)
+importFrom("coda", mcmc.list, mcmc)
+importFrom("gsubfn", strapply)
+
+export(runModels, runModels_Interactive, extractModelSummaries, 
+	extractModelParameters, extractModIndices, getSavedata_Data, getSavedata_Fileinfo,
+	getSavedata_Bparams, showSummaryTable, LatexSummaryTable, HTMLSummaryTable,
+	createModels, prepareMplusData, readModels, testBParamConstraint,
+	testBParamCompoundConstraint, compareModels, lookupTech1Parameter,
+	mplus.traceplot)
