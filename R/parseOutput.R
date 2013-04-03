@@ -479,26 +479,30 @@ divideIntoFields <- function(section.text, required) {
     if (grepl("^\\s*!.*", cmd, perl=TRUE)) next #skip comment lines
     if (grepl("^\\s+$", cmd, perl=TRUE)) next #skip blank lines
     
-    #force text matches at word boundary, or just split on = (\b doesn't work for =)
-    cmd.split <- strsplit(cmd[1L], "(\\b(IS|ARE|is|are|Is|Are)\\b|=)", perl=TRUE)[[1]]
-    if (length(cmd.split) < 2L) { 
-      #anomaly: no is/are/=
-      if (tolower(cmd.spacesplit <- strsplit(trimSpace(cmd[1L]), "\\s+", perl=TRUE)[[1L]])[1L] == "usevariables") {
-        #for now, tolerate syntax usevariables x1-x10;
-        cmd.split[1L] <- cmd.spacesplit[1L]
-        cmd.split[2L] <- paste(cmd.spacesplit[2L:length(cmd.spacesplit)], collapse=" ") #rejoin rhs with spaces
-      } else {
-        stop("First line not dividing into LHS and RHS: ", cmd[1L])        
-      }
-    } else if (length(cmd.split) > 2L) {
-      #probably more than one equals sign, such as knownclass: KNOWNCLASS = g (grp = 1 grp = 2 grp = 3)
-      cmd.split[2L] <- paste(cmd.split[-1L], collapse="=") #pull out lhs [-1] and join other strings with =
-      cmd.split <- cmd.split[1L:2L] #just retain the lhs and (joined) rhs elements
-    }
-        
-    cmdName <- trimSpace(cmd.split[1L]) #lhs
-    cmdArgs <- trimSpace(cmd.split[2L]) #rhs
+    #mplus is apparently tolerant of specifications that don't include IS/ARE/=
+    #example: usevariables x1-x10;
+    #thus, split on spaces and assume that first element is lhs, drop second element if IS/ARE/=, and assume remainder is rhs
     
+    #but if user uses equals sign, then spaces will not always be present (e.g., usevariables=x1-x10)
+    if ( (leadingEquals <- regexpr("^\\s*[A-Za-z]+[A-Za-z_-]*\\s*(=)", cmd[1L], perl=TRUE))[1L] > 0) {
+      cmdName <- trimSpace(substr(cmd[1L], 1, attr(leadingEquals, "capture.start") - 1))
+      cmdArgs <- trimSpace(substr(cmd[1L], attr(leadingEquals, "capture.start") + 1, nchar(cmd[1L])))
+    } else {
+      cmd.spacesplit <- strsplit(trimSpace(cmd[1L]), "\\s+", perl=TRUE)[[1L]]
+
+      if (length(cmd.spacesplit) < 2L) {
+        #for future: make room for this function to prase things like just TECH13 (no rhs)
+      } else {
+        cmdName <- trimSpace(cmd.spacesplit[1L])
+        if (length(cmd.spacesplit) > 2L && tolower(cmd.spacesplit[2L]) %in% c("is", "are")) {
+          cmdArgs <- paste(cmd.spacesplit[3L:length(cmd.spacesplit)], collapse=" ") #remainder, removing is/are          
+        } else {
+          cmdArgs <- paste(cmd.spacesplit[2L:length(cmd.spacesplit)], collapse=" ") #is/are not used, so just join rhs
+        }
+      }
+            
+    }
+
     section.divide[[make.names(tolower(cmdName))]] <- cmdArgs
     
   }
