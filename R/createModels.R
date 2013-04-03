@@ -581,7 +581,7 @@ replaceBodyTags <- function(bodySection, bodyTags, initCollection) {
   #if so, replace at the last minute (check this in Init)
 
   #set a "deferred" status in currentValue if replacement contains tags
-  targetTags <- with(bodyTags, bodyTags[, tagType %in% c("simple", "iterator", "array")])
+  targetTags <- with(bodyTags, bodyTags[tagType %in% c("simple", "iterator", "array"), ])
   targetTags$rownumber <- 1:nrow(targetTags)
 
   #print(targetTags)

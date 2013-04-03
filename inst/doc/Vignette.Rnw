@@ -30,7 +30,7 @@ columns=fullflexible						%makes character spacing nice
 \bigskip
 %Note that I need to set the directory before building this file, but shouldn't set it using setwd
 %because then CRAN maintainers can't link to the same directory.
-%setwd(file.path(getMainDir(), "Mplus_Automation/pkg/inst/doc"))
+%setwd(file.path(getMainDir(), "MplusAutomation/pkg/inst/doc"))
 \section{Overview}
 This guide provides examples of how to use the functions in the MplusAutomation package.
 The package is designed to automate three major aspects of latent variable modeling in Mplus:
@@ -897,7 +897,7 @@ starting values with random starts.
 iterators = classes;
 classes = 1:7;
 filename = "[[classes]]-class LCA 7.3.inp";
-outputDirectory = "C:/Mplus_Automation/LCA Outputs";
+outputDirectory = "C:/MplusAutomation/LCA Outputs";
 [[/init]]
 
 TITLE: this is an example of a LCA with binary
@@ -916,7 +916,7 @@ OUTPUT: TECH1 TECH8 TECH10;
 The above template file instructs the \lstinline|createModels| function to loop over a variable called \lstinline|classes|.
 The \lstinline|classes| variable is defined as the integers from 1-7 (the colon in 1:7 indicates a sequence).
 Files should be named according to the number of classes, so when \lstinline|classes = 5|, then \lstinline|filename = "[[classes]]-class LCA 7.3.inp";|
-will evaluate to \lstinline|5-class LCA 7.3.inp|. All files will be saved in the directory \lstinline|C:/Mplus_Automation/LCA Outputs|. Note that
+will evaluate to \lstinline|5-class LCA 7.3.inp|. All files will be saved in the directory \lstinline|C:/MplusAutomation/LCA Outputs|. Note that
 \textit{R} uses forward slashes, not backslashes, to indicate directory paths.
 
 In the body section of this simple example, the only thing that changes is the definition \lstinline|CLASSES = c([[classes]])|. And because
