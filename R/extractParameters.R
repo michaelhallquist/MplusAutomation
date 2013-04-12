@@ -148,7 +148,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
   #detectColumn names sub-divides (perhaps unnecessarily) the matches based on the putative section type of the output
   #current distinctions include modification indices, confidence intervals, and model results.
-  if (sectionName == "ci.unstandardized") sectionType <- "confidence_intervals"
+  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized")) sectionType <- "confidence_intervals"
   else sectionType <- "model_results"
 
   columnNames <- detectColumnNames(filename, modelSection, sectionType)
@@ -372,16 +372,24 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     allSections <- appendListElements(allSections, extractParameters_1section(filename, ciSection, "ci.unstandardized"))
   }
 
-  #listOrder <- c()
-  #if ("unstandardized" %in% names(allSections)) listOrder <- c(listOrder, "unstandardized")
-  #if ("ci.unstandardized" %in% names(allSections)) listOrder <- c(listOrder, "ci.unstandardized")
-  #if ("stdyx.standardized" %in% names(allSections)) listOrder <- c(listOrder, "stdyx.standardized")
-  #if ("stdy.standardized" %in% names(allSections)) listOrder <- c(listOrder, "stdy.standardized")
-  #if ("std.standardized" %in% names(allSections)) listOrder <- c(listOrder, "std.standardized")
-
+  ciStdSection <- getSection("^(CONFIDENCE INTERVALS OF STANDARDIZED MODEL RESULTS|CREDIBILITY INTERVALS OF STANDARDIZED MODEL RESULTS)$", outfiletext)
+  if (!is.null(ciStdSection)) {
+    stdsections <- c("STDYX Standardization", "STDY Standardization", "STD Standardization")
+    stdyx.section <- getSection("STDYX Standardization", ciStdSection, headers=stdsections)
+    if (!is.null(stdyx.section)) { allSections <- appendListElements(allSections, extractParameters_1section(filename, stdyx.section, "ci.stdyx.standardized")) }
+    
+    stdy.section <- getSection("STDY Standardization", ciStdSection, headers=stdsections)
+    if (!is.null(stdy.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, stdy.section, "ci.stdy.standardized"))
+    
+    std.section <- getSection("STD Standardization", ciStdSection, headers=stdsections)
+    if (!is.null(std.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, std.section, "ci.std.standardized"))
+  }
+  
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "ci.unstandardized",
-    "stdyx.standardized", "stdy.standardized", "std.standardized")
+    "stdyx.standardized", "ci.stdyx.standardized", 
+    "stdy.standardized", "ci.stdy.standardized", 
+    "std.standardized", "ci.std.standardized")
   listOrder <- listOrder[listOrder %in% names(allSections)]
 
 

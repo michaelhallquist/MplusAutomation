@@ -215,7 +215,7 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "THE FOLLOWING DATA SET\\(S\\) DID NOT RESULT IN A COMPLETED REPLICATION:",
         "RESIDUAL OUTPUT", "MODEL MODIFICATION INDICES", "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
         "FACTOR SCORE INFORMATION \\(COMPLETE DATA\\)", "SUMMARY OF FACTOR SCORES", "PLOT INFORMATION", "SAVEDATA INFORMATION",
-        "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
+        "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
         "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
     )
 
@@ -347,6 +347,11 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
           identical (nextLine, c("Population", "Average", "Std.", "Dev.", "Average", "Cover", "Coeff")))
         varNames <- c("param", "population", "average", "population_sd", "average_se", "mse", "cover_95", "pct_sig_coef")      
       
+      #Multiple imputation output (I think format introduced in v7)
+      else if (identical(thisLine, c("Two-Tailed", "Rate", "of")) &&
+          identical(nextLine, c("Estimate", "S.E.", "Est./S.E.", "P-Value", "Missing")))
+        varNames <- c("param", "est", "se", "est_se", "pval", "rate_missing")      
+            
       #Usual five-column output that applies to most unstandardized and standardized sections in Mplus 5 and later
       else if (identical(thisLine, c("Two-Tailed")) && 
           identical(nextLine, c("Estimate", "S.E.", "Est./S.E.", "P-Value")))

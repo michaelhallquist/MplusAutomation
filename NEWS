@@ -1,3 +1,8 @@
+Version 0.5-5
+- feature: initial extraction support of standardized confidence intervals.
+- support 6-column output from multiple imputation analyses that contain "rate of missing" column.
+- extract all details of bootstrapped likelihood ratio test.
+
 Version 0.5-4
 - feature: readModels extracts warnings and errors.
 - feature: prepareMplusData now optionally allows for a .inp to be written or for interactive selection of a filename. 

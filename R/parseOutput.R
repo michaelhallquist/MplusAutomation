@@ -224,6 +224,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
 #make this a more generic function that accepts headers and fields in case it is useful outside the MODEL FIT section
 extractSummaries_1plan <- function(arglist, sectionHeaders, sectionFields, textToParse, filename) {
   if (length(sectionHeaders) < 1) stop("No section headers provided.")
+  if (length(sectionHeaders) != length(sectionFields)) stop("Section headers and section fields have different lengths.")
   
   #multiple sections
   for (header in 1:length(sectionHeaders)) {
@@ -238,8 +239,13 @@ extractSummaries_1plan <- function(arglist, sectionHeaders, sectionFields, textT
     sectionFieldDF <- sectionFields[[header]]
     #browser()
     for (i in 1:nrow(sectionFieldDF)) {
-      thisField <- sectionFieldDF[i,] 
-      arglist[[ thisField$varName ]] <- extractValue(pattern=thisField$regexPattern, sectionText, filename, type=thisField$varType)
+      thisField <- sectionFieldDF[i,]
+
+      #Check whether this field already exists and is not missing. If so, skip the extraction.
+      #This was initially setup because of Tech 14 section changes where the number of final stage optimizations is different from v6 to v7.
+      if (!thisField$varName %in% names(arglist) || is.na(arglist[[ thisField$varName ]])) {
+        arglist[[ thisField$varName ]] <- extractValue(pattern=thisField$regexPattern, sectionText, filename, type=thisField$varType)
+      }
     }
   }
 
@@ -755,67 +761,58 @@ extractSummaries_1file <- function(outfiletext, filename, input, extract=c("Titl
             varType=c("dec", "dec"), stringsAsFactors=FALSE
         )
     )
-        
+    
     arglist <- extractSummaries_1plan(arglist, tech11headers, tech11fields, tech11Output, filename)
   }
   
   
-  #the BLRT keyword serves as a placeholder for extracting many fields, like km1likelihood
+  tech14Output <- getSection("^\\s*TECHNICAL 14 OUTPUT\\s*$", outfiletext)
 
-#tech14headers <- c(
-#    "Random Starts Specifications for the k-1 Class Analysis Model",
-#    "Random Starts Specification for the k-1 Class Model for Generated Data",
-#    "Random Starts Specification for the k Class Model for Generated Data",
-#    "Number of bootstrap draws requested",
-#    "PARAMETRIC BOOTSTRAPPED LIKELIHOOD RATIO TEST FOR \\d+ \\(H0\\) VERSUS \\d+ CLASSES"
-#
-#)
-#tech14fields <- list(
-#    data.frame(
-#        varName=c("T11_KM1Starts", "T11_KM1Final"),
-#        regexPattern=c("Number of initial stage random starts", "Number of final stage optimizations"),
-#        varType=c("int", "int"), stringsAsFactors=FALSE
-#    ),
-#    data.frame(
-#        varName=c("T11_KM1LL", "T11_VLMR_2xLLDiff", "T11_VLMR_ParamDiff", "T11_VLMR_Mean", "T11_VLMR_SD", "T11_VLMR_PValue"), 
-#        regexPattern=c("H0 Loglikelihood Value", "2 Times the Loglikelihood Difference", "Difference in the Number of Parameters", "Mean", "Standard Deviation", "P-Value"), 
-#        varType=c("dec", "dec", "int", "dec", "dec", "dec"), stringsAsFactors=FALSE
-#    ),
-#    data.frame(
-#        varName=c("T11_LMR_Value", "T11_LMR_PValue"), 
-#        regexPattern=c("^\\s*Value", "^\\s*P-Value"), 
-#        varType=c("dec", "dec"), stringsAsFactors=FALSE
-#    )
-#)
-  if ("BLRT" %in% extract) {
+  if (!is.null(tech14Output)) {
+    tech14headers <- c(
+        "", #section-inspecific parameters
+        "Random Starts Specifications for the k-1 Class Analysis Model",
+        "Random Starts Specification for the k-1 Class Model for Generated Data",
+        "Random Starts Specification for the k Class Model for Generated Data",
+        "PARAMETRIC BOOTSTRAPPED LIKELIHOOD RATIO TEST FOR \\d+ \\(H0\\) VERSUS \\d+ CLASSES"    
+    )
+    tech14fields <- list(
+        #top-level (no section)
+        data.frame(
+            varName=c("BLRT_RequestedDraws"),
+            regexPattern=c("Number of bootstrap draws requested"),
+            varType=c("str"), stringsAsFactors=FALSE
+        ),
+        #Random Starts Specifications for the k-1 Class Analysis Model
+        data.frame(
+            varName=c("BLRT_KM1AnalysisStarts", "BLRT_KM1AnalysisFinal"),
+            regexPattern=c("Number of initial stage random starts", "Number of final stage optimizations"),
+            varType=c("int", "int"), stringsAsFactors=FALSE
+        ),
+        #Random Starts Specification for the k-1 Class Model for Generated Data
+        #v7 format: Number of final stage optimizations for the\n initial stage random starts  <N>
+        #v6 format: Number of final stage optimizations <N>
+        #Thus, include the genfinal twice here to catch both circumstances
+        data.frame(
+            varName=c("BLRT_KM1GenStarts", "BLRT_KM1GenFinal", "BLRT_KM1GenFinal"),
+            regexPattern=c("Number of initial stage random starts", "+1:Number of final stage optimizations for the", "Number of final stage optimizations"),
+            varType=c("int", "int", "int"), stringsAsFactors=FALSE
+        ),
+        data.frame(
+            varName=c("BLRT_KGenStarts", "BLRT_KGenFinal"),
+            regexPattern=c("Number of initial stage random starts", "Number of final stage optimizations"),
+            varType=c("int", "int"), stringsAsFactors=FALSE
+        ),
+        data.frame(
+            varName=c("BLRT_KM1LL", "BLRT_2xLLDiff", "BLRT_ParamDiff", "BLRT_PValue", "BLRT_SuccessfulDraws"), 
+            regexPattern=c("H0 Loglikelihood Value", "2 Times the Loglikelihood Difference", "Difference in the Number of Parameters", "Approximate P-Value", "Successful Bootstrap Draws"), 
+            varType=c("dec", "dec", "int", "dec", "int"), stringsAsFactors=FALSE
+        )
+    )
     
-    #locate the beginning of the BLRT section
-    matchlines <- grep("TECHNICAL 14 OUTPUT", outfiletext)
+    arglist <- extractSummaries_1plan(arglist, tech14headers, tech14fields, tech14Output, filename)
     
-    if (length(matchlines) == 1) {
-      #match up through the end of the file
-      endRange <- grep("3463 Stoner Ave\\.", outfiletext)
-      
-      if (!length(endRange) == 1) {
-        stop("Problem identifying end marker for BLRT")
-      }
-      
-      blrtpiece <- outfiletext[matchlines:endRange]
-      
-      arglist$BLRT_KM1LL <- extractValue(pattern="H0 Loglikelihood Value", blrtpiece, filename, type="dec")
-      arglist$BLRT_PValue <- extractValue(pattern="Approximate P-Value", blrtpiece, filename, type="dec")
-      arglist$BLRT_Numdraws <- extractValue(pattern="Successful Bootstrap Draws", blrtpiece, filename, type="int")
-    }
-    else {
-      #warning("Could not locate BLRT section, despite being requested")
-      
-      #need to pad the expected fields with NAs to keep the list length consistent, permitting correct rbind
-      arglist$BLRT_KM1LL <- as.numeric(NA)
-      arglist$BLRT_PValue <- as.numeric(NA)
-      arglist$BLRT_Numdraws <- as.numeric(NA)
-    }
   }
-
   
 	#calculate adjusted AIC per Burnham & Anderson(2004), which is better than AIC for non-nested model selection
 	#handle AICC calculation, requires AIC, Parameters, and observations
