@@ -151,7 +151,7 @@ addNode <- function(dotModel, name, role, type) {
 #' @param dotModel The basic model
 #' @param node1 The starting node
 #' @param node2 The ending node
-#' @connectionType The type of connection to add between nodes 1 and 2
+#' @param connectionType The type of connection to add between nodes 1 and 2
 #' @return NULL
 #' @keywords internal
 connectNodes <- function(dotModel, node1, node2, connectionType) {

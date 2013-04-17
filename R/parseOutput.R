@@ -1228,7 +1228,7 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courie
 #'   together to include and exclude columns. The function will error if you include both parameters.
 #' @seealso \code{\link{extractModelSummaries}}, \code{\link{showSummaryTable}}, \code{\link{LatexSummaryTable}}
 #' @export
-#' @keyword interface
+#' @keywords interface
 #' @examples
 #' # make me!!!
 HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy, display=FALSE) {
