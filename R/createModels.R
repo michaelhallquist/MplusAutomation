@@ -1154,7 +1154,7 @@ processInit <- function(initsection) {
 #' @keywords internal
 #' @seealso \code{\link{prepareMplusData}}
 #' @examples
-#' createVarSyntax(mtcars)
+#' MplusAutomation:::createVarSyntax(mtcars)
 createVarSyntax <- function(data) {
   #variable created for readability
   variableNames <- paste(gsub("\\.", "_", names(data)), collapse=" ")

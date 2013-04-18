@@ -234,7 +234,7 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #' \dontrun{
 #'   runModels("C:/Users/Michael/Mplus Runs", recursive=TRUE, showOutput=TRUE,
 #'     replaceOutfile="modifiedDate", logFile="MH_RunLog.txt",
-#'     Mplus_command="C:\\Users\\Michael\\Mplus Install\\Mplus51.exe")}
+#'     Mplus_command="C:\\Users\\Michael\\Mplus Install\\Mplus51.exe")
 #' }
 runModels <- function(directory=getwd(), recursive=FALSE, showOutput=FALSE, replaceOutfile="always",
     logFile="Mplus Run Models.log", Mplus_command="Mplus") {

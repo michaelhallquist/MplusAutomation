@@ -1219,7 +1219,7 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courie
 #'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
 #'   Example: \code{c("InputInstructions", "TLI")}
 #' @param sortBy optional. Field name (as character string) by which to sort the table. Typically an information criterion
-#'   (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".}
+#'   (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".
 #' @param display optional. This parameter specifies whether to display the table in a web
 #'   browser upon creation (\code{TRUE} or \code{FALSE}).
 #' @return No value is returned by this function. It is solely used to create an HTML file containing summary statistics.
@@ -1281,7 +1281,7 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #' @param label optional. A character string specifying the label for the LaTex table, which can be
 #'   used for referencing the table.
 #' @param caption optional. A character string specifying the caption for the LaTex table.
-#' @return A LaTex-formatted table summarizing the \code{modelList} is returned (created by \code{xtable}).}
+#' @return A LaTex-formatted table summarizing the \code{modelList} is returned (created by \code{xtable}).
 #' @author Michael Hallquist
 #' @note You must choose between \code{keepCols} and \code{dropCols} because it is not sensible to use these together
 #'   to include and exclude columns. The function will error if you include both parameters.
