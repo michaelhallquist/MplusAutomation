@@ -338,12 +338,16 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   if (run) {
     results <- .run(data = data, i = 1:nrow(object$rdata), boot = FALSE, ...)
     finalres$model <- results
-    if (run == 1) return(results)
   } else {
     prepareMplusData(df = object$rdata[, object$usevariables], filename = dataout,
       inpfile = tempfile(), ...)
+    return(object)
   }
-  object$results <- finalres
+  if (run == 1) {
+    object$results <- finalres$model
+  } else {
+    object$results <- finalres
+  }
   return(object)
 }
 
