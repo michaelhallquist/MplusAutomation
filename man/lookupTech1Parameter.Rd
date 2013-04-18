@@ -1,0 +1,39 @@
+\name{lookupTech1Parameter}
+\alias{lookupTech1Parameter}
+\title{Lookup the matrix element for a give parameter number}
+\usage{
+  lookupTech1Parameter(tech1Output, paramNumber)
+}
+\arguments{
+  \item{tech1Output}{The object corresponding to the TECH1
+  parameter specification from readModels.}
+
+  \item{paramNumber}{The parameter number to lookup}
+}
+\value{
+  A \code{data.frame} containing the row(s) and column(s)
+  of TECH1 parameter specification matching the requested
+  \code{paramNumber}.
+}
+\description{
+  The \code{lookupTech1Parameter} function identifies the
+  position in the Mplus model matrices corresponding to a
+  given parameter defined in the TECHNICAL 1 PARAMETER
+  SPECIFICATION OUTPUT. The goal of this function is to aid
+  in identifying problematic parameters often printed in
+  the warnings and errors section of Mplus output.
+}
+\examples{
+\dontrun{
+  models <- readModels("test1.out")
+  param <- lookupTech1Parameter(models$tech1, 16)
+}
+}
+\author{
+  Michael Hallquist
+}
+\seealso{
+  \code{\link{readModels}}
+}
+\keyword{interface}
+

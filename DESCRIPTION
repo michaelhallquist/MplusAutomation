@@ -5,13 +5,34 @@ Version: 0.5-4
 Date: 2013-02-14
 Author: Michael Hallquist, Joshua Wiley
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
-Description: The MplusAutomation package leverages the flexibility of the 
- R language to automate latent variable model estimation and interpretation using Mplus, 
- a powerful latent variable modeling program developed by Muthen and Muthen (www.statmodel.com).
- Specifically, MplusAutomation provides routines for creating related groups of models,
- running batches of models, and extracting and tabulating model parameters and fit statistics. 
+Description: The MplusAutomation package leverages the flexibility of the R
+    language to automate latent variable model estimation and interpretation
+    using Mplus, a powerful latent variable modeling program developed by
+    Muthen and Muthen (www.statmodel.com). Specifically, MplusAutomation
+    provides routines for creating related groups of models, running batches of
+    models, and extracting and tabulating model parameters and fit statistics.
 License: LGPL-3
-Depends: tcltk, plyr
-Imports: gsubfn, relimp, coda, xtable
-Suggests: hdf5
+Depends:
+    tcltk,
+    plyr
+Imports:
+    gsubfn,
+    relimp,
+    coda,
+    xtable
+Suggests:
+    hdf5
 LazyLoad: yes
+Collate:
+    'compareModels.R'
+    'createModels.R'
+    'extractAuxE.R'
+    'extractModIndices.R'
+    'extractParameters.R'
+    'extractSaveData.R'
+    'graphModels.R'
+    'mplus.R'
+    'MplusAutomation.R'
+    'parseOutput.R'
+    'runModels.R'
+    'utilityFunctions.R'

@@ -1,0 +1,43 @@
+\name{rmVarWarnings}
+\alias{rmVarWarnings}
+\title{Remove variable name length warnings from Mplus output file}
+\usage{
+  rmVarWarnings(file)
+}
+\arguments{
+  \item{file}{A file name (including path if necessary) to
+  an Mplus output file.  Note that you must have read and
+  write privileges on the file for this function to work
+  properly.}
+}
+\value{
+  Usually NULL. Called for the side effect of removing
+  warnings in Mplus output files. If
+  \code{\link{file.access}} testing for write permissions
+  returns \code{FALSE}, a character string note that
+  \code{rmVarWarnings} could not run.
+}
+\description{
+  This function is designed to remove warnings in Mplus
+  output files about variable names being greater than 8
+  characters. It replaces them with a note that the
+  warnings were removed and a count of how many warnings
+  were removed.
+}
+\details{
+  This is an internal function and not meant to be directly
+  called by the user under most circumstances. It is called
+  by \code{\link{mplusModeler}} when the \code{varwarnings
+  = FALSE} argument is used.
+}
+\examples{
+# to do
+}
+\author{
+  Joshua Wiley
+}
+\seealso{
+  \code{\link{mplusModeler}}
+}
+\keyword{internal}
+

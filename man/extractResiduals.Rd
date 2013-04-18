@@ -1,0 +1,26 @@
+\name{extractResiduals}
+\alias{extractResiduals}
+\title{Extract residual matrices}
+\usage{
+  extractResiduals(outfiletext, filename)
+}
+\arguments{
+  \item{outfiletext}{the text of the output file}
+
+  \item{filename}{The name of the file}
+}
+\value{
+  A list of the residual matrices
+}
+\description{
+  Function that extracts the residual matrices including
+  standardized ones
+}
+\examples{
+# make me!!!
+}
+\seealso{
+  \code{\link{matrixExtract}}
+}
+\keyword{internal}
+

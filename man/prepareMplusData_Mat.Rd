@@ -1,0 +1,22 @@
+\name{prepareMplusData_Mat}
+\alias{prepareMplusData_Mat}
+\title{Prepare Mplus Data Matrix}
+\usage{
+  prepareMplusData_Mat(covMatrix, meansMatrix, nobs)
+}
+\arguments{
+  \item{covMatrix}{The covariance matrix}
+
+  \item{meansMatrix}{The means matrix}
+
+  \item{nobs}{Number of observations for the data}
+}
+\value{
+  A dataset
+}
+\description{
+  support writing of covariance or means + covariance
+  matrix (future)
+}
+\keyword{internal}
+

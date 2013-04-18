@@ -1,0 +1,60 @@
+\name{parseMplus}
+\alias{parseMplus}
+\title{Check Mplus code for missing semicolons or too long lines.}
+\usage{
+  parseMplus(x, add = FALSE)
+}
+\arguments{
+  \item{x}{a character string containing Mplus code.}
+
+  \item{add}{logical indicating whether or not to add
+  semicolons to lines that do not have them. Defaults to
+  \code{FALSE}.}
+}
+\value{
+  a character vector containing the input text and
+  optionally added semicolons.
+}
+\description{
+  The function parses a character string containing Mplus
+  code and checks that every non blank line ends in either
+  a colon or a semicolon. In addition, it checks that every
+  line is less than 80 characters, because Mplus ignores
+  everything after 80 characters on a line which can be a
+  source of enigmatic errors.
+}
+\details{
+  The function is fairly basic at the moment. It works by
+  simply removing blank space (spaces, tabs, etc.) and then
+  if a line does not terminate in a colon or semicolon, it
+  returns a note and the line number.  Optionally, it can
+  add semicolons to any lines missing them and return the
+  input with added semicolons. To check for lines that are
+  too long, all trailing (but not before) white space is
+  removed, and then the number of characters is checked.
+}
+\examples{
+# sample input
+test <- "
+MODEL:
+  mpg ON wt hp;
+  wt WITH hp
+"
+# check and return
+cat(parseMplus(test), fill=TRUE)
+# add missing semicolons and return
+cat(parseMplus(test, TRUE), fill=TRUE)
+test <- "
+MODEL:
+  mpg cyl disp hp drat wt qsec vs am gear PWITH cyl disp hp drat wt qsec vs am gear carb;
+"
+cat(parseMplus(test))
+}
+\author{
+  Joshua Wiley
+}
+\seealso{
+  \code{\link{mplusModeler}}
+}
+\keyword{utils}
+

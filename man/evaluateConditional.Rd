@@ -1,0 +1,22 @@
+\name{evaluateConditional}
+\alias{evaluateConditional}
+\title{Evaluate Conditional}
+\usage{
+  evaluateConditional(tag, initCollection)
+}
+\arguments{
+  \item{tag}{A tag}
+
+  \item{initCollection}{The list of all arguments parsed
+  from the init section}
+}
+\value{
+  A boolean value indicating whether the conditional is
+  true
+}
+\description{
+  Note that at thie point the comparator must be a number
+  (not another variable).
+}
+\keyword{internal}
+

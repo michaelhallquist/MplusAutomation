@@ -1,0 +1,26 @@
+\name{extractFreeFile}
+\alias{extractFreeFile}
+\title{Extract free file output}
+\usage{
+  extractFreeFile(filename, outfile, make_symmetric = TRUE)
+}
+\arguments{
+  \item{filename}{The name of the output file}
+
+  \item{outfile}{The output file}
+
+  \item{make_symmetric}{A logical indicating whether or not
+  to make the matrix symmetric, defaults to \code{TRUE}}
+}
+\value{
+  a matrix
+}
+\description{
+  Function for reading "free" output where a sequence of
+  values populates a matrix
+}
+\examples{
+# make me!!!
+}
+\keyword{internal}
+

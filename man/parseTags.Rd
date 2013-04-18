@@ -1,0 +1,25 @@
+\name{parseTags}
+\alias{parseTags}
+\title{Parses tags in the body section}
+\usage{
+  parseTags(bodySection, initCollection)
+}
+\arguments{
+  \item{bodySection}{The body}
+
+  \item{initCollection}{The initial collection}
+}
+\value{
+  A list with three elements, where each list represents
+  the location, start character, end character, tag type,
+  etc. of each tag. \describe{ \item{initTags}{initMatches}
+  \item{bodyTags}{bodyMatches} \item{bodyText}{bodySection}
+  }
+}
+\description{
+  Parses tags in the body section (character vector) and
+  init collection (list of vars defined in the init
+  section). This is an internal function.
+}
+\keyword{internal}
+

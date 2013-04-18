@@ -1,0 +1,44 @@
+\name{l_getSavedata_Fileinfo}
+\alias{l_getSavedata_Fileinfo}
+\title{local function that does the work of getSaveData_Fileinfo}
+\usage{
+  l_getSavedata_Fileinfo(outfile, outfiletext)
+}
+\arguments{
+  \item{outfile}{A character string giving the name of the
+  Mplus output file.}
+
+  \item{outfiletext}{The contents of the output file, for
+  example as read by \code{scan}}
+}
+\value{
+  A list that includes: \item{fileName}{The name of the
+  file containing the analysis dataset created by the Mplus
+  SAVEDATA command.} \item{fileVarNames}{A character vector
+  containing the names of variables in the dataset.}
+  \item{fileVarFormats}{A character vector containing the
+  Fortran-style formats of variables in the dataset.}
+  \item{fileVarWidths}{A numeric vector containing the
+  widths of variables in the dataset (which is stored in
+  fixed-width format).} \item{bayesFile}{The name of the
+  BPARAMETERS file containing draws from the posterior
+  distribution created by the Mplus SAVEDATA BPARAMETERS
+  command.} \item{bayesVarNames}{A character vector
+  containing the names of variables in the BPARAMETERS
+  dataset.} \item{tech3File}{A character vector of the tech
+  3 output.} \item{tech4File}{A character vector of the
+  tech 4 output.}
+}
+\description{
+  This function is split out so that
+  \code{getSaveData_Fileinfo} is exposed to the user, but
+  the parsing function can be used by \code{readModels}
+}
+\examples{
+# make me!
+}
+\seealso{
+  \code{\link{getSavedata_Data}}
+}
+\keyword{internal}
+

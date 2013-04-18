@@ -1,0 +1,23 @@
+\name{addNode}
+\alias{addNode}
+\title{Add a node to a GRAPHVIZ model}
+\usage{
+  addNode(dotModel, name, role, type)
+}
+\arguments{
+  \item{dotModel}{Basic model}
+
+  \item{name}{}
+
+  \item{role}{The role of a variable (can be multiple)}
+
+  \item{type}{The type of variable}
+}
+\value{
+  the dotModel with added node
+}
+\description{
+  To do: add details
+}
+\keyword{internal}
+

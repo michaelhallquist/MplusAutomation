@@ -1,0 +1,25 @@
+\name{extractFacScoreStats}
+\alias{extractFacScoreStats}
+\title{Extract Factor Score Statistics}
+\usage{
+  extractFacScoreStats(outfiletext, filename)
+}
+\arguments{
+  \item{outfiletext}{The text of the output file}
+
+  \item{filename}{The name of the output file}
+}
+\value{
+  A list
+}
+\description{
+  Function for extracting matrices for factor scores
+}
+\examples{
+# make me!!!
+}
+\seealso{
+  \code{\link{matrixExtract}}
+}
+\keyword{internal}
+
