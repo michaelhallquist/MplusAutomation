@@ -14,7 +14,8 @@ Description: The MplusAutomation package leverages the flexibility of the R
 License: LGPL-3
 Depends:
     tcltk,
-    plyr
+    plyr,
+    boot
 Imports:
     gsubfn,
     relimp,
