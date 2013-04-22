@@ -376,8 +376,20 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       else if (identical(thisLine, c("StdYX", "Std")) && identical (nextLine, c("Estimate", "Estimate")))
         varNames <- c("param", "stdyx", "std")
 
+      #if user specifically requests just stdyx STANDARDIZED(STDYX);
+      else if (identical(thisLine, c("StdYX")) && identical (nextLine, c("Estimate")))
+        varNames <- c("param", "stdyx")
+      
+      #if user specifically requests just stdy STANDARDIZED(STDY);
+      else if (identical(thisLine, c("StdY")) && identical (nextLine, c("Estimate")))
+        varNames <- c("param", "stdy")
+      
+      #if user specifically requests just std STANDARDIZED(STD);
+      else if (identical(thisLine, c("Std")) && identical (nextLine, c("Estimate")))
+        varNames <- c("param", "std")
+      
       #Also, even with new versions of Mplus (e.g., 6.11), sometimes have stdyx, stdy, and std in old-style column format
-      #The current case I'm aware of is the use of boostrapped confidence intervals (BOOTSTRAP + OUTPUT:CINTERVAL).
+      #The current case I'm aware of is the use of bootstrapped confidence intervals (BOOTSTRAP + OUTPUT:CINTERVAL).
       else if (identical(thisLine, c("StdYX", "StdY", "Std")) && identical (nextLine, c("Estimate", "Estimate", "Estimate")))
         varNames <- c("param", "stdyx", "stdy", "std")
           
