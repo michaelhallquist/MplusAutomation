@@ -1222,6 +1222,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'   data files and optionally input files.
 #' @keywords interface
 #' @author Michael Hallquist
+#' @export
 #' @examples
 #' \dontrun{
 #' library(foreign)
