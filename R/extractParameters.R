@@ -501,6 +501,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 #'
 #' @author Michael Hallquist
 #' @seealso \code{\link{extractModelSummaries}}
+#' @export
 #' @keywords interface
 #' @examples
 #' \dontrun{
