@@ -1,0 +1,25 @@
+\name{extractTech9}
+\alias{extractTech9}
+\title{Extract Technical 9 matrix from Mplus}
+\usage{
+  extractTech9(outfiletext, filename)
+}
+\arguments{
+  \item{outfiletext}{the text of the output file}
+
+  \item{filename}{The name of the file}
+}
+\value{
+  A list of class \dQuote{mplus.tech9}
+}
+\description{
+  Function that extracts the Tech9 matrix
+}
+\examples{
+# make me!!!
+}
+\seealso{
+  \code{\link{matrixExtract}}
+}
+\keyword{internal}
+

@@ -1,0 +1,35 @@
+\name{l_getSavedata_readRawFile}
+\alias{l_getSavedata_readRawFile}
+\title{Internal function to load the draws from the Bayesian model posterior distribution}
+\usage{
+  l_getSavedata_readRawFile(outfile, outfiletext,
+    format = "fixed", fileName, varNames, varWidths, input)
+}
+\arguments{
+  \item{outfile}{The Mplus output file to be used.}
+
+  \item{outfiletext}{The contents of the Mplus output file}
+
+  \item{format}{A character string indicating the format.
+  Defaults to \dQuote{fixed}.}
+
+  \item{fileName}{The name of the file}
+
+  \item{varNames}{The names of the variables to extract,
+  comes from the fileInfo}
+
+  \item{varWidths}{The widths of the variables to extract,
+  comes from the fileInfo}
+
+  \item{input}{}
+}
+\value{
+  A data frame of the extracted data.
+}
+\description{
+  This function is used by other extractor functions that
+  read particular types of saved data such as factor scores
+  or iterations from an MCMC chain.
+}
+\keyword{internal}
+

@@ -90,20 +90,20 @@ extractModIndices_1file <- function(outfiletext, filename) {
 #'   the MODEL MODIFICATION INDICES section of \code{outfile}. Variables include
 #'   \item{modV1}{The first variable in the pair to be freed according to the M.I.}
 #'   \item{operator}{The suggested relationship between \code{modV1} and \code{modV2}
-#'                   (e.g., WITH for freeing the covariance between \code{modV1} and \code{modV2})}
+#'     (e.g., WITH for freeing the covariance between \code{modV1} and \code{modV2})}
 #'   \item{modV2}{The first variable in the pair to be freed according to the M.I.}
 #'   \item{MI}{The decrease in model chi-square if the specified relationship is freely estimated}
 #'   \item{EPC}{The expected parameter estimate between \code{modV1} and \code{modV2} if freed.}
 #'   \item{Std_EPC}{The EPC value standardized using the variances of the continuous latent variables.}
 #'   \item{StdYX_EPC}{The EPC value standardized using the variances of the continuous latent
-#'                    variables as well as the variances of the background and/or outcome variables.}
+#'     variables as well as the variances of the background and/or outcome variables.}
 #' @author Michael Hallquist
 #' @seealso \code{\link{readModels}}, \code{\link{extractModelSummaries}}, \code{\link{extractModelParameters}}
 #' @keywords interface
 #' @examples
 #' \dontrun{
 #' ex3.14 <- extractModIndices(
-#' 	"C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/ex3.14.out")}
+#' 	"C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/ex3.14.out")
 #' }
 extractModIndices <- function(target=getwd(), recursive=FALSE, filefilter) {
   outfiles <- getOutFileList(target, recursive, filefilter)

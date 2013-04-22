@@ -377,18 +377,18 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     stdsections <- c("STDYX Standardization", "STDY Standardization", "STD Standardization")
     stdyx.section <- getSection("STDYX Standardization", ciStdSection, headers=stdsections)
     if (!is.null(stdyx.section)) { allSections <- appendListElements(allSections, extractParameters_1section(filename, stdyx.section, "ci.stdyx.standardized")) }
-    
+
     stdy.section <- getSection("STDY Standardization", ciStdSection, headers=stdsections)
     if (!is.null(stdy.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, stdy.section, "ci.stdy.standardized"))
-    
+
     std.section <- getSection("STD Standardization", ciStdSection, headers=stdsections)
     if (!is.null(std.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, std.section, "ci.std.standardized"))
   }
-  
+
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "ci.unstandardized",
-    "stdyx.standardized", "ci.stdyx.standardized", 
-    "stdy.standardized", "ci.stdy.standardized", 
+    "stdyx.standardized", "ci.stdyx.standardized",
+    "stdy.standardized", "ci.stdy.standardized",
     "std.standardized", "ci.std.standardized")
   listOrder <- listOrder[listOrder %in% names(allSections)]
 
@@ -502,7 +502,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 #' @author Michael Hallquist
 #' @seealso \code{\link{extractModelSummaries}}
 #' @keywords interface
-#' \examples
+#' @examples
 #' \dontrun{
 #' ex3.14 <- extractModelParameters(
 #' 	"C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/ex3.14.out")

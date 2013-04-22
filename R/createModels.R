@@ -189,7 +189,7 @@ parseTags <- function(bodySection, initCollection) {
 #' @param templatefile The filename (absolute or relative path) of an Mplus template file to be processed. Example \dQuote{C:/MplusTemplate.txt}
 #' @return No value is returned by this function. It is solely used to process an Mplus template file.
 #' @author Michael Hallquist
-#' @keyword interface
+#' @keywords interface
 #' @export
 #' @examples
 #' \dontrun{
@@ -1144,6 +1144,31 @@ processInit <- function(initsection) {
 }
 
 
+#' Create Mplus syntax for variable names
+#'
+#' This is a simple function designed to take a dataset in \code{R}
+#' and translate it into a set of variable names for Mplus.
+#'
+#' @param data An \code{R} dataset.
+#' @return A character vector of the variable names for Mplus
+#' @keywords internal
+#' @seealso \code{\link{prepareMplusData}}
+#' @examples
+#' MplusAutomation:::createVarSyntax(mtcars)
+createVarSyntax <- function(data) {
+  #variable created for readability
+  variableNames <- paste(gsub("\\.", "_", names(data)), collapse=" ")
+
+  #short names?
+  #shortNames <- paste(substr(names(df), 1, 8), collapse=" ")
+
+  vnames <- paste(strwrap(paste(c("NAMES = ", variableNames, ";"), collapse = ""),
+    width=85, exdent=5), collapse="\n")
+  vnames[length(vnames)] <- paste(vnames[length(vnames)], "\n", collapse="")
+
+  return(vnames)
+}
+
 #' Prepare Mplus Data Matrix
 #'
 #' support writing of covariance or means + covariance matrix (future)
@@ -1196,6 +1221,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'   syntax. Primarily called for its side effect of creating Mplus
 #'   data files and optionally input files.
 #' @keywords interface
+#' @author Michael Hallquist
 #' @examples
 #' \dontrun{
 #' library(foreign)
@@ -1323,17 +1349,10 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
 
   write.table(df, filename, sep = "\t", col.names = FALSE, row.names = FALSE, na=".")
 
-  #variable created for readability
-  variableNames <- paste(gsub("\\.", "_", names(df)), collapse=" ")
-
-  #short names?
-  #shortNames <- paste(substr(names(df), 1, 8), collapse=" ")
-
   syntax <- c(
     "TITLE: Your title goes here\n",
-    paste0("DATA: FILE = \"", filename, "\";\n"),
-    paste(strwrap(paste("VARIABLE: NAMES = ", variableNames), width=85, exdent=5), collapse="\n"),
-    ";\n\n", "MISSING=.;\n")
+    DATA <- paste0("DATA: FILE = \"", filename, "\";\n"),
+    "VARIABLE: \n", createVarSyntax(df), "MISSING=.;\n")
 
   # if inpfile is a logical value and is TRUE
   # then create the file using filename

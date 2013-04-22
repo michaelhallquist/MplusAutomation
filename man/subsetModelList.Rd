@@ -1,0 +1,28 @@
+\name{subsetModelList}
+\alias{subsetModelList}
+\title{Subset a list of Mplus model results}
+\usage{
+  subsetModelList(modelList, keepCols, dropCols, sortBy)
+}
+\arguments{
+  \item{modelList}{A list object of Mplus models}
+
+  \item{keepCols}{Columns to keep}
+
+  \item{dropCols}{Columns to drop (use only one of
+  keep/dropCols)}
+
+  \item{sortBy}{How to sort}
+}
+\value{
+  Extracted and sorted data
+}
+\description{
+  a helper function to be used by wrappers that generate
+  HTML, LaTex, and on-screen displays of summary statistics
+}
+\examples{
+# make me!!!
+}
+\keyword{internal}
+

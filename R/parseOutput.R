@@ -876,11 +876,11 @@ extractSummaries_1file <- function(outfiletext, filename, input, extract=c("Titl
             varType=c("dec", "dec"), stringsAsFactors=FALSE
         )
     )
-    
+
     arglist <- extractSummaries_1plan(arglist, tech11headers, tech11fields, tech11Output, filename)
   }
-  
-  
+
+
   tech14Output <- getSection("^\\s*TECHNICAL 14 OUTPUT\\s*$", outfiletext)
 
   if (!is.null(tech14Output)) {
@@ -889,7 +889,7 @@ extractSummaries_1file <- function(outfiletext, filename, input, extract=c("Titl
         "Random Starts Specifications for the k-1 Class Analysis Model",
         "Random Starts Specification for the k-1 Class Model for Generated Data",
         "Random Starts Specification for the k Class Model for Generated Data",
-        "PARAMETRIC BOOTSTRAPPED LIKELIHOOD RATIO TEST FOR \\d+ \\(H0\\) VERSUS \\d+ CLASSES"    
+        "PARAMETRIC BOOTSTRAPPED LIKELIHOOD RATIO TEST FOR \\d+ \\(H0\\) VERSUS \\d+ CLASSES"
     )
     tech14fields <- list(
         #top-level (no section)
@@ -919,16 +919,16 @@ extractSummaries_1file <- function(outfiletext, filename, input, extract=c("Titl
             varType=c("int", "int"), stringsAsFactors=FALSE
         ),
         data.frame(
-            varName=c("BLRT_KM1LL", "BLRT_2xLLDiff", "BLRT_ParamDiff", "BLRT_PValue", "BLRT_SuccessfulDraws"), 
-            regexPattern=c("H0 Loglikelihood Value", "2 Times the Loglikelihood Difference", "Difference in the Number of Parameters", "Approximate P-Value", "Successful Bootstrap Draws"), 
+            varName=c("BLRT_KM1LL", "BLRT_2xLLDiff", "BLRT_ParamDiff", "BLRT_PValue", "BLRT_SuccessfulDraws"),
+            regexPattern=c("H0 Loglikelihood Value", "2 Times the Loglikelihood Difference", "Difference in the Number of Parameters", "Approximate P-Value", "Successful Bootstrap Draws"),
             varType=c("dec", "dec", "int", "dec", "int"), stringsAsFactors=FALSE
         )
     )
-    
+
     arglist <- extractSummaries_1plan(arglist, tech14headers, tech14fields, tech14Output, filename)
-    
+
   }
-  
+
 	#calculate adjusted AIC per Burnham & Anderson(2004), which is better than AIC for non-nested model selection
 	#handle AICC calculation, requires AIC, Parameters, and observations
   if (all(c("AICC", "AIC", "Parameters", "Observations") %in% extract)) {
@@ -1202,7 +1202,35 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courie
   showData(MplusData, font=font, placement="+30+30", maxwidth=150, maxheight=50, rownumbers=FALSE, title="Mplus Summary Table")
 }
 
-#create HTML table
+#' Create an HTML file containing a summary table of Mplus model statistics
+#'
+#' Creates an HTML file containing a summary table of model fit statistics extracted using the \code{extractModelSummaries} function.
+#' By default, the following summary statistics are included: \code{Title, LL, Parameters, AIC, AICC, BIC, RMSEA_Estimate},
+#' but these are customizable using the \code{keepCols} and \code{dropCols} parameters.
+#'
+#' @param modelList A list of models (as a \code{data.frame}) returned from the \code{extractModelSummaries} function.
+#' @param filename The name of the HTML file to be created. Can be an absolute or relative path. If \code{filename}
+#'   is a relative path or just the filename, then it is assumed that the file resides in the working
+#'   directory \code{getwd()}. Example: \code{"Mplus Summary.html"}
+#' @param keepCols A vector of character strings indicating which columns/variables to display in the summary.
+#'   Only columns included in this list will be displayed (all others excluded). By default, \code{keepCols}
+#'   is: \code{c("Title", "LL", "Parameters", "AIC", "AICC", "BIC", "RMSEA_Estimate")}. Example: \code{c("Title", "LL", "AIC", "CFI")}
+#' @param dropCols A vector of character strings indicating which columns/variables to omit from the summary.
+#'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
+#'   Example: \code{c("InputInstructions", "TLI")}
+#' @param sortBy optional. Field name (as character string) by which to sort the table. Typically an information criterion
+#'   (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".
+#' @param display optional. This parameter specifies whether to display the table in a web
+#'   browser upon creation (\code{TRUE} or \code{FALSE}).
+#' @return No value is returned by this function. It is solely used to create an HTML file containing summary statistics.
+#' @author Michael Hallquist
+#' @note You must choose between \code{keepCols} and \code{dropCols} because it is not sensible to use these
+#'   together to include and exclude columns. The function will error if you include both parameters.
+#' @seealso \code{\link{extractModelSummaries}}, \code{\link{showSummaryTable}}, \code{\link{LatexSummaryTable}}
+#' @export
+#' @keywords interface
+#' @examples
+#' # make me!!!
 HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy, display=FALSE) {
 #  require(xtable)
   #create HTML table and write to file.
@@ -1233,6 +1261,35 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 
 }
 
+#' Display summary table of Mplus model statistics in separate window
+#'
+#' Creates a LaTex-formatted summary table of model fit statistics extracted using the \code{extractModelSummaries} function.
+#' The table syntax is returned by the function, which is useful for embedding LaTex tables using Sweave.
+#' By default, the following summary statistics are included: \code{Title, LL, Parameters, AIC, AICC, BIC, RMSEA_Estimate},
+#' but these are customizable using the \code{keepCols} and \code{dropCols} parameters.
+#'
+#' @param modelList A list of models (as a \code{data.frame}) returned from the \code{extractModelSummaries} function.
+#' @param keepCols A vector of character strings indicating which columns/variables to display in the summary. Only columns
+#'   included in this list will be displayed (all others excluded). By default, \code{keepCols}
+#'   is: \code{c("Title", "LL", "Parameters", "AIC", "AICC", "BIC", "RMSEA_Estimate")}.
+#'   Example: \code{c("Title", "LL", "AIC", "CFI")}
+#' @param dropCols A vector of character strings indicating which columns/variables to omit from the summary.
+#'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
+#'   Example: \code{c("InputInstructions", "TLI")}
+#' @param sortBy optional. Field name (as character string) by which to sort the table.
+#'   Typically an information criterion (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC"
+#' @param label optional. A character string specifying the label for the LaTex table, which can be
+#'   used for referencing the table.
+#' @param caption optional. A character string specifying the caption for the LaTex table.
+#' @return A LaTex-formatted table summarizing the \code{modelList} is returned (created by \code{xtable}).
+#' @author Michael Hallquist
+#' @note You must choose between \code{keepCols} and \code{dropCols} because it is not sensible to use these together
+#'   to include and exclude columns. The function will error if you include both parameters.
+#' @seealso \code{\link{extractModelSummaries}}, \code{\link{HTMLSummaryTable}}, \code{\link{showSummaryTable}}, \code{\link{Sweave}}
+#' @export
+#' @keywords interface
+#' @examples
+#' # make me!!!
 LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy, label=NULL, caption=NULL) {
   #return latex table to caller
   #require(xtable)
@@ -1245,19 +1302,27 @@ LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy, label=NULL,
 #removed input instructions from routine extraction
 #dropCols=c("InputInstructions", "Observations")
 
+
+#' Create tables
+#'
+#' This function generates an HTML table from a list of models generated by extractModelSummaries.
+#'
+#' @param modelList A list of model details returned by extractModelSummaries
+#' @param filename The name of HTML table file. Defaults to model comparison.html
+#' @param sortby The name of a field on which to sort. Defaults to "AICC". "BIC" and "AIC" are options.
+#' @param display Logical, whether to load the HTML table in the browser after creating it. Defaults to \code{TRUE}.
+#' @param latex Logical, whether to return a LaTeX table or not.
+#' @param dropCols A vector of the columns to be dropped
+#' @param label Defaults to \code{NULL}
+#' @return A file or \code{xtable} object
+#' @author Michael Hallquist
+#' @keywords internal
+#' @examples
+#' \dontrun{
+#'   createTable(myModels, "C:/Documents and Settings/Michael/My Documents/Mplus Stuff/", "my comparison.html", sortby="BIC")
+#' }
 createTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"),
   sortby="AICC", display=TRUE, latex=FALSE, dropCols=c("Observations"), label=NULL) {
-#createTable(directory, recursive=FALSE)
-#
-#   modelList: list of model details returned by extractModelSummaries.
-#   basedir: directory in which to save the HTML table. Defaults to current directory.
-#   filename: name of HTML table file. Defaults to model comparison.html
-#   sortby: name of field on which to sort. Defaults to "AICC". "BIC" and "AIC" are options.
-#   display: whether to load the HTML table in the browser after creating it. Defaults to TRUE. (TRUE/FALSE)
-#
-#   Description: This function generates an HTML table from a list of models generated by extractModelSummaries.
-#
-#   Example: createTable(myModels, "C:/Documents and Settings/Michael/My Documents/Mplus Stuff/", "my comparison.html", sortby="BIC")
 
   #retain working directory to reset at end of run
   #curdir <- getwd()
@@ -1308,9 +1373,19 @@ createTable <- function(modelList, filename=file.path(getwd(), "Model Comparison
   #setwd(curdir)
 
   if (latex==TRUE) return(xtable(sortTab, label=label))
-
 }
 
+#' Extract residual matrices
+#'
+#' Function that extracts the residual matrices including standardized ones
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of the residual matrices
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
 extractResiduals <- function(outfiletext, filename) {
   residSection <- getSection("^RESIDUAL OUTPUT$", outfiletext)
   if (is.null(residSection)) return(list()) #no residuals output
@@ -1358,6 +1433,17 @@ extractResiduals <- function(outfiletext, filename) {
   return(residList)
 }
 
+#' Extract Technical 1 matrix from Mplus
+#'
+#' Function that extracts the Tech1 matrix
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech1}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
 extractTech1 <- function(outfiletext, filename) {
   tech1Section <- getSection("^TECHNICAL 1 OUTPUT$", outfiletext)
   if (is.null(tech1Section)) return(list()) #no tech1 output
@@ -1465,16 +1551,17 @@ extractTech1 <- function(outfiletext, filename) {
 
 }
 
-#Function for reading "free" output where a sequence of values populates a matrix
-
-
-
-
-
-
-
-
-
+#' Extract free file output
+#'
+#' Function for reading "free" output where a sequence of values populates a matrix
+#'
+#' @param filename The name of the output file
+#' @param outfile The output file
+#' @param make_symmetric A logical indicating whether or not to make the matrix symmetric, defaults to \code{TRUE}
+#' @return a matrix
+#' @keywords internal
+#' @examples
+#' # make me!!!
 extractFreeFile <- function(filename, outfile, make_symmetric=TRUE) {
   #Adapted from code graciously provided by Joe Glass.
 
@@ -1531,6 +1618,18 @@ extractFreeFile <- function(filename, outfile, make_symmetric=TRUE) {
   return(mat)
 }
 
+#' Extract Technical 3 matrix from Mplus
+#'
+#' Function that extracts the Tech3 matrix
+#'
+#' @param outfiletext the text of the output file
+#' @param savedata_info Information on saved data
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech3}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
 extractTech3 <- function(outfiletext, savedata_info, filename) {
   tech3Section <- getSection("^TECHNICAL 3 OUTPUT$", outfiletext)
   if (is.null(tech3Section)) return(list()) #no tech3 output
@@ -1550,6 +1649,17 @@ extractTech3 <- function(outfiletext, savedata_info, filename) {
   return(tech3List)
 }
 
+#' Extract Technical 4 matrix from Mplus
+#'
+#' Function that extracts the Tech4 matrix
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech4}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
 extractTech4 <- function(outfiletext, filename) {
   #TODO: have empty list use mplus.tech4 class
   tech4Section <- getSection("^TECHNICAL 4 OUTPUT$", outfiletext)
@@ -1591,6 +1701,17 @@ extractTech4 <- function(outfiletext, filename) {
   return(tech4List)
 }
 
+#' Extract Technical 9 matrix from Mplus
+#'
+#' Function that extracts the Tech9 matrix
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech9}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
 extractTech9 <- function(outfiletext, filename) {
   tech9List <- list()
   class(tech9List) <- c("list", "mplus.tech9")
@@ -1617,6 +1738,17 @@ extractTech9 <- function(outfiletext, filename) {
   return(tech9List)
 }
 
+#' Extract Technical 10 matrix from Mplus
+#'
+#' Function that extracts the Tech10 matrix
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return An empty list
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
 extractTech10 <- function(outfiletext, filename) {
   tech10Section <- getSection("^TECHNICAL 10 OUTPUT$", outfiletext)
   if (is.null(tech10Section)) return(list()) #no tech4 output
@@ -1625,6 +1757,17 @@ extractTech10 <- function(outfiletext, filename) {
 
 }
 
+#' Extract Factor Score Statistics
+#'
+#' Function for extracting matrices for factor scores
+#'
+#' @param outfiletext The text of the output file
+#' @param filename The name of the output file
+#' @return A list
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
 extractFacScoreStats <- function(outfiletext, filename) {
   #for now, skip getSection call and use nested header to getMultilineSection to avoid issue of SAMPLE STATISTICS appearing both
   #as top-level header and sub-header within factor scores
@@ -1645,6 +1788,16 @@ extractFacScoreStats <- function(outfiletext, filename) {
 }
 
 
+#' Extract Latent Class Counts
+#'
+#' Function for extracting counts of latent classes
+#'
+#' @param outfiletext The text of the output file
+#' @param filename The name of the output file
+#' @return a list
+#' @keywords internal
+#' @examples
+#' # make me!!!
 extractClassCounts <- function(outfiletext, filename) {
 
   ####
@@ -1729,9 +1882,20 @@ extractClassCounts <- function(outfiletext, filename) {
   return(countlist)
 }
 
-#main worker function for extracting Mplus matrix output
-#where matrices are spread across blocks to keep within width constraints
-#example: tech1 matrix output.
+
+#' Extract Factor Score Statistics
+#'
+#' main worker function for extracting Mplus matrix output
+#' where matrices are spread across blocks to keep within width constraints
+#' example: tech1 matrix output.
+#'
+#' @param outfiletext The text of the output file
+#' @param headerLine The header line
+#' @param filename The name of the output file
+#' @return a matrix
+#' @keywords internal
+#' @examples
+#' # make me!!!
 matrixExtract <- function(outfiletext, headerLine, filename) {
   matLines <- getMultilineSection(headerLine, outfiletext, filename, allowMultiple=TRUE)
 

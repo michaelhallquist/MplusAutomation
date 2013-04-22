@@ -1,0 +1,25 @@
+\name{createVarSyntax}
+\alias{createVarSyntax}
+\title{Create Mplus syntax for variable names}
+\usage{
+  createVarSyntax(data)
+}
+\arguments{
+  \item{data}{An \code{R} dataset.}
+}
+\value{
+  A character vector of the variable names for Mplus
+}
+\description{
+  This is a simple function designed to take a dataset in
+  \code{R} and translate it into a set of variable names
+  for Mplus.
+}
+\examples{
+MplusAutomation:::createVarSyntax(mtcars)
+}
+\seealso{
+  \code{\link{prepareMplusData}}
+}
+\keyword{internal}
+

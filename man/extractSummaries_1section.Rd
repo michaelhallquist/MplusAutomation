@@ -1,0 +1,27 @@
+\name{extractSummaries_1section}
+\alias{extractSummaries_1section}
+\title{Extract summary information for one section from Mplus output}
+\usage{
+  extractSummaries_1section(modelFitSection, arglist,
+    filename)
+}
+\arguments{
+  \item{modelFitSection}{The fit information section}
+
+  \item{arglist}{The argument list}
+
+  \item{filename}{The file name}
+}
+\value{
+  The argument list
+}
+\description{
+  Function to extract model fit statistics from a section,
+  wrapped to allow for multiple fit sections, as in EFA
+  files. Calls \code{extractSummaries_1plan}
+}
+\examples{
+# make me!!!
+}
+\keyword{internal}
+

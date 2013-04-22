@@ -1,0 +1,24 @@
+\name{classifyTags}
+\alias{classifyTags}
+\title{Classifies Tags}
+\usage{
+  classifyTags(tagVector, iteratorsVector)
+}
+\arguments{
+  \item{tagVector}{A vector of tags to be classified}
+
+  \item{iteratorsVector}{a vector of the iterators to
+  correctly classify tags}
+}
+\value{
+  A character vector the same length as the vectors to be
+  tagged
+}
+\description{
+  Accepts a vector of tags to be classified as well as the
+  iterators. Tags are classified as \sQuote{iterator},
+  \sQuote{array}, \sQuote{conditional}, or \sQuote{simple}.
+  This is an internal function.
+}
+\keyword{internal}
+
