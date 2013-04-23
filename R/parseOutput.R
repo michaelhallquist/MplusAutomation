@@ -1228,6 +1228,7 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courie
 #'   together to include and exclude columns. The function will error if you include both parameters.
 #' @seealso \code{\link{extractModelSummaries}}, \code{\link{showSummaryTable}}, \code{\link{LatexSummaryTable}}
 #' @export
+#' @importFrom xtable xtable
 #' @keywords interface
 #' @examples
 #' # make me!!!
@@ -1287,6 +1288,7 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #'   to include and exclude columns. The function will error if you include both parameters.
 #' @seealso \code{\link{extractModelSummaries}}, \code{\link{HTMLSummaryTable}}, \code{\link{showSummaryTable}}, \code{\link{Sweave}}
 #' @export
+#' @importFrom xtable xtable
 #' @keywords interface
 #' @examples
 #' # make me!!!
