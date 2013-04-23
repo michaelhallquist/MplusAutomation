@@ -117,6 +117,9 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
 #' str(update(example1, MODEL = ~ "wt ON hp;"))
 #' str(update(example1, MODEL = ~ . + "wt ON hp;"))
 #' str(update(example1, ANALYSIS = x, MODEL = ~ . + "wt ON hp;"))
+#'
+#' # test to make sure . in Mplus code does not cause problems
+#' str(update(example1, ANALYSIS = x, MODEL = ~ . + "wt ON hp*.5;"))
 #' rm(example1, x)
 update.mplusObject <- function(object, ...) {
 
@@ -135,7 +138,7 @@ update.mplusObject <- function(object, ...) {
     mplusSections <- lapply(mplusIndex, function(n) {
       tmp <- dots[[n]]
       tmp <- as.character(tmp[[2]])
-      if (any(grepl("\\.", tmp))) {
+      if (any(grepl("^\\.$", tmp))) {
         old <- paste0(object[[n]], "\n")
       } else {
         old <- ""
