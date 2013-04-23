@@ -98,6 +98,7 @@ extractModIndices_1file <- function(outfiletext, filename) {
 #'   \item{StdYX_EPC}{The EPC value standardized using the variances of the continuous latent
 #'     variables as well as the variances of the background and/or outcome variables.}
 #' @author Michael Hallquist
+#' @export
 #' @seealso \code{\link{readModels}}, \code{\link{extractModelSummaries}}, \code{\link{extractModelParameters}}
 #' @keywords interface
 #' @examples
