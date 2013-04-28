@@ -427,7 +427,13 @@ runModels <- function(directory=getwd(), recursive=FALSE, showOutput=FALSE, repl
 
 		#unix system command does not have show.output.on.console or invisible parameters
     if (.Platform$OS.type == "windows")	system(command, show.output.on.console = showOutput, invisible=(!showOutput), wait=TRUE)
-		else system(command, wait=TRUE)
+	
+	else{
+		if(showOutput) stdout.value = ""
+		else stdout.value = NULL
+		
+	 	system2(Mplus_command, args=inputSplit$filename, stdout=stdout.value, wait=TRUE)
+	 }
 
   }
 

@@ -60,7 +60,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
 		if (recursive==FALSE)	listID <- make.names(splitFilePath(curfile)$filename) #each list element is named by the respective file
 		else listID <- make.names(curfile) #each list element is named by the respective file
 
-		outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE)
+		outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
     allFiles[[listID]]$input <- inp <- extractInput_1file(outfiletext, curfile)
     warn_err <- extractWarningsErrors_1file(outfiletext, curfile, input=inp)
@@ -1049,7 +1049,7 @@ extractModelSummaries <- function(target=getwd(), recursive=FALSE, filefilter) {
   #rbind creates an array of lists by appending each extractSummaries_1file return value
   for (i in 1:length(outfiles)) {
     #read the file
-    readfile <- scan(outfiles[i], what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE)
+    readfile <- scan(outfiles[i], what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
     #bomb out for EFA files
     if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", readfile, ignore.case=TRUE, perl=TRUE)) > 0) {
@@ -1590,7 +1590,7 @@ extractFreeFile <- function(filename, outfile, make_symmetric=TRUE) {
     return(NULL)
   }
 
-  values <- scan(savedataFile, what="character", strip.white=FALSE, blank.lines.skip=FALSE)
+  values <- scan(savedataFile, what="character", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
   matrix.size <- function(x) {
     # per algebra of quadratic equations: p is the # of rows & columns in a symmetric
     # matrix given x unique covariance elements (the lower triangle plus diagonal).

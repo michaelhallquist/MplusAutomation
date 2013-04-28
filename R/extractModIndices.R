@@ -119,7 +119,7 @@ extractModIndices <- function(target=getwd(), recursive=FALSE, filefilter) {
       listID <- make.names(curfile) #each list element is named by the respective file
     }
 
-    outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE)
+    outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
     allFiles[[listID]] <- extractModIndices_1file(outfiletext, curfile)
   }
