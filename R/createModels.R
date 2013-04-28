@@ -201,7 +201,7 @@ createModels <- function(templatefile) {
 
   if (!file.exists(templatefile)) stop("Template file not found.")
 
-  readfile <- scan(templatefile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE)
+  readfile <- scan(templatefile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
   # divide into init versus body
   startinit <- grep("[[init]]", readfile, fixed=T)
