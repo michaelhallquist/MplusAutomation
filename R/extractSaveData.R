@@ -39,7 +39,7 @@ getSavedata_Fileinfo <- function(outfile) {
     stop("Cannot locate outfile: ", outfile)
   }
 
-  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE)
+  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
   if (length(outfiletext) == 0) {
     warning("Empty outfile")
@@ -314,7 +314,7 @@ getSavedata_Data <- function(outfile) {
     stop("Cannot locate outfile: ", outfile)
   }
 
-  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE)
+  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
   if (length(outfiletext) == 0) {
     warning("Empty outfile")
@@ -365,7 +365,7 @@ getSavedata_Bparams <- function(outfile, discardBurnin=TRUE) {
     stop("Cannot locate outfile: ", outfile)
   }
 
-  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE)
+  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
   if (length(outfiletext) == 0) {
     warning("Empty outfile")

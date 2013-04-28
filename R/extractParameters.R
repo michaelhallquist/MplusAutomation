@@ -524,7 +524,7 @@ extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, 
     if (recursive==FALSE)	listID <- make.names(splitFilePath(curfile)$filename) #each list element is named by the respective file
     else listID <- make.names(curfile) #each list element is named by the respective file
 
-    outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE)
+    outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
     allFiles[[listID]] <- extractParameters_1file(outfiletext, curfile, resultType)
   }
