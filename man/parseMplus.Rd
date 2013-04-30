@@ -19,8 +19,8 @@
   The function parses a character string containing Mplus
   code and checks that every non blank line ends in either
   a colon or a semicolon. In addition, it checks that every
-  line is less than 80 characters, because Mplus ignores
-  everything after 80 characters on a line which can be a
+  line is less than 90 characters, because Mplus ignores
+  everything after 90 characters on a line which can be a
   source of enigmatic errors.
 }
 \details{

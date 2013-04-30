@@ -3,7 +3,7 @@
 \title{Create, run, and read Mplus models.}
 \usage{
   mplusModeler(object, dataout, modelout, run = 0L,
-    check = TRUE, varwarnings = TRUE, ...)
+    check = FALSE, varwarnings = TRUE, ...)
 }
 \arguments{
   \item{object}{An object of class mplusObject}
@@ -27,7 +27,7 @@
   \item{check}{logical whether the body of the Mplus syntax
   should be checked for missing semicolons using the
   \code{\link{parseMplus}} function. Defaults to
-  \code{TRUE}.}
+  \code{FALSE}.}
 
   \item{varwarnings}{A logical whether warnings about
   variable length should be left, the default, or removed

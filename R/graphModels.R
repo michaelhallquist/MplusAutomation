@@ -164,7 +164,7 @@ connectNodes <- function(dotModel, node1, node2, connectionType) {
 #'
 #' @param The model
 #' @return a dot model
-#' @import plyr
+#' @importFrom plyr a_ply
 #' @keywords internal
 graphModel <- function(model) {
   # require(plyr)
