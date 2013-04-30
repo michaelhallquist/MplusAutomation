@@ -168,6 +168,8 @@ update.mplusObject <- function(object, ...) {
 #' @param check A logical indicating whether or not to run \code{parseMplus}
 #'   on the created input file. Checks for errors like lines that are too long,
 #'   or for missing semi-colons and gives notes.
+#' @param add A logical passed on to \code{parseMplus} whether to add semi
+#'   colons to line ends. Defaults to \code{FALSE}.
 #' @return A character string containing all the text for the Mplus
 #'   input file.
 #' @keywords interface
@@ -189,7 +191,7 @@ update.mplusObject <- function(object, ...) {
 #'   usevariables = c("mpg", "hp", "wt")), "example1.dat"),
 #'   fill=TRUE)
 #' rm(example1)
-createSyntax <- function(object, filename, check=TRUE) {
+createSyntax <- function(object, filename, check=TRUE, add=FALSE) {
   stopifnot(inherits(object, "mplusObject"))
 
   mplusList <- c("TITLE", "DATA", "VARIABLE", "DEFINE",
@@ -212,7 +214,7 @@ createSyntax <- function(object, filename, check=TRUE) {
   body <- paste(body, collapse = "\n")
 
   if (check) {
-    body <- parseMplus(body, add = FALSE)
+    body <- parseMplus(body, add = add)
   }
 
   return(body)
@@ -248,7 +250,7 @@ createSyntax <- function(object, filename, check=TRUE) {
 #'   model is run. If greater than one, the model is bootstrapped with \code{run} replications as
 #'   well as the basic model.
 #' @param check logical whether the body of the Mplus syntax should be checked for missing
-#'   semicolons using the \code{\link{parseMplus}} function. Defaults to \code{TRUE}.
+#'   semicolons using the \code{\link{parseMplus}} function. Defaults to \code{FALSE}.
 #' @param varwarnings A logical whether warnings about variable length should be left, the
 #'   default, or removed from the output file.
 #' @param \ldots additional arguments passed to the
@@ -302,7 +304,7 @@ createSyntax <- function(object, filename, check=TRUE) {
 #'  unlink("Mplus Run Models.log")
 #' }
 mplusModeler <- function(object, dataout, modelout, run = 0L,
-  check = TRUE, varwarnings = TRUE, ...) {
+  check = FALSE, varwarnings = TRUE, ...) {
   stopifnot((run %% 1) == 0 && length(run) == 1)
   oldSHELL <- Sys.getenv("SHELL")
   Sys.setenv(SHELL = Sys.getenv("COMSPEC"))
@@ -326,8 +328,8 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
 
   body <- createSyntax(object, dataout, check=check)
   cat(body, file = modelout, sep = "\n")
-  cat("Wrote model to:", modelout, fill = TRUE)
-  cat("Wrote data to:", dataout, fill = TRUE)
+  message("Wrote model to: ", modelout)
+  message("Wrote data to: ", dataout)
 
   results <- bootres <- NULL
   finalres <- list(model = results, boot = bootres)
@@ -668,8 +670,8 @@ paramExtract <- function(x, type = c("directed", "undirected", "expectation", "v
 #'
 #' The function parses a character string containing Mplus code
 #' and checks that every non blank line ends in either a colon or
-#' a semicolon. In addition, it checks that every line is less than 80
-#' characters, because Mplus ignores everything after 80 characters on a line
+#' a semicolon. In addition, it checks that every line is less than 90
+#' characters, because Mplus ignores everything after 90 characters on a line
 #' which can be a source of enigmatic errors.
 #'
 #' The function is fairly basic at the moment. It works by simply
@@ -716,27 +718,27 @@ parseMplus <- function(x, add = FALSE) {
   semiok <- empty | end
   if (!all(semiok)) {
     index <- which(!semiok)
-    cat("The following lines are not empty and do not end in a : or ;.", fill = TRUE)
-    cat(paste(index, init[index], sep = ": "), sep = "\n")
+    message(paste(c("The following lines are not empty and do not end in a : or ;.",
+            paste(index, init[index], sep = ": ")), collapse = "\n"))
     if (add) {
       init[index] <- paste0(init[index], ";")
-      cat("added semicolons ';' to all of the above lines", fill = TRUE)
+      message("added semicolons ';' to all of the above lines")
     } else {
-      cat("Rerun with parseMplus(add = TRUE) to add semicolons to all lines", fill = TRUE)
+      message("Rerun with parseMplus(add = TRUE) to add semicolons to all lines")
     }
   }
 
   notrailspace <- gsub("[[:space:]]+$", "", init)
-  lengthok <- nchar(notrailspace) <= 80
+  lengthok <- nchar(notrailspace) <= 90
   if (!all(lengthok)) {
     index <- which(!lengthok)
-    cat("The following lines are longer than 80 characters", fill = TRUE)
-    cat(paste(index, init[index], sep = ": "), sep = "\n")
-    cat("Mplus will ignore everything after the 80th character on a line.\n",
+    message(paste(c("The following lines are longer than 90 characters",
+            paste(index, init[index], sep = ": ")), collapse = "\n"))
+    message("Mplus will ignore everything after the 90th character on a line.\n",
         "Consider breaking the line(s)")
   }
 
-  if(all(semiok & lengthok)) cat("All ok", fill = TRUE)
+  if(all(semiok & lengthok)) message("All ok")
   return(paste(init, collapse = "\n"))
 }
 
