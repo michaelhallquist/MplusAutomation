@@ -31,16 +31,17 @@
   Defaults to \code{FALSE}.}
 }
 \value{
-  A named character vector of class \sQuote{MplusRstruc}
-  with three elements: \item{Variances}{A character string
-  containing all of the variances.} \item{Covariances}{A
-  character string containing all of the covariances,
-  properly labelled to allow constraints and the
-  autoregressive residual covariance structure.}
-  \item{Constraints}{A character string containing the
-  \sQuote{MODEL CONSTRAINT} section and code needed to
-  parameterize the residual covariance structure as
-  autoregressive.}
+  A named character vector of class
+  \sQuote{MplusRstructure} with four elements: \item{all}{A
+  character string collapsing all other sections.}
+  \item{Variances}{A character string containing all of the
+  variances.} \item{Covariances}{A character string
+  containing all of the covariances, properly labelled to
+  allow constraints and the autoregressive residual
+  covariance structure.} \item{Constraints}{A character
+  string containing the \sQuote{MODEL CONSTRAINT} section
+  and code needed to parameterize the residual covariance
+  structure as autoregressive.}
 }
 \description{
   This function makes it easy to write the Mplus syntax for

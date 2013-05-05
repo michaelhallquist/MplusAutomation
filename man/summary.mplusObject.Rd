@@ -1,0 +1,55 @@
+\name{summary.mplusObject}
+\alias{summary.mplusObject}
+\title{Summarize an mplusObject}
+\usage{
+  \method{summary}{mplusObject} (object, verbose = FALSE,
+    ...)
+}
+\arguments{
+  \item{object}{An object of class mplusObject}
+
+  \item{verbose}{Logical whether to print verbose output.
+  Defaults to \code{FALSE}.}
+
+  \item{\dots}{Additional arguments to pass on (not
+  currently used)}
+}
+\value{
+  \code{NULL} Called for its side effect of printing a
+  model summary to the console
+}
+\description{
+  This is a method for summarizing an mplusObject.
+}
+\examples{
+\dontrun{
+# simple example of a model using builtin data
+# demonstrates use
+test <- mplusObject(
+  TITLE = "test the MplusAutomation Package;",
+  MODEL = "
+    mpg ON wt hp;
+    wt WITH hp;",
+  usevariables = c("mpg", "wt", "hp"),
+  rdata = mtcars)
+
+ res <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
+
+# example of the summary method
+summary(res)
+
+# example of verbose output
+summary(res, verbose=TRUE)
+
+# remove files
+unlink("mtcars.dat")
+unlink("model1.inp")
+unlink("model1.out")
+unlink("Mplus Run Models.log")
+}
+}
+\author{
+  Joshua Wiley
+}
+\keyword{interface}
+

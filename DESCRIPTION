@@ -37,3 +37,4 @@ Collate:
     'parseOutput.R'
     'runModels.R'
     'utilityFunctions.R'
+    'methods.R'
