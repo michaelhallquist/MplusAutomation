@@ -473,7 +473,8 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
 #' @param collapse whether to collapse the covariance code using \sQuote{PWITH}. Note that
 #'   at the time of writing, Mplus does not allow more than 80 characters per row.
 #'   Defaults to \code{FALSE}.
-#' @return A named character vector of class \sQuote{MplusRstruc} with three elements:
+#' @return A named character vector of class \sQuote{MplusRstructure} with four elements:
+#'   \item{all}{A character string collapsing all other sections.}
 #'   \item{Variances}{A character string containing all of the variances.}
 #'   \item{Covariances}{A character string containing all of the
 #'     covariances, properly labelled to allow constraints and the
@@ -522,7 +523,7 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
 
     res <- do.call("paste", list(unlist(res), collapse = "\n"))
 
-    c(Covariances = res, Constraints = "")
+    list(Covariances = res, Constraints = "")
   }
 
   toeplitzCov <- function(x, r, e, collapse, type = c("toeplitz", "cs", "ar")) {
@@ -564,11 +565,11 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
           paste0("  ", rho[i], " = ((", r, "/", e, ")^", i, ") * ", e, ";")
         })
         cons <- do.call("paste", list(unlist(cons), collapse = "\n"))
-        paste(c("MODEL CONSTRAINT: \n", cons), collapse = "")
+        paste(c("MODEL CONSTRAINT: \n", cons, "\n"), collapse = "")
       }
     )
 
-    c(Covariances = res, Constraints = constraint)
+    list(Covariances = res, Constraints = constraint)
   }
 
   V <- switch(type,
@@ -590,7 +591,10 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
   )
 
   Rstruc <- c(Variances = V, Rcov)
-  class(Rstruc) <- "MplusRstruc"
+  allres <- do.call(paste, list(Rstruc, collapse = "\n"))
+  Rstruc <- c(all = allres, Rstruc)
+
+  class(Rstruc) <- "MplusRstructure"
 
   return(Rstruc)
 }
