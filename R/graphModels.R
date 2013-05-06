@@ -2,7 +2,7 @@
 #'
 #' Displays a traceplot of the MCMC draws from the poster distribution of each parameter estimate for a Bayesian Mplus model.
 #' This function requires that 1) PLOT: TYPE=PLOT2; be included in the Mplus input file, 2) a gh5 file be present corresponding
-#' to the Mplus output file (and containing a bayesian_data section), and 3) that the hdf5 package be installed to allow
+#' to the Mplus output file (and containing a bayesian_data section), and 3) that the rhdf5 package be installed to allow
 #' the gh5 file to be imported.
 #'
 #' A multi-panel plot is drawn to the screen and the user is prompted to display the next plot if more than rows x columns estimates are
@@ -38,8 +38,8 @@ mplus.traceplot <- function(mplus.model, rows=4, cols=4, parameters_only=TRUE) {
 
   if (!inherits(mplus.model, "mplus.model")) stop("mplus.traceplot function requires an mplus.model object (from readModels).")
 
-  #if(!(suppressWarnings(require(hdf5)) && suppressWarnings(require(lattice)))) stop("mplus.traceplot requires hdf5 and lattice packages")
-  if(!suppressWarnings(require(hdf5))) stop("mplus.traceplot requires hdf5 package.")
+  #if(!(suppressWarnings(require(rhdf5)) && suppressWarnings(require(lattice)))) stop("mplus.traceplot requires rhdf5 and lattice packages")
+  if(!suppressWarnings(require(rhdf5))) stop("mplus.traceplot requires rhdf5 package.")
 
 	if (length(mplus.model$gh5) <= 0) stop("No data in gh5 element of Mplus model.")
 

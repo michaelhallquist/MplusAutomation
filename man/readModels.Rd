@@ -55,7 +55,7 @@
   obtained using auxiliary(e) syntax in latent class
   models} \item{gh5}{a list containing data from the gh5
   (graphics) file corresponding to this output. (Requires
-  hdf5 package)}
+  rhdf5 package)}
 }
 \description{
   Extracts the model parameters, summary statistics, and

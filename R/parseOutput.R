@@ -35,7 +35,7 @@
 #'   \item{tech3}{a list containing parameter covariance and correlation matrices from OUTPUT: TECH3}
 #'   \item{tech4}{a list containing means, covariances, and correlations for latent variables from OUTPUT: TECH4}
 #'   \item{lcCondMeans}{conditional latent class means, obtained using auxiliary(e) syntax in latent class models}
-#'   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires hdf5 package)}
+#'   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)}
 #' @author Michael Hallquist
 #' @seealso \code{\link{extractModelSummaries}},
 #' \code{\link{extractModelParameters}}, \code{\link{extractModIndices}},

@@ -20,9 +20,10 @@ Imports:
     gsubfn,
     relimp,
     coda,
-    xtable
+    xtable,
+    lattice
 Suggests:
-    hdf5
+    rhdf5
 LazyLoad: yes
 Collate:
     'compareModels.R'
