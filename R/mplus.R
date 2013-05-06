@@ -486,24 +486,23 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
 #' @export
 #' @author Joshua Wiley
 #' @examples
-#' # use cat() for pretty printing
 #' # all five structures collapsing
-#' cat(mplusRcov(letters[1:4], "homogenous", "rho", "e", TRUE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "heterogenous", "rho", "e", TRUE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "cs", "rho", "e", TRUE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "toeplitz", "rho", "e", TRUE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "ar", "rho", "e", TRUE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "un", "rho", "e", TRUE), sep = "\n")
+#' mplusRcov(letters[1:4], "homogenous", "rho", "e", TRUE)
+#' mplusRcov(letters[1:4], "heterogenous", "rho", "e", TRUE)
+#' mplusRcov(letters[1:4], "cs", "rho", "e", TRUE)
+#' mplusRcov(letters[1:4], "toeplitz", "rho", "e", TRUE)
+#' mplusRcov(letters[1:4], "ar", "rho", "e", TRUE)
+#' mplusRcov(letters[1:4], "un", "rho", "e", TRUE)
 #'
 #' # all five structures without collapsing
 #' # useful for long names or many variables
 #' # where a line may cross 80 characters
-#' cat(mplusRcov(letters[1:4], "homogenous", "rho", "e", FALSE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "heterogenous", "rho", "e", FALSE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "cs", "rho", "e", FALSE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "toeplitz", "rho", "e", FALSE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "ar", "rho", "e", FALSE), sep = "\n")
-#' cat(mplusRcov(letters[1:4], "un", "rho", "e", FALSE), sep = "\n")
+#' mplusRcov(letters[1:4], "homogenous", "rho", "e", FALSE)
+#' mplusRcov(letters[1:4], "heterogenous", "rho", "e", FALSE)
+#' mplusRcov(letters[1:4], "cs", "rho", "e", FALSE)
+#' mplusRcov(letters[1:4], "toeplitz", "rho", "e", FALSE)
+#' mplusRcov(letters[1:4], "ar", "rho", "e", FALSE)
+#' mplusRcov(letters[1:4], "un", "rho", "e", FALSE)
 mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz", "ar", "un"),
   r = "rho", e = "e", collapse=FALSE) {
 
@@ -587,7 +586,8 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
     cs = toeplitzCov(x = x, r = r, e = e, collapse = collapse, type = type),
     toeplitz = toeplitzCov(x = x, r = r, e = e, collapse = collapse, type = type),
     ar = toeplitzCov(x = x, r = r, e = e, collapse = collapse, type = type),
-    un = gsub("@0", "", indCov(x = x, r = r, e = e, collapse = collapse))
+    un = lapply(indCov(x = x, r = r, e = e, collapse = collapse), function(x) {
+      gsub("@0", "", x)})
   )
 
   Rstruc <- c(Variances = V, Rcov)

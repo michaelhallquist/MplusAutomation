@@ -167,24 +167,23 @@
   \ldots \tab \eqn{\sigma^{2}_{en}}{sn^2} \cr }
 }
 \examples{
-# use cat() for pretty printing
 # all five structures collapsing
-cat(mplusRcov(letters[1:4], "homogenous", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "heterogenous", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "cs", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "toeplitz", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "ar", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "un", "rho", "e", TRUE), sep = "\\n")
+mplusRcov(letters[1:4], "homogenous", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "heterogenous", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "cs", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "toeplitz", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "ar", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "un", "rho", "e", TRUE)
 
 # all five structures without collapsing
 # useful for long names or many variables
 # where a line may cross 80 characters
-cat(mplusRcov(letters[1:4], "homogenous", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "heterogenous", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "cs", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "toeplitz", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "ar", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "un", "rho", "e", FALSE), sep = "\\n")
+mplusRcov(letters[1:4], "homogenous", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "heterogenous", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "cs", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "toeplitz", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "ar", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "un", "rho", "e", FALSE)
 }
 \author{
   Joshua Wiley
