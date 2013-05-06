@@ -1,10 +1,11 @@
 Version 0.6
-- feature: initial extraction support of standardized confidence intervals.
 - feature: create Mplus model objects, automatically create and run models using mplusModeler
 - feature: generate code for residual covariance structures for latent growth models using mplusRcov
-- support 6-column output from multiple imputation analyses that contain "rate of missing" column.
-- extract all details of bootstrapped likelihood ratio test.
+- feature: initial support for extracting standardized confidence intervals.
+- feature: extract all details of bootstrapped likelihood ratio test.
+- feature: initial support for extracting IRT parameterization model results (see $irt.parameterization).
 - added basic documentation for functions including internal functions
+- support 6-column output from multiple imputation analyses that contain "rate of missing" column.
 - fixes to quiet scan commands (thanks to Mikko Ronkko)
 - fixes to use of system call on Mac/Unix (thanks to Mikko Ronkko)
 - move to rhdf5 package (hdf5 no longer maintained)
