@@ -64,6 +64,7 @@
 #'
 #' Maintainer: Michael Hallquist \email{michael.hallquist@@gmail.com}
 #' @keywords package
+#' @import tcltk
 #' @seealso See \code{\link{runModels}} for an example running a model.
 #' @references Mplus software. Muthen and Muthen. \url{http://www.statmodel.com}
 NULL
