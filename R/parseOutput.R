@@ -50,18 +50,18 @@
 #' }
 readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
   #large wrapper function to read summaries, parameters, and savedata from one or more output files.
-  
+
   outfiles <- getOutFileList(target, recursive, filefilter)
-  
+
   allFiles <- list()
   for (curfile in outfiles) {
     cat("Reading model: ", curfile, "\n")
     #if not recursive, then each element is uniquely identified (we hope!) by filename alone
     if (recursive==FALSE)	listID <- make.names(splitFilePath(curfile)$filename) #each list element is named by the respective file
     else listID <- make.names(curfile) #each list element is named by the respective file
-    
+
     outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
-    
+
     allFiles[[listID]]$input <- inp <- extractInput_1file(outfiletext, curfile)
     warn_err <- extractWarningsErrors_1file(outfiletext, curfile, input=inp)
     allFiles[[listID]]$warnings <- warn_err$warnings
@@ -71,14 +71,14 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$class_counts <- extractClassCounts(outfiletext, curfile) #latent class counts
     allFiles[[listID]]$mod_indices <- extractModIndices_1file(outfiletext, curfile)
     allFiles[[listID]]$savedata_info <- fileInfo <- l_getSavedata_Fileinfo(curfile, outfiletext)
-    
+
     #missing widths indicative of MI/MC run
     if (!is.null(fileInfo) && is.na(fileInfo[["fileVarWidths"]])) {
       allFiles[[listID]]$savedata <- l_getSavedata_readRawFile(curfile, outfiletext, format="free", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], input=inp)
     } else {
       allFiles[[listID]]$savedata <- l_getSavedata_readRawFile(curfile, outfiletext, format="fixed", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], varWidths=fileInfo[["fileVarWidths"]], input=inp)
     }
-    
+
     allFiles[[listID]]$bparameters <- l_getSavedata_Bparams(curfile, outfiletext, fileInfo, discardBurnin=FALSE)
     allFiles[[listID]]$residuals <- extractResiduals(outfiletext, curfile)
     allFiles[[listID]]$tech1 <- extractTech1(outfiletext, curfile) #parameter specification
@@ -86,25 +86,25 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$tech4 <- extractTech4(outfiletext, curfile) #latent means
     allFiles[[listID]]$tech9 <- extractTech9(outfiletext, curfile) #tech 9 output (errors and warnings for Monte Carlo output)
     allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
-    
+
     #aux(e) means
     allFiles[[listID]]$lcCondMeans <- extractAuxE_1file(outfiletext, curfile)
-    
+
     #add class tag for use with compareModels
     class(allFiles[[listID]]) <- c("list", "mplus.model")
     attr(allFiles[[listID]], "filename") <- curfile
-    
+
     #cleanup summary columns containing only NAs
     for (col in names(allFiles[[listID]]$summaries)) {
       if (all(is.na(allFiles[[listID]]$summaries[[col]]))) allFiles[[listID]]$summaries[[col]] <- NULL
     }
-    
+
     #check for gh5 file, and load if possible
     gh5 <- list()
     gh5fname <- sub("^(.*)\\.out$", "\\1.gh5", curfile, ignore.case=TRUE, perl=TRUE)
     if (file.exists(gh5fname)) {
       if (suppressWarnings(require(rhdf5))) {
-        gh5 <- h5dump(file=gh5fname, recursive=TRUE, load=TRUE)        
+        gh5 <- h5dump(file=gh5fname, recursive=TRUE, load=TRUE)
       } else { warning(paste(c("Unable to read gh5 file because rhdf5 package not installed.\n",
                     "To install, in an R session, type:\n",
                     "  source(\"http://bioconductor.org/biocLite.R\")\n",
@@ -113,13 +113,13 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     }
     allFiles[[listID]]$gh5 <- gh5
   }
-  
+
   if (length(outfiles)==1) {
     allFiles <- allFiles[[1]] #no need for single top-level element when there is only one file
   } else {
     class(allFiles) <- c("list", "mplus.model.list")
   }
-  
+
   return(allFiles)
 }
 
