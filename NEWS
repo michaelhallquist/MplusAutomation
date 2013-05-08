@@ -1,3 +1,7 @@
+Version 0.6-2
+- feature: initial support for extracting TECH7 (sample stats within latent classes)
+- feature: initial support for extracting TECH12 (observed versus estimated sample statistics for TYPE=MIXTURE analyses)
+
 Version 0.6-1
 - bugfix: fixed plyr namespace imports
 - bugfix: fixed runModels log file when NULL

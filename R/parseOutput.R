@@ -34,6 +34,9 @@
 #'   \item{tech1}{a list containing parameter specification and starting values from OUTPUT: TECH1}
 #'   \item{tech3}{a list containing parameter covariance and correlation matrices from OUTPUT: TECH3}
 #'   \item{tech4}{a list containing means, covariances, and correlations for latent variables from OUTPUT: TECH4}
+#'   \item{tech7}{a list containing sample statistics for each latent class from OUTPUT: TECH7}
+#'   \item{tech9}{a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9}
+#'   \item{tech12}{a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
 #'   \item{lcCondMeans}{conditional latent class means, obtained using auxiliary(e) syntax in latent class models}
 #'   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)}
 #' @author Michael Hallquist
@@ -84,7 +87,9 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$tech1 <- extractTech1(outfiletext, curfile) #parameter specification
     allFiles[[listID]]$tech3 <- extractTech3(outfiletext, fileInfo, curfile) #covariance/correlation matrix of parameter estimates
     allFiles[[listID]]$tech4 <- extractTech4(outfiletext, curfile) #latent means
+    allFiles[[listID]]$tech7 <- extractTech7(outfiletext, curfile) #sample stats for each class
     allFiles[[listID]]$tech9 <- extractTech9(outfiletext, curfile) #tech 9 output (errors and warnings for Monte Carlo output)
+    allFiles[[listID]]$tech12 <- extractTech12(outfiletext, curfile) #observed versus estimated sample stats for TYPE=MIXTURE
     allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
 
     #aux(e) means
@@ -1619,6 +1624,59 @@ extractTech4 <- function(outfiletext, filename) {
   return(tech4List)
 }
 
+#' Extract Technical 7 from Mplus
+#'
+#' The TECH7 option is used in conjunction with TYPE=MIXTURE to request sample statistics
+#' for each class using raw data weighted by the estimated posterior probabilities for each class.
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech7}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractTech7 <- function(outfiletext, filename) {
+  #TODO: have empty list use mplus.tech7 class
+  #not sure whether there are sometimes multiple groups within this section.
+  tech7Section <- getSection("^TECHNICAL 7 OUTPUT$", outfiletext)
+  if (is.null(tech7Section)) return(list()) #no tech7 output
+  
+  tech7List <- list()
+  
+  tech7Subsections <- getMultilineSection("SAMPLE STATISTICS WEIGHTED BY ESTIMATED CLASS PROBABILITIES FOR CLASS \\d+",
+      tech7Section, filename, allowMultiple=TRUE)
+  
+  matchlines <- attr(tech7Subsections, "matchlines")
+  
+  if (length(tech7Subsections) == 0) {
+    warning("No sections found within tech7 output.")
+    return(list())
+  }
+  else if (length(tech7Subsections) > 1) {
+    groupNames <- make.names(gsub("^\\s*SAMPLE STATISTICS WEIGHTED BY ESTIMATED CLASS PROBABILITIES FOR (CLASS \\d+)\\s*$", "\\1", tech7Section[matchlines], perl=TRUE))
+  }
+  
+  for (g in 1:length(tech7Subsections)) {
+    targetList <- list()
+    
+    targetList[["classSampMeans"]] <- matrixExtract(tech7Subsections[[g]], "Means", filename)
+    targetList[["classSampCovs"]] <- matrixExtract(tech7Subsections[[g]], "Covariances", filename)
+    
+    if (length(tech7Subsections) > 1) {
+      class(targetList) <- c("list", "mplus.tech7")
+      tech7List[[groupNames[g]]] <- targetList
+    }
+    else
+      tech7List <- targetList    
+  }
+  
+  class(tech7List) <- c("list", "mplus.tech7")
+  
+  return(tech7List)
+}
+
+
 #' Extract Technical 9 matrix from Mplus
 #'
 #' Function that extracts the Tech9 matrix
@@ -1669,10 +1727,75 @@ extractTech9 <- function(outfiletext, filename) {
 #' # make me!!!
 extractTech10 <- function(outfiletext, filename) {
   tech10Section <- getSection("^TECHNICAL 10 OUTPUT$", outfiletext)
-  if (is.null(tech10Section)) return(list()) #no tech4 output
+  if (is.null(tech10Section)) return(list()) #no tech10 output
 
   tech10List <- list()
 
+}
+
+#' Extract Technical 12 from Mplus
+#'
+#' The TECH12 option is used in conjunction with TYPE=MIXTURE to request residuals for observed 
+#' versus model estimated means, variances, covariances, univariate skewness, and univariate 
+#' kurtosis. The observed values come from the total sample. The estimated values are computed as
+#' a mixture across the latent classes.
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech12}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractTech12 <- function(outfiletext, filename) {
+  #TODO: have empty list use mplus.tech12 class
+  #not sure whether there are sometimes multiple groups within this section.
+  tech12Section <- getSection("^TECHNICAL 12 OUTPUT$", outfiletext)
+  if (is.null(tech12Section)) return(list()) #no tech12 output
+  
+  tech12List <- list()
+  
+  tech12Subsections <- getMultilineSection("ESTIMATED MIXED MODEL AND RESIDUALS \\(OBSERVED - EXPECTED\\)",
+      tech12Section, filename, allowMultiple=TRUE)
+  
+  matchlines <- attr(tech12Subsections, "matchlines")
+  
+  if (length(tech12Subsections) == 0) {
+    warning("No sections found within tech12 output.")
+    return(list())
+  }
+  else if (length(tech12Subsections) > 1) {
+    warning("extractTech12 does not yet know how to handle multiple sections (if such exist)")
+  }
+  browser()
+  
+  for (g in 1:length(tech12Subsections)) {
+    targetList <- list()
+    
+    targetList[["obsMeans"]] <- matrixExtract(tech12Subsections[[g]], "Observed Means", filename)
+    targetList[["mixedMeans"]] <- matrixExtract(tech12Subsections[[g]], "Estimated Mixed Means", filename)
+    targetList[["mixedMeansResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Means", filename)
+    targetList[["obsCovs"]] <- matrixExtract(tech12Subsections[[g]], "Observed Covariances", filename)
+    targetList[["mixedCovs"]] <- matrixExtract(tech12Subsections[[g]], "Estimated Mixed Covariances", filename)
+    targetList[["mixedCovsResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Covariances", filename)
+    targetList[["obsSkewness"]] <- matrixExtract(tech12Subsections[[g]], "Observed Skewness", filename)
+    targetList[["mixedSkewness"]] <- matrixExtract(tech12Subsections[[g]], "Estimated Mixed Skewness", filename)
+    targetList[["mixedSkewnessResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Skewness", filename)
+    targetList[["obsKurtosis"]] <- matrixExtract(tech12Subsections[[g]], "Observed Kurtosis", filename)
+    targetList[["mixedKurtosis"]] <- matrixExtract(tech12Subsections[[g]], "Estimated Mixed Kurtosis", filename)
+    targetList[["mixedKurtosisResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Kurtosis", filename)
+    
+    if (length(tech12Subsections) > 1) {
+      class(targetList) <- c("list", "mplus.tech12")
+      tech12List[[g]] <- targetList #no known case where there are many output sections
+    }
+    else
+      tech12List <- targetList
+  }
+  
+  class(tech12List) <- c("list", "mplus.tech12")
+  
+  return(tech12List)
 }
 
 #' Extract Factor Score Statistics
