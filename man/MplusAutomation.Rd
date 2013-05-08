@@ -65,7 +65,7 @@
   Mplus syntax stub for variable names.
 
   \tabular{ll}{ Package: \tab MplusAutomation\cr Type: \tab
-  Package\cr Version: \tab 0.6\cr Date: \tab 2013-05-03\cr
+  Package\cr Version: \tab 0.6-1\cr Date: \tab 2013-05-07\cr
   License: \tab LGPL-3\cr LazyLoad: \tab yes\cr }
 }
 \author{

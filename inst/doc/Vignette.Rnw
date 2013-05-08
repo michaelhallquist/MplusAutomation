@@ -24,7 +24,7 @@ columns=fullflexible						%makes character spacing nice
 \setlength{\parskip}{0.3cm}
 \title{MplusAutomation Examples}
 \author{Michael N. Hallquist}
-\date{Package version 0.6}
+\date{Package version 0.6-1}
 \maketitle
 \tableofcontents
 \bigskip
