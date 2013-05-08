@@ -1767,7 +1767,6 @@ extractTech12 <- function(outfiletext, filename) {
   else if (length(tech12Subsections) > 1) {
     warning("extractTech12 does not yet know how to handle multiple sections (if such exist)")
   }
-  browser()
   
   for (g in 1:length(tech12Subsections)) {
     targetList <- list()
