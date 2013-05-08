@@ -21,9 +21,11 @@
 \examples{
 \dontrun{
   #a few examples of files to parse
-  #mg + lc. Results in latent class pattern, not really different from regular latent class matching. See Example 7.21
+  #mg + lc. Results in latent class pattern, not really different from
+  #         regular latent class matching. See Example 7.21
   #mg + twolevel. Group is top, bw/wi is 2nd. See Example 9.11
-  #lc + twolevel. Bw/wi is top, lc is 2nd. See Example 10.1. But categorical latent variables is even higher
+  #lc + twolevel. Bw/wi is top, lc is 2nd. See Example 10.1.
+  #               But categorical latent variables is even higher
   #test cases for more complex output: 7.21, 9.7, 9.11, 10.1
 }
 }

@@ -322,7 +322,7 @@ runModels <- function(directory=getwd(), recursive=FALSE, showOutput=FALSE, repl
 		}
 
     #close logfile
-    close(logTarget)
+    if (isLogOpen()) { close(logTarget) }
 
     #reset working directory
     setwd(curdir)

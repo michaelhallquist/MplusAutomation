@@ -1,3 +1,10 @@
+Version 0.6-1
+- bugfix: fixed plyr namespace imports
+- bugfix: fixed runModels log file when NULL
+- corrected line length problems in documentation.
+- deleted old createTable routine (not used).
+- removed fields to extract from extractSummaries_1file (not useful).
+
 Version 0.6
 - feature: create Mplus model objects, automatically create and run models using mplusModeler
 - feature: generate code for residual covariance structures for latent growth models using mplusRcov
