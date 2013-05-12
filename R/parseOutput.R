@@ -1189,12 +1189,14 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
 #' @return No value is returned by this function. It is solely used to display the summary table in a separate window.
 #' @author Michael Hallquist
 #' @seealso \code{\link{extractModelSummaries}} \code{\link{HTMLSummaryTable}} \code{\link{LatexSummaryTable}}
-#' @importFrom relimp showData
 #' @export
 #' @keywords interface
 #' @examples
 #' # make me!!!
 showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courier 9") {
+  if (!suppressWarnings(require(relimp))) {
+    stop("The relimp package is absent. Interactive folder selection cannot function.")
+  }
 
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
   showData(MplusData, font=font, placement="+30+30", maxwidth=150, maxheight=50, rownumbers=FALSE, title="Mplus Summary Table")

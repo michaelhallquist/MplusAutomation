@@ -51,6 +51,12 @@
   covariance and correlation matrices from OUTPUT: TECH3}
   \item{tech4}{a list containing means, covariances, and
   correlations for latent variables from OUTPUT: TECH4}
+  \item{tech7}{a list containing sample statistics for each
+  latent class from OUTPUT: TECH7} \item{tech9}{a list
+  containing warnings/errors from replication runs for
+  MONTECARLO analyses from OUTPUT: TECH9} \item{tech12}{a
+  list containing observed versus estimated sample
+  statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
   \item{lcCondMeans}{conditional latent class means,
   obtained using auxiliary(e) syntax in latent class
   models} \item{gh5}{a list containing data from the gh5
