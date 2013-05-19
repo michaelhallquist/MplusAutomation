@@ -31,16 +31,17 @@
   Defaults to \code{FALSE}.}
 }
 \value{
-  A named character vector of class \sQuote{MplusRstruc}
-  with three elements: \item{Variances}{A character string
-  containing all of the variances.} \item{Covariances}{A
-  character string containing all of the covariances,
-  properly labelled to allow constraints and the
-  autoregressive residual covariance structure.}
-  \item{Constraints}{A character string containing the
-  \sQuote{MODEL CONSTRAINT} section and code needed to
-  parameterize the residual covariance structure as
-  autoregressive.}
+  A named character vector of class
+  \sQuote{MplusRstructure} with four elements: \item{all}{A
+  character string collapsing all other sections.}
+  \item{Variances}{A character string containing all of the
+  variances.} \item{Covariances}{A character string
+  containing all of the covariances, properly labelled to
+  allow constraints and the autoregressive residual
+  covariance structure.} \item{Constraints}{A character
+  string containing the \sQuote{MODEL CONSTRAINT} section
+  and code needed to parameterize the residual covariance
+  structure as autoregressive.}
 }
 \description{
   This function makes it easy to write the Mplus syntax for
@@ -166,24 +167,23 @@
   \ldots \tab \eqn{\sigma^{2}_{en}}{sn^2} \cr }
 }
 \examples{
-# use cat() for pretty printing
 # all five structures collapsing
-cat(mplusRcov(letters[1:4], "homogenous", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "heterogenous", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "cs", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "toeplitz", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "ar", "rho", "e", TRUE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "un", "rho", "e", TRUE), sep = "\\n")
+mplusRcov(letters[1:4], "homogenous", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "heterogenous", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "cs", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "toeplitz", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "ar", "rho", "e", TRUE)
+mplusRcov(letters[1:4], "un", "rho", "e", TRUE)
 
 # all five structures without collapsing
 # useful for long names or many variables
 # where a line may cross 80 characters
-cat(mplusRcov(letters[1:4], "homogenous", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "heterogenous", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "cs", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "toeplitz", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "ar", "rho", "e", FALSE), sep = "\\n")
-cat(mplusRcov(letters[1:4], "un", "rho", "e", FALSE), sep = "\\n")
+mplusRcov(letters[1:4], "homogenous", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "heterogenous", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "cs", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "toeplitz", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "ar", "rho", "e", FALSE)
+mplusRcov(letters[1:4], "un", "rho", "e", FALSE)
 }
 \author{
   Joshua Wiley

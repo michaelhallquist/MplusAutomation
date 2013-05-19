@@ -1,0 +1,28 @@
+\name{extractTech7}
+\alias{extractTech7}
+\title{Extract Technical 7 from Mplus}
+\usage{
+  extractTech7(outfiletext, filename)
+}
+\arguments{
+  \item{outfiletext}{the text of the output file}
+
+  \item{filename}{The name of the file}
+}
+\value{
+  A list of class \dQuote{mplus.tech7}
+}
+\description{
+  The TECH7 option is used in conjunction with TYPE=MIXTURE
+  to request sample statistics for each class using raw
+  data weighted by the estimated posterior probabilities
+  for each class.
+}
+\examples{
+# make me!!!
+}
+\seealso{
+  \code{\link{matrixExtract}}
+}
+\keyword{internal}
+

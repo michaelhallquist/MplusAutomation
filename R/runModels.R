@@ -29,9 +29,10 @@
 runModels_Interactive <- function(directory=getwd(), recursive="0",
     showOutput="1", replaceOutfile="1", checkDate="0", logFile="1")
 {
-  tcltk <- require(tcltk)
-  if (!tcltk) stop("The tcltk package is absent. Interactive folder selection cannot function.")
-
+  if (!suppressWarnings(require(tcltk))) {
+    stop("The tcltk package is absent. Interactive folder selection cannot function.")
+  }
+  
   #button handler functions
   onOK <- function() {
     #tkmessageBox(message="clicked ok")
@@ -325,7 +326,7 @@ runModels <- function(directory=getwd(), recursive=FALSE, filefilter, showOutput
 		}
 
     #close logfile
-    close(logTarget)
+    if (isLogOpen()) { close(logTarget) }
 
     #reset working directory
     setwd(curdir)

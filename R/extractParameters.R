@@ -8,13 +8,14 @@
 #' @param thisCunk
 #' @param columnNames
 #' @return A data frame (or matrix?)
+#' @importFrom plyr ldply ddply
 #' @keywords internal
 extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
   if (missing(thisChunk) || is.na(thisChunk) || is.null(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
   if (missing(columnNames) || is.na(columnNames) || is.null(columnNames)) stop("Missing column names for chunk.\n  ", filename)
 
   #okay to match beginning and end of line because strip.white used in scan
-  matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Residual Variances|New/Additional Parameters|Scales)|([\\w_\\d+\\.#]+\\s+(BY|WITH|ON|\\|)))\\s*$", thisChunk, perl=TRUE)
+  matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Residual Variances|New/Additional Parameters|Scales)|([\\w_\\d+\\.#]+\\s+(BY|WITH|ON|\\|)))\\s*$", thisChunk, perl=TRUE)
 
   #more readable (than above) using ldply from plyr
   convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
@@ -36,7 +37,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
         match <- substr(thisChunk[row$startline], row$start, row$end)
 
         #check for keyword
-        if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "New/Additional Parameters", "Scales")) {
+        if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "New/Additional Parameters", "Scales", "Item Difficulties")) {
           return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_))
         }
         else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
@@ -104,7 +105,6 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
     #use the column names detected in extractParameters_1section
     names(parsedParams) <- columnNames
 
-
     #add the paramHeader to the data.frame
     parsedParams$paramHeader <- varTitle
 
@@ -133,9 +133,11 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
 #' @examples
 #' \dontrun{
 #'   #a few examples of files to parse
-#'   #mg + lc. Results in latent class pattern, not really different from regular latent class matching. See Example 7.21
+#'   #mg + lc. Results in latent class pattern, not really different from 
+#'   #         regular latent class matching. See Example 7.21
 #'   #mg + twolevel. Group is top, bw/wi is 2nd. See Example 9.11
-#'   #lc + twolevel. Bw/wi is top, lc is 2nd. See Example 10.1. But categorical latent variables is even higher
+#'   #lc + twolevel. Bw/wi is top, lc is 2nd. See Example 10.1.
+#'   #               But categorical latent variables is even higher
 #'   #test cases for more complex output: 7.21, 9.7, 9.11, 10.1
 #' }
 extractParameters_1section <- function(filename, modelSection, sectionName) {
@@ -148,10 +150,14 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
   #detectColumn names sub-divides (perhaps unnecessarily) the matches based on the putative section type of the output
   #current distinctions include modification indices, confidence intervals, and model results.
-  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized")) sectionType <- "confidence_intervals"
-  else sectionType <- "model_results"
+  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized")) { sectionType <- "confidence_intervals"
+  } else if (sectionName == "irt.parameterization") {
+    #the IRT section follows from the MODEL RESULTS section, and column headers are not reprinted.
+    #Thus, for now (first pass), assume a 5-column header -- kludge
+    columnNames <- c("param", "est", "se", "est_se", "pval")
+  } else { sectionType <- "model_results" }
 
-  columnNames <- detectColumnNames(filename, modelSection, sectionType)
+  if (!exists("columnNames")) { columnNames <- detectColumnNames(filename, modelSection, sectionType) }
 
   #Detect model section dividers
   #These include: 1) multiple groups: Group XYZ
@@ -246,7 +252,6 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
       matchIndex <- matchIndex + 1
     }
 
-
   }
   else allSectionParameters <- extractParameters_1chunk(filename, modelSection, columnNames) #just one model section
 
@@ -271,7 +276,6 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
       if ("BetweenWithin" %in% names(allSectionParameters)) listParameters[[paste0(colName, ".standardized")]]$BetweenWithin <- allSectionParameters$BetweenWithin
 
       allSectionParameters[[colName]] <- NULL #remove from unstandardized output
-
 
     }
     listParameters[[sectionName]] <- allSectionParameters #now that standardized removed, add remainder to the list under appropriate name
@@ -302,13 +306,15 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 #' @param sectionName
 #' @return A list of parameters
 #' @keywords internal
-#' @import gsubfn plyr
+#@import gsubfn plyr # commenting this out to reduce warnings on load
+# this globally imports all functions from those packages, which may be overkill
+# if we can get away with specific functions
 extractParameters_1file <- function(outfiletext, filename, resultType) {
   #require(gsubfn) # trying to import
   #require(plyr)
 
   if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", outfiletext, ignore.case=TRUE, perl=TRUE)) > 0) {
-    warning(paste("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelParameters.\n  Skipping outfile: ", filename, sep=""))
+    warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelParameters.\n  Skipping outfile: ", filename))
     return(NULL) #skip file
   }
 
@@ -366,6 +372,18 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 
   }
 
+  #two-parameter IRT output
+  irtSection <- getSection("^IRT PARAMETERIZATION IN TWO-PARAMETER (PROBIT|LOGISTIC) METRIC$", outfiletext)
+  if (!is.null(irtSection)) {
+    #parse what the logit or probit is
+    probitLogit <- tolower(sub("^\\s*where the (probit|logit) is.*$", "\\1", irtSection[1L], ignore.case=TRUE, perl=TRUE))
+    def <- tolower(sub("^\\s*where the (?:probit|logit) is\\s+(.*)$", "\\1", irtSection[1L], ignore.case=TRUE, perl=TRUE))
+    irtSection <- irtSection[2:length(irtSection)] #drop line "WHERE THE LOGIT IS 1.7*DISCRIMINATION*(THETA - DIFFICULTY)"
+    irtParsed <- extractParameters_1section(filename, irtSection, "irt.parameterization")
+    attr(irtParsed[["irt.parameterization"]], probitLogit) <- def #add probit/logit definition as attribute
+    allSections <- appendListElements(allSections, irtParsed)
+  }
+
   #confidence intervals for usual output, credibility intervals for bayesian output
   ciSection <- getSection("^(CONFIDENCE INTERVALS OF MODEL RESULTS|CREDIBILITY INTERVALS OF MODEL RESULTS)$", outfiletext)
   if (!is.null(ciSection)) {
@@ -387,9 +405,10 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "ci.unstandardized",
-    "stdyx.standardized", "ci.stdyx.standardized",
-    "stdy.standardized", "ci.stdy.standardized",
-    "std.standardized", "ci.std.standardized")
+      "irt.parameterization",
+      "stdyx.standardized", "ci.stdyx.standardized",
+      "stdy.standardized", "ci.stdy.standardized",
+      "std.standardized", "ci.std.standardized")
   listOrder <- listOrder[listOrder %in% names(allSections)]
 
 

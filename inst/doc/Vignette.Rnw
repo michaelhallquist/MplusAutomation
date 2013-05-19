@@ -24,7 +24,7 @@ columns=fullflexible						%makes character spacing nice
 \setlength{\parskip}{0.3cm}
 \title{MplusAutomation Examples}
 \author{Michael N. Hallquist}
-\date{Package version 0.5-3}
+\date{Package version 0.6-1}
 \maketitle
 \tableofcontents
 \bigskip
@@ -291,7 +291,7 @@ output file. Elements of an \lstinline|mplus.model| object include:
   correlations for latent variables from OUTPUT: TECH4.
   \item \lstinline|lcCondMeans|: conditional latent class means, obtained using auxiliary(e) syntax in latent class models
   \item \lstinline|gh5|: a list containing data from the gh5 (graphics) file
-  corresponding to this output. (Requires hdf5 package)
+  corresponding to this output. (Requires rhdf5 package)
 \end{enumerate}
 
 Basic example:

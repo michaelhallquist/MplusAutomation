@@ -34,8 +34,11 @@
 #'   \item{tech1}{a list containing parameter specification and starting values from OUTPUT: TECH1}
 #'   \item{tech3}{a list containing parameter covariance and correlation matrices from OUTPUT: TECH3}
 #'   \item{tech4}{a list containing means, covariances, and correlations for latent variables from OUTPUT: TECH4}
+#'   \item{tech7}{a list containing sample statistics for each latent class from OUTPUT: TECH7}
+#'   \item{tech9}{a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9}
+#'   \item{tech12}{a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
 #'   \item{lcCondMeans}{conditional latent class means, obtained using auxiliary(e) syntax in latent class models}
-#'   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires hdf5 package)}
+#'   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)}
 #' @author Michael Hallquist
 #' @seealso \code{\link{extractModelSummaries}},
 #' \code{\link{extractModelParameters}}, \code{\link{extractModIndices}},
@@ -51,16 +54,16 @@
 readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
   #large wrapper function to read summaries, parameters, and savedata from one or more output files.
 
-	outfiles <- getOutFileList(target, recursive, filefilter)
+  outfiles <- getOutFileList(target, recursive, filefilter)
 
-	allFiles <- list()
-	for (curfile in outfiles) {
+  allFiles <- list()
+  for (curfile in outfiles) {
     cat("Reading model: ", curfile, "\n")
-		#if not recursive, then each element is uniquely identified (we hope!) by filename alone
-		if (recursive==FALSE)	listID <- make.names(splitFilePath(curfile)$filename) #each list element is named by the respective file
-		else listID <- make.names(curfile) #each list element is named by the respective file
+    #if not recursive, then each element is uniquely identified (we hope!) by filename alone
+    if (recursive==FALSE)	listID <- make.names(splitFilePath(curfile)$filename) #each list element is named by the respective file
+    else listID <- make.names(curfile) #each list element is named by the respective file
 
-		outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
+    outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
     allFiles[[listID]]$input <- inp <- extractInput_1file(outfiletext, curfile)
     warn_err <- extractWarningsErrors_1file(outfiletext, curfile, input=inp)
@@ -69,7 +72,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$summaries <- extractSummaries_1file(outfiletext, curfile, input=inp)
     allFiles[[listID]]$parameters <- extractParameters_1file(outfiletext, curfile)
     allFiles[[listID]]$class_counts <- extractClassCounts(outfiletext, curfile) #latent class counts
-		allFiles[[listID]]$mod_indices <- extractModIndices_1file(outfiletext, curfile)
+    allFiles[[listID]]$mod_indices <- extractModIndices_1file(outfiletext, curfile)
     allFiles[[listID]]$savedata_info <- fileInfo <- l_getSavedata_Fileinfo(curfile, outfiletext)
 
     #missing widths indicative of MI/MC run
@@ -84,7 +87,9 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$tech1 <- extractTech1(outfiletext, curfile) #parameter specification
     allFiles[[listID]]$tech3 <- extractTech3(outfiletext, fileInfo, curfile) #covariance/correlation matrix of parameter estimates
     allFiles[[listID]]$tech4 <- extractTech4(outfiletext, curfile) #latent means
+    allFiles[[listID]]$tech7 <- extractTech7(outfiletext, curfile) #sample stats for each class
     allFiles[[listID]]$tech9 <- extractTech9(outfiletext, curfile) #tech 9 output (errors and warnings for Monte Carlo output)
+    allFiles[[listID]]$tech12 <- extractTech12(outfiletext, curfile) #observed versus estimated sample stats for TYPE=MIXTURE
     allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
 
     #aux(e) means
@@ -103,13 +108,16 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     gh5 <- list()
     gh5fname <- sub("^(.*)\\.out$", "\\1.gh5", curfile, ignore.case=TRUE, perl=TRUE)
     if (file.exists(gh5fname)) {
-      if(suppressWarnings(require(hdf5))) {
-        #use load=FALSE to return named list, which is appended to model object.
-        gh5 <- hdf5load(file=gh5fname, load=FALSE, verbosity=0, tidy=TRUE)
-      } else { warning("Unable to read gh5 file because hdf5 package not installed. Please install.packages(\"hdf5\")\n  Note: this depends on having an installation of the hdf5 library on your system.") }
+      if (suppressWarnings(require(rhdf5))) {
+        gh5 <- h5dump(file=gh5fname, recursive=TRUE, load=TRUE)
+      } else { warning(paste(c("Unable to read gh5 file because rhdf5 package not installed.\n",
+                    "To install, in an R session, type:\n",
+                    "  source(\"http://bioconductor.org/biocLite.R\")\n",
+                    "  biocLite(\"rhdf5\")\n")))
+      }
     }
     allFiles[[listID]]$gh5 <- gh5
-	}
+  }
 
   if (length(outfiles)==1) {
     allFiles <- allFiles[[1]] #no need for single top-level element when there is only one file
@@ -754,12 +762,9 @@ extractInput_1file <- function(outfiletext, filename) {
 #' @keywords internal
 #' @examples
 #' # make me!!!
-extractSummaries_1file <- function(outfiletext, filename, input, extract=c("Title", "LL", "BIC", "AIC", "AICC",
-  "Parameters", "Observations", "BLRT", "RMSEA", "CFI", "TLI", "ChiSqModel", "aBIC",
-  "Estimator", "SRMR", "WRMR", "ChiSqBaseline"))
+extractSummaries_1file <- function(outfiletext, filename, input)
 {
   #preallocates list
-  #arglist = vector("list", length(extract))
   arglist <- list()
 
   #obtain mplus software version
@@ -770,7 +775,7 @@ extractSummaries_1file <- function(outfiletext, filename, input, extract=c("Titl
   ###Copy some elements of the input instructions into the summaries
 
   #copy title into arglist
-  if ("Title" %in% extract && !is.null(input$title)) {
+  if (!is.null(input$title)) {
     arglist$Title <- input$title
   } else {
     #warning("Unable to locate title field. Returning missing") #Warning doesn't seem very useful
@@ -797,12 +802,8 @@ extractSummaries_1file <- function(outfiletext, filename, input, extract=c("Titl
   #BEGIN ANALYSIS SUMMARY PROCESSING
   analysisSummarySection <- getSection("^\\s*SUMMARY OF ANALYSIS\\s*$", outfiletext)
 
-  if ("Estimator" %in% extract)
-    arglist$Estimator <- extractValue(pattern="^\\s*Estimator\\s*", analysisSummarySection, filename, type="str")
-
-  if ("Observations" %in% extract)
-    arglist$Observations <- extractValue(pattern="^\\s*Number of observations\\s*", analysisSummarySection, filename, type="int")
-
+  arglist$Estimator <- extractValue(pattern="^\\s*Estimator\\s*", analysisSummarySection, filename, type="str")  
+  arglist$Observations <- extractValue(pattern="^\\s*Number of observations\\s*", analysisSummarySection, filename, type="int")
 
   #END ANALYSIS SUMMARY PROCESSING
 
@@ -932,16 +933,13 @@ extractSummaries_1file <- function(outfiletext, filename, input, extract=c("Titl
 
 	#calculate adjusted AIC per Burnham & Anderson(2004), which is better than AIC for non-nested model selection
 	#handle AICC calculation, requires AIC, Parameters, and observations
-  if (all(c("AICC", "AIC", "Parameters", "Observations") %in% extract)) {
-		if (!is.null(arglist$Parameters) && !is.na(arglist$Parameters) &&
-				!is.null(arglist$AIC) && !is.na(arglist$AIC) &&
-				!is.null(arglist$Observations) && !is.na(arglist$Observations))
-			arglist$AICC <- arglist$AIC + (2*arglist$Parameters*(arglist$Parameters+1))/(arglist$Observations-arglist$Parameters-1)
-		else
-			arglist$AICC <- NA_real_
+  if (!is.null(arglist$Parameters) && !is.na(arglist$Parameters) &&
+      !is.null(arglist$AIC) && !is.na(arglist$AIC) &&
+      !is.null(arglist$Observations) && !is.na(arglist$Observations)) {
+    arglist$AICC <- arglist$AIC + (2*arglist$Parameters*(arglist$Parameters+1))/(arglist$Observations-arglist$Parameters-1)
+  } else {
+    arglist$AICC <- NA_real_
   }
-
-
 
   #Only warn about missing LL for ML-based estimators
 #too convoluted to maintain (and not so useful), generating errors I don't want to debug
@@ -1192,12 +1190,14 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
 #' @return No value is returned by this function. It is solely used to display the summary table in a separate window.
 #' @author Michael Hallquist
 #' @seealso \code{\link{extractModelSummaries}} \code{\link{HTMLSummaryTable}} \code{\link{LatexSummaryTable}}
-#' @importFrom relimp showData
 #' @export
 #' @keywords interface
 #' @examples
 #' # make me!!!
 showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courier 9") {
+  if (!suppressWarnings(require(relimp))) {
+    stop("The relimp package is absent. Interactive folder selection cannot function.")
+  }
 
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
   showData(MplusData, font=font, placement="+30+30", maxwidth=150, maxheight=50, rownumbers=FALSE, title="Mplus Summary Table")
@@ -1234,7 +1234,6 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courie
 #' @examples
 #' # make me!!!
 HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy, display=FALSE) {
-#  require(xtable)
   #create HTML table and write to file.
 
   #ensure that the filename has a .html or .htm at the end
@@ -1295,88 +1294,12 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #' # make me!!!
 LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy, label=NULL, caption=NULL) {
   #return latex table to caller
-  #require(xtable)
 
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
 
   return(xtable(MplusData, label=label, caption=caption))
 }
 
-#removed input instructions from routine extraction
-#dropCols=c("InputInstructions", "Observations")
-
-
-#' Create tables
-#'
-#' This function generates an HTML table from a list of models generated by extractModelSummaries.
-#'
-#' @param modelList A list of model details returned by extractModelSummaries
-#' @param filename The name of HTML table file. Defaults to model comparison.html
-#' @param sortby The name of a field on which to sort. Defaults to "AICC". "BIC" and "AIC" are options.
-#' @param display Logical, whether to load the HTML table in the browser after creating it. Defaults to \code{TRUE}.
-#' @param latex Logical, whether to return a LaTeX table or not.
-#' @param dropCols A vector of the columns to be dropped
-#' @param label Defaults to \code{NULL}
-#' @return A file or \code{xtable} object
-#' @author Michael Hallquist
-#' @keywords internal
-#' @examples
-#' \dontrun{
-#'   createTable(myModels, "C:/Documents and Settings/Michael/My Documents/Mplus Stuff/", "my comparison.html", sortby="BIC")
-#' }
-createTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"),
-  sortby="AICC", display=TRUE, latex=FALSE, dropCols=c("Observations"), label=NULL) {
-
-  #retain working directory to reset at end of run
-  #curdir <- getwd()
-  #setwd(basedir)
-
-  #require(xtable)
-
-  #convert modelList (which defaults to array of lists) to data frame
-  dframe <- as.data.frame(modelList)
-
-  #Process vector of columns to drop
-  for (column in dropCols) {
-    dframe[[column]] <- NULL
-  }
-
-  #sort the data frame according the sortby value
-  sortTab <- dframe[order(unlist(dframe[, sortby])), ]
-
-  #note that the sorting was previously not working because unlist automatically drops NULL values
-  #switched code to use NAs, which is more appropriate.
-
-  #ensure that the filename has a .html or .htm at the end
-  if (!length(grep(".*\\.htm[l]*", filename)) > 0) {
-    filename <- paste0(filename, ".html")
-  }
-
-  if (length(grep("[\\/]", filename)) == 0) {
-    #Filename does not contain a path. Therefore, add the working directory
-    filename <- file.path(getwd(), filename)
-  }
-
-  if (latex==FALSE) {
-    print(
-        x=xtable(sortTab),
-        type="html",
-        file=filename,
-        include.rownames = FALSE,
-        NA.string = "."
-    )
-
-    if (display) {
-      #load table in browser
-      shell.exec(paste0("file:///", filename))
-    }
-  }
-
-  #reset working directory
-  #setwd(curdir)
-
-  if (latex==TRUE) return(xtable(sortTab, label=label))
-}
 
 #' Extract residual matrices
 #'
@@ -1704,6 +1627,59 @@ extractTech4 <- function(outfiletext, filename) {
   return(tech4List)
 }
 
+#' Extract Technical 7 from Mplus
+#'
+#' The TECH7 option is used in conjunction with TYPE=MIXTURE to request sample statistics
+#' for each class using raw data weighted by the estimated posterior probabilities for each class.
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech7}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractTech7 <- function(outfiletext, filename) {
+  #TODO: have empty list use mplus.tech7 class
+  #not sure whether there are sometimes multiple groups within this section.
+  tech7Section <- getSection("^TECHNICAL 7 OUTPUT$", outfiletext)
+  if (is.null(tech7Section)) return(list()) #no tech7 output
+  
+  tech7List <- list()
+  
+  tech7Subsections <- getMultilineSection("SAMPLE STATISTICS WEIGHTED BY ESTIMATED CLASS PROBABILITIES FOR CLASS \\d+",
+      tech7Section, filename, allowMultiple=TRUE)
+  
+  matchlines <- attr(tech7Subsections, "matchlines")
+  
+  if (length(tech7Subsections) == 0) {
+    warning("No sections found within tech7 output.")
+    return(list())
+  }
+  else if (length(tech7Subsections) > 1) {
+    groupNames <- make.names(gsub("^\\s*SAMPLE STATISTICS WEIGHTED BY ESTIMATED CLASS PROBABILITIES FOR (CLASS \\d+)\\s*$", "\\1", tech7Section[matchlines], perl=TRUE))
+  }
+  
+  for (g in 1:length(tech7Subsections)) {
+    targetList <- list()
+    
+    targetList[["classSampMeans"]] <- matrixExtract(tech7Subsections[[g]], "Means", filename)
+    targetList[["classSampCovs"]] <- matrixExtract(tech7Subsections[[g]], "Covariances", filename)
+    
+    if (length(tech7Subsections) > 1) {
+      class(targetList) <- c("list", "mplus.tech7")
+      tech7List[[groupNames[g]]] <- targetList
+    }
+    else
+      tech7List <- targetList    
+  }
+  
+  class(tech7List) <- c("list", "mplus.tech7")
+  
+  return(tech7List)
+}
+
+
 #' Extract Technical 9 matrix from Mplus
 #'
 #' Function that extracts the Tech9 matrix
@@ -1754,10 +1730,74 @@ extractTech9 <- function(outfiletext, filename) {
 #' # make me!!!
 extractTech10 <- function(outfiletext, filename) {
   tech10Section <- getSection("^TECHNICAL 10 OUTPUT$", outfiletext)
-  if (is.null(tech10Section)) return(list()) #no tech4 output
+  if (is.null(tech10Section)) return(list()) #no tech10 output
 
   tech10List <- list()
 
+}
+
+#' Extract Technical 12 from Mplus
+#'
+#' The TECH12 option is used in conjunction with TYPE=MIXTURE to request residuals for observed 
+#' versus model estimated means, variances, covariances, univariate skewness, and univariate 
+#' kurtosis. The observed values come from the total sample. The estimated values are computed as
+#' a mixture across the latent classes.
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech12}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractTech12 <- function(outfiletext, filename) {
+  #TODO: have empty list use mplus.tech12 class
+  #not sure whether there are sometimes multiple groups within this section.
+  tech12Section <- getSection("^TECHNICAL 12 OUTPUT$", outfiletext)
+  if (is.null(tech12Section)) return(list()) #no tech12 output
+  
+  tech12List <- list()
+  
+  tech12Subsections <- getMultilineSection("ESTIMATED MIXED MODEL AND RESIDUALS \\(OBSERVED - EXPECTED\\)",
+      tech12Section, filename, allowMultiple=TRUE)
+  
+  matchlines <- attr(tech12Subsections, "matchlines")
+  
+  if (length(tech12Subsections) == 0) {
+    warning("No sections found within tech12 output.")
+    return(list())
+  }
+  else if (length(tech12Subsections) > 1) {
+    warning("extractTech12 does not yet know how to handle multiple sections (if such exist)")
+  }
+  
+  for (g in 1:length(tech12Subsections)) {
+    targetList <- list()
+    
+    targetList[["obsMeans"]] <- matrixExtract(tech12Subsections[[g]], "Observed Means", filename)
+    targetList[["mixedMeans"]] <- matrixExtract(tech12Subsections[[g]], "Estimated Mixed Means", filename)
+    targetList[["mixedMeansResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Means", filename)
+    targetList[["obsCovs"]] <- matrixExtract(tech12Subsections[[g]], "Observed Covariances", filename)
+    targetList[["mixedCovs"]] <- matrixExtract(tech12Subsections[[g]], "Estimated Mixed Covariances", filename)
+    targetList[["mixedCovsResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Covariances", filename)
+    targetList[["obsSkewness"]] <- matrixExtract(tech12Subsections[[g]], "Observed Skewness", filename)
+    targetList[["mixedSkewness"]] <- matrixExtract(tech12Subsections[[g]], "Estimated Mixed Skewness", filename)
+    targetList[["mixedSkewnessResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Skewness", filename)
+    targetList[["obsKurtosis"]] <- matrixExtract(tech12Subsections[[g]], "Observed Kurtosis", filename)
+    targetList[["mixedKurtosis"]] <- matrixExtract(tech12Subsections[[g]], "Estimated Mixed Kurtosis", filename)
+    targetList[["mixedKurtosisResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Kurtosis", filename)
+    
+    if (length(tech12Subsections) > 1) {
+      class(targetList) <- c("list", "mplus.tech12")
+      tech12List[[g]] <- targetList #no known case where there are many output sections
+    }
+    else
+      tech12List <- targetList
+  }
+  
+  class(tech12List) <- c("list", "mplus.tech12")
+  
+  return(tech12List)
 }
 
 #' Extract Factor Score Statistics

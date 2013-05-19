@@ -31,7 +31,7 @@
   TYPE=PLOT2; be included in the Mplus input file, 2) a gh5
   file be present corresponding to the Mplus output file
   (and containing a bayesian_data section), and 3) that the
-  hdf5 package be installed to allow the gh5 file to be
+  rhdf5 package be installed to allow the gh5 file to be
   imported.
 }
 \details{

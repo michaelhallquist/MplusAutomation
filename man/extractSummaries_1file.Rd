@@ -2,8 +2,7 @@
 \alias{extractSummaries_1file}
 \title{Extract the summaries from one file}
 \usage{
-  extractSummaries_1file(outfiletext, filename, input,
-    extract = c("Title", "LL", "BIC", "AIC", "AICC", "Parameters", "Observations", "BLRT", "RMSEA", "CFI", "TLI", "ChiSqModel", "aBIC", "Estimator", "SRMR", "WRMR", "ChiSqBaseline"))
+  extractSummaries_1file(outfiletext, filename, input)
 }
 \arguments{
   \item{outfiletext}{This is the output file in string form

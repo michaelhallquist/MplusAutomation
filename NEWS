@@ -1,10 +1,25 @@
-Version 0.5-5
-- feature: initial extraction support of standardized confidence intervals.
+Version 0.6-2
+- feature: initial support for extracting TECH7 (sample stats within latent classes)
+- feature: initial support for extracting TECH12 (observed versus estimated sample statistics for TYPE=MIXTURE analyses)
+
+Version 0.6-1
+- bugfix: fixed plyr namespace imports
+- bugfix: fixed runModels log file when NULL
+- corrected line length problems in documentation.
+- deleted old createTable routine (not used).
+- removed fields to extract from extractSummaries_1file (not useful).
+
+Version 0.6
 - feature: create Mplus model objects, automatically create and run models using mplusModeler
 - feature: generate code for residual covariance structures for latent growth models using mplusRcov
-- support 6-column output from multiple imputation analyses that contain "rate of missing" column.
-- extract all details of bootstrapped likelihood ratio test.
+- feature: initial support for extracting standardized confidence intervals.
+- feature: extract all details of bootstrapped likelihood ratio test.
+- feature: initial support for extracting IRT parameterization model results (see $irt.parameterization).
 - added basic documentation for functions including internal functions
+- support 6-column output from multiple imputation analyses that contain "rate of missing" column.
+- fixes to quiet scan commands (thanks to Mikko Ronkko)
+- fixes to use of system call on Mac/Unix (thanks to Mikko Ronkko)
+- move to rhdf5 package (hdf5 no longer maintained)
 
 Version 0.5-4
 - feature: readModels extracts warnings and errors.

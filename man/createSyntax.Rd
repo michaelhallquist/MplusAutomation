@@ -2,7 +2,7 @@
 \alias{createSyntax}
 \title{Create the Mplus input text for an mplusObject}
 \usage{
-  createSyntax(object, filename, check = TRUE)
+  createSyntax(object, filename, check = TRUE, add = FALSE)
 }
 \arguments{
   \item{object}{An object of class mplusObject}
@@ -14,6 +14,10 @@
   \code{parseMplus} on the created input file. Checks for
   errors like lines that are too long, or for missing
   semi-colons and gives notes.}
+
+  \item{add}{A logical passed on to \code{parseMplus}
+  whether to add semi colons to line ends. Defaults to
+  \code{FALSE}.}
 }
 \value{
   A character string containing all the text for the Mplus
