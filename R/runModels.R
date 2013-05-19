@@ -435,8 +435,7 @@ runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, sho
 	else{
 		if(showOutput) stdout.value = ""
 		else stdout.value = NULL
-		
-	 	system2(Mplus_command, args=inputSplit$filename, stdout=stdout.value, wait=TRUE)
+	 	system2(Mplus_command, args=paste('"',inputSplit$filename,'"',sep=""), stdout=stdout.value, wait=TRUE)
 	 }
 
   }
