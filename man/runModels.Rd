@@ -16,6 +16,12 @@
   nested in subdirectories within \code{directory}.
   Defaults to \code{FALSE}.}
 
+  \item{filefilter}{a Perl regular expression
+  (PCRE-compatible) specifying particular input files to
+  be run within \code{directory}. See \code{regex} or
+  \url{http://www.pcre.org/pcre.txt} for details about
+  regular expression syntax.}
+
   \item{showOutput}{optional. If \code{TRUE}, show
   estimation output (TECH8) in the R console. Note that if
   run within Rgui, output will display within R, but if run

@@ -629,6 +629,7 @@ divideIntoFields <- function(section.text, required) {
 #' @examples
 #' # make me!!!
 extractWarningsErrors_1file <- function(outfiletext, filename, input) {
+
   warnerr <- list(warnings=list(), errors=list())
   class(warnerr$errors) <- c("list", "mplus.errors")
   class(warnerr$warnings) <- c("list", "mplus.warnings")
