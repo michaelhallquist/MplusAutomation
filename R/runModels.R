@@ -240,7 +240,7 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #'     replaceOutfile="modifiedDate", logFile="MH_RunLog.txt",
 #'     Mplus_command="C:\\Users\\Michael\\Mplus Install\\Mplus51.exe")
 #' }
-runModels <- function(directory=getwd(), recursive=FALSE, filefilter, showOutput=FALSE,
+runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, showOutput=FALSE,
 	replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus") {
 
   #removed from parameter list because no need for user to customize at this point
