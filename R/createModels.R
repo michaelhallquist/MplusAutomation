@@ -1085,8 +1085,6 @@ processInit <- function(initsection) {
     arglist[[thisIt]] <- sort(unique(arglist[[thisIt]]))
   }
 
-  #browser()
-
   #now that iterators are defined, ensure that list tags match
   #pad vectors accordingly
 

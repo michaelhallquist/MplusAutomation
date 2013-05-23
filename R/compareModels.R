@@ -331,7 +331,7 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
 
     if (any(c("all", "equal") %in% show)) {
       cat("  Parameters present in both models\n=========\n\n")
-      cat("  Equal in both models (param. est. diff <= ", equalityMargin["param"], ")\n\n")
+      cat("  Equal in both models (param. est. diff <= ", equalityMargin["param"], ")\n  ----------------------------------------------\n", sep="")
       if (any(paramsEqual))
         print(matchDF[paramsEqual==TRUE, ], row.names=FALSE)
       else
