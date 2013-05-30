@@ -210,6 +210,9 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #'   Defaults to the current working directory. Example: \dQuote{C:/Users/Michael/Mplus Runs}
 #' @param recursive optional. If \code{TRUE}, run all models nested in subdirectories
 #'   within \code{directory}. Defaults to \code{FALSE}.
+#' @param filefilter a Perl regular expression (PCRE-compatible) specifying particular input
+#'   files to be run within \code{directory}. See \code{regex} or \url{http://www.pcre.org/pcre.txt}
+#'   for details about regular expression syntax.
 #' @param showOutput optional. If \code{TRUE}, show estimation output (TECH8)
 #'   in the R console. Note that if run within Rgui, output will display within R,
 #'   but if run via Rterm, a separate window will appear during estimation.
@@ -237,9 +240,9 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #'     replaceOutfile="modifiedDate", logFile="MH_RunLog.txt",
 #'     Mplus_command="C:\\Users\\Michael\\Mplus Install\\Mplus51.exe")
 #' }
-runModels <- function(directory=getwd(), recursive=FALSE, showOutput=FALSE, replaceOutfile="always",
-    logFile="Mplus Run Models.log", Mplus_command="Mplus") {
-  
+runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, showOutput=FALSE,
+	replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus") {
+
   #removed from parameter list because no need for user to customize at this point
   deleteOnKill <- TRUE #at this point, don't expose this setting to the user
   
@@ -331,10 +334,10 @@ runModels <- function(directory=getwd(), recursive=FALSE, showOutput=FALSE, repl
   } #end exitRun definition
   
   on.exit(exitRun())
-  
+
   #list files in the current directory
-  filelist <- list.files(recursive=recursive)
-  
+  filelist <- list.files(recursive=recursive, pattern=filefilter)
+
   #select only .inp files using grep
   inpfiles <- filelist[grep(".*\\.inp$", filelist, ignore.case=TRUE)]
   outfiles <- filelist[grep(".*\\.out$", filelist, ignore.case=TRUE)]
@@ -436,13 +439,12 @@ runModels <- function(directory=getwd(), recursive=FALSE, showOutput=FALSE, repl
       #need to switch to each directory, then run Mplus within using just the filename
       oldwd <- getwd()
       setwd(inputSplit$directory)
-      exitCode <- system2(Mplus_command, args=inputSplit$filename, stdout=stdout.value, wait=TRUE)
+      exitCode <- system2(Mplus_command, args=past0('"', inputSplit$filename, '"'), stdout=stdout.value, wait=TRUE)
       if (exitCode > 0L) {
         warning("Mplus returned error code: ", exitCode, ", for model: ", inputSplit$filename, "\n")
       }
       setwd(oldwd)
     }
-    
   }
   
   if (isLogOpen()) {
