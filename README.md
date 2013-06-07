@@ -46,6 +46,27 @@ package in the
 [vignette](https://github.com/michaelhallquist/MplusAutomation/blob/master/inst/doc/Vignette.pdf)
 located in the /inst/doc/ directory. 
 
-You can also see the Wiki 
-[Examples page](https://github.com/michaelhallquist/MplusAutomation/wiki/Examples).
+How to Help
+-----------
+
+If you have a tutorial or examples using `MplusAutomation`, please add them to 
+the [Wiki](https://github.com/michaelhallquist/MplusAutomation/wiki).
+
+In addition, on the [Wiki](https://github.com/michaelhallquist/MplusAutomation/wiki), 
+is a list of publications that cite or use `MplusAutomation`.  If you use `MplusAutomation` 
+in your own work --- papers, posters, presentations, etc. --- please add a citation to the 
+list, and if possible, include an abstract or link to the full text. This helps us get to 
+know our users and how `MplusAutomation` is being used.
+
+Finally, if you find bugs or have suggestions for new features or ways to enhance 
+`MplusAutomation`, please let us know!  Just clicke the 'Issues' button at the top 
+or go [here](https://github.com/michaelhallquist/MplusAutomation/issues?state=open) 
+and open a New Issue.
+
+Lastly, if you use `MplusAutomation` and have space, we greatly appreciating citations. 
+In addition to being easier to track, the recognition and credit help make it 
+easier for us to continue putting our time into developing and sharing this software!
+
+
+
 
