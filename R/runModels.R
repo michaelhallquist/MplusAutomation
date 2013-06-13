@@ -435,7 +435,12 @@ runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, sho
 	else{
 		if(showOutput) stdout.value = ""
 		else stdout.value = NULL
+		
+		# System2 uses the working directory as the running directory
+		originalWd <- getwd()
+		setwd(inputSplit$directory)
 	 	system2(Mplus_command, args=c(shQuote(inputSplit$filename)), stdout=stdout.value, wait=TRUE)
+		setwd(originalWd)
 	 }
 
   }
