@@ -151,8 +151,9 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   #detectColumn names sub-divides (perhaps unnecessarily) the matches based on the putative section type of the output
   #current distinctions include modification indices, confidence intervals, and model results.
   if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized")) { sectionType <- "confidence_intervals"
-  } else if (sectionName == "irt.parameterization") {
+  } else if (sectionName == "irt.parameterization" || sectionName == "probability.scale") {
     #the IRT section follows from the MODEL RESULTS section, and column headers are not reprinted.
+    #Same applies for RESULTS IN PROBABILITY SCALE section
     #Thus, for now (first pass), assume a 5-column header -- kludge
     columnNames <- c("param", "est", "se", "est_se", "pval")
   } else { sectionType <- "model_results" }
@@ -234,7 +235,6 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         #this handles issues where a blank section terminates the results section, such as multilevel w/ no between
         thisChunk <- modelSection[(match+1):length(modelSection)]
         chunkToParse <- TRUE
-
       }
 
       if (chunkToParse == TRUE) {
@@ -318,7 +318,6 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     return(NULL) #skip file
   }
 
-
   # copy elements of append into target. note that data.frames inherit list,
   # so could be wonky if append is a data.frame (shouldn't happen here)
   appendListElements <- function(target, append) {
@@ -383,7 +382,13 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     attr(irtParsed[["irt.parameterization"]], probitLogit) <- def #add probit/logit definition as attribute
     allSections <- appendListElements(allSections, irtParsed)
   }
-
+  
+#  probSection <- getSection("^RESULTS IN PROBABILITY SCALE$", outfiletext)
+#  if (!is.null(probSection)) {
+#    probParsed <- extractParameters_1section(filename, probSection, "probability.scale")
+#    allSections <- appendListElements(allSections, probParsed)
+#  }
+  
   #confidence intervals for usual output, credibility intervals for bayesian output
   ciSection <- getSection("^(CONFIDENCE INTERVALS OF MODEL RESULTS|CREDIBILITY INTERVALS OF MODEL RESULTS)$", outfiletext)
   if (!is.null(ciSection)) {
@@ -405,7 +410,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "ci.unstandardized",
-      "irt.parameterization",
+      "irt.parameterization", "probability.scale",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",
       "std.standardized", "ci.std.standardized")

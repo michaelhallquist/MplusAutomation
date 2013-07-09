@@ -449,7 +449,7 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
   if(discardBurnin) {
     bp.split <- bp.split[["valid_draw"]]
   }
-
+  
   class(bp.split) <- c(class(bp.split), "mplus.bparameters")
 
   return(bp.split)

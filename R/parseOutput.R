@@ -1882,9 +1882,9 @@ extractClassCounts <- function(outfiletext, filename) {
 
   mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
   countlist[["mostLikely"]] <- getClassCols(mostLikelyCounts)
-
+  
   mostLikelyProbs <- getSection("^Average Latent Class Probabilities for Most Likely Latent Class Membership \\(Row\\)$", outfiletext)
-
+  
   if (length(mostLikelyProbs) > 0) {
 
     #Example:
@@ -1906,7 +1906,7 @@ extractClassCounts <- function(outfiletext, filename) {
     #first line is "by Latent Class (Column)"
     #second line is blank
     #third line contains the number of classes, which is useful for matrix setup.
-
+	
     classLabels <- as.numeric(strsplit(trimSpace(mostLikelyProbs[3]), "\\s+", perl=TRUE)[[1]])
     mlpp_probs <- matrix(NA, nrow=length(classLabels), ncol=length(classLabels), dimnames=
             list(hardClassified=paste("ml.c", classLabels, sep=""),
