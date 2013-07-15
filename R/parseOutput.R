@@ -523,9 +523,9 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
             varType=c("dec[1]", "dec[2]", "dec"), stringsAsFactors=FALSE
         ),
         data.frame( #Information Criterion
-            varName=c("DIC", "pD"),
-            regexPattern=c("Deviance \\(DIC\\)", "Estimated Number of Parameters \\(pD\\)"),
-            varType=c("dec", "dec"), stringsAsFactors=FALSE
+            varName=c("DIC", "pD", "BIC"),
+            regexPattern=c("Deviance \\(DIC\\)", "Estimated Number of Parameters \\(pD\\)", "Bayesian \\(BIC\\)"), #sometimes BIC is listed here (e.g., MI Bayes output) 
+            varType=c("dec", "dec", "dec"), stringsAsFactors=FALSE
         )
 		)
 
@@ -1884,6 +1884,40 @@ extractClassCounts <- function(outfiletext, filename) {
   countlist[["mostLikely"]] <- getClassCols(mostLikelyCounts)
   
   mostLikelyProbs <- getSection("^Average Latent Class Probabilities for Most Likely Latent Class Membership \\(Row\\)$", outfiletext)
+  mostLikelyProbs <- mostLikelyProbs[-1] #remove line 1: "by Latent Class (Column)"
+  
+  #need to hack together a way to use matrixExtract because with many classes, the output becomes too wide, leading to this:
+  #1        2        3        4        5        6        7        8        9
+  #
+  #1   0.885    0.000    0.000    0.017    0.024    0.000    0.000    0.019    0.055
+  #2   0.000    0.775    0.006    0.000    0.000    0.064    0.097    0.013    0.000
+  #3   0.000    0.004    0.826    0.035    0.000    0.082    0.000    0.000    0.052
+  #4   0.014    0.002    0.070    0.804    0.018    0.035    0.000    0.008    0.046
+  #5   0.042    0.000    0.001    0.076    0.842    0.000    0.000    0.001    0.038
+  #6   0.000    0.096    0.063    0.014    0.001    0.732    0.021    0.026    0.008
+  #7   0.002    0.091    0.010    0.005    0.001    0.034    0.808    0.005    0.005
+  #8   0.118    0.014    0.006    0.004    0.000    0.030    0.015    0.514    0.139
+  #9   0.030    0.001    0.056    0.059    0.014    0.024    0.000    0.109    0.691
+  #10   0.030    0.062    0.007    0.007    0.002    0.052    0.130    0.108    0.063
+  #
+  #10
+  #
+  #1   0.000
+  #2   0.046
+  #3   0.001
+  #4   0.004
+  #5   0.000
+  #6   0.038
+  #7   0.039
+  #8   0.159
+  #9   0.016
+  #10   0.539
+
+  
+  
+  
+  #a bit of a hack here
+  mostLikelyProbs <- matrixExtract(mostLikelyProbs, "^by Latent Class \\(Column\\)$", filename)
   
   if (length(mostLikelyProbs) > 0) {
 
@@ -1907,6 +1941,12 @@ extractClassCounts <- function(outfiletext, filename) {
     #second line is blank
     #third line contains the number of classes, which is useful for matrix setup.
 	
+    mostLikelyProbs <- mostLikelyProbs[2:length(mostLikelyProbs)] #drop
+    
+    
+  
+    #Jul2013: better to use matrix extract
+  
     classLabels <- as.numeric(strsplit(trimSpace(mostLikelyProbs[3]), "\\s+", perl=TRUE)[[1]])
     mlpp_probs <- matrix(NA, nrow=length(classLabels), ncol=length(classLabels), dimnames=
             list(hardClassified=paste("ml.c", classLabels, sep=""),

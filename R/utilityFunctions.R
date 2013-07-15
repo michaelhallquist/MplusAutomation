@@ -292,6 +292,8 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE",
         "CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP",
         "Average Latent Class Probabilities for Most Likely Latent Class Membership \\(Row\\)",
+        "Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
+        "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
         "MODEL RESULTS", "LOGISTIC REGRESSION ODDS RATIO RESULTS", "RESULTS IN PROBABILITY SCALE",
         "IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC METRIC",
         "IRT PARAMETERIZATION IN TWO-PARAMETER PROBIT METRIC",
