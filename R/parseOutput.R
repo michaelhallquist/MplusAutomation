@@ -1883,11 +1883,61 @@ extractClassCounts <- function(outfiletext, filename) {
   mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
   countlist[["mostLikely"]] <- getClassCols(mostLikelyCounts)
   
+  #most likely by posterior probability section
   mostLikelyProbs <- getSection("^Average Latent Class Probabilities for Most Likely Latent Class Membership \\(Row\\)$", outfiletext)
-  mostLikelyProbs <- mostLikelyProbs[-1] #remove line 1: "by Latent Class (Column)"
+  if (length(mostLikelyProbs) > 1L) { mostLikelyProbs <- mostLikelyProbs[-1L] } #remove line 1: "by Latent Class (Column)"
+    
+  #Example:
+  #Average Latent Class Probabilities for Most Likely Latent Class Membership (Row)
+  #by Latent Class (Column)
+  #
+  #  			1        2
+  #
+  #  1   0.986    0.014
+  #  2   0.030    0.970
+  #
+  #A bit of a wonky section. Some notes:
+  # 1) Rows represent those hard classified into that class.
+  # 2) Rows sum to 1.0 and represent the summed average posterior probabilities of all the class assignment possibilities.
+  # 3) Columns represent average posterior probabilitity of being in class 1 for those hard classified as 1 or 2.
+  # 4) High diagonal indicates that hard classification matches posterior probability patterns.
+
+  countlist[["avgProbs.mostLikely"]] <- unlabeledMatrixExtract(mostLikelyProbs, filename)
+
+  #same, but for classification probabilities
+  classificationProbs <- getSection("^Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)$", outfiletext)
+  if (length(classificationProbs) > 1L) { classificationProbs <- classificationProbs[-1L] } #remove line 1: "by Latent Class (Column)"
   
-  #need to hack together a way to use matrixExtract because with many classes, the output becomes too wide, leading to this:
-  #1        2        3        4        5        6        7        8        9
+  countlist[["classificationProbs.mostLikely"]] <- unlabeledMatrixExtract(classificationProbs, filename)
+  
+  #same, but for classification probability logits
+  classificationLogitProbs <- getSection("^Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)$", outfiletext)
+  if (length(classificationLogitProbs) > 1L) { classificationLogitProbs <- classificationLogitProbs[-1L] } #remove line 1: "by Latent Class (Column)"
+  
+  countlist[["logitProbs.mostLikely"]] <- unlabeledMatrixExtract(classificationLogitProbs, filename)
+  
+
+  return(countlist)
+}
+
+#' Reconstruct matrix from unlabeled multi-line text output
+#'
+#' worker function for extracting Mplus matrix output from an unlabeled section
+#' where matrices are spread across blocks to keep within width constraints
+#' example: class counts output from latent class models.
+#'
+#' @param outfiletext The text of the output file
+#' @param filename The name of the output file
+#' @return a matrix
+#' @keywords internal
+#' @examples
+#' # make me!!!
+unlabeledMatrixExtract <- function(outfiletext, filename) {
+  #This function extends the matrixExtract function by allowing for the matrix to be recreated
+  #to have no header labels and where section headers have a blank line on either side. Only example is in the class counts section, where when there
+  #are many classes, the most likely x posterior probability matrix is too wide and is output like this:
+  
+  #       1        2        3        4        5        6        7        8        9
   #
   #1   0.885    0.000    0.000    0.017    0.024    0.000    0.000    0.019    0.055
   #2   0.000    0.775    0.006    0.000    0.000    0.064    0.097    0.013    0.000
@@ -1898,9 +1948,9 @@ extractClassCounts <- function(outfiletext, filename) {
   #7   0.002    0.091    0.010    0.005    0.001    0.034    0.808    0.005    0.005
   #8   0.118    0.014    0.006    0.004    0.000    0.030    0.015    0.514    0.139
   #9   0.030    0.001    0.056    0.059    0.014    0.024    0.000    0.109    0.691
-  #10   0.030    0.062    0.007    0.007    0.002    0.052    0.130    0.108    0.063
+  #10  0.030    0.062    0.007    0.007    0.002    0.052    0.130    0.108    0.063
   #
-  #10
+  #      10
   #
   #1   0.000
   #2   0.046
@@ -1911,62 +1961,50 @@ extractClassCounts <- function(outfiletext, filename) {
   #7   0.039
   #8   0.159
   #9   0.016
-  #10   0.539
-
+  #10  0.539
   
+  #Only one matrix can be extracted from outfiletext since sections are unlabeled
   
-  
-  #a bit of a hack here
-  mostLikelyProbs <- matrixExtract(mostLikelyProbs, "^by Latent Class \\(Column\\)$", filename)
-  
-  if (length(mostLikelyProbs) > 0) {
-
-    #Example:
-    #Average Latent Class Probabilities for Most Likely Latent Class Membership (Row)
-    #by Latent Class (Column)
-    #
-    #  			1        2
-    #
-    #  1   0.986    0.014
-    #  2   0.030    0.970
-
-    #A bit of a wonky section. Some notes:
-    # 1) Rows represent those hard classified into that class.
-    # 2) Rows sum to 1.0 and represent the summed average posterior probabilities of all the class assignment possibilities.
-    # 3) Columns represent average posterior probabilitity of being in class 1 for those hard classified as 1 or 2.
-    # 4) High diagonal indicates that hard classification matches posterior probability patterns.
-
-    #processing is also custom.
-    #first line is "by Latent Class (Column)"
-    #second line is blank
-    #third line contains the number of classes, which is useful for matrix setup.
-	
-    mostLikelyProbs <- mostLikelyProbs[2:length(mostLikelyProbs)] #drop
+  if (length(outfiletext) > 0L && length(outfiletext) > 1L) {
     
+    #pattern match: 1) blank line; 2) integers line; 3) blank line
+    #find these cases, then add "DUMMY" to each of the header blank lines
     
-  
-    #Jul2013: better to use matrix extract
-  
-    classLabels <- as.numeric(strsplit(trimSpace(mostLikelyProbs[3]), "\\s+", perl=TRUE)[[1]])
-    mlpp_probs <- matrix(NA, nrow=length(classLabels), ncol=length(classLabels), dimnames=
-            list(hardClassified=paste("ml.c", classLabels, sep=""),
-                posteriorProb=paste("pp.c", classLabels, sep="")))
-
-    #fourth line is blank
-    #fifth line begins probabilities
-    firstProbLine <- 5
-    blankLine <- which(mostLikelyProbs[firstProbLine:length(mostLikelyProbs)] == "")[1] + (firstProbLine - 1) #need to add offset to get absolute position in overall section
-    probSection <- mostLikelyProbs[firstProbLine:(blankLine-1)]
-    mlpp_probs[,] <- do.call(rbind, lapply(strsplit(trimSpace(probSection), "\\s+", perl=TRUE), as.numeric))[,-1]
-
-    countlist[["avgProbs.mostLikely"]] <- mlpp_probs
+    blankLines <- which(outfiletext == "")
+    
+    if (length(blankLines) > 0L) {
+      headerLines <- c()
+      
+      for (b in 1:length(blankLines)) {
+        if (b < length(blankLines) && blankLines[b+1] == blankLines[b] + 2) {
+          # a blank line followed by a non-blank line followed by a blank line...
+          # check that it represents an integer sequence (this may need to be removed in more general cases)
+          intLine <- strsplit(trimSpace(outfiletext[blankLines[b]+1]), "\\s+", perl=TRUE)[[1L]]
+          firstCol <- as.numeric(intLine[1L]) #number of the class in the first column
+          if (all(intLine == firstCol:(firstCol + length(intLine) - 1) )) {
+            headerLines <- c(headerLines, blankLines[b])
+          }
+        }
+      }
+      
+      #add the header to blank lines preceding class labels row
+      outfiletext[headerLines] <- "DUMMY"
+      
+      #now use matrix extract to reconstruct matrix
+      unlabeledMat <- matrixExtract(outfiletext, "DUMMY", filename)
+      
+      return(unlabeledMat)
+      
+    } else {
+      return(NULL)
+    }
+  } else {
+    return(NULL)
   }
-
-  return(countlist)
 }
 
 
-#' Extract Factor Score Statistics
+#' Reconstruct matrix from multi-line text output
 #'
 #' main worker function for extracting Mplus matrix output
 #' where matrices are spread across blocks to keep within width constraints

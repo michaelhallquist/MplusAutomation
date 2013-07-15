@@ -4,6 +4,7 @@ Version 0.6-2
 - loosen dependency on relimp and tcltk packages to permit installation and loading of MplusAutomation without these.
 - bugfix: readModels was failing when confidence intervals were in probability scale.
 - bugfix: readModels failed to extract BIC for some ESTIMATOR=BAYES outputs.
+- bugfix: extract class counts for cases where k > 9 classes estimated.
 
 Version 0.6-1
 - bugfix: fixed plyr namespace imports
