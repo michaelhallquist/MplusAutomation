@@ -362,7 +362,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE) {
 #'
 #'  res4 <- mplusModeler(test4, "mtcars.dat", modelout = "model4.inp", run = 10L)
 #'  # see the results
-#'  res3$results$boot
+#'  res4$results$boot
 #'
 #'  # remove files
 #'  unlink("mtcars.dat")
