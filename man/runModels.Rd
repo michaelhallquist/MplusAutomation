@@ -3,7 +3,8 @@
 \title{Run Mplus Models}
 \usage{
   runModels(directory = getwd(), recursive = FALSE,
-    showOutput = FALSE, replaceOutfile = "always",
+    filefilter = NULL, showOutput = FALSE,
+    replaceOutfile = "always",
     logFile = "Mplus Run Models.log",
     Mplus_command = "Mplus")
 }
@@ -17,8 +18,8 @@
   Defaults to \code{FALSE}.}
 
   \item{filefilter}{a Perl regular expression
-  (PCRE-compatible) specifying particular input files to
-  be run within \code{directory}. See \code{regex} or
+  (PCRE-compatible) specifying particular input files to be
+  run within \code{directory}. See \code{regex} or
   \url{http://www.pcre.org/pcre.txt} for details about
   regular expression syntax.}
 

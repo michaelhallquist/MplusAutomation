@@ -1,6 +1,6 @@
 \name{matrixExtract}
 \alias{matrixExtract}
-\title{Extract Factor Score Statistics}
+\title{Reconstruct matrix from multi-line text output}
 \usage{
   matrixExtract(outfiletext, headerLine, filename)
 }
