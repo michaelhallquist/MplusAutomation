@@ -29,8 +29,12 @@
 #' @param OUTPUT A character string of the output section for Mplus (optional)
 #' @param SAVEDATA A character string of the savedata section for Mplus (optional)
 #' @param PLOT A character string of the plot section for Mplus (optional)
-#' @param usevariables A character vector of the variables from the \code{R} dataset to use in the model.
+#' @param usevariables A character vector of the variables from the
+#'   \code{R} dataset to use in the model.
 #' @param rdata An \code{R} dataset to be used for the model.
+#' @param autof A logical (defaults to \code{TRUE}) argument indicating
+#'   whether R should attempt to guess the correct variables to use from
+#'   the R dataset, if \code{usevariables} is left \code{NULL}.
 #'
 #' @return A list of class \code{mplusObject} with elements
 #' \item{TITLE}{The title in Mplus (if defined)}
@@ -56,9 +60,22 @@
 #'   usevariables = c("mpg", "hp"), rdata = mtcars)
 #' str(example1)
 #' rm(example1)
+#'
+#' # R figures out the variables automagically, with a message
+#' example2 <- mplusObject(MODEL = "mpg ON wt;",
+#'   rdata = mtcars, autov = TRUE)
+#' str(example2)
+#' rm(example2)
+#'
+#' # R warns if the first 8 characters of a (used) variable name are not unique
+#' # as they will be indistinguishable in the Mplus output
+#' example3 <- mplusObject(MODEL = "basename_01 ON basename_02;",
+#'   rdata = data.frame(basename_01 = 1:5, basename_02 = 5:1),
+#'   autov = TRUE)
+#' rm(example3)
 mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NULL,
   ANALYSIS = NULL, MODEL = NULL, OUTPUT = NULL, SAVEDATA = NULL, PLOT = NULL,
-  usevariables = NULL, rdata = NULL) {
+  usevariables = NULL, rdata = NULL, autov = TRUE) {
 
   charOrNull <- function(x) {is.character(x) || is.null(x)}
   stopifnot(charOrNull(TITLE))
@@ -70,6 +87,19 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
   stopifnot(charOrNull(OUTPUT))
   stopifnot(charOrNull(SAVEDATA))
   stopifnot(charOrNull(PLOT))
+
+  if (autov && is.null(usevariables) && !is.null(rdata) && !is.null(MODEL)) {
+    v <- colnames(rdata)
+    v <- v[sapply(v, grepl, x = paste(c(MODEL, DEFINE), collapse = "\n"), ignore.case=TRUE)]
+    message("No R variables to use specified. \nSelected automatically as any variable name that occurs in the MODEL or DEFINE section.")
+    usevariables <- v
+  }
+
+  i <- duplicated(substr(usevariables, start = 1, stop = 8))
+  if (any(i)) {
+    message(sprintf("The following variables are not unique in the first 8 characters:\n %s",
+      paste(usevariables[i], collapse = ", ")))
+  }
 
   object <- list(
     TITLE = TITLE,
@@ -269,38 +299,75 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE) {
 #' @author Joshua Wiley
 #' @examples
 #' \dontrun{
-#' # simple example of a model using builtin data
-#' # demonstrates use
-#' test <- mplusObject(
-#'   TITLE = "test the MplusAutomation Package and my Wrapper;",
-#'   MODEL = "
-#'     mpg ON wt hp;
-#'     wt WITH hp;",
-#'   usevariables = c("mpg", "wt", "hp"),
-#'   rdata = mtcars)
+#' # minimal example of a model using builtin data, allowing R
+#' # to automatically guess the correct variables to use
+#' test <- mplusObject(MODEL = "mpg ON wt hp;
+#'   wt WITH hp;", rdata = mtcars)
 #'
+#'  # estimate the model in Mplus and read results back into R
 #'  res <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
+#'
+#'  # show summary
+#'  summary(res)
 #'
 #'  # remove files
 #'  unlink("mtcars.dat")
 #'  unlink("model1.inp")
 #'  unlink("model1.out")
 #'
-#'  # similar example using a robust estimator for standard errors
-#'  test2 <- update(test, ANALYSIS = ~ "ESTIMATOR = MLR;")
+#' # simple example of a model using builtin data
+#' # demonstrates use with a few more sections
+#' test2 <- mplusObject(
+#'   TITLE = "test the MplusAutomation Package and mplusModeler wrapper;",
+#'   MODEL = "
+#'     mpg ON wt hp;
+#'     wt WITH hp;",
+#'   usevariables = c("mpg", "wt", "hp"),
+#'   rdata = mtcars)
 #'
 #'  res2 <- mplusModeler(test2, "mtcars.dat", modelout = "model2.inp", run = 1L)
+#'
+#'  # remove files
 #'  unlink("mtcars.dat")
 #'  unlink("model2.inp")
+#'  unlink("model2.out")
+#'
+#'  # similar example using a robust estimator for standard errors
+#'  # and showing how an existing model can be easily updated and reused
+#'  test3 <- update(test2, ANALYSIS = ~ "ESTIMATOR = MLR;")
+#'
+#'  res3 <- mplusModeler(test3, "mtcars.dat", modelout = "model3.inp", run = 1L)
+#'  unlink("mtcars.dat")
+#'  unlink("model3.inp")
 #'  unlink("model3.out")
 #'
 #'  # now use the built in bootstrapping methods
 #'  # note that these work, even when Mplus will not bootstrap
-#'  res3 <- mplusModeler(test2, "mtcars.dat", modelout = "model3.inp", run = 10L)
+#'  # also note how categorical variables and weights are declared
+#'  # in particular, the usevariables for Mplus must be specified
+#'  # because mroe variables are included in the data than are in the
+#'  # model. Note the R usevariables includes all variables for both
+#'  # model and weights. The same is true for clustering.
+#'  test4 <- mplusObject(
+#'    TITLE = "test bootstrapping;",
+#'    VARIABLE = "
+#'      CATEGORICAL = cyl;
+#'      WEIGHT = wt;
+#'      USEVARIABLES = cyl mpg;",
+#'    ANALYSIS = "ESTIMATOR = MLR;",
+#'    MODEL = "
+#'      cyl ON mpg;",
+#'    usevariables = c("mpg", "wt", "cyl"),
+#'    rdata = mtcars)
 #'
+#'  res4 <- mplusModeler(test4, "mtcars.dat", modelout = "model4.inp", run = 10L)
+#'  # see the results
+#'  res4$results$boot
+#'
+#'  # remove files
 #'  unlink("mtcars.dat")
-#'  unlink("model3.inp")
-#'  unlink("model3.out")
+#'  unlink("model4.inp")
+#'  unlink("model4.out")
 #'  unlink("Mplus Run Models.log")
 #' }
 mplusModeler <- function(object, dataout, modelout, run = 0L,
@@ -322,7 +389,12 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
     } else {
       with(results, unlist(lapply(
         parameters[!grepl("^ci\\..+", names(parameters))],
-        function(x) as.vector(t(x[, c("est", "se")])))))
+        function(x) {
+          x <- x[, c("est", "se")]
+          x[] <- lapply(x, as.numeric)
+          as.vector(t(na.omit(x)))
+        }
+      )))
     }
   }
 
@@ -661,7 +733,7 @@ paramExtract <- function(x, type = c("directed", "undirected", "expectation", "v
   keys <- switch(type,
     directed = c("ON", "BY", "\\|"),
     undirected = c("WITH"),
-    expectation = c("Means", "Intercepts"),
+    expectation = c("Means", "Intercepts", "Thresholds"),
     variability = c("Variances", "Residual.Variances"))
   index <- rowSums(sapply(keys, function(pattern) {
     grepl(paste0(".*", pattern, "$"), x[, "paramHeader"])

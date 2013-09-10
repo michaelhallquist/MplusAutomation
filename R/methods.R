@@ -209,6 +209,7 @@ plot.mplusObject <- function(x, y, type = c("stdyx", "un", "std", "stdy"), ...) 
   sections <- c("directed", "undirected", "expectation", "variability")
   res <- lapply(sections, function(type) {
     tmp <- paramExtract(p, type = type)
+    if (!nrow(tmp)) return(NULL)
     n <- paste(tmp[, "paramHeader"], tmp[, "param"], sep = ":")
     data.frame(Name = n, Estimate = tmp[, "est"], Section = paste("Type:", type),
        stringsAsFactors=FALSE)

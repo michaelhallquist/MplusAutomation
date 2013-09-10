@@ -5,7 +5,7 @@
   mplusObject(TITLE = NULL, DATA = NULL, VARIABLE = NULL,
     DEFINE = NULL, ANALYSIS = NULL, MODEL = NULL,
     OUTPUT = NULL, SAVEDATA = NULL, PLOT = NULL,
-    usevariables = NULL, rdata = NULL)
+    usevariables = NULL, rdata = NULL, autov = TRUE)
 }
 \arguments{
   \item{TITLE}{A character string of the title for Mplus.}
@@ -42,6 +42,11 @@
 
   \item{rdata}{An \code{R} dataset to be used for the
   model.}
+
+  \item{autof}{A logical (defaults to \code{TRUE}) argument
+  indicating whether R should attempt to guess the correct
+  variables to use from the R dataset, if
+  \code{usevariables} is left \code{NULL}.}
 }
 \value{
   A list of class \code{mplusObject} with elements
@@ -90,6 +95,19 @@ example1 <- mplusObject(MODEL = "mpg ON wt;",
   usevariables = c("mpg", "hp"), rdata = mtcars)
 str(example1)
 rm(example1)
+
+# R figures out the variables automagically, with a message
+example2 <- mplusObject(MODEL = "mpg ON wt;",
+  rdata = mtcars, autov = TRUE)
+str(example2)
+rm(example2)
+
+# R warns if the first 8 characters of a (used) variable name are not unique
+# as they will be indistinguishable in the Mplus output
+example3 <- mplusObject(MODEL = "basename_01 ON basename_02;",
+  rdata = data.frame(basename_01 = 1:5, basename_02 = 5:1),
+  autov = TRUE)
+rm(example3)
 }
 \author{
   Joshua Wiley

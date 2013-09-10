@@ -1,0 +1,25 @@
+\name{unlabeledMatrixExtract}
+\alias{unlabeledMatrixExtract}
+\title{Reconstruct matrix from unlabeled multi-line text output}
+\usage{
+  unlabeledMatrixExtract(outfiletext, filename)
+}
+\arguments{
+  \item{outfiletext}{The text of the output file}
+
+  \item{filename}{The name of the output file}
+}
+\value{
+  a matrix
+}
+\description{
+  worker function for extracting Mplus matrix output from
+  an unlabeled section where matrices are spread across
+  blocks to keep within width constraints example: class
+  counts output from latent class models.
+}
+\examples{
+# make me!!!
+}
+\keyword{internal}
+

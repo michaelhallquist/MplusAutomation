@@ -74,38 +74,75 @@
 }
 \examples{
 \dontrun{
-# simple example of a model using builtin data
-# demonstrates use
-test <- mplusObject(
-  TITLE = "test the MplusAutomation Package and my Wrapper;",
-  MODEL = "
-    mpg ON wt hp;
-    wt WITH hp;",
-  usevariables = c("mpg", "wt", "hp"),
-  rdata = mtcars)
+# minimal example of a model using builtin data, allowing R
+# to automatically guess the correct variables to use
+test <- mplusObject(MODEL = "mpg ON wt hp;
+  wt WITH hp;", rdata = mtcars)
 
+ # estimate the model in Mplus and read results back into R
  res <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
+
+ # show summary
+ summary(res)
 
  # remove files
  unlink("mtcars.dat")
  unlink("model1.inp")
  unlink("model1.out")
 
- # similar example using a robust estimator for standard errors
- test2 <- update(test, ANALYSIS = ~ "ESTIMATOR = MLR;")
+# simple example of a model using builtin data
+# demonstrates use with a few more sections
+test2 <- mplusObject(
+  TITLE = "test the MplusAutomation Package and mplusModeler wrapper;",
+  MODEL = "
+    mpg ON wt hp;
+    wt WITH hp;",
+  usevariables = c("mpg", "wt", "hp"),
+  rdata = mtcars)
 
  res2 <- mplusModeler(test2, "mtcars.dat", modelout = "model2.inp", run = 1L)
+
+ # remove files
  unlink("mtcars.dat")
  unlink("model2.inp")
+ unlink("model2.out")
+
+ # similar example using a robust estimator for standard errors
+ # and showing how an existing model can be easily updated and reused
+ test3 <- update(test2, ANALYSIS = ~ "ESTIMATOR = MLR;")
+
+ res3 <- mplusModeler(test3, "mtcars.dat", modelout = "model3.inp", run = 1L)
+ unlink("mtcars.dat")
+ unlink("model3.inp")
  unlink("model3.out")
 
  # now use the built in bootstrapping methods
  # note that these work, even when Mplus will not bootstrap
- res3 <- mplusModeler(test2, "mtcars.dat", modelout = "model3.inp", run = 10L)
+ # also note how categorical variables and weights are declared
+ # in particular, the usevariables for Mplus must be specified
+ # because mroe variables are included in the data than are in the
+ # model. Note the R usevariables includes all variables for both
+ # model and weights. The same is true for clustering.
+ test4 <- mplusObject(
+   TITLE = "test bootstrapping;",
+   VARIABLE = "
+     CATEGORICAL = cyl;
+     WEIGHT = wt;
+     USEVARIABLES = cyl mpg;",
+   ANALYSIS = "ESTIMATOR = MLR;",
+   MODEL = "
+     cyl ON mpg;",
+   usevariables = c("mpg", "wt", "cyl"),
+   rdata = mtcars)
 
+ res4 <- mplusModeler(test4, "mtcars.dat", modelout = "model4.inp", run = 10L)
+ # see the results
+ res4$results$boot
+
+ # remove files
  unlink("mtcars.dat")
- unlink("model3.inp")
- unlink("model3.out")
+ unlink("model4.inp")
+ unlink("model4.out")
  unlink("Mplus Run Models.log")
 }
 }
