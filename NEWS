@@ -5,6 +5,7 @@ Version 0.6-2
 - bugfix: readModels was failing when confidence intervals were in probability scale.
 - bugfix: readModels failed to extract BIC for some ESTIMATOR=BAYES outputs.
 - bugfix: extract class counts for cases where k > 9 classes estimated.
+- bugfix: change mplus.traceplot to use names from rhdf5 and permute to chain, iteration, param to match prior code. 
 
 Version 0.6-1
 - bugfix: fixed plyr namespace imports
