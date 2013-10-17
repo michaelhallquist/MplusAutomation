@@ -2,6 +2,7 @@ Version 0.6-2
 - feature: initial support for extracting TECH7 (sample stats within latent classes)
 - feature: initial support for extracting TECH12 (observed versus estimated sample statistics for TYPE=MIXTURE analyses)
 - loosen dependency on relimp and tcltk packages to permit installation and loading of MplusAutomation without these.
+- read more summary statistics from Mplus MONTECARLO outputs.
 - bugfix: readModels was failing when confidence intervals were in probability scale.
 - bugfix: readModels failed to extract BIC for some ESTIMATOR=BAYES outputs.
 - bugfix: extract class counts for cases where k > 9 classes estimated.

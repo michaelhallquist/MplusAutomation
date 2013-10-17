@@ -360,7 +360,10 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
 				"Information Criteria::Bayesian \\(BIC\\)",
 				"Information Criteria::Sample-Size Adjusted BIC \\(n\\* = \\(n \\+ 2\\) / 24\\)",
 				"RMSEA \\(Root Mean Square Error Of Approximation\\)",
-				"WRMR \\(Weighted Root Mean Square Residual\\)"
+				"WRMR \\(Weighted Root Mean Square Residual\\)",
+        "Information Criterion::Deviance \\(DIC\\)",
+        "Information Criterion::Estimated Number of Parameters \\(pD\\)",
+        "Information Criterion::Bayesian \\(BIC\\)"
 		)
 		modelFitSectionFields <- list(
 				data.frame(
@@ -422,7 +425,22 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
 						varName=c("WRMR_Mean", "WRMR_SD", "WRMR_NumComputations"),
 						regexPattern=c("Mean", "Std Dev", "Number of successful computations"),
 						varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
-				)
+				),
+        data.frame( #Information Criterion:: DIC
+            varName=c("DIC_Mean", "DIC_SD", "DIC_NumComputations"),
+            regexPattern=c("Mean", "Std Dev", "Number of successful computations"), 
+            varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
+        ),
+        data.frame( #Information Criterion:: Estimated number of parameters (pD)
+            varName=c("pD_Mean", "pD_SD", "pD_NumComputations"),
+            regexPattern=c("Mean", "Std Dev", "Number of successful computations"), 
+            varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
+        ),
+        data.frame( #Information Criterion:: Bayesian (BIC) -- sometimes within Information Criterion, sometimes Information Criteria (above)...
+            varName=c("BIC_Mean", "BIC_SD", "BIC_NumComputations"),
+            regexPattern=c("Mean", "Std Dev", "Number of successful computations"), 
+            varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
+        )
 		)
 
 		#handle two-level models, which return separate srmr for between vs. within
@@ -792,6 +810,8 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 	#extract the data type (important for detecting imputation datasets)
   if (!is.null(input$data$type)) {
     arglist$DataType <- input$data$type
+  }  else if (any(c("montecarlo", "model.population") %in% names(input))) {
+    arglist$DataType <- "MONTECARLO"
   } else {
     arglist$DataType <- "INDIVIDUAL" #Data type not specified, default to individual
   }
