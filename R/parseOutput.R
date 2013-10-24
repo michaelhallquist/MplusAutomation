@@ -37,7 +37,7 @@
 #'   \item{tech7}{a list containing sample statistics for each latent class from OUTPUT: TECH7}
 #'   \item{tech9}{a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9}
 #'   \item{tech12}{a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
-#'   \item{lcCondMeans}{conditional latent class means, obtained using auxiliary(e) syntax in latent class models}
+#'   \item{lcCondMeans}{conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models}
 #'   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)}
 #' @author Michael Hallquist
 #' @seealso \code{\link{extractModelSummaries}},
@@ -92,8 +92,8 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$tech12 <- extractTech12(outfiletext, curfile) #observed versus estimated sample stats for TYPE=MIXTURE
     allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
 
-    #aux(e) means
-    allFiles[[listID]]$lcCondMeans <- extractAuxE_1file(outfiletext, curfile)
+    #aux(e) means and pairwise comparisons
+    allFiles[[listID]]$lcCondMeans <- extractAux(outfiletext, curfile)
 
     #add class tag for use with compareModels
     class(allFiles[[listID]]) <- c("list", "mplus.model")

@@ -987,8 +987,6 @@ processConditionalTags <- function(templateTags, initCollection) {
 #' @importFrom gsubfn strapply
 #' @keywords internal
 processInit <- function(initsection) {
-  # moved to an import
-  # require(gsubfn)
 
   #combine multi-line statements by searching for semi-colon
   assignments <- grep("^\\s*.+\\s*=", initsection, perl=TRUE)

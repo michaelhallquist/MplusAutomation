@@ -438,7 +438,7 @@ runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, sho
       else stdout.value = NULL
       #need to switch to each directory, then run Mplus within using just the filename
       oldwd <- getwd()
-      setwd(inputSplit$directory)
+      setwd(dirtocd)
       exitCode <- system2(Mplus_command, args=c(shQuote(inputSplit$filename)), stdout=stdout.value, wait=TRUE)
       if (exitCode > 0L) {
         warning("Mplus returned error code: ", exitCode, ", for model: ", inputSplit$filename, "\n")

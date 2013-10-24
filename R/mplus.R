@@ -32,7 +32,7 @@
 #' @param usevariables A character vector of the variables from the
 #'   \code{R} dataset to use in the model.
 #' @param rdata An \code{R} dataset to be used for the model.
-#' @param autof A logical (defaults to \code{TRUE}) argument indicating
+#' @param autov A logical (defaults to \code{TRUE}) argument indicating
 #'   whether R should attempt to guess the correct variables to use from
 #'   the R dataset, if \code{usevariables} is left \code{NULL}.
 #'

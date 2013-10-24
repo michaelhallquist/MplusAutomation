@@ -2,7 +2,9 @@ Version 0.6-2
 - feature: initial support for extracting TECH7 (sample stats within latent classes)
 - feature: initial support for extracting TECH12 (observed versus estimated sample statistics for TYPE=MIXTURE analyses)
 - loosen dependency on relimp and tcltk packages to permit installation and loading of MplusAutomation without these.
-- read more summary statistics from Mplus MONTECARLO outputs.
+- read more summary statistics from Mplus MONTECARLO outputs
+- read dispersion parameters for NB models
+- readModels overall and pairwise comparisons of latent class means (Auxiliary E). Thanks to Davide Morselli for initial code.
 - bugfix: readModels was failing when confidence intervals were in probability scale.
 - bugfix: readModels failed to extract BIC for some ESTIMATOR=BAYES outputs.
 - bugfix: extract class counts for cases where k > 9 classes estimated.
@@ -12,14 +14,14 @@ Version 0.6-1
 - bugfix: fixed plyr namespace imports
 - bugfix: fixed runModels log file when NULL
 - corrected line length problems in documentation.
-- deleted old createTable routine (not used).
+- deleted old createTable routine (not used)
 - removed fields to extract from extractSummaries_1file (not useful).
 
 Version 0.6
 - feature: create Mplus model objects, automatically create and run models using mplusModeler
 - feature: generate code for residual covariance structures for latent growth models using mplusRcov
-- feature: initial support for extracting standardized confidence intervals.
-- feature: extract all details of bootstrapped likelihood ratio test.
+- feature: initial support for extracting standardized confidence intervals
+- feature: extract all details of bootstrapped likelihood ratio test
 - feature: initial support for extracting IRT parameterization model results (see $irt.parameterization).
 - added basic documentation for functions including internal functions
 - support 6-column output from multiple imputation analyses that contain "rate of missing" column.
