@@ -261,7 +261,7 @@ around four other user-accessible functions: \lstinline|extractModelSummaries|,
 \lstinline|extractModelParameters|, \lstinline|extractModIndices|, and
 \lstinline|getSavedata_Data|. The \lstinline|readModels| function also uses 
 a number of additional functions not accessible to the user to read output
-such as TECH1, TECH3, TECH4, and RESIDUALS. The \lstinline|readModels| function
+such as TECH1, TECH3, TECH4, TECH9, and RESIDUALS. The \lstinline|readModels| function
 extracts model summaries, parameters, modification indices, and saved data
 (using the Mplus SAVEDATA syntax), into a single list object (stored as \lstinline|mplus.model|). The top-level
 elements of the list represent distinct output files and are named by the
@@ -289,6 +289,8 @@ output file. Elements of an \lstinline|mplus.model| object include:
   correlation matrices from OUTPUT: TECH3.
   \item \lstinline|tech4|: a list containing means, covariances, and
   correlations for latent variables from OUTPUT: TECH4.
+  \item \lstinline|tech9|: a list containing error messages for each replication of a Monte
+  Carlo simulation study from OUTPUT: TECH9.
   \item \lstinline|lcCondMeans|: conditional latent class means, obtained using auxiliary(e) syntax in latent class models
   \item \lstinline|gh5|: a list containing data from the gh5 (graphics) file
   corresponding to this output. (Requires rhdf5 package)
