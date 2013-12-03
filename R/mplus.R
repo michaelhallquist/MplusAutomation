@@ -32,7 +32,7 @@
 #' @param usevariables A character vector of the variables from the
 #'   \code{R} dataset to use in the model.
 #' @param rdata An \code{R} dataset to be used for the model.
-#' @param autof A logical (defaults to \code{TRUE}) argument indicating
+#' @param autov A logical (defaults to \code{TRUE}) argument indicating
 #'   whether R should attempt to guess the correct variables to use from
 #'   the R dataset, if \code{usevariables} is left \code{NULL}.
 #'
@@ -90,9 +90,15 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
 
   if (autov && is.null(usevariables) && !is.null(rdata) && !is.null(MODEL)) {
     v <- colnames(rdata)
-    v <- v[sapply(v, grepl, x = paste(c(MODEL, DEFINE), collapse = "\n"), ignore.case=TRUE)]
+    v.model <- v[sapply(v, grepl, x = MODEL, ignore.case=TRUE)]
+    v.setup <- v[sapply(v, grepl, x = paste(c(VARIABLE, DEFINE), collapse = "\n"), ignore.case=TRUE)]
     message("No R variables to use specified. \nSelected automatically as any variable name that occurs in the MODEL or DEFINE section.")
-    usevariables <- v
+    usevariables <- c(v.model, v.setup)
+
+    if (!isTRUE(grepl("usevariables", VARIABLE, ignore.case=TRUE)) && length(v.setup) & length(v.model)) {
+      message("There are define or analysis variables, but no USEVARIABLES statement in Mplus.\nYou may need to add any defined variables.\nSuggest:")
+      message(sprintf("USEVARIABLES = %s;", paste(v.model, collapse = " ")))
+    }
   }
 
   i <- duplicated(substr(usevariables, start = 1, stop = 8))
@@ -272,8 +278,11 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE) {
 #'
 #' @param object An object of class mplusObject
 #' @param dataout the name of the file to output the data to for Mplus.
-#' @param modelout the name of the output file for the model. This is the file all the syntax is
-#'   written to, which becomes the Mplus input file. Typically ends in .inp.
+#'   If missing, defaults to \code{modelout} changing .inp to .dat.
+#' @param modelout the name of the output file for the model.
+#'   This is the file all the syntax is written to, which becomes the
+#'   Mplus input file. It should end in .inp.  If missing, defaults to
+#'   \code{dataout} changing the extension to .inp.
 #' @param run an integer indicating how many models should be run. Defaults to zero.
 #'   If zero, the data and model input files are all created, but the model is not run.
 #'   This can be useful for seeing how the function works and what setup is done. If one, a basic
@@ -377,10 +386,18 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   Sys.setenv(SHELL = Sys.getenv("COMSPEC"))
   on.exit(Sys.setenv(SHELL = oldSHELL))
 
+  if (missing(modelout) & missing(dataout)) {
+    stop("You must specify either modelout or dataout")
+  } else if (missing(dataout)) {
+    dataout <- gsub("(^.*)(\\.inp$)", "\\1.dat", modelout)
+  } else if (missing(modelout)) {
+    modelout <- gsub("(.*)(\\..+$)", "\\1.inp", dataout)
+  }
+
   .run <- function(data, i, boot = TRUE, ...) {
     prepareMplusData(df = object$rdata[i, object$usevariables],
       filename = dataout, inpfile = tempfile(), ...)
-    runModels()
+    runModels(filefilter = modelout)
     outfile <- gsub("(^.*)(\\.inp$)", "\\1.out", modelout)
     results <- readModels(target = outfile)
     if (!boot) {
