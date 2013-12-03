@@ -1,3 +1,7 @@
+Version 0.6-3
+- feature: mplusObject tries hard (with a note) to guess variables to include from the dataset if usevariables is missing
+- bugfix: mplusModeler only runs the input file it generated in a directory now (thanks to Huashan Chen)
+
 Version 0.6-2
 - feature: initial support for extracting TECH7 (sample stats within latent classes)
 - feature: initial support for extracting TECH12 (observed versus estimated sample statistics for TYPE=MIXTURE analyses)
@@ -8,7 +12,7 @@ Version 0.6-2
 - bugfix: readModels was failing when confidence intervals were in probability scale.
 - bugfix: readModels failed to extract BIC for some ESTIMATOR=BAYES outputs.
 - bugfix: extract class counts for cases where k > 9 classes estimated.
-- bugfix: change mplus.traceplot to use names from rhdf5 and permute to chain, iteration, param to match prior code. 
+- bugfix: change mplus.traceplot to use names from rhdf5 and permute to chain, iteration, param to match prior code.
 
 Version 0.6-1
 - bugfix: fixed plyr namespace imports
@@ -31,12 +35,12 @@ Version 0.6
 
 Version 0.5-4
 - feature: readModels extracts warnings and errors.
-- feature: prepareMplusData now optionally allows for a .inp to be written or for interactive selection of a filename. 
+- feature: prepareMplusData now optionally allows for a .inp to be written or for interactive selection of a filename.
 - feature: readModels now stores (somewhat) parsed Mplus input syntax in $input (read from the INPUT INSTRUCTIONS in .out file).
 - feature: readModels now parses error messages from Monte Carlo output (TECH9) into tech9.
 - feature: Mplus software version now extracted as Mplus.version in model summaries.
 - feature: showSummaryTable, LatexSummaryTable, and HTMLSummaryTable now accept model lists from readModels (no need to extract summaries from each).
-- feature: readModels extracts SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section associated with PLOT3 into fac_score_stats. 
+- feature: readModels extracts SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section associated with PLOT3 into fac_score_stats.
 - feature: extractTech1 now parses TAU(U) sections in mixture models with class-varying thresholds.
 - refactored SAVEDATA parsing to handle Mplus v7 output, which reordered sections in some cases.
 - to enhance formatting, createModels no longer strips blank lines from the template file. Thanks to Ronkko Mikko for the suggestion.
@@ -58,7 +62,7 @@ Version 0.5-3
 
 Version 0.5-2
 - feature: divide BPARAMETERS by MCMC chain and separate burn-in (first half) versus valid draw (second half).
-           (Adapted from code and insights graciously provided by Florian Boeing-Messing.) 
+           (Adapted from code and insights graciously provided by Florian Boeing-Messing.)
 - feature: Bparameters stored as mcmc.list to promote compatibility with coda package (coda now imported).
            (Thanks to Davood Tofighi for the suggestion.)
 - feature: readModels imports corresponding gh5 file, if it exists, into list element gh5 (requires hdf5 package).
@@ -68,7 +72,7 @@ Version 0.5-2
 - bugfix:  Chi-square difference test for MLR based on LL did not work for models with only LL and Parameters.
 - bugfix:  Scales section of model parameters was not being read properly.
 - bugfix:  matrixExtract (tech1, residuals, etc.) now handles blank section appropriately.
-- updated MplusAutomation Examples vignette to reflect greater functionality of readModels. 
+- updated MplusAutomation Examples vignette to reflect greater functionality of readModels.
 
 Version 0.5-1
 - TECH1, RESIDUALS, and TECH4 extraction now support latent class models and multilevel models
@@ -91,7 +95,7 @@ Version 0.5
 - extraction of RESIDUALS output supported by readModels.
 - extractModelSummaries now reads summaries (e.g., DIC) from ESTIMATOR=BAYES output.
 - getSavedata_Fileinfo now supports extraction of Monte Carlo variable names.
-- getSavedata_Data now automatically extracts Monte Carlo/Multiple Imputation data as a list. 
+- getSavedata_Data now automatically extracts Monte Carlo/Multiple Imputation data as a list.
 - removed wine as default for running Mplus on Linux now that Mplus is native for Linux.
 - specify runModels default mplus location on Mac as /Applications/Mplus/mplus.
 - several updates to MplusAutomation Vignette.
@@ -105,12 +109,12 @@ Version 0.4-3
 - throw specific error when createModels encounters a template file with no body tags (come back later to allow for this).
 - changed names of return list from getSavedata_Fileinfo: breaks compatibility.
 - initial support of reading Bayesian parameters from SAVEDATA BPARAMETERS command.
-- provide inequality constraint tests for bayesian parameter estimates: van de Schoot, Hoijtink, Hallquist, & Boelen, submitted. 
+- provide inequality constraint tests for bayesian parameter estimates: van de Schoot, Hoijtink, Hallquist, & Boelen, submitted.
 - initial support of model parameter extraction for Monte Carlo output (MONTECARLO: and MODEL POPULATION:) using extractModelParameters.
 - initial support of unstandardized confidence interval output from OUTPUT:CINTERVAL (thanks to Stephen Tueller for initial development of this)
 - reworked detection of major output sections to match a fixed list of options (decrease ambiguity)
 - bugfix: extractModelParameters correctly handles nonconverged output, where only estimates are available.
-- savedata file information now included in readModels list in element savedata_info.  
+- savedata file information now included in readModels list in element savedata_info.
 
 Version 0.4-2
 - initial support for extracting model modification indices, when available: extractModIndices
@@ -152,7 +156,7 @@ Version 0.3-3
 - extractModelParameters now extracts constraints listed under "New/Additional Parameters".
 - bugfix: extractModelParameters omitted latent class regression coefficients in mixture models.
 - bugfix: extractModelParameters could not locate section end for some standardized parameters.
-- bugfix: extractModelParameters failed to identify latent class membership with multiple categorical latent variables. 
+- bugfix: extractModelParameters failed to identify latent class membership with multiple categorical latent variables.
 - Changed runModels to limit Windows-specific command line tweaks to R running on Windows computers.
 - Removed InputInstructions from extractModelSummaries routine. Made output too cluttered.
 - In extractModelSummaries routine, only warn about missing log-likelihood for ML estimators.
@@ -189,7 +193,7 @@ Version 0.2-5
 
 - Extracts Baseline Chi-square, SRMR, and WRMR using extractModelSummaries.
 - Allows target for extractModelSummaries to be a single file or a directory.
-- extractModelParameters now successfully extracts multiple group analyses. 
+- extractModelParameters now successfully extracts multiple group analyses.
 - Fixed minor bug in extractModelParameters for calculating keyword match length.
 - Fixed minor bug in regular expression for parseChunk matching leading/trailing spaces (handled by strip.white).
 
@@ -209,6 +213,6 @@ Version 0.2-2
 
 - Improved extractModelSummaries function to allow for summary statistics located across multiple lines.
   New summaries include model chi-square, RMSEA, CFI, and TLI.
-  
+
 - Corrected a bug in extractValue that did not select the correctly utilize match.length from regexpr
-  (failure to subtract 1 in substr).  
+  (failure to subtract 1 in substr).
