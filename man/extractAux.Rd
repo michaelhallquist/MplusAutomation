@@ -1,8 +1,8 @@
-\name{extractAuxE_1file}
-\alias{extractAuxE_1file}
-\title{Extract Auxillary}
+\name{extractAux}
+\alias{extractAux}
+\title{Extract Auxiliary condition means and comparisons.}
 \usage{
-  extractAuxE_1file(outfiletext, filename)
+  extractAux(outfiletext, filename)
 }
 \arguments{
   \item{outfiletext}{}

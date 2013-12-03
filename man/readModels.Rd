@@ -57,11 +57,11 @@
   MONTECARLO analyses from OUTPUT: TECH9} \item{tech12}{a
   list containing observed versus estimated sample
   statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
-  \item{lcCondMeans}{conditional latent class means,
-  obtained using auxiliary(e) syntax in latent class
-  models} \item{gh5}{a list containing data from the gh5
-  (graphics) file corresponding to this output. (Requires
-  rhdf5 package)}
+  \item{lcCondMeans}{conditional latent class means and
+  pairwise comparisons, obtained using auxiliary(e) syntax
+  in latent class models} \item{gh5}{a list containing data
+  from the gh5 (graphics) file corresponding to this
+  output. (Requires rhdf5 package)}
 }
 \description{
   Extracts the model parameters, summary statistics, and

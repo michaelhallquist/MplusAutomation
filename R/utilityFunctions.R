@@ -273,6 +273,7 @@ getSection_Blanklines <- function(sectionHeader, outfiletext) {
 #LOGISTIC REGRESSION ODDS RATIO RESULTS
 #ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION
 
+
 getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL) {
   #encode the top-level major headers here, but allow for custom headers to be passed in
   #omit allows for one or more strings from headers not to be considered
@@ -292,8 +293,6 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE",
         "CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP",
         "Average Latent Class Probabilities for Most Likely Latent Class Membership \\(Row\\)",
-        "Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
-        "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
         "MODEL RESULTS", "LOGISTIC REGRESSION ODDS RATIO RESULTS", "RESULTS IN PROBABILITY SCALE",
         "IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC METRIC",
         "IRT PARAMETERIZATION IN TWO-PARAMETER PROBIT METRIC",
@@ -309,34 +308,34 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "CONFIDENCE INTERVALS IN PROBABILITY SCALE",
         "CONFIDENCE INTERVALS OF TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS",
         "CONFIDENCE INTERVALS OF STANDARDIZED TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT,", #omitted "AND DIRECT EFFECTS"
-        "EQUALITY TESTS OF MEANS ACROSS CLASSES USING POSTERIOR PROBABILITY-BASED",
+        "EQUALITY TESTS OF MEANS",
         "THE FOLLOWING DATA SET\\(S\\) DID NOT RESULT IN A COMPLETED REPLICATION:",
         "RESIDUAL OUTPUT", "MODEL MODIFICATION INDICES", "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
         "FACTOR SCORE INFORMATION \\(COMPLETE DATA\\)", "SUMMARY OF FACTOR SCORES", "PLOT INFORMATION", "SAVEDATA INFORMATION",
         "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
         "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
     )
-
+  
   if (!is.null(omit)) headers <- headers[which(!headers %in% omit)] #drop omit
-
+  
   beginSection <- grep(sectionHeader, outfiletext, perl=TRUE)[1]
-
+  
   #if section header cannot be found, then bail out
   if (is.na(beginSection)) return(NULL)
-
+  
   #form alternation pattern for regular expression (currently adds leading and trailing spaces permission to each header)
   headerRegexpr <- paste("(", paste(gsub("(.*)", "^\\\\s*\\1\\\\s*$", headers, perl=TRUE), sep="", collapse="|"), ")", sep="")
   headerLines <- grep(headerRegexpr, outfiletext, perl=TRUE)
   subsequentHeaders <- which(headerLines > beginSection)
-
+  
   if (length(subsequentHeaders) == 0) nextHeader <- length(outfiletext) #just return the whole enchilada
   else nextHeader <- headerLines[subsequentHeaders[1]] - 1
-
+  
   section.found <- outfiletext[(beginSection+1):nextHeader]
   attr(section.found, "lines") <- beginSection:nextHeader
-
+  
   return(section.found)
-
+  
 }
 
 #could this also be used by runModels to locate input files?

@@ -43,7 +43,7 @@
   \item{rdata}{An \code{R} dataset to be used for the
   model.}
 
-  \item{autof}{A logical (defaults to \code{TRUE}) argument
+  \item{autov}{A logical (defaults to \code{TRUE}) argument
   indicating whether R should attempt to guess the correct
   variables to use from the R dataset, if
   \code{usevariables} is left \code{NULL}.}

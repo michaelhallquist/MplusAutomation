@@ -35,7 +35,7 @@
 #' @keywords interface
 mplus.traceplot <- function(mplus.model, rows=4, cols=4, parameters_only=TRUE) {
   #uses gh5 output, requires PLOT: TYPE=PLOT2
-
+  
   if (!inherits(mplus.model, "mplus.model")) stop("mplus.traceplot function requires an mplus.model object (from readModels).")
 
   #if(!(suppressWarnings(require(rhdf5)) && suppressWarnings(require(lattice)))) stop("mplus.traceplot requires rhdf5 and lattice packages")
@@ -48,7 +48,7 @@ mplus.traceplot <- function(mplus.model, rows=4, cols=4, parameters_only=TRUE) {
 
 	if (length(mplus.model$gh5) <= 0) stop("No data in gh5 element of Mplus model.")
 
-  if (!"bayesian.data" %in% names(mplus.model$gh5)) stop("No bayesian_data element of gh5 file. Requires PLOT: TYPE=PLOT2; in Mplus input.")
+  if (!"bayesian_data" %in% names(mplus.model$gh5)) stop("No bayesian_data element of gh5 file. Requires PLOT: TYPE=PLOT2; in Mplus input.")
 
   #expected structure
   # $bayesian_data - list of 1
@@ -63,23 +63,42 @@ mplus.traceplot <- function(mplus.model, rows=4, cols=4, parameters_only=TRUE) {
   #                           ^^^  ^^^^^  ^^^^
   #                          chain param  value
 
+  #UPDATE OCT2013: NEW expected structure
+  #not sure if this reflects an internal change in Mplus or shift to rhdf5 package
+  # $bayesian_data - list of 2
+  #  $parameters_autocorr - list of 4
+  #   $statements - chr [1:302]
+  #
+  #   $parameters - num [1:302, 1:162200, 1:2]
+  #                      ^^^^^  ^^^^^^^^  ^^^
+  #                  parameter  iteration chain
+  #
+  #   $autocorrelation - num [1:30, 1:302, 1:2]
+  #                           ^^^^  ^^^^^  ^^^^
+  #                          value  param  chain
+  
+  
 #  setwd(analysisDirectory)
 #  jpeg(file="plot%d.jpg", width=8.5, height=11, units = "in", res=120)
 #  col <- c("red", "blue", "green", "orange")
 
-  parameters.autocorr <- mplus.model$gh5$bayesian.data$parameters.autocorr
+  parameters_autocorr <- mplus.model$gh5$bayesian_data$parameters_autocorr
 
+  #to keep code below the same as previous versions, use aperm to rearrange as chain, iteration, parameter/value
+  parameters_autocorr$parameters <- aperm(parameters_autocorr$parameters, c(3,2,1))
+  parameters_autocorr$autocorrelation <- aperm(parameters_autocorr$autocorrelation, c(3,2,1))
+  
   #whether to restrict to parameters, as opposed to STD, STDY, STDYX, R-SQUARE, etc.
   if (parameters_only) {
-    pkeep <- grep("^Parameter", parameters.autocorr$statements)
+    pkeep <- grep("^Parameter", parameters_autocorr$statements)
     if (length(pkeep) > 0) {
-      parameters.autocorr$statements <- parameters.autocorr$statements[pkeep]
-      parameters.autocorr$parameters <- parameters.autocorr$parameters[,,pkeep, drop=FALSE]
-      parameters.autocorr$autocorrelation <- parameters.autocorr$autocorrelation[,pkeep,, drop=FALSE]
+      parameters_autocorr$statements <- parameters_autocorr$statements[pkeep]
+      parameters_autocorr$parameters <- parameters_autocorr$parameters[,,pkeep, drop=FALSE]
+      parameters_autocorr$autocorrelation <- parameters_autocorr$autocorrelation[,pkeep,, drop=FALSE]
     }
   }
 
-  param.dim <- dim(parameters.autocorr$parameters)
+  param.dim <- dim(parameters_autocorr$parameters)
 
   n.chains <- param.dim[1]
   n.iterations <- param.dim[2]
@@ -102,13 +121,13 @@ mplus.traceplot <- function(mplus.model, rows=4, cols=4, parameters_only=TRUE) {
         #x
         c(0, n.iterations),
         #y
-        range(parameters.autocorr$parameters[1:n.chains,,i]),
+        range(parameters_autocorr$parameters[1:n.chains,,i]),
         #options
-        ylab="Estimate", xlab="Iteration", main=paste(strwrap(parameters.autocorr$statements[i], width=30), collapse="\n"),
+        ylab="Estimate", xlab="Iteration", main=paste(strwrap(parameters_autocorr$statements[i], width=30), collapse="\n"),
         xaxs="i", cex.main=0.8, cex.lab=1, cex.axis=1, type="n"
     )
     for (j in 1:n.chains){
-      lines (1:n.iterations, parameters.autocorr$parameters[j,1:n.iterations,i], lwd=.5, col=col[j])
+      lines (1:n.iterations, parameters_autocorr$parameters[j,1:n.iterations,i], lwd=.5, col=col[j])
     }
   }
   par(ask=oldAsk)
