@@ -9,12 +9,14 @@
   \item{object}{An object of class mplusObject}
 
   \item{dataout}{the name of the file to output the data to
-  for Mplus.}
+  for Mplus.  If missing, defaults to \code{modelout}
+  changing .inp to .dat.}
 
   \item{modelout}{the name of the output file for the
-  model. This is the file all the syntax is written to,
-  which becomes the Mplus input file. Typically ends in
-  .inp.}
+  model.  This is the file all the syntax is written to,
+  which becomes the Mplus input file. It should end in
+  .inp.  If missing, defaults to \code{dataout} changing
+  the extension to .inp.}
 
   \item{run}{an integer indicating how many models should
   be run. Defaults to zero.  If zero, the data and model
