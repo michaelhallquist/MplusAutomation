@@ -308,15 +308,17 @@ extractSummaries_1plan <- function(arglist, sectionHeaders, sectionFields, textT
   #multiple sections
   for (header in 1:length(sectionHeaders)) {
     #a blank section header indicates to match anywhere in the textToParse
-    if (sectionHeaders[header] == "") sectionText <- textToParse
-
-		#could be pretty inefficient if the same section header is repeated several times.
-		#could build a list with divided output and check whether a section is present in the list before extracting
-		else sectionText <- getMultilineSection(sectionHeaders[header], textToParse, filename)
+    if (sectionHeaders[header] == "") {
+      sectionText <- textToParse
+    } else {
+      #could be pretty inefficient if the same section header is repeated several times.
+      #could build a list with divided output and check whether a section is present in the list before extracting
+      sectionText <- getMultilineSection(sectionHeaders[header], textToParse, filename)
+    }
 
     #process all fields for this section
     sectionFieldDF <- sectionFields[[header]]
-    #browser()
+
     for (i in 1:nrow(sectionFieldDF)) {
       thisField <- sectionFieldDF[i,]
 
@@ -487,7 +489,8 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
 				"RMSEA \\(Root Mean Square Error Of Approximation\\)",
 				"WRMR \\(Weighted Root Mean Square Residual\\)",
         "Bayesian Posterior Predictive Checking using Chi-Square",
-        "Information Criterion" #somehow singular for bayes output?
+        "Information Criterion", #somehow singular for bayes output?
+        "Wald Test of Parameter Constraints"
 		)
 		modelFitSectionFields <- list(
 				data.frame(
@@ -544,6 +547,11 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
             varName=c("DIC", "pD", "BIC"),
             regexPattern=c("Deviance \\(DIC\\)", "Estimated Number of Parameters \\(pD\\)", "Bayesian \\(BIC\\)"), #sometimes BIC is listed here (e.g., MI Bayes output) 
             varType=c("dec", "dec", "dec"), stringsAsFactors=FALSE
+        ),
+        data.frame( #Wald Test of Parameter Constraints
+            varName=c("WaldChiSq_Value", "WaldChiSq_DF", "WaldChiSq_PValue"),
+            regexPattern=c("^\\s*Value", "Degrees of Freedom", "^\\s*P-Value"), 
+            varType=c("dec", "int", "dec"), stringsAsFactors=FALSE
         )
 		)
 
@@ -1023,9 +1031,12 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #' \item{ObsRepChiSqDiff_95CI_LB}{Lower bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
 #' \item{ObsRepChiSqDiff_95CI_UB}{Upper bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
 #' \item{PostPred_PValue}{Posterior predictive p-value}
+#' \item{BLRT_RequestedDraws}{Number of requested bootstrap draws for TECH14.}
 #' \item{BLRT_KM1LL}{Log-likelihood of the K-1 model (one less class) for the Bootstrapped Likelihood Ratio Test (TECH14).}
+#' \item{BLRT_2xLLDiff}{Two times the log-likelihood difference of the models with K and K-1 classes (TECH14).}
+#' \item{BLRT_ParamDiff}{Difference in the number of parameters for models with K and K-1 classes (TECH14).}
 #' \item{BLRT_PValue}{P-value of the Bootstrapped Likelihood Ratio Test (TECH14) testing whether the K class model is significantly better than K-1}
-#' \item{BLRT_Numdraws}{The number of bootstrapped samples used in the Bootstrapped Likelihood Ratio Test}
+#' \item{BLRT_SuccessfulDraws}{The number of successful bootstrapped samples used in the Bootstrapped Likelihood Ratio Test}
 #' \item{SRMR}{Standardized root mean square residual}
 #' \item{SRMR.Between}{For TYPE=TWOLEVEL output, standardized root mean square residual for between level}
 #' \item{SRMR.Within}{For TYPE=TWOLEVEL output, standardized root mean square residual for within level}
