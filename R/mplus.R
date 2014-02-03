@@ -93,7 +93,7 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
     v.model <- v[sapply(v, grepl, x = MODEL, ignore.case=TRUE)]
     v.setup <- v[sapply(v, grepl, x = paste(c(VARIABLE, DEFINE), collapse = "\n"), ignore.case=TRUE)]
     message("No R variables to use specified. \nSelected automatically as any variable name that occurs in the MODEL or DEFINE section.")
-    usevariables <- c(v.model, v.setup)
+    usevariables <- unique(c(v.model, v.setup))
 
     if (!isTRUE(grepl("usevariables", VARIABLE, ignore.case=TRUE)) && length(v.setup) & length(v.model)) {
       message("There are define or analysis variables, but no USEVARIABLES statement in Mplus.\nYou may need to add any defined variables.\nSuggest:")
