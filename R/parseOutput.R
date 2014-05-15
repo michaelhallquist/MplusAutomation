@@ -654,67 +654,6 @@ divideIntoFields <- function(section.text, required) {
 #' @keywords internal
 #' @examples
 #' # make me!!!
-## extractWarningsErrors_1file <- function(outfiletext, filename, input) {
-
-##   warnerr <- list(warnings=list(), errors=list())
-##   class(warnerr$errors) <- c("list", "mplus.errors")
-##   class(warnerr$warnings) <- c("list", "mplus.warnings")
-
-##   if (!inherits(input, "mplus.inp")) {
-##     warning("Could not identify warnings and errors; input is not of class mplus.inp")
-##     return(warnerr)
-##   }
-
-##   if (is.null(attr(input, "start.line")) || is.null(attr(input, "end.line")) ||
-##       attr(input, "start.line") < 0L || attr(input, "end.line") < 0L) {
-##     warning("Could not identify bounds of input section: ", filename)
-##     return(warnerr)
-##   }
-
-##   startWarnErr <- attr(input, "end.line") + 1L
-
-##   endWarnErr <- grep("^\\s*(INPUT READING TERMINATED NORMALLY|\\*\\*\\* WARNING.*|\\d+ (?:ERROR|WARNING)\\(S\\) FOUND IN THE INPUT INSTRUCTIONS|\\*\\*\\* ERROR.*)\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
-##   if (length(endWarnErr) == 0L) {
-##     return(warnerr) #unable to find end of warnings (weird), or there are none.
-##   }
-
-##   #The above will match all of the possible relevant lines.
-##   #To identify warnings section, need to go to first blank line after the final warning or error. (look in next 100 lines)
-##   lastWarn <- endWarnErr[length(endWarnErr)]
-##   blank <- which(outfiletext[lastWarn:(lastWarn + 100 )] == "")[1L] + lastWarn - 1
-
-##   warnerrtext <- outfiletext[startWarnErr[1L]:(blank-1)]
-
-##   lines <- friendlyGregexpr("^\\s*(\\*\\*\\* WARNING|\\*\\*\\* ERROR).*\\s*$", warnerrtext, perl=TRUE)
-
-##   w <- 1
-##   e <- 1
-
-##   if (!is.null(lines)) {
-##     for (l in 1:nrow(lines)) {
-##       if (l < nrow(lines)) {
-##         warn.err.body <- trimSpace(warnerrtext[(lines[l,"element"] + 1):(lines[l+1,"element"] - 1)])
-##       } else {
-##         warn.err.body <- trimSpace(warnerrtext[(lines[l,"element"] + 1):length(warnerrtext)])
-##       }
-
-##       if (substr(lines[l,"tag"], 1, 11) == "*** WARNING") {
-##         warnerr$warnings[[w]] <- warn.err.body
-##         w <- w + 1
-##       } else if (substr(lines[l,"tag"], 1, 9) == "*** ERROR") {
-##         warnerr$errors[[e]] <- warn.err.body
-##         splittag <- strsplit(lines[l,"tag"], "\\s+", perl=TRUE)[[1L]]
-##         if (length(splittag) > 3L && splittag[3L] == "in") {
-##           attr(warnerr$errors[[e]], "section") <- tolower(paste(splittag[4L:(which(splittag == "command") - 1L)], collapse="."))
-##         }
-##         e <- e + 1
-##       } else { stop ("Cannot discern warning/error type: ", lines[l, "tag"]) }
-##     }
-##   }
-
-##   return(warnerr)
-
-## }
 extractWarningsErrors_1file <- function(outfiletext,filename,input) {
 
     warnerr <- list(warnings = list(), errors = list())
