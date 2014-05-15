@@ -690,7 +690,7 @@ extractWarningsErrors_1file <- function(outfiletext,filename,input) {
     warnerrtext <- c(inputwarntext,estwarntext)
 
     ## 4. Get input warnings, estimation warnings. Removes end flag (MODEL FIT INFORMATION)
-    lines <- MplusAutomation:::friendlyGregexpr("(^\\s*(\\*\\*\\* WARNING|\\*\\*\\* ERROR).*\\s*$)|(WARNING:)|(MODEL FIT INFORMATION)|(THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY)|(PROBLEM INVOLVING PARAMETER)\\s\\d\\.\\n*", warnerrtext, perl = TRUE)    
+    lines <- friendlyGregexpr("(^\\s*(\\*\\*\\* WARNING|\\*\\*\\* ERROR).*\\s*$)|(WARNING:)|(MODEL FIT INFORMATION)|(THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY)|(PROBLEM INVOLVING PARAMETER)\\s\\d\\.\\n*", warnerrtext, perl = TRUE)    
     w <- 1
     e <- 1
     esterr <- FALSE
@@ -707,17 +707,17 @@ extractWarningsErrors_1file <- function(outfiletext,filename,input) {
                 ## sadly, we need to parse the warning errors differently for "WARNING:" (the estimation warnings)
                 ## because the warning message occurs partially on the same line as "WARNING:"
                 firstline <- warnerrtext[lines[l,"element"]]             
-                warn.err.body <- c(MplusAutomation:::trimSpace(sub("WARNING:","",firstline)),
-                                   MplusAutomation:::trimSpace(warnerrtext[(lines[l, "element"] + 1):(lines[l + 1, "element"] - 1)]))                            
+                warn.err.body <- c(trimSpace(sub("WARNING:","",firstline)),
+                                   trimSpace(warnerrtext[(lines[l, "element"] + 1):(lines[l + 1, "element"] - 1)]))                            
             } else {
                 ## again sadly, we need to parse the not terminate normally errors differently because the flag is contained in the message
                 ## and is different for the last error.
                 if(grepl("THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY",lines[l,]$tag)) {
                     if(l == nrow(lines)-1) {
-                        warn.err.body <- MplusAutomation:::trimSpace(warnerrtext[(lines[l, "element"]):(lines[l + 1, "element"])])
-                    } else { warn.err.body <- MplusAutomation:::trimSpace(warnerrtext[(lines[l, "element"]):(lines[l + 1, "element"])-1])}
+                        warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]):(lines[l + 1, "element"])])
+                    } else { warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]):(lines[l + 1, "element"])-1])}
                 } else {
-                    warn.err.body <- MplusAutomation:::trimSpace(warnerrtext[(lines[l, "element"]+1):(lines[l + 1, "element"]-1)])
+                    warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]+1):(lines[l + 1, "element"]-1)])
                 }
             }                
             ## 5.2 build the warnerr object
