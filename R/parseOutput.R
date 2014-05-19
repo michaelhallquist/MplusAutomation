@@ -671,16 +671,27 @@ extractWarningsErrors_1file <- function(outfiletext,filename,input) {
         return(warnerr)
     }
     
-    ## 1. Grab indices of input warnings. Finds indices matching the following:
+    ## 1. Grab indices of all warnings, errors, and end flags. Finds indices matching the following:
     ## a. Input reading terminated normally (no input warnings)
-    ## b. any use of "WARNING"
-    ## c. If all went well, there are no warnings after MODEL FIT INFORMATION. Use as end flag.
-    ## d. If estimation failed, the end flag is PROBLEM INVOLVING PARAMETER.
-    allwarn <- grep("(INPUT READING TERMINATED NORMALLY)|WARNING.*|(MODEL FIT INFORMATION)|(THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY)|(PROBLEM INVOLVING PARAMETER)\\s\\d\\.\\n*",outfiletext, ignore.case = TRUE, perl = TRUE)
+    ## b. any use of "WARNING" or "ERROR"
+    ## c. Estimation errors:
+    ##   1. MODEL ESTIMATION DID NOT TERMINATE NORMALLY
+    ##   2. LOGLIKELIHOOD DECREASED
+    ## ... can add more estimation error flags here
+    ## z1. End flag 1: MODEL FIT INFORMATION
+    ## z2. End flag 2: FINAL CLASS COUNTS (occurs for some mixture models, which report class counts before model results)
+    ## z3. End flag 3: MODEL RESULTS
+    ## ... better ending flags?
+
+    esterrflags <- "(THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY)|(LOGLIKELIHOOD DECREASED)|"
+    endflags <- c("(MODEL FIT INFORMATION)|(FINAL CLASS COUNTS)|(MODEL RESULTS)")
+    allwarnpat <- paste0("(INPUT READING TERMINATED NORMALLY)|(ERROR)|WARNING.*|",esterrflags,endflags,collapse="")
+    
+    allwarn <- grep(allwarnpat,outfiletext, ignore.case = TRUE, perl = TRUE)
     startwarn <- allwarn[1]
     endinputerr <- allwarn[grep("INPUT",outfiletext[allwarn])]
     
-    ## 2. grab indices of the estimation warnings: 1 warning after "x WARNINGS FOUND IN INPUT INSTRUCTIONS"  
+    ## 2. grab line #s of the estimation warnings: 1 warning after "x WARNINGS FOUND IN INPUT INSTRUCTIONS" to the last end flag, MODEL RESULTS
     startesterr <- allwarn[which(endinputerr==allwarn)+1]
     endesterr <- allwarn[length(allwarn)]
     
@@ -689,43 +700,46 @@ extractWarningsErrors_1file <- function(outfiletext,filename,input) {
     estwarntext <- outfiletext[startesterr:endesterr]
     warnerrtext <- c(inputwarntext,estwarntext)
 
-    ## 4. Get input warnings, estimation warnings. Removes end flag (MODEL FIT INFORMATION)
-    lines <- friendlyGregexpr("(^\\s*(\\*\\*\\* WARNING|\\*\\*\\* ERROR).*\\s*$)|(WARNING:)|(MODEL FIT INFORMATION)|(THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY)|(PROBLEM INVOLVING PARAMETER)\\s\\d\\.\\n*", warnerrtext, perl = TRUE)    
+    ## 4. Find and tag the lines in warnerrtext corresponding to input warnings/errors, estimation warnings/errors, and end flags.
+    lines <- friendlyGregexpr(paste0("(^\\s*(\\*\\*\\* WARNING|\\*\\*\\* ERROR).*\\s*$)|WARNING:|",esterrflags,endflags,collapse=""), warnerrtext, perl = TRUE)
     w <- 1
-    e <- 1
-    esterr <- FALSE
+    e <- 1    
+
     ## 5. Parse the lines
     if( !is.null(lines)) {
-        ## If the model did not estimate normally, (and does not contain model fit info) 
-        #if(!any(grepl("(MODEL FIT INFORMATION)",lines$tag))) {
-        #    lines[nrow(lines),tag] <- ""
-        #}
-        ## don't get error message from end flag, but use the end flag position ($element)
-        for(l in 1:(nrow(lines)-1)) {
-            ## 5.1 Get error or warning message l
-            if(grepl("WARNING:",lines[l,]$tag)) {
-                ## sadly, we need to parse the warning errors differently for "WARNING:" (the estimation warnings)
-                ## because the warning message occurs partially on the same line as "WARNING:"
-                firstline <- warnerrtext[lines[l,"element"]]             
-                warn.err.body <- c(trimSpace(sub("WARNING:","",firstline)),
-                                   trimSpace(warnerrtext[(lines[l, "element"] + 1):(lines[l + 1, "element"] - 1)]))                            
+        ## 5.1 get end flag line
+            endflagline <- min(grep(endflags,lines$tag))
+        
+        for(l in 1:(endflagline-1)) {
+            ## 5.2 Get error or warning message l
+            samelineError <- paste0("(WARNING:)|",esterrflags,collapse="")
+            if(grepl(samelineError,lines[l,]$tag)) {
+                ## Case 1: The warning message occurs on the same line as the flag. Leave flag in message.             
+                warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]):(lines[l + 1, "element"] - 1)])                            
             } else {
-                ## again sadly, we need to parse the not terminate normally errors differently because the flag is contained in the message
-                ## and is different for the last error.
-                if(grepl("THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY",lines[l,]$tag)) {
-                    if(l == nrow(lines)-1) {
-                        warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]):(lines[l + 1, "element"])])
-                    } else { warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]):(lines[l + 1, "element"])-1])}
+                if(l == (endflagline-1)) {
+                    ## Case 2: Last estimation error/warning flag. Get all warning text from last estimation error/warning flag to end flag.
+                    warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]):(lines[endflagline, "element"]-1)])
                 } else {
-                    warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]+1):(lines[l + 1, "element"]-1)])
+                    ## Case 3: Warning message does not occur on the same line as the flag (i.e. input warnings/errors), remove flag from message.
+                    warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]+1):(lines[l + 1, "element"])-1])
                 }
             }                
-            ## 5.2 build the warnerr object
-            if (grepl("WARNING",lines[l,]$tag,)) {
+            ## 5.3 build the warnerr object
+            if (grepl("WARNING",lines[l,]$tag)) {
+                ## Case 1: Message contains "WARNING" (input or estimation)
                 warnerr$warnings[[w]] <- warn.err.body
+                if(grepl("\\*\\*\\* WARNING",lines[l,]$tag)){
+                    ## message is an input warning
+                    splittag <- strsplit(lines[l, "tag"], "\\s+", perl = TRUE)[[1L]]
+                    if (length(splittag) > 3L && splittag[3L] == "in") {
+                        attr(warnerr$warnings[[w]], "section") <- tolower(paste(splittag[4L:(which(splittag == "command") - 1L)], collapse = "."))
+                    }
+                }
                 w <- w + 1
             }
             else if ((substr(lines[l, "tag"], 1, 9) == "*** ERROR")) {
+                ## Case 2: Message contains an input error
                 warnerr$errors[[e]] <- warn.err.body
                 splittag <- strsplit(lines[l, "tag"], "\\s+", perl = TRUE)[[1L]]
                 if (length(splittag) > 3L && splittag[3L] == "in") {
@@ -733,7 +747,8 @@ extractWarningsErrors_1file <- function(outfiletext,filename,input) {
                 }
                 e <- e + 1
             }
-            else if (grepl("THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY",lines[l,]$tag)) {
+            else if (grepl(esterrflags,lines[l,]$tag)) {
+                ## Case 3: Message contains an estimation error
                 warnerr$errors[[e]] <- warn.err.body
                 attr(warnerr$errors[[e]],"section") <- tolower(lines[l,]$tag)
                 e <- e + 1
