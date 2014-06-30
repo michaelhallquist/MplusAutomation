@@ -228,6 +228,8 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #'   defaults). Allows the user to specify the name/path of the Mplus executable to be used for
 #'   running models. This covers situations where Mplus is not in the system's path,
 #'   or where one wants to test different versions of the Mplus program.
+#' @param killOnFail optional. Windows only for now. If \code{TRUE}, kill all processes named mplus.exe when 
+#'   \code{runModels} does not terminate normally. Defaults to \code{TRUE}.
 #'
 #' @return None. Function is used for its side effects (running models).
 #' @author Michael Hallquist
@@ -241,14 +243,12 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #'     Mplus_command="C:\\Users\\Michael\\Mplus Install\\Mplus51.exe")
 #' }
 runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, showOutput=FALSE,
-	replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus") {
-
-  #removed from parameter list because no need for user to customize at this point
-  deleteOnKill <- TRUE #at this point, don't expose this setting to the user
+	replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus", killOnFail=TRUE) {
 
   #retain working directory and reset at end of run
   #need to set here to ensure that logTarget initialization below is within target directory, not getwd()
   curdir <- getwd()
+  directory <- sub("(\\\\|/)?$", "", directory, perl=TRUE) #remove trailing slash, which generates file.exists error on windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
   if (!file.exists(directory)) { stop("runModels cannot change to directory: ", directory)}
   setwd(directory)
   normalComplete <- FALSE
@@ -279,9 +279,9 @@ runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, sho
 
   #if the function gets interrupted (e.g., the user presses escape), kill the Mplus process (doesn't happen automatically).
   exitRun <- function() {
-    #require(plyr) #shift to import
-
-    if(normalComplete == FALSE && isLogOpen()) {
+    deleteOnKill <- TRUE #whether to delete unfinished output
+    
+    if (normalComplete == FALSE && isLogOpen()) {
       writeLines("Run terminated abnormally", logTarget)
       flush(logTarget)
     }
@@ -289,7 +289,7 @@ runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, sho
     #create a data frame consisting of the process names and pids
     #uses str split on the output of wmic to extract name and pid columns
     #depends on windows tools
-    if (.Platform$OS.type == "windows") {
+    if (.Platform$OS.type == "windows" && normalComplete == FALSE && killOnFail == TRUE) {
       processList <- ldply(strsplit(shell("wmic process get caption, processid", intern=TRUE), split="\\s+", perl=TRUE),
           function(element) {
             return(data.frame(procname=element[1], pid=element[2], stringsAsFactors = FALSE))

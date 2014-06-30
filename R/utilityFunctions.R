@@ -388,6 +388,9 @@ splitFilePath <- function(abspath) {
   if (!is.character(abspath)) stop("Path not a character string")
   if (nchar(abspath) < 1 || is.na(abspath)) stop("Path is missing or of zero length")
 
+  #trailing slash screws up file.exists call on Windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
+  abspath <- sub("(\\\\|/)?$", "", abspath, perl=TRUE)  
+  
   components <- strsplit(abspath, split="[\\/]")[[1]]
   lcom <- length(components)
 

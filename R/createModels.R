@@ -1306,7 +1306,7 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
   if (!missing(keepCols) && length(keepCols) > 0) {
     df <- df[, keepCols] # works with all types
   }
-
+  
   #drop columns specified by dropCols
   if (!missing(dropCols) && length(dropCols) > 0) {
     if (is.character(dropCols)) {
@@ -1317,23 +1317,30 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
       df <- subset(df, select = !dropCols)
     }
   }
-
+  
   #convert factors to numbers
-  df <- as.data.frame(lapply(df, function(col) {
-    #can't use ifelse because is.factor returns only one element,
-    #and ifelse enforces identical length
-    if (is.factor(col)) {
-      # numeric storage of the levels corresponds to the order of the levels
-      cat("Factor levels: ", paste(levels(col), collapse=", "), "converted to numbers: ",
-        paste(seq_along(levels(col)), collapse=", "), "\n\n")
-      col <- as.numeric(col)
-    }
-    if (is.character(col)) {
-      warning("Character data requested for output using prepareMplusData.\n  Mplus does not support character data.")
-    }
-    return(col)
-  }))
-
+  df <- as.data.frame(qv <- lapply(1:ncol(df), function(col) {
+            #can't use ifelse because is.factor returns only one element,
+            #and ifelse enforces identical length
+            if (is.factor(df[,col])) {
+              # numeric storage of the levels corresponds to the order of the levels
+              cat("Factor variable:", names(df)[col], "; factor levels:", paste(levels(df[,col]), collapse=", "), "converted to numbers:",
+                  paste(seq_along(levels(df[,col])), collapse=", "), "\n\n")
+              col_value <- as.numeric(df[,col])
+            } else {
+              col_value <- df[,col]
+            }
+            
+            if (is.character(df[,col])) {
+              warning("Character data requested for output using prepareMplusData.\n  Mplus does not support character data.")
+            }
+            
+            col_value <- list(col_value)
+            names(col_value) <- names(df)[col]
+            return(col_value)
+          }))
+  
+  
   if (file.exists(filename)) {
     if (overwrite) {
       warning(paste("The file", sQuote(basename(filename)),

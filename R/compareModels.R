@@ -54,6 +54,8 @@
 #' @param equalityMargin Defines the discrepancy between models that is considered equal.
 #'   	Different margins can be specified for p-value equality
 #'   	versus parameter equality. Defaults to .0001 for both.
+#' @param compare Which parameter estimates should be compared. Options are "unstandardized", "stdyx.standardized"
+#'    "stdy.standardized", and "std.standardized".
 #' @param sort How to sort the output of parameter comparisons.
 #'   	Options are "none", "type", "alphabetical", and "maxDiff". See below for details.
 #' @param showFixed Whether to display fixed parameters in the output (identified
@@ -72,7 +74,8 @@
 #' @examples
 #'
 #' # make me!!!
-compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pvalue=0.0001), sort="none", showFixed=FALSE, showNS=TRUE, diffTest=FALSE) {
+compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pvalue=0.0001), 
+    compare="unstandardized", sort="none", showFixed=FALSE, showNS=TRUE, diffTest=FALSE) {
   # TODO: Make work with standardized parameter estimates
   #options for show:
   # -all: print equal params, unequal params, and unique params
@@ -120,8 +123,6 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
     cat("\nModel Summary Comparison\n------------------------\n\n")
 
     # compare basic stuff
-
-    #sumCombined <- plyr::rbind.fill(m1Summaries, m2Summaries)
     sumCombined <- rbind.fill(m1Summaries, m2Summaries)
 
     if (!"allsummaries" %in% show) {
@@ -141,13 +142,14 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
       sumCombinedL[[var]] <- lapply(sumCombinedL[[var]], strwrap, width=40, exdent=2)
       len1 <- length(sumCombinedL[[var]][[1]])
       len2 <- length(sumCombinedL[[var]][[2]])
-      if (len1 > len2) sumCombinedL[[var]][[2]] <- c(sumCombinedL[[var]][[2]], rep("", len1-len2))
-      else if (len2 > len1) sumCombinedL[[var]][[1]] <- c(sumCombinedL[[var]][[1]], rep("", len2-len1))
+      if (len1 > len2) { sumCombinedL[[var]][[2]] <- c(sumCombinedL[[var]][[2]], rep("", len1-len2))
+      } else if (len2 > len1) { sumCombinedL[[var]][[1]] <- c(sumCombinedL[[var]][[1]], rep("", len2-len1)) }
       padLen <- max(len2, len1) - 1
-      if ((var+totalPad+1) <= length(nameList))
+      if ((var+totalPad+1) <= length(nameList)) {
         nameList <- c(nameList[1:(var+totalPad)], rep("", padLen), nameList[(var+totalPad+1):length(nameList)])
-      else
+      } else {
         nameList <- c(nameList[1:(var+totalPad)], rep("", padLen))
+      }
 
       totalPad <- totalPad + padLen
     }
@@ -248,11 +250,15 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
       inherits(m2, c("mplus.model", "mplus.params")) &&
       any(c("all", "equal", "diff", "pdiff", "unique") %in% show)) {
 
-    if (inherits(m1, "mplus.model")) m1Params <- m1$parameters$unstandardized
-    else m1Params <- m1
+    if (inherits(m1, "mplus.model")) {
+      m1Params <- m1$parameters[[compare]]
+      if (is.null(m1Params)) { stop("Unable to find model 1 parameters: ", compare) }
+    } else { m1Params <- m1 }
 
-    if (inherits(m2, "mplus.model")) m2Params <- m2$parameters$unstandardized
-    else m2Params <- m2
+    if (inherits(m2, "mplus.model")) {
+      m2Params <- m2$parameters[[compare]]
+      if (is.null(m2Params)) { stop("Unable to find model 2 parameters: ", compare) }
+    } else { m2Params <- m2 }
 
 	#check for multiple groups, latent classes, and multilevel output
 	uniqueParamCols <- c("paramHeader", "param")

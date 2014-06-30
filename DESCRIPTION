@@ -25,17 +25,3 @@ Suggests:
     tcltk,
     relimp
 LazyLoad: yes
-Collate:
-    'compareModels.R'
-    'createModels.R'
-    'extractModIndices.R'
-    'extractParameters.R'
-    'extractSaveData.R'
-    'graphModels.R'
-    'mplus.R'
-    'MplusAutomation.R'
-    'parseOutput.R'
-    'runModels.R'
-    'utilityFunctions.R'
-    'methods.R'
-    'extractAuxDis.R'
