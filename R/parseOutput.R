@@ -654,67 +654,114 @@ divideIntoFields <- function(section.text, required) {
 #' @keywords internal
 #' @examples
 #' # make me!!!
-extractWarningsErrors_1file <- function(outfiletext, filename, input) {
+extractWarningsErrors_1file <- function(outfiletext,filename,input) {
 
-  warnerr <- list(warnings=list(), errors=list())
-  class(warnerr$errors) <- c("list", "mplus.errors")
-  class(warnerr$warnings) <- c("list", "mplus.warnings")
-
-  if (!inherits(input, "mplus.inp")) {
-    warning("Could not identify warnings and errors; input is not of class mplus.inp")
-    return(warnerr)
-  }
-
-  if (is.null(attr(input, "start.line")) || is.null(attr(input, "end.line")) ||
-      attr(input, "start.line") < 0L || attr(input, "end.line") < 0L) {
-    warning("Could not identify bounds of input section: ", filename)
-    return(warnerr)
-  }
-
-  startWarnErr <- attr(input, "end.line") + 1L
-
-  endWarnErr <- grep("^\\s*(INPUT READING TERMINATED NORMALLY|\\*\\*\\* WARNING.*|\\d+ (?:ERROR|WARNING)\\(S\\) FOUND IN THE INPUT INSTRUCTIONS|\\*\\*\\* ERROR.*)\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
-  if (length(endWarnErr) == 0L) {
-    return(warnerr) #unable to find end of warnings (weird), or there are none.
-  }
-
-  #The above will match all of the possible relevant lines.
-  #To identify warnings section, need to go to first blank line after the final warning or error. (look in next 100 lines)
-  lastWarn <- endWarnErr[length(endWarnErr)]
-  blank <- which(outfiletext[lastWarn:(lastWarn + 100 )] == "")[1L] + lastWarn - 1
-
-  warnerrtext <- outfiletext[startWarnErr[1L]:(blank-1)]
-
-  lines <- friendlyGregexpr("^\\s*(\\*\\*\\* WARNING|\\*\\*\\* ERROR).*\\s*$", warnerrtext, perl=TRUE)
-
-  w <- 1
-  e <- 1
-
-  if (!is.null(lines)) {
-    for (l in 1:nrow(lines)) {
-      if (l < nrow(lines)) {
-        warn.err.body <- trimSpace(warnerrtext[(lines[l,"element"] + 1):(lines[l+1,"element"] - 1)])
-      } else {
-        warn.err.body <- trimSpace(warnerrtext[(lines[l,"element"] + 1):length(warnerrtext)])
-      }
-
-      if (substr(lines[l,"tag"], 1, 11) == "*** WARNING") {
-        warnerr$warnings[[w]] <- warn.err.body
-        w <- w + 1
-      } else if (substr(lines[l,"tag"], 1, 9) == "*** ERROR") {
-        warnerr$errors[[e]] <- warn.err.body
-        splittag <- strsplit(lines[l,"tag"], "\\s+", perl=TRUE)[[1L]]
-        if (length(splittag) > 3L && splittag[3L] == "in") {
-          attr(warnerr$errors[[e]], "section") <- tolower(paste(splittag[4L:(which(splittag == "command") - 1L)], collapse="."))
-        }
-        e <- e + 1
-      } else { stop ("Cannot discern warning/error type: ", lines[l, "tag"]) }
+    warnerr <- list(warnings = list(), errors = list())
+    class(warnerr$errors) <- c("list", "mplus.errors")
+    class(warnerr$warnings) <- c("list", "mplus.warnings")
+    if (!inherits(input, "mplus.inp")) {
+        warning("Could not identify warnings and errors; input is not of class mplus.inp")
+        return(warnerr)
     }
-  }
+    if (is.null(attr(input, "start.line")) || is.null(attr(input, 
+        "end.line")) || attr(input, "start.line") < 0L || 
+        attr(input, "end.line") < 0L) {
+        warning("Could not identify bounds of input section: ", 
+            filename)
+        return(warnerr)
+    }
+    
+    ## 1. Grab indices of all warnings, errors, and end flags. Finds indices matching the following:
+    ## a. Input reading terminated normally (no input warnings)
+    ## b. any use of "WARNING" or "ERROR"
+    ## c. Estimation errors:
+    ##   1. MODEL ESTIMATION DID NOT TERMINATE NORMALLY
+    ##   2. LOGLIKELIHOOD DECREASED
+    ## ... can add more estimation error flags here
+    ## z1. End flag 1: MODEL FIT INFORMATION
+    ## z2. End flag 2: FINAL CLASS COUNTS (occurs for some mixture models, which report class counts before model results)
+    ## z3. End flag 3: MODEL RESULTS
+    ## ... better ending flags?
 
-  return(warnerr)
+    esterrflags <- "(THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY)|(LOGLIKELIHOOD DECREASED)|"
+    endflags <- c("(MODEL FIT INFORMATION)|(FINAL CLASS COUNTS)|(MODEL RESULTS)")
+    allwarnpat <- paste0("(INPUT READING TERMINATED NORMALLY)|(ERROR)|WARNING.*|",esterrflags,endflags,collapse="")
+    
+    allwarn <- grep(allwarnpat,outfiletext, ignore.case = TRUE, perl = TRUE)
+    startwarn <- allwarn[1]
+    endinputerr <- allwarn[grep("INPUT",outfiletext[allwarn])]
+    
+    ## 2. grab line #s of the estimation warnings: 1 warning after "x WARNINGS FOUND IN INPUT INSTRUCTIONS" to the last end flag, MODEL RESULTS
+    startesterr <- allwarn[which(endinputerr==allwarn)+1]
+    endesterr <- allwarn[length(allwarn)]
+    
+    ## 3. get warning text: input and estimation
+    inputwarntext <- outfiletext[startwarn:endinputerr]
+    estwarntext <- outfiletext[startesterr:endesterr]
+    warnerrtext <- c(inputwarntext,estwarntext)
 
+    ## 4. Find and tag the lines in warnerrtext corresponding to input warnings/errors, estimation warnings/errors, and end flags.
+    lines <- friendlyGregexpr(paste0("(^\\s*(\\*\\*\\* WARNING|\\*\\*\\* ERROR).*\\s*$)|WARNING:|",esterrflags,endflags,collapse=""), warnerrtext, perl = TRUE)
+    w <- 1
+    e <- 1    
+
+    ## 5. Parse the lines
+    if( !is.null(lines)) {
+        ## 5.1 get end flag line
+            endflagline <- min(grep(endflags,lines$tag))
+        
+        for(l in 1:(endflagline-1)) {
+            ## 5.2 Get error or warning message l
+            samelineError <- paste0("(WARNING:)|",esterrflags,collapse="")
+            if(grepl(samelineError,lines[l,]$tag)) {
+                ## Case 1: The warning message occurs on the same line as the flag. Leave flag in message.             
+                warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]):(lines[l + 1, "element"] - 1)])                            
+            } else {
+                if(l == (endflagline-1)) {
+                    ## Case 2: Last estimation error/warning flag. Get all warning text from last estimation error/warning flag to end flag.
+                    warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]):(lines[endflagline, "element"]-1)])
+                } else {
+                    ## Case 3: Warning message does not occur on the same line as the flag (i.e. input warnings/errors), remove flag from message.
+                    warn.err.body <- trimSpace(warnerrtext[(lines[l, "element"]+1):(lines[l + 1, "element"])-1])
+                }
+            }                
+            ## 5.3 build the warnerr object
+            if (grepl("WARNING",lines[l,]$tag)) {
+                ## Case 1: Message contains "WARNING" (input or estimation)
+                warnerr$warnings[[w]] <- warn.err.body
+                if(grepl("\\*\\*\\* WARNING",lines[l,]$tag)){
+                    ## message is an input warning
+                    splittag <- strsplit(lines[l, "tag"], "\\s+", perl = TRUE)[[1L]]
+                    if (length(splittag) > 3L && splittag[3L] == "in") {
+                        attr(warnerr$warnings[[w]], "section") <- tolower(paste(splittag[4L:(which(splittag == "command") - 1L)], collapse = "."))
+                    }
+                }
+                w <- w + 1
+            }
+            else if ((substr(lines[l, "tag"], 1, 9) == "*** ERROR")) {
+                ## Case 2: Message contains an input error
+                warnerr$errors[[e]] <- warn.err.body
+                splittag <- strsplit(lines[l, "tag"], "\\s+", perl = TRUE)[[1L]]
+                if (length(splittag) > 3L && splittag[3L] == "in") {
+                    attr(warnerr$errors[[e]], "section") <- tolower(paste(splittag[4L:(which(splittag == "command") - 1L)], collapse = "."))
+                }
+                e <- e + 1
+            }
+            else if (grepl(esterrflags,lines[l,]$tag)) {
+                ## Case 3: Message contains an estimation error
+                warnerr$errors[[e]] <- warn.err.body
+                attr(warnerr$errors[[e]],"section") <- tolower(lines[l,]$tag)
+                e <- e + 1
+            }
+            else { 
+                stop("Cannot discern warning/error type: ", lines[l, "tag"])
+            }
+        }
+    }
+    return(warnerr)
 }
+
+
 
 #' Extract and parse Mplus input file
 #'
