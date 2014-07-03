@@ -1442,14 +1442,14 @@ extractResiduals <- function(outfiletext, filename) {
   for (g in 1:length(residSubsections)) {
     targetList <- list()
     
-    targetList[["meanEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Means/Intercepts/Thresholds", filename)
-    targetList[["meanResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Means/Intercepts/Thresholds", filename)
-    targetList[["meanResid.std"]] <- matrixExtract(residSubsections[[g]], "Standardized Residuals \\(z-scores\\) for Means/Intercepts/Thresholds", filename)
-    targetList[["meanResid.norm"]] <- matrixExtract(residSubsections[[g]], "Normalized Residuals for Means/Intercepts/Thresholds", filename)
-    targetList[["covarianceEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Covariances/Correlations/Residual Correlations", filename)
-    targetList[["covarianceResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Covariances/Correlations/Residual Correlations", filename)
-    targetList[["covarianceResid.std"]] <- matrixExtract(residSubsections[[g]], "Standardized Residuals \\(z-scores\\) for Covariances/Correlations/Residual Corr", filename)
-    targetList[["covarianceResid.norm"]] <- matrixExtract(residSubsections[[g]], "Normalized Residuals for Covariances/Correlations/Residual Correlations", filename)
+    targetList[["meanEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Means(/Intercepts/Thresholds)*", filename)
+    targetList[["meanResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Means(/Intercepts/Thresholds)*", filename)
+    targetList[["meanResid.std"]] <- matrixExtract(residSubsections[[g]], "Standardized Residuals \\(z-scores\\) for Means(/Intercepts/Thresholds)*", filename)
+    targetList[["meanResid.norm"]] <- matrixExtract(residSubsections[[g]], "Normalized Residuals for Means(/Intercepts/Thresholds)*", filename)
+    targetList[["covarianceEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Covariances(/Correlations/Residual Correlations)*", filename)
+    targetList[["covarianceResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
+    targetList[["covarianceResid.std"]] <- matrixExtract(residSubsections[[g]], "Standardized Residuals \\(z-scores\\) for Covariances(/Correlations/Residual Corr)*", filename)
+    targetList[["covarianceResid.norm"]] <- matrixExtract(residSubsections[[g]], "Normalized Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
     targetList[["slopeEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Slopes", filename)
     targetList[["slopeResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Slopes", filename)
     
