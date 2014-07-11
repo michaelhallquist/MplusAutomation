@@ -47,10 +47,6 @@ the `mtcars` dataset built into `R`.
 
     require(MplusAutomation)
 
-    ## Loading required package: MplusAutomation
-    ## Loading required package: plyr
-    ## Loading required package: boot
-
     pathmodel <- mplusObject(
        TITLE = "MplusAutomation Example - Path Model;",
        MODEL = "
@@ -81,109 +77,31 @@ run the model on the dataset, and reads it back into `R`.
 
 There is even pretty printing now. To see the results:
 
-    require(texreg)
-    htmlreg(extract(fit, summaries = c("Observations", "CFI", "SRMR")), single.row=TRUE)
+<pre><code>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<table cellspacing="0" align="center" style="border: none;">
-  <caption align="bottom" style="margin-top:0.3em;">
-Statistical models
-</caption>
-  <tr>
-    <th style="text-align: left; border-top: 2px solid black; border-bottom: 1px solid black; padding-right: 12px;"></th>
-    <th style="text-align: left; border-top: 2px solid black; border-bottom: 1px solid black; padding-right: 12px;">
-<b>Model 1</b>
-</th>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-MPG\<-HP
-</td>
-    <td style="padding-right: 12px; border: none;">
--0.06 (0.01)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-WT\<-DISP
-</td>
-    <td style="padding-right: 12px; border: none;">
-0.01 (0.00)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-WT\<-\>MPG
-</td>
-    <td style="padding-right: 12px; border: none;">
--1.02 (0.38)<sup style="vertical-align: 4px;">\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-MPG\<-Intercepts
-</td>
-    <td style="padding-right: 12px; border: none;">
-29.59 (1.53)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-WT\<-Intercepts
-</td>
-    <td style="padding-right: 12px; border: none;">
-1.82 (0.18)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-MPG\<-\>MPG
-</td>
-    <td style="padding-right: 12px; border: none;">
-14.04 (3.52)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-WT\<-\>WT
-</td>
-    <td style="padding-right: 12px; border: none;">
-0.21 (0.06)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="border-top: 1px solid black;">
-Observations
-</td>
-    <td style="border-top: 1px solid black;">
-32
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;">
-CFI
-</td>
-    <td style="padding-right: 12px; border: none;">
-0.87
-</td>
-  </tr>
-  <tr>
-    <td style="border-bottom: 2px solid black;">
-SRMR
-</td>
-    <td style="border-bottom: 2px solid black;">
-0.14
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;" colspan="2">
-<span
-style="font-size:0.8em"><sup style="vertical-align: 4px;">***</sup>p \<
-0.001, <sup style="vertical-align: 4px;">**</sup>p \< 0.01,
-<sup style="vertical-align: 4px;">*</sup>p \< 0.05</span>
-</td>
-  </tr>
-</table>
+```r
+require(texreg)
+screenreg(extract(fit, summaries = c("Observations", "CFI", "SRMR")), single.row=TRUE)
+```
+
+
+==================================
+                  Model 1         
+----------------------------------
+ MPG<-HP          -0.06 (0.01) ***
+ WT<-DISP          0.01 (0.00) ***
+ WT<->MPG         -1.02 (0.38) ** 
+ MPG<-Intercepts  29.59 (1.53) ***
+ WT<-Intercepts    1.82 (0.18) ***
+ MPG<->MPG        14.04 (3.52) ***
+ WT<->WT           0.21 (0.06) ***
+----------------------------------
+Observations      32              
+CFI                0.87           
+SRMR               0.14           
+==================================
+*** p < 0.001, ** p < 0.01, * p < 0.05
+</code></pre>
 
 The fit is not great, to add some extra paths we can update the model.
 
@@ -205,162 +123,35 @@ The fit is not great, to add some extra paths we can update the model.
 
 We can make some pretty output of both models:
 
-    htmlreg(list(
-      extract(fit, summaries = c("Observations", "CFI", "SRMR")),
-      extract(fit2, summaries = c("Observations", "CFI", "SRMR"))),
-      single.row=TRUE)
+<pre><code>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<table cellspacing="0" align="center" style="border: none;">
-  <caption align="bottom" style="margin-top:0.3em;">
-Statistical models
-</caption>
-  <tr>
-    <th style="text-align: left; border-top: 2px solid black; border-bottom: 1px solid black; padding-right: 12px;"></th>
-    <th style="text-align: left; border-top: 2px solid black; border-bottom: 1px solid black; padding-right: 12px;">
-<b>Model 1</b>
-</th>
-    <th style="text-align: left; border-top: 2px solid black; border-bottom: 1px solid black; padding-right: 12px;">
-<b>Model 2</b>
-</th>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-MPG\<-HP
-</td>
-    <td style="padding-right: 12px; border: none;">
--0.06 (0.01)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-    <td style="padding-right: 12px; border: none;">
--0.02 (0.01)
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-WT\<-DISP
-</td>
-    <td style="padding-right: 12px; border: none;">
-0.01 (0.00)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-    <td style="padding-right: 12px; border: none;">
-0.01 (0.00)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-WT\<-\>MPG
-</td>
-    <td style="padding-right: 12px; border: none;">
--1.02 (0.38)<sup style="vertical-align: 4px;">\*\*</sup>
-</td>
-    <td style="padding-right: 12px; border: none;">
--0.73 (0.26)<sup style="vertical-align: 4px;">\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-MPG\<-Intercepts
-</td>
-    <td style="padding-right: 12px; border: none;">
-29.59 (1.53)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-    <td style="padding-right: 12px; border: none;">
-30.74 (1.27)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-WT\<-Intercepts
-</td>
-    <td style="padding-right: 12px; border: none;">
-1.82 (0.18)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-    <td style="padding-right: 12px; border: none;">
-1.68 (0.19)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-MPG\<-\>MPG
-</td>
-    <td style="padding-right: 12px; border: none;">
-14.04 (3.52)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-    <td style="padding-right: 12px; border: none;">
-8.86 (2.21)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-WT\<-\>WT
-</td>
-    <td style="padding-right: 12px; border: none;">
-0.21 (0.06)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-    <td style="padding-right: 12px; border: none;">
-0.19 (0.05)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-MPG\<-DISP
-</td>
-    <td style="padding-right: 12px; border: none;"></td>
-    <td style="padding-right: 12px; border: none;">
--0.03 (0.01)<sup style="vertical-align: 4px;">\*\*\*</sup>
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;"> 
-WT\<-HP
-</td>
-    <td style="padding-right: 12px; border: none;"></td>
-    <td style="padding-right: 12px; border: none;">
-0.00 (0.00)
-</td>
-  </tr>
-  <tr>
-    <td style="border-top: 1px solid black;">
-Observations
-</td>
-    <td style="border-top: 1px solid black;">
-32
-</td>
-    <td style="border-top: 1px solid black;">
-32
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;">
-CFI
-</td>
-    <td style="padding-right: 12px; border: none;">
-0.87
-</td>
-    <td style="padding-right: 12px; border: none;">
-1.00
-</td>
-  </tr>
-  <tr>
-    <td style="border-bottom: 2px solid black;">
-SRMR
-</td>
-    <td style="border-bottom: 2px solid black;">
-0.14
-</td>
-    <td style="border-bottom: 2px solid black;">
-0.00
-</td>
-  </tr>
-  <tr>
-    <td style="padding-right: 12px; border: none;" colspan="3">
-<span
-style="font-size:0.8em"><sup style="vertical-align: 4px;">***</sup>p \<
-0.001, <sup style="vertical-align: 4px;">**</sup>p \< 0.01,
-<sup style="vertical-align: 4px;">*</sup>p \< 0.05</span>
-</td>
-  </tr>
-</table>
+```r
+screenreg(list(
+  extract(fit, summaries = c("Observations", "CFI", "SRMR")),
+  extract(fit2, summaries = c("Observations", "CFI", "SRMR"))),
+  single.row=TRUE)
+```
+
+
+====================================================
+                  Model 1           Model 2         
+----------------------------------------------------
+ MPG<-HP          -0.06 (0.01) ***  -0.02 (0.01)    
+ WT<-DISP          0.01 (0.00) ***   0.01 (0.00) ***
+ WT<->MPG         -1.02 (0.38) **   -0.73 (0.26) ** 
+ MPG<-Intercepts  29.59 (1.53) ***  30.74 (1.27) ***
+ WT<-Intercepts    1.82 (0.18) ***   1.68 (0.19) ***
+ MPG<->MPG        14.04 (3.52) ***   8.86 (2.21) ***
+ WT<->WT           0.21 (0.06) ***   0.19 (0.05) ***
+ MPG<-DISP                          -0.03 (0.01) ***
+ WT<-HP                              0.00 (0.00)    
+----------------------------------------------------
+Observations      32                32              
+CFI                0.87              1.00           
+SRMR               0.14              0.00           
+====================================================
+*** p < 0.001, ** p < 0.01, * p < 0.05
+</code></pre>
 
 How to Help
 -----------
