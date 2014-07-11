@@ -5,7 +5,7 @@
 \usage{
 \method{coef}{mplus.model}(object, type = c("un", "std", "stdy", "stdyx"),
   params = c("regression", "loading", "undirected", "expectation",
-  "variability"), ..., raw = FALSE)
+  "variability", "new"), ..., raw = FALSE)
 }
 \arguments{
 \item{object}{An object of class mplusObject}
@@ -15,7 +15,8 @@ One of \dQuote{un}, \dQuote{std}, \dQuote{stdy}, or \dQuote{stdyx}.}
 
 \item{params}{A character vector indicating what type of parameters to
 extract.  Any combination of \dQuote{regression}, \dQuote{loading},
-\dQuote{undirected}, \dQuote{expectation}, \dQuote{variability}.  A
+\dQuote{undirected}, \dQuote{expectation}, \dQuote{variability}, and
+\dQuote{new}.  A
 single one can be passed or multiple.  By default, all are used and
 all parameters are returned.}
 

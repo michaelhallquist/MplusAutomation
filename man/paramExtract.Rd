@@ -4,7 +4,7 @@
 \title{Extract parameters from a data frame of Mplus estimates}
 \usage{
 paramExtract(x, params = c("regression", "loading", "undirected",
-  "expectation", "variability"))
+  "expectation", "variability", "new"))
 }
 \arguments{
 \item{x}{A data frame (specifically the type returned by \code{readModels}) containing
@@ -13,7 +13,8 @@ column called \sQuote{paramHeader}.}
 
 \item{params}{A character string indicating the types of parameters to be returned.
 Options currently include \sQuote{regression}, \sQuote{loading}, \sQuote{undirected},
-\sQuote{expectation}, and \sQuote{variability}. Regressions include regression of one variable
+\sQuote{expectation}, \sQuote{variability}, and \sQuote{new} for new/additional parameters.
+Regressions include regression of one variable
 \code{ON} another. \sQuote{loading} include indicator variables (which are assumed caused by the
 underlying latent variable) and variables in latent growth models (\code{BY} or \code{|}).
 Undirected paths currently only include covariances, indicated by the \code{WITH}

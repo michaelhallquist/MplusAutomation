@@ -1,5 +1,6 @@
 Version 0.6-3
 - feature: readModels tries hard to extract estimation errors and warnings into $errors and $warnings, respectively.
+- feature: coef methods for mplus.model and mplusObject class objects are smarter allowing extract methods and the use of texreg package for prettier output
 - feature: mplusObject tries hard (with a note) to guess variables to include from the dataset if usevariables is missing
 - variable name explicitly mentioned when factors are converted to numeric codes by prepareMplusData.
 - bugfix: mplusModeler only runs the input file it generated in a directory now (thanks to Huashan Chen)

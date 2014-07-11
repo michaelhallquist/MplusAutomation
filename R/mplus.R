@@ -703,7 +703,8 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
 #'   column called \sQuote{paramHeader}.
 #' @param params A character string indicating the types of parameters to be returned.
 #'   Options currently include \sQuote{regression}, \sQuote{loading}, \sQuote{undirected},
-#'   \sQuote{expectation}, and \sQuote{variability}. Regressions include regression of one variable
+#'   \sQuote{expectation}, \sQuote{variability}, and \sQuote{new} for new/additional parameters.
+#'   Regressions include regression of one variable
 #'   \code{ON} another. \sQuote{loading} include indicator variables (which are assumed caused by the
 #'   underlying latent variable) and variables in latent growth models (\code{BY} or \code{|}).
 #'   Undirected paths currently only include covariances, indicated by the \code{WITH}
@@ -743,7 +744,7 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
 #'   paramExtract(d, "e")
 #'   paramExtract(d, "v")
 #' }
-paramExtract <- function(x, params = c("regression", "loading", "undirected", "expectation", "variability")) {
+paramExtract <- function(x, params = c("regression", "loading", "undirected", "expectation", "variability", "new")) {
   #readModels("C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/Outputs/ex3.9.out")
   params <- match.arg(params)
 
@@ -752,7 +753,8 @@ paramExtract <- function(x, params = c("regression", "loading", "undirected", "e
     loading = c("BY", "\\|"),
     undirected = c("WITH"),
     expectation = c("Means", "Intercepts", "Thresholds"),
-    variability = c("Variances", "Residual.Variances"))
+    variability = c("Variances", "Residual.Variances"),
+    new = "New.Additional.Parameters")
   index <- sapply(keys, function(pattern) {
     grepl(paste0(".*", pattern, "$"), x[, "paramHeader"])
   })

@@ -106,7 +106,8 @@ summary.mplusObject <- function(object, verbose=FALSE, ...) {
 #'   One of \dQuote{un}, \dQuote{std}, \dQuote{stdy}, or \dQuote{stdyx}.
 #' @param params A character vector indicating what type of parameters to
 #'   extract.  Any combination of \dQuote{regression}, \dQuote{loading},
-#'   \dQuote{undirected}, \dQuote{expectation}, \dQuote{variability}.  A
+#'   \dQuote{undirected}, \dQuote{expectation}, \dQuote{variability}, and
+#'   \dQuote{new}.  A
 #'   single one can be passed or multiple.  By default, all are used and
 #'   all parameters are returned.
 #' @param \dots Additional arguments to pass on (not currently used)
@@ -156,7 +157,7 @@ summary.mplusObject <- function(object, verbose=FALSE, ...) {
 #' unlink("Mplus Run Models.log")
 #' }
 coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
-  params = c("regression", "loading", "undirected", "expectation", "variability"),
+  params = c("regression", "loading", "undirected", "expectation", "variability", "new"),
   ..., raw=FALSE) {
   type <- match.arg(type)
 
@@ -187,7 +188,8 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
       loading = paste0(res[, "param"], "<-", gsub("\\.BY|\\.\\|", "", res[, "paramHeader"])),
       undirected = paste0(gsub("\\.WITH", "<->", res[, "paramHeader"]), res[, "param"]),
       expectation = paste0(res[, "param"], "<-", gsub("\\.Means|\\.Intercepts|\\.Thresholds", "", res[, "paramHeader"])),
-      variability = paste0(res[, "param"], "<->", res[, "param"]))
+      variability = paste0(res[, "param"], "<->", res[, "param"]),
+      new = res[, 'param'])
     cbind(Label = names, res, Section = attr(res, "type"))
   })
 
@@ -211,7 +213,7 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
   if ("se" %in% colnames(out)) {
     se <- "se"
   } else if ("posterior_sd" %in% colnames(out)) {
-    colnames(out)[which(colnames(out) == se)] <- "se"
+    colnames(out)[which(colnames(out) == "posterior_sd")] <- "se"
     se <- "se"
   }
 
@@ -302,7 +304,7 @@ coef.mplusObject <- function(object, ...) {
 #' unlink("Mplus Run Models.log")
 #' }
 extract.mplus.model <- function(model, summaries = "none", ...) {
-  if (summaries != "none") {
+  if (summaries[1] != "none") {
     stopifnot(all(summaries %in% colnames(model$summaries)))
 
     knownsummaries <- c("Title","Mplus.version", "AnalysisType", "DataType", "Filename", "Estimator",

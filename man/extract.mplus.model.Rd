@@ -19,6 +19,7 @@ extract.mplus.model(model, summaries = "none", ...)
 Defaults to \dQuote{none}.}
 
 \item{\dots}{Additional arguments passed to \code{\link{coef.mplus.model}}.}
+
 }
 \value{
 A \code{texreg} object, or for multiple group models,
