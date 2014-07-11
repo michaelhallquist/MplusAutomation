@@ -54,7 +54,7 @@ the `mtcars` dataset built into `R`.
          wt ON disp;",
        rdata = mtcars)
 
-    ## No R variables to use specified. 
+    ## No R variables to use specified.
     ## Selected automatically as any variable name that occurs in the MODEL or DEFINE section.
 
     fit <- mplusModeler(pathmodel, "mtcars.dat", modelout = "model1.inp", run = 1L)
@@ -64,9 +64,9 @@ the `mtcars` dataset built into `R`.
 
     ## Warning: The file 'mtcars.dat' currently exists and will be overwritten
 
-    ## 
-    ## Running model: model1.inp 
-    ## System command: C:\Windows\system32\cmd.exe /c cd "c:\Users\Joshua Wiley\OneDrive\Rpackages\MplusAutomation" && "Mplus" "model1.inp" 
+    ##
+    ## Running model: model1.inp
+    ## System command: C:\Windows\system32\cmd.exe /c cd "c:\Users\Joshua Wiley\OneDrive\Rpackages\MplusAutomation" && "Mplus" "model1.inp"
     ## Reading model:  model1.out
 
 That is all it takes to run Mplus! `MplusAutomation` takes care of
@@ -86,21 +86,21 @@ screenreg(extract(fit, summaries = c("Observations", "CFI", "SRMR")), single.row
 
 
 ==================================
-                  Model 1         
+                  Model 1
 ----------------------------------
- MPG<-HP          -0.06 (0.01) ***
- WT<-DISP          0.01 (0.00) ***
- WT<->MPG         -1.02 (0.38) ** 
- MPG<-Intercepts  29.59 (1.53) ***
- WT<-Intercepts    1.82 (0.18) ***
- MPG<->MPG        14.04 (3.52) ***
- WT<->WT           0.21 (0.06) ***
+ MPG&lt;-HP          -0.06 (0.01) ***
+ WT&lt;-DISP          0.01 (0.00) ***
+ WT&lt;-&gt;MPG         -1.02 (0.38) **
+ MPG&lt;-Intercepts  29.59 (1.53) ***
+ WT&lt;-Intercepts    1.82 (0.18) ***
+ MPG&lt;-&gt;MPG        14.04 (3.52) ***
+ WT&lt;-&gt;WT           0.21 (0.06) ***
 ----------------------------------
-Observations      32              
-CFI                0.87           
-SRMR               0.14           
+Observations      32
+CFI                0.87
+SRMR               0.14
 ==================================
-*** p < 0.001, ** p < 0.01, * p < 0.05
+*** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05
 </code></pre>
 
 The fit is not great, to add some extra paths we can update the model.
@@ -116,9 +116,9 @@ The fit is not great, to add some extra paths we can update the model.
 
     ## Warning: The file 'mtcars2.dat' currently exists and will be overwritten
 
-    ## 
-    ## Running model: model2.inp 
-    ## System command: C:\Windows\system32\cmd.exe /c cd "c:\Users\Joshua Wiley\OneDrive\Rpackages\MplusAutomation" && "Mplus" "model2.inp" 
+    ##
+    ## Running model: model2.inp
+    ## System command: C:\Windows\system32\cmd.exe /c cd "c:\Users\Joshua Wiley\OneDrive\Rpackages\MplusAutomation" && "Mplus" "model2.inp"
     ## Reading model:  model2.out
 
 We can make some pretty output of both models:
@@ -134,23 +134,23 @@ screenreg(list(
 
 
 ====================================================
-                  Model 1           Model 2         
+                  Model 1           Model 2
 ----------------------------------------------------
- MPG<-HP          -0.06 (0.01) ***  -0.02 (0.01)    
- WT<-DISP          0.01 (0.00) ***   0.01 (0.00) ***
- WT<->MPG         -1.02 (0.38) **   -0.73 (0.26) ** 
- MPG<-Intercepts  29.59 (1.53) ***  30.74 (1.27) ***
- WT<-Intercepts    1.82 (0.18) ***   1.68 (0.19) ***
- MPG<->MPG        14.04 (3.52) ***   8.86 (2.21) ***
- WT<->WT           0.21 (0.06) ***   0.19 (0.05) ***
- MPG<-DISP                          -0.03 (0.01) ***
- WT<-HP                              0.00 (0.00)    
+ MPG&lt;-HP          -0.06 (0.01) ***  -0.02 (0.01)
+ WT&lt;-DISP          0.01 (0.00) ***   0.01 (0.00) ***
+ WT&lt;-&gt;MPG         -1.02 (0.38) **   -0.73 (0.26) **
+ MPG&lt;-Intercepts  29.59 (1.53) ***  30.74 (1.27) ***
+ WT&lt;-Intercepts    1.82 (0.18) ***   1.68 (0.19) ***
+ MPG&lt;-&gt;MPG        14.04 (3.52) ***   8.86 (2.21) ***
+ WT&lt;-&gt;WT           0.21 (0.06) ***   0.19 (0.05) ***
+ MPG&lt;-DISP                          -0.03 (0.01) ***
+ WT&lt;-HP                              0.00 (0.00)
 ----------------------------------------------------
-Observations      32                32              
-CFI                0.87              1.00           
-SRMR               0.14              0.00           
+Observations      32                32
+CFI                0.87              1.00
+SRMR               0.14              0.00
 ====================================================
-*** p < 0.001, ** p < 0.01, * p < 0.05
+*** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05
 </code></pre>
 
 How to Help
