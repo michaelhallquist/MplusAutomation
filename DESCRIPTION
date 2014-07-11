@@ -13,13 +13,15 @@ Description: The MplusAutomation package leverages the flexibility of the R
     models, and extracting and tabulating model parameters and fit statistics.
 License: LGPL-3
 Depends:
+    methods,
     plyr,
     boot
 Imports:
     gsubfn,
     coda,
     xtable,
-    lattice
+    lattice,
+    texreg
 Suggests:
     rhdf5,
     tcltk,
