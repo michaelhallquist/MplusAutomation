@@ -62,11 +62,8 @@ the `mtcars` dataset built into `R`.
     ## Wrote model to: model1.inp
     ## Wrote data to: mtcars.dat
 
-    ## Warning: The file 'mtcars.dat' currently exists and will be overwritten
-
     ##
     ## Running model: model1.inp
-    ## System command: C:\Windows\system32\cmd.exe /c cd "c:\Users\Joshua Wiley\OneDrive\Rpackages\MplusAutomation" && "Mplus" "model1.inp"
     ## Reading model:  model1.out
 
 That is all it takes to run Mplus! `MplusAutomation` takes care of
@@ -77,14 +74,12 @@ run the model on the dataset, and reads it back into `R`.
 
 There is even pretty printing now. To see the results:
 
-<pre><code>
-
 ```r
 require(texreg)
 screenreg(extract(fit, summaries = c("Observations", "CFI", "SRMR")), single.row=TRUE)
 ```
 
-
+<pre><code>
 ==================================
                   Model 1
 ----------------------------------
@@ -118,12 +113,9 @@ The fit is not great, to add some extra paths we can update the model.
 
     ##
     ## Running model: model2.inp
-    ## System command: C:\Windows\system32\cmd.exe /c cd "c:\Users\Joshua Wiley\OneDrive\Rpackages\MplusAutomation" && "Mplus" "model2.inp"
     ## Reading model:  model2.out
 
 We can make some pretty output of both models:
-
-<pre><code>
 
 ```r
 screenreg(list(
@@ -132,7 +124,7 @@ screenreg(list(
   single.row=TRUE)
 ```
 
-
+<pre><code>
 ====================================================
                   Model 1           Model 2
 ----------------------------------------------------
