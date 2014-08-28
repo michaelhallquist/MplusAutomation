@@ -45,7 +45,7 @@ package in the
 Here is an example of using the package to run a simple path model using
 the `mtcars` dataset built into `R`.
 
-    require(MplusAutomation)
+    library(MplusAutomation)
 
     pathmodel <- mplusObject(
        TITLE = "MplusAutomation Example - Path Model;",
@@ -75,8 +75,8 @@ run the model on the dataset, and reads it back into `R`.
 There is even pretty printing now. To see the results:
 
 ```r
-require(texreg)
-screenreg(extract(fit, summaries = c("Observations", "CFI", "SRMR")), single.row=TRUE)
+library(texreg)
+screenreg(fit, summaries = c("Observations", "CFI", "SRMR"), single.row=TRUE)
 ```
 
 <pre><code>
