@@ -61,7 +61,7 @@ the results returned from the \code{\link{readModels}} function.
 }
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \seealso{
 \code{\link{readModels}}

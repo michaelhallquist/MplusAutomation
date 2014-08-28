@@ -158,7 +158,7 @@ mplusRcov(letters[1:4], "ar", "rho", "e", FALSE)
 mplusRcov(letters[1:4], "un", "rho", "e", FALSE)
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \keyword{interface}
 

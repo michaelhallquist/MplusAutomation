@@ -37,7 +37,7 @@ str(update(example1, ANALYSIS = x, MODEL = ~ . + "wt ON hp*.5;"))
 rm(example1, x)
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \keyword{interface}
 

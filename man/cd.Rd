@@ -44,7 +44,7 @@ cd(base, pre, 2)
 }
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \keyword{utilities}
 

@@ -43,7 +43,7 @@ cat(createSyntax(update(example1,
 rm(example1)
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \seealso{
 \code{\link{prepareMplusData}}, \code{\link{mplusModeler}}

@@ -69,7 +69,6 @@
 #' @return No value is returned by this function. It is used to print model differences to the R console.
 #' @author Michael Hallquist
 #' @keywords interface
-#' @importFrom plyr rbind.fill rename
 #' @export
 #' @examples
 #'

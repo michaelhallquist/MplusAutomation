@@ -49,7 +49,7 @@ MODEL:
 cat(parseMplus(test))
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \seealso{
 \code{\link{mplusModeler}}

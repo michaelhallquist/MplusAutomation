@@ -92,7 +92,7 @@ example3 <- mplusObject(MODEL = "basename_01 ON basename_02;",
 rm(example3)
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \seealso{
 \code{\link{mplusModeler}}

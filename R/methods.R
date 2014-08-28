@@ -8,7 +8,7 @@
 #' @family Mplus-Formatting
 #' @export
 #' @method print MplusRstructure
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @keywords interface
 #' @examples
 #' # default 'show' uses printing
@@ -34,7 +34,7 @@ print.MplusRstructure <- function(x, ...) {
 #' @family Mplus-Formatting
 #' @export
 #' @method summary mplusObject
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @keywords interface
 #' @examples
 #' \dontrun{
@@ -123,7 +123,7 @@ summary.mplusObject <- function(object, verbose=FALSE, ...) {
 #' @family Mplus-Formatting
 #' @export
 #' @method coef mplus.model
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @keywords interface
 #' @examples
 #' \dontrun{
@@ -241,12 +241,8 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
 #' Method that calls \code{coef.mplus.model}.
 #' See further documentation there.
 #'
-#' @param object An object of class mplusObject.
-#' @param \dots Additional arguments passed to \code{coef}.
-#' @return Typically a data frame.
-#' @family Mplus-Formatting
+#' @rdname coef.mplus.model
 #' @export
-#' @keywords interface
 coef.mplusObject <- function(object, ...) {
   coef(object$results, ...)
 }
@@ -256,20 +252,24 @@ coef.mplusObject <- function(object, ...) {
 #' This is a method for extracting output in a format
 #' suitable for the \pkg{texreg} package.  Uses \code{coef} for most the work.
 #'
-#' @param model An object of class mplus.model
+#' @param model An Mplus model object.  This typically comes either from
+#'   \code{\link{readModels}} directly, or indirectly via
+#'   \code{\link{mplusModeler}}.  The results will have different classes,
+#'   but extract methods are defined for both.
 #' @param summaries A character vector which summaries to include.
 #'   Defaults to \dQuote{none}.
-#' @param \dots Additional arguments passed to \code{\link{coef.mplus.model}}.
+#' @param ... Additional arguments passed to \code{\link{coef.mplus.model}}.
 #' @return A \code{texreg} object, or for multiple group models,
 #'   a list of \code{texreg} objects.
 #' @seealso \code{\link{readModels}}
 #' @family Mplus-Formatting
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @export
-#' @name extract.mplus.model
-#' @rdname extract.mplus.model
 #' @import texreg methods
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
 #' @keywords interface
+#' @name extract
+#' @rdname extract
+#' @aliases extract.mplus.model
 #' @examples
 #' \dontrun{
 #' # simple example of a model using builtin data
@@ -289,13 +289,17 @@ coef.mplusObject <- function(object, ...) {
 #' # there is also a method for mplusObject class
 #' extract(res)
 #'
-#' screenreg(extract(res))
-#' screenreg(extract(res, type = 'stdyx'))
+#' # load the texreg package
+#' # to use pretty printing via screenreg
+#' # uncomment to run these examples
+#' # library(texreg)
+#' # screenreg(res)
+#' # screenreg(res, type = 'stdyx')
 #'
-#' screenreg(extract(res, type = 'un', params = 'regression'),
-#'   single.row=TRUE)
-#' screenreg(extract(res, type = 'un', params = 'regression', summaries = 'CFI'),
-#'   single.row=TRUE)
+#' # screenreg(res, type = 'un', params = 'regression',
+#' #   single.row=TRUE)
+#' # screenreg(res, type = 'un', params = 'regression', summaries = 'CFI',
+#' #   single.row=TRUE)
 #'
 #' # remove files
 #' unlink("mtcars.dat")
@@ -373,17 +377,22 @@ extract.mplus.model <- function(model, summaries = "none", ...) {
   return(tr)
 }
 
-#' @rdname extract.mplus.model
-#' @aliases extract,mplus.model-method
+
+#' @rdname extract
+#' @export
+extract.mplusObject <- function(model, summaries = "none", ...) {
+  extract(model$results, summaries = summaries, ...)
+}
+
+#' @rdname extract
+#' @export
 setMethod("extract", signature = className("mplus.model", "MplusAutomation"),
   definition = extract.mplus.model)
 
-#' @rdname extract.mplus.model
-#' @aliases extract,mplusObject-method
+#' @rdname extract
+#' @export
 setMethod("extract", signature = className("mplusObject", "MplusAutomation"),
-  definition = function(model, summaries = "none", ...) {
-    extract(model$results, summaries = summaries, ...)
-})
+  definition = extract.mplusObject)
 
 
 ## m <- list(
@@ -414,7 +423,7 @@ setMethod("extract", signature = className("mplusObject", "MplusAutomation"),
 ##   #Mcrossclassbayes = readModels("C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/Outputs/ex9.25.out"),
 ##   M2levelmix = readModels("C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/Outputs/ex10.1.out"))
 
-## require(texreg)
+## library(texreg)
 ## screenreg(list(extract(mtmp1, summaries = c("Observations", "LL", "CFI", "SRMR")),
 ##  extract(mtmp2, summaries = c("Observations", "CFI"))), single.row=TRUE,
 ##  custom.model.names = c("Path Analysis", "SEM"))
@@ -435,7 +444,7 @@ setMethod("extract", signature = className("mplusObject", "MplusAutomation"),
 #' @export
 #' @method plot mplusObject
 #' @importFrom lattice dotplot
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @keywords interface
 #' @examples
 #' \dontrun{

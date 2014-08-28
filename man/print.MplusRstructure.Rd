@@ -27,14 +27,15 @@ print(mplusRcov(c("a", "b", "c"), type = "ar"))
 str(mplusRcov(c("a", "b", "c"), type = "ar"))
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \seealso{
-Other Mplus.Formatting: \code{\link{coef.mplus.model}};
-  \code{\link{coef.mplusObject}};
+Other Mplus.Formatting: \code{\link{coef.mplus.model}},
+  \code{\link{coef.mplusObject}}; \code{\link{extract}},
   \code{\link{extract,mplus.model-method}},
   \code{\link{extract,mplusObject-method}},
-  \code{\link{extract.mplus.model}};
+  \code{\link{extract.mplus.model}},
+  \code{\link{extract.mplusObject}};
   \code{\link{summary.mplusObject}}
 }
 \keyword{interface}

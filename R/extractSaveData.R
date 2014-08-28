@@ -69,7 +69,6 @@ getSavedata_Fileinfo <- function(outfile) {
 #' \item{bayesVarNames}{A character vector containing the names of variables in the BPARAMETERS dataset.}
 #' \item{tech3File}{A character vector of the tech 3 output.}
 #' \item{tech4File}{A character vector of the tech 4 output.}
-#' @importFrom plyr l_ply
 #' @importFrom gsubfn strapply
 #' @seealso \code{\link{getSavedata_Data}}
 #' @examples

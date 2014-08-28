@@ -31,7 +31,7 @@ when the \code{varwarnings = FALSE} argument is used.
 # to do
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \seealso{
 \code{\link{mplusModeler}}

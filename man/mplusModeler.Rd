@@ -137,7 +137,7 @@ test2 <- mplusObject(
 }
 }
 \author{
-Joshua Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \seealso{
 \code{\link{runModels}} and \code{\link{readModels}}

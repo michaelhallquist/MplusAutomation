@@ -50,7 +50,7 @@
 #' \item{usevariables}{A character vector of the variables from the \code{R} data set to be used.}
 #' \item{rdata}{The \code{R} data set to use for the model.}
 #'
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @export
 #' @seealso \code{\link{mplusModeler}}
 #' @keywords interface
@@ -142,7 +142,7 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
 #' @return An (updated) Mplus model object
 #' @export
 #' @method update mplusObject
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @keywords interface
 #' @examples
 #' example1 <- mplusObject(MODEL = "mpg ON wt;",
@@ -210,7 +210,7 @@ update.mplusObject <- function(object, ...) {
 #'   input file.
 #' @keywords interface
 #' @export
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @seealso \code{\link{prepareMplusData}}, \code{\link{mplusModeler}}
 #' @examples
 #' # example mplusObject
@@ -303,9 +303,9 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE) {
 #'   containing the regular Mplus model output and the boot object, respectively.
 #'   In all cases, the Mplus data file and input files are created.
 #' @seealso \code{\link{runModels}} and \code{\link{readModels}}
-#' @importFrom boot boot
+#' @import boot
 #' @export
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @examples
 #' \dontrun{
 #' # minimal example of a model using builtin data, allowing R
@@ -573,7 +573,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
 #'     as autoregressive.}
 #' @keywords interface
 #' @export
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @examples
 #' # all five structures collapsing
 #' mplusRcov(letters[1:4], "homogenous", "rho", "e", TRUE)
@@ -720,7 +720,7 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
 #'   can be called via shorthand, \sQuote{r}, \sQuote{l}, \sQuote{u}, \sQuote{e}, and \sQuote{v}.
 #' @return A subset data frame with the parameters of interest.
 #' @seealso \code{\link{readModels}}
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @keywords utils
 #' @export
 #' @examples
@@ -799,7 +799,7 @@ paramExtract <- function(x, params = c("regression", "loading", "undirected", "e
 #' @seealso \code{\link{mplusModeler}}
 #' @keywords utils
 #' @export
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @examples
 #'
 #' # sample input
@@ -870,7 +870,7 @@ parseMplus <- function(x, add = FALSE) {
 #'   returns \code{FALSE}, a character string note that \code{rmVarWarnings}
 #'   could not run.
 #' @seealso \code{\link{mplusModeler}}
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @keywords internal
 #' @examples
 #' # to do
@@ -920,7 +920,7 @@ rmVarWarnings <- function(file) {
 #' @return NULL, changes the current working directory
 #' @keywords utilities
 #' @export
-#' @author Joshua Wiley <jwiley.psych@@gmail.com>
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @examples
 #' \dontrun{
 #' # an example just using the base

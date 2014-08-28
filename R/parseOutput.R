@@ -1135,7 +1135,6 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #'
 #' @author Michael Hallquist
 #' @seealso \code{\link{regex}}, \code{\link{runModels}}, \code{\link{readModels}}
-#' @importFrom plyr rbind.fill
 #' @keywords interface
 #' @export
 #' @examples
@@ -1210,7 +1209,6 @@ addHeaderToSavedata <- function(outfile, directory=getwd()) {
 #' @param dropCols Columns to drop (use only one of keep/dropCols)
 #' @param sortBy How to sort
 #' @return Extracted and sorted data
-#' @importFrom plyr rbind.fill
 #' @keywords internal
 #' @examples
 #' # make me!!!
