@@ -8,7 +8,6 @@
 #' @param thisCunk
 #' @param columnNames
 #' @return A data frame (or matrix?)
-#' @importFrom plyr ldply ddply
 #' @keywords internal
 extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
   if (missing(thisChunk) || is.na(thisChunk) || is.null(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
@@ -306,12 +305,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 #' @param sectionName
 #' @return A list of parameters
 #' @keywords internal
-#@import gsubfn plyr # commenting this out to reduce warnings on load
-# this globally imports all functions from those packages, which may be overkill
-# if we can get away with specific functions
 extractParameters_1file <- function(outfiletext, filename, resultType) {
-  #require(gsubfn) # trying to import
-  #require(plyr)
 
   if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", outfiletext, ignore.case=TRUE, perl=TRUE)) > 0) {
     warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelParameters.\n  Skipping outfile: ", filename))

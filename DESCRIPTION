@@ -3,7 +3,10 @@ Type: Package
 Title: Automating Mplus Model Estimation and Interpretation
 Version: 0.6-2
 Date: 2013-10-24
-Author: Michael Hallquist, Joshua Wiley
+Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
+    email = "michael.hallquist@gmail.com"),
+    person("Joshua", "Wiley", role = "aut",
+    email = "jwiley.psych@gmail.com"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
 Description: The MplusAutomation package leverages the flexibility of the R
     language to automate latent variable model estimation and interpretation
@@ -12,16 +15,21 @@ Description: The MplusAutomation package leverages the flexibility of the R
     provides routines for creating related groups of models, running batches of
     models, and extracting and tabulating model parameters and fit statistics.
 License: LGPL-3
+URL: https://github.com/michaelhallquist/MplusAutomation
 Depends:
-    plyr,
-    boot
+    R (>= 2.15.0),
+    methods
 Imports:
+    boot,
+    plyr,
     gsubfn,
     coda,
     xtable,
-    lattice
+    lattice,
+    texreg
 Suggests:
     rhdf5,
     tcltk,
-    relimp
+    relimp,
+    testthat
 LazyLoad: yes
