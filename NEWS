@@ -8,6 +8,7 @@ Version 0.6-3
 - added killOnFail parameter for runModels to give user option of whether to kill mplus.exe processes on failure.
 - bugfix: pickup new top-level section marker "Available post-processing tools:"
 - bugfix: residuals output section naming changed.
+- bugfix: support summary tables for single model input.
 
 Version 0.6-2
 - feature: initial support for extracting TECH7 (sample stats within latent classes)

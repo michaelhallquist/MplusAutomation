@@ -1219,6 +1219,8 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
   #if passed an mplus.model.list from readModels, then just extract summaries for disply
   if (inherits(modelList, "mplus.model.list")) {
     modelList <- do.call("rbind.fill", sapply(modelList, "[", "summaries"))
+  } else if (inherits(modelList, "mplus.model")) { #single model (e.g., EFA output with many factor solutions)
+    modelList <- modelList$summaries
   }
   
   #only allow keep OR drop.

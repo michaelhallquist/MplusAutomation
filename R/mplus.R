@@ -397,7 +397,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   .run <- function(data, i, boot = TRUE, ...) {
     prepareMplusData(df = object$rdata[i, object$usevariables],
       filename = dataout, inpfile = tempfile(), ...)
-    runModels(filefilter = modelout)
+  runModels(filefilter = modelout)
     outfile <- gsub("(^.*)(\\.inp$)", "\\1.out", modelout)
     results <- readModels(target = outfile)
     if (!boot) {
