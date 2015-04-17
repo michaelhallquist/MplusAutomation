@@ -534,3 +534,9 @@ trimSpace <- function(string) {
       }, USE.NAMES=FALSE)
   return(stringTrim)
 }
+
+#helper function to convert strings formatted in Mplus Fortran-style scientific notation using D to indicate double.
+mplus_as.numeric <- function(vec) {
+  vec <- sub("D", "E", vec, fixed=TRUE)
+  as.numeric(vec)
+}

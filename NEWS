@@ -1,3 +1,8 @@
+Version 0.6-4
+- bugfix: matrixExtract was failing to read in Mplus Fortran-style scientific notation (e.g., 1.5533D-06).
+- added extraction of Chi-Square Test of Model Fit for Binary and Ordered Categorical section
+- added extraction of Chi-Square Test for MCAR under the Unrestricted Latent Class Indicator Model section.
+
 Version 0.6-3
 - feature: readModels tries hard to extract estimation errors and warnings into $errors and $warnings, respectively.
 - feature: coef methods for mplus.model and mplusObject class objects are smarter allowing extract methods and the use of texreg package for prettier output

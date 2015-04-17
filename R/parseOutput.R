@@ -220,14 +220,61 @@ extractValue <- function(pattern, textToScan, filename, type="int") {
 #' @examples
 #' # make me!!!
 getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FALSE, allowSpace=TRUE) {
-
+  # Apr2015: Need greater flexibility in how a section is defined. For certain sections, indentation is unhelpful. Example:
+  
+  # Chi-Square Test of Model Fit for the Binary and Ordered Categorical
+  # (Ordinal) Outcomes
+  #
+  # Pearson Chi-Square
+  #
+  # Value                             13.286
+  # Degrees of Freedom                     9
+  # P-Value                           0.1501
+  #
+  # Likelihood Ratio Chi-Square
+  #
+  # Value                             16.731
+  # Degrees of Freedom                     9
+  # P-Value                           0.0531
+  
+  # Likewise, in the above example there is a second line to the header that should be skipped before developing the section
+  # 
+  # New syntax:
+  # {+2i}Chi-Square Test of Model Fit for the Binary and Ordered Categorical::{+1b}Pearson Chi-Square
+  #
+  # +X specifies how many lines (after the header line itself) should be skipped prior to searching for the section end
+  # i,b specifies whether to use identical indentation {i} (which has been the standard up to now) or to use a blank line {b} to identify the section end
+  # If no curly braces are provided, assume {+1i}
+  
   #allow for multiple depths (subsections) separated by ::
   #will just extract from deepest depth
   header <- strsplit(header, "::", fixed=TRUE)[[1]]
-
+  
   sectionList <- list()
   targetText <- outfiletext
   for (level in 1:length(header)) {
+    if ((searchCmd <- regexpr("^\\{(\\+\\d+)*([ib])*\\}", header[level], perl=TRUE)) > 0) {
+      if ((o_start <- attr(searchCmd, "capture.start")[1]) > 0) {
+        offset <- substr(header[level], o_start, o_start + attr(searchCmd, "capture.length")[1] - 1)
+        offset <- as.integer(sub("+", "", offset, fixed=TRUE)) #remove + sign
+      } else {
+        offset <- 1
+      }
+      
+      if ((s_start <- attr(searchCmd, "capture.start")[2]) > 0) {
+        stype <- substr(header[level], s_start, s_start + attr(searchCmd, "capture.length")[2] - 1)
+        stopifnot(nchar(stype) == 1 && stype %in% c("i", "b"))
+      } else {
+        stype <- "i"
+      }
+
+      #remove search type information from header
+      header[level] <- substr(header[level], searchCmd[1] + attr(searchCmd, "match.length"), nchar(header[level]))
+    } else {
+      offset <- 1
+      stype <- "i"
+    }
+    
     if (allowSpace==TRUE) headerRow <- grep(paste("^\\s*", header[level], "\\s*$", sep=""), targetText, perl=TRUE)
     else headerRow <- grep(paste("^", header[level], "$", sep=""), targetText, perl=TRUE) #useful for equality of means where we just want anything with 0 spaces
 
@@ -236,31 +283,49 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
         #locate the position of the first non-space character
         numSpacesHeader <- regexpr("\\S+.*$", targetText[headerRow[r]], perl=TRUE) - 1
 
-        sectionStart <- headerRow[r] + 1 #skip header row itself
-        #if (outfiletext[sectionStart] == "") sectionStart <- sectionStart + 1 #As far as I know, there is always a blank line after the header, so skip past it
+        sectionStart <- headerRow[r] + offset #skip header row itself
 
-        sameLevelMatch <- FALSE
-        readStart <- sectionStart #counter variable to chunk through output
-        while(sameLevelMatch == FALSE) {
-          #read 20-line chunks of text to find next line with identical identation
-          #more efficient than running gregexpr on whole output
-          #match position of first non-space character, subtract 1 to get num spaces.
-          #blank lines will generate a value of -2, so shouldn't throw off top-level match
-          firstNonspaceCharacter <- lapply(gregexpr("\\S+.*$", targetText[readStart:(readStart+19)], perl=TRUE), FUN=function(x) x - 1)
-          samelevelMatches <- which(firstNonspaceCharacter == numSpacesHeader)
-          if (length(samelevelMatches) > 0) {
-            sameLevelMatch <- TRUE
-            sectionEnd <- readStart+samelevelMatches[1] - 2 #-1 for going to line before next header, another -1 for readStart
+        if (stype == "i") {
+          sameLevelMatch <- FALSE
+          readStart <- sectionStart #counter variable to chunk through output
+          while(sameLevelMatch == FALSE) {
+            #read 20-line chunks of text to find next line with identical identation
+            #more efficient than running gregexpr on whole output
+            #match position of first non-space character, subtract 1 to get num spaces.
+            #blank lines will generate a value of -2, so shouldn't throw off top-level match
+            firstNonspaceCharacter <- lapply(gregexpr("\\S+.*$", targetText[readStart:(readStart+19)], perl=TRUE), FUN=function(x) x - 1)
+            samelevelMatches <- which(firstNonspaceCharacter == numSpacesHeader)
+            if (length(samelevelMatches) > 0) {
+              sameLevelMatch <- TRUE
+              sectionEnd <- readStart+samelevelMatches[1] - 2 #-1 for going to line before next header, another -1 for readStart
+            }
+            else if (readStart+19 >= length(targetText)) {
+              sameLevelMatch <- TRUE
+              sectionEnd <- length(targetText)
+            }
+            else readStart <- readStart + 20 #process next batch
+            
+            #if (readStart > 100000) browser()#stop ("readStart exceeded 100000. Must be formatting problem.")
           }
-          else if (readStart+19 >= length(targetText)) {
-            sameLevelMatch <- TRUE
-            sectionEnd <- length(targetText)
+        } else if (stype == "b") {
+          blankFound <- FALSE
+          i <- 0
+          while(!grepl("^\\s*$", targetText[sectionStart+i], perl=T)) {
+            i <- i + 1
+            if (i > 100000) { stop ("searched for next blank linke on 100000 rows without success.") }
           }
-          else readStart <- readStart + 20 #process next batch
+          if (i == 0) {
+            #first line of section was blank, so just set start and end to same
+            #could force search to look beyond first line since it would be rare that a blank line after header match should count as empty
+            sectionEnd <- sectionStart
+          } else {
+            sectionEnd <- sectionStart + i - 1 #line prior to blank
+          }
 
-          #if (readStart > 100000) browser()#stop ("readStart exceeded 100000. Must be formatting problem.")
         }
 
+        #if (header[level] %in% c("Chi-Square Test of Model Fit for the Binary and Ordered Categorical", "Pearson Chi-Square")) { browser()}
+        
         #there will probably be collisions between use of nested headers :: and use of allowMultiple
         #I haven't attempted to get both to work together as they're currently used for different purposes
         if (isTRUE(allowMultiple))
@@ -319,6 +384,8 @@ extractSummaries_1plan <- function(arglist, sectionHeaders, sectionFields, textT
     #process all fields for this section
     sectionFieldDF <- sectionFields[[header]]
 
+	#browser()
+	
     for (i in 1:nrow(sectionFieldDF)) {
       thisField <- sectionFieldDF[i,]
 
@@ -482,6 +549,10 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
         "", #section-inspecific parameters
         "Chi-Square Test of Model Fit",
         "Chi-Square Test of Model Fit for the Baseline Model",
+        "{+3i}Chi-Square Test of Model Fit for the Binary and Ordered Categorical::{+2b}Pearson Chi-Square", #chi-square header spans two lines, so +3i
+        "{+3i}Chi-Square Test of Model Fit for the Binary and Ordered Categorical::{+2b}Likelihood Ratio Chi-Square",
+        "Chi-Square Test for MCAR under the Unrestricted Latent Class Indicator Model::{+2b}Pearson Chi-Square", #use blank line to find pearson within section
+        "Chi-Square Test for MCAR under the Unrestricted Latent Class Indicator Model::{+2b}Likelihood Ratio Chi-Square",
         "Chi-Square Test for Difference Testing",
         "Loglikelihood",
         "CFI/TLI",
@@ -508,6 +579,26 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
             regexPattern=c("^\\s*Value", "Degrees of Freedom", "^\\s*P-Value"),
             varType=c("dec", "int", "dec"), stringsAsFactors=FALSE
         ),
+        data.frame(
+            varName=c("ChiSqCategoricalPearson_Value", "ChiSqCategoricalPearson_DF", "ChiSqCategoricalPearson_PValue"),
+            regexPattern=c("^\\s*Value", "Degrees of Freedom", "^\\s*P-Value"),
+            varType=c("dec", "int", "dec"), stringsAsFactors=FALSE
+        ),
+        data.frame(
+            varName=c("ChiSqCategoricalLRT_Value", "ChiSqCategoricalLRT_DF", "ChiSqCategoricalLRT_PValue"),
+            regexPattern=c("^\\s*Value", "Degrees of Freedom", "^\\s*P-Value"),
+            varType=c("dec", "int", "dec"), stringsAsFactors=FALSE
+        ),
+        data.frame(
+            varName=c("ChiSqMCARUnrestrictedPearson_Value", "ChiSqMCARUnrestrictedPearson_DF", "ChiSqMCARUnrestrictedPearson_PValue"),
+            regexPattern=c("^\\s*Value", "Degrees of Freedom", "^\\s*P-Value"),
+            varType=c("dec", "int", "dec"), stringsAsFactors=FALSE
+        ),
+        data.frame(
+            varName=c("ChiSqMCARUnrestrictedLRT_Value", "ChiSqMCARUnrestrictedLRT_DF", "ChiSqMCARUnrestrictedLRT_PValue"),
+            regexPattern=c("^\\s*Value", "Degrees of Freedom", "^\\s*P-Value"),
+            varType=c("dec", "int", "dec"), stringsAsFactors=FALSE
+        ),		
         data.frame(
             varName=c("ChiSqDiffTest_Value", "ChiSqDiffTest_DF", "ChiSqDiffTest_PValue"),
             regexPattern=c("^\\s*Value", "Degrees of Freedom", "^\\s*P-Value"),
@@ -2157,7 +2248,7 @@ matrixExtract <- function(outfiletext, headerLine, filename) {
           dimnames=list(rowHeaders, colHeaders))
 
       for (r in 1:length(splitData)) {
-        line <- as.numeric(splitData[[r]][-1])
+        line <- mplus_as.numeric(splitData[[r]][-1]) #use mplus_as.numeric to handle D+XX scientific notation in output
         if ((lenDiff <- length(colHeaders) - length(line)) > 0)
           line <- c(line, rep(NA, lenDiff))
         mat[r,] <- line
