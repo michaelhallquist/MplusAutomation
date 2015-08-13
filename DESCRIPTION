@@ -26,7 +26,8 @@ Imports:
     coda,
     xtable,
     lattice,
-    texreg
+    texreg,
+    pander
 Suggests:
     rhdf5,
     tcltk,

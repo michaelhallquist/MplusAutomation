@@ -14,7 +14,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
   if (missing(columnNames) || is.na(columnNames) || is.null(columnNames)) stop("Missing column names for chunk.\n  ", filename)
 
   #okay to match beginning and end of line because strip.white used in scan
-  matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Residual Variances|New/Additional Parameters|Scales|Dispersion)|([\\w_\\d+\\.#]+\\s+(BY|WITH|ON|\\|)))\\s*$", thisChunk, perl=TRUE)
+  matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion)|([\\w_\\d+\\.#]+\\s+(BY|WITH|ON|\\|)))\\s*$", thisChunk, perl=TRUE)
 
   #more readable (than above) using ldply from plyr
   convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
@@ -36,7 +36,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
         match <- substr(thisChunk[row$startline], row$start, row$end)
 
         #check for keyword
-        if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "New/Additional Parameters", "Scales", "Item Difficulties", "Dispersion")) {
+        if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", "Scales", "Item Difficulties", "Dispersion")) {
           return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_))
         }
         else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
@@ -132,7 +132,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
 #' @examples
 #' \dontrun{
 #'   #a few examples of files to parse
-#'   #mg + lc. Results in latent class pattern, not really different from 
+#'   #mg + lc. Results in latent class pattern, not really different from
 #'   #         regular latent class matching. See Example 7.21
 #'   #mg + twolevel. Group is top, bw/wi is 2nd. See Example 9.11
 #'   #lc + twolevel. Bw/wi is top, lc is 2nd. See Example 10.1.
@@ -376,13 +376,13 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     attr(irtParsed[["irt.parameterization"]], probitLogit) <- def #add probit/logit definition as attribute
     allSections <- appendListElements(allSections, irtParsed)
   }
-  
+
 #  probSection <- getSection("^RESULTS IN PROBABILITY SCALE$", outfiletext)
 #  if (!is.null(probSection)) {
 #    probParsed <- extractParameters_1section(filename, probSection, "probability.scale")
 #    allSections <- appendListElements(allSections, probParsed)
 #  }
-  
+
   #confidence intervals for usual output, credibility intervals for bayesian output
   ciSection <- getSection("^(CONFIDENCE INTERVALS OF MODEL RESULTS|CREDIBILITY INTERVALS OF MODEL RESULTS)$", outfiletext)
   if (!is.null(ciSection)) {
