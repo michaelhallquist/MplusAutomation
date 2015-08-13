@@ -1601,6 +1601,7 @@ extractTech1 <- function(outfiletext, filename) {
     targetList[["psi"]] <- matrixExtract(paramSpecSubsections[[g]], "PSI", filename)
     targetList[["gamma.c"]] <- matrixExtract(paramSpecSubsections[[g]], "GAMMA\\(C\\)", filename)
     targetList[["alpha.c"]] <- matrixExtract(paramSpecSubsections[[g]], "ALPHA\\(C\\)", filename)
+    targetList[["new_additional"]] <- matrixExtract(paramSpecSubsections[[g]], "NEW/ADDITIONAL PARAMETERS", filename) 
 
     #latent class indicator part includes subsections for each latent class, such as class-varying thresholds
     if (groupNames[g] == "LATENT.CLASS.INDICATOR.MODEL.PART") {
@@ -1648,6 +1649,7 @@ extractTech1 <- function(outfiletext, filename) {
     targetList[["psi"]] <- matrixExtract(startValSubsections[[g]], "PSI", filename)
     targetList[["gamma.c"]] <- matrixExtract(startValSubsections[[g]], "GAMMA\\(C\\)", filename)
     targetList[["alpha.c"]] <- matrixExtract(startValSubsections[[g]], "ALPHA\\(C\\)", filename)
+    targetList[["new_additional"]] <- matrixExtract(startValSubsections[[g]], "NEW/ADDITIONAL PARAMETERS", filename)
 
     #latent class indicator part includes subsections for each latent class, such as class-varying thresholds
     if (groupNames[g] == "LATENT.CLASS.INDICATOR.MODEL.PART") {
@@ -2260,11 +2262,18 @@ matrixExtract <- function(outfiletext, headerLine, filename) {
 
     #aggregate sections
     aggMatCols <- do.call("c", lapply(blockList, colnames))
-    aggMatRows <- rownames(blockList[[1]])
+    aggMatRows <- rownames(blockList[[1]]) #row names are shared across blocks in Mplus output
     aggMat <- matrix(NA, nrow=length(aggMatRows), ncol=length(aggMatCols), dimnames=list(aggMatRows, aggMatCols))
 
+    #Unfortunately, due to Mplus 8-character printing limits for matrix sections, row/col names are not guaranteed to be unique.
+    #This causes problems for using name-based matching to fill the matrix.
+    #We know that blocks are printed from left-to-right by column (i.e., the block 1 has the first X columns, block 2 has the next Y columns).
+    #Thus, we should be able to use a counter and fill columns numerically. This does not get around a problem of non-unique row names since we
+    #can't easily discern the rows represented in a block based on row numbering alone. Thus, this is an incomplete solution for now (Aug2015 MH)
+    colCounter <- 1
     for (l in blockList) {
-      aggMat[rownames(l), colnames(l)] <- l #fill in just the block of the aggregate matrix represented in l
+      aggMat[rownames(l), colCounter:(colCounter + ncol(l) - 1)] <- l #fill in just the block of the aggregate matrix represented in l
+      colCounter <- colCounter + ncol(l)
     }
   }
   else {
