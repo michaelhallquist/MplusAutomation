@@ -310,6 +310,10 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'   semicolons using the \code{\link{parseMplus}} function. Defaults to \code{FALSE}.
 #' @param varwarnings A logical whether warnings about variable length should be left, the
 #'   default, or removed from the output file.
+#' @param Mplus_command optional. N.B.: No need to pass this parameter for most users (has intelligent
+#'   defaults). Allows the user to specify the name/path of the Mplus executable to be used for
+#'   running models. This covers situations where Mplus is not in the system's path,
+#'   or where one wants to test different versions of the Mplus program.
 #' @param \ldots additional arguments passed to the
 #'   \code{\link[MplusAutomation]{prepareMplusData}} function.
 #' @return An Mplus model object, with results.
@@ -398,7 +402,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'  unlink("Mplus Run Models.log")
 #' }
 mplusModeler <- function(object, dataout, modelout, run = 0L,
-                         check = FALSE, varwarnings = TRUE, ...) {
+                         check = FALSE, varwarnings = TRUE, Mplus_command="Mplus", ...) {
 
   stopifnot((run %% 1) == 0 && length(run) == 1)
   oldSHELL <- Sys.getenv("SHELL")
@@ -426,7 +430,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                          filename = dataout, inpfile = tempfile(), ...)
     }
 
-    runModels(filefilter = modelout)
+    runModels(filefilter = modelout, Mplus_command = Mplus_command)
     outfile <- gsub("(^.*)(\\.inp$)", "\\1.out", modelout)
     results <- readModels(target = outfile)
     if (!boot) {
