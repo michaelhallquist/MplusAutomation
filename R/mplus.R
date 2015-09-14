@@ -470,7 +470,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                      keepCols = object$usevariables,
                      filename = dataout,
                      inpfile = tempfile(),
-                     imputed = object$object,
+                     imputed = object$imputed,
                      ...)
     return(object)
   }
