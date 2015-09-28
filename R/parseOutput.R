@@ -108,8 +108,8 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     gh5 <- list()
     gh5fname <- sub("^(.*)\\.out$", "\\1.gh5", curfile, ignore.case=TRUE, perl=TRUE)
     if (file.exists(gh5fname)) {
-      if (suppressWarnings(require(rhdf5))) {
-        gh5 <- h5dump(file=gh5fname, recursive=TRUE, load=TRUE)
+      if (requireNamespace("rhdf5", quietly = TRUE)) {
+        gh5 <- rhdf5::h5dump(file=gh5fname, recursive=TRUE, load=TRUE)
       } else { warning(paste(c("Unable to read gh5 file because rhdf5 package not installed.\n",
                     "To install, in an R session, type:\n",
                     "  source(\"http://bioconductor.org/biocLite.R\")\n",
@@ -324,8 +324,6 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
 
         }
 
-        #if (header[level] %in% c("Chi-Square Test of Model Fit for the Binary and Ordered Categorical", "Pearson Chi-Square")) { browser()}
-
         #there will probably be collisions between use of nested headers :: and use of allowMultiple
         #I haven't attempted to get both to work together as they're currently used for different purposes
         if (isTRUE(allowMultiple))
@@ -418,16 +416,16 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
   #MI and Montecarlo data types have fundamentally different output (means and sds per fit stat)
   if (grepl("imputation", arglist$DataType, ignore.case=TRUE) || grepl("montecarlo", arglist$DataType, ignore.case=TRUE)) {
     modelFitSectionHeaders <- c(
-        "", #section-inspecific parameters
+        "", #section-nonspecific parameters
         "Chi-Square Test of Model Fit",
 #        "Chi-Square Test of Model Fit for the Baseline Model",
         "Loglikelihood::H0 Value",
         "Loglikelihood::H1 Value",
         "CFI/TLI::CFI",
         "CFI/TLI::TLI",
-        "Information Criteria::Akaike \\(AIC\\)",
-        "Information Criteria::Bayesian \\(BIC\\)",
-        "Information Criteria::Sample-Size Adjusted BIC \\(n\\* = \\(n \\+ 2\\) / 24\\)",
+        "Information Criteria( Including the Auxiliary Part)*::Akaike \\(AIC\\)",
+        "Information Criteria( Including the Auxiliary Part)*::Bayesian \\(BIC\\)",
+        "Information Criteria( Including the Auxiliary Part)*c::Sample-Size Adjusted BIC \\(n\\* = \\(n \\+ 2\\) / 24\\)",
         "RMSEA \\(Root Mean Square Error Of Approximation\\)",
         "WRMR \\(Weighted Root Mean Square Residual\\)",
         "Information Criterion::Deviance \\(DIC\\)",
@@ -437,7 +435,7 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
     modelFitSectionFields <- list(
         data.frame(
             varName=c("Parameters"), #defined outside of information criteria section for non-ML estimators
-            regexPattern=c("Number of Free Parameters"),
+            regexPattern=c("^Number of Free Parameters"),
             varType=c("int"), stringsAsFactors=FALSE
         ),
         data.frame(
@@ -554,9 +552,9 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
         "Chi-Square Test for MCAR under the Unrestricted Latent Class Indicator Model::{+2b}Pearson Chi-Square", #use blank line to find pearson within section
         "Chi-Square Test for MCAR under the Unrestricted Latent Class Indicator Model::{+2b}Likelihood Ratio Chi-Square",
         "Chi-Square Test for Difference Testing",
-        "Loglikelihood",
+        "Loglikelihood( Including the Auxiliary Part)*",
         "CFI/TLI",
-        "Information Criteria",
+        "Information Criteria( Including the Auxiliary Part)*",
         "RMSEA \\(Root Mean Square Error Of Approximation\\)",
         "WRMR \\(Weighted Root Mean Square Residual\\)",
         "Bayesian Posterior Predictive Checking using Chi-Square",
@@ -566,7 +564,7 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
     modelFitSectionFields <- list(
         data.frame(
             varName=c("Parameters"), #defined outside of information criteria section for non-ML estimators
-            regexPattern=c("Number of Free Parameters"),
+            regexPattern=c("^Number of Free Parameters"), #only match beginning of line (aux section has its own indented variant)
             varType=c("int"), stringsAsFactors=FALSE
         ),
         data.frame(

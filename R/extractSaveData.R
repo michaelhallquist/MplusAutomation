@@ -76,9 +76,6 @@ getSavedata_Fileinfo <- function(outfile) {
 #' @keywords internal
 l_getSavedata_Fileinfo <- function(outfile, outfiletext) {
 
-  #require(gsubfn)
-  #require(plyr)
-
   sectionStarts <- c("Estimates", #estimates
       "Estimated Covariance Matrix for the Parameter Estimates", #tech3
       "Estimated Means and Covariance Matrix for the Latent Variables", #tech4
@@ -391,7 +388,6 @@ getSavedata_Bparams <- function(outfile, discardBurnin=TRUE) {
 #' @import coda
 #' @keywords internal
 l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=TRUE) {
-  #require(coda)
 
   #missing fileInfo
   if (is.null(fileInfo)) return(NULL)

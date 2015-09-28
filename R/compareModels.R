@@ -86,7 +86,6 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
   # -allsummaries
 
   # defaults to show equal and unequal params
-  #require(plyr)
 
   # if a single scalar is passed in with no name, then use that value for param and pvalue diffs
   if (length(equalityMargin) == 1) {
@@ -182,11 +181,13 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
 
       } else if (m1Summaries$Estimator %in% c("ML", "MLM", "MLR", "WLS", "WLSM") && m1Summaries$Parameters != m2Summaries$Parameters) {
         if (m1Summaries$Estimator == m2Summaries$Estimator ) {
-          if (m1Summaries$Parameters < m2Summaries$Parameters) H0m <- m1Summaries
-          else H0m <- m2Summaries
-
-          if (m1Summaries$Parameters > m2Summaries$Parameters) H1m <- m1Summaries
-          else H1m <- m2Summaries
+          if (m1Summaries$Parameters < m2Summaries$Parameters) {
+            H0m <- m1Summaries
+            H1m <- m2Summaries
+          } else {
+            H0m <- m2Summaries
+            H1m <- m1Summaries
+          }
 
           if (m1Summaries$Estimator == "MLR") {
             #Chi-square difference test for MLR models based on loglikelihood

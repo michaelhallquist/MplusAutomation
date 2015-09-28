@@ -190,7 +190,6 @@ connectNodes <- function(dotModel, node1, node2, connectionType) {
 #' @return a dot model
 #' @keywords internal
 graphModel <- function(model) {
-  # require(plyr)
   if (!inherits(model, "data.frame")) stop("Parameter model must be a data.frame")
 
   byOnWith <- grep("\\.(BY|ON|WITH)$", model$paramHeader, perl=TRUE)
