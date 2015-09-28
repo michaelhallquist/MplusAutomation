@@ -35,6 +35,8 @@
 #' @param autov A logical (defaults to \code{TRUE}) argument indicating
 #'   whether R should attempt to guess the correct variables to use from
 #'   the R dataset, if \code{usevariables} is left \code{NULL}.
+#' @param imputed A logical whether the data are multiply imputed (a list).
+#'   Defaults to \code{FALSE}.
 #'
 #' @return A list of class \code{mplusObject} with elements
 #' \item{TITLE}{The title in Mplus (if defined)}
@@ -49,6 +51,7 @@
 #' \item{results}{NULL by default, but can be later updated to include the results from the model run.}
 #' \item{usevariables}{A character vector of the variables from the \code{R} data set to be used.}
 #' \item{rdata}{The \code{R} data set to use for the model.}
+#' \item{imputed}{A logical whether the data are multiply imputed.}
 #'
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @export
@@ -75,7 +78,7 @@
 #' rm(example3)
 mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NULL,
   ANALYSIS = NULL, MODEL = NULL, OUTPUT = NULL, SAVEDATA = NULL, PLOT = NULL,
-  usevariables = NULL, rdata = NULL, autov = TRUE) {
+  usevariables = NULL, rdata = NULL, autov = TRUE, imputed = FALSE) {
 
   charOrNull <- function(x) {is.character(x) || is.null(x)}
   stopifnot(charOrNull(TITLE))
@@ -89,7 +92,11 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
   stopifnot(charOrNull(PLOT))
 
   if (autov && is.null(usevariables) && !is.null(rdata) && !is.null(MODEL)) {
-    v <- colnames(rdata)
+    if (imputed) {
+      v <- colnames(rdata[[1]])
+    } else {
+      v <- colnames(rdata)
+    }
     v.model <- v[sapply(v, grepl, x = MODEL, ignore.case=TRUE)]
     v.setup <- v[sapply(v, grepl, x = paste(c(VARIABLE, DEFINE), collapse = "\n"), ignore.case=TRUE)]
     message("No R variables to use specified. \nSelected automatically as any variable name that occurs in the MODEL or DEFINE section.")
@@ -119,7 +126,8 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
     PLOT = PLOT,
     results = NULL,
     usevariables = usevariables,
-    rdata = rdata)
+    rdata = rdata,
+    imputed = imputed)
 
   class(object) <- c("mplusObject", "list")
 
@@ -206,6 +214,8 @@ update.mplusObject <- function(object, ...) {
 #'   or for missing semi-colons and gives notes.
 #' @param add A logical passed on to \code{parseMplus} whether to add semi
 #'   colons to line ends. Defaults to \code{FALSE}.
+#' @param imputed A logical whether the data are multiply imputed.
+#'   Defaults to \code{FALSE}.
 #' @return A character string containing all the text for the Mplus
 #'   input file.
 #' @keywords interface
@@ -227,16 +237,24 @@ update.mplusObject <- function(object, ...) {
 #'   usevariables = c("mpg", "hp", "wt")), "example1.dat"),
 #'   fill=TRUE)
 #' rm(example1)
-createSyntax <- function(object, filename, check=TRUE, add=FALSE) {
+createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE) {
   stopifnot(inherits(object, "mplusObject"))
 
   mplusList <- c("TITLE", "DATA", "VARIABLE", "DEFINE",
     "ANALYSIS", "MODEL", "OUTPUT", "SAVEDATA", "PLOT")
 
   dFile <- paste0("FILE = \"", filename, "\";\n")
+  if (imputed) {
+    dFile <- paste0(dFile, "TYPE = IMPUTATION;\n")
+  }
+
   object$DATA <- paste(dFile, object$DATA, collapse = "\n")
 
-  vNames <- createVarSyntax(object$rdata[, object$usevariables])
+  if (object$imputed) {
+    vNames <- createVarSyntax(object$rdata[[1]][, object$usevariables])
+  } else {
+    vNames <- createVarSyntax(object$rdata[, object$usevariables])
+  }
   object$VARIABLE <- paste(vNames, "MISSING=.;\n", object$VARIABLE, collapse = "\n")
 
   index <- sapply(object[mplusList], function(x) {
@@ -292,6 +310,10 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE) {
 #'   semicolons using the \code{\link{parseMplus}} function. Defaults to \code{FALSE}.
 #' @param varwarnings A logical whether warnings about variable length should be left, the
 #'   default, or removed from the output file.
+#' @param Mplus_command optional. N.B.: No need to pass this parameter for most users (has intelligent
+#'   defaults). Allows the user to specify the name/path of the Mplus executable to be used for
+#'   running models. This covers situations where Mplus is not in the system's path,
+#'   or where one wants to test different versions of the Mplus program.
 #' @param \ldots additional arguments passed to the
 #'   \code{\link[MplusAutomation]{prepareMplusData}} function.
 #' @return An Mplus model object, with results.
@@ -380,7 +402,8 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE) {
 #'  unlink("Mplus Run Models.log")
 #' }
 mplusModeler <- function(object, dataout, modelout, run = 0L,
-  check = FALSE, varwarnings = TRUE, ...) {
+                         check = FALSE, varwarnings = TRUE, Mplus_command="Mplus", ...) {
+
   stopifnot((run %% 1) == 0 && length(run) == 1)
   oldSHELL <- Sys.getenv("SHELL")
   Sys.setenv(SHELL = Sys.getenv("COMSPEC"))
@@ -394,10 +417,20 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
     modelout <- gsub("(.*)(\\..+$)", "\\1.inp", dataout)
   }
 
-  .run <- function(data, i, boot = TRUE, ...) {
-    prepareMplusData(df = object$rdata[i, object$usevariables],
-      filename = dataout, inpfile = tempfile(), ...)
-  runModels(filefilter = modelout)
+  .run <- function(data, i, boot = TRUE, imputed = FALSE, ...) {
+    if (imputed) {
+      if(boot) stop("Cannot use imputed data and bootstrap")
+      prepareMplusData(df = data,
+                       keepCols = object$usevariables,
+                       filename = dataout,
+                       inpfile = tempfile(),
+                       imputed = imputed, ...)
+    } else {
+        prepareMplusData(df = data[i, object$usevariables],
+                         filename = dataout, inpfile = tempfile(), ...)
+    }
+
+    runModels(filefilter = modelout, Mplus_command = Mplus_command)
     outfile <- gsub("(^.*)(\\.inp$)", "\\1.out", modelout)
     results <- readModels(target = outfile)
     if (!boot) {
@@ -415,7 +448,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
     }
   }
 
-  body <- createSyntax(object, dataout, check=check)
+  body <- createSyntax(object, dataout, check=check, imputed = object$imputed)
   cat(body, file = modelout, sep = "\n")
   message("Wrote model to: ", modelout)
   message("Wrote data to: ", dataout)
@@ -423,18 +456,22 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   results <- bootres <- NULL
   finalres <- list(model = results, boot = bootres)
 
-  if (run > 1) {
+  if (run > 1 & !object$imputed) {
     bootres <- boot(object$rdata, .run, R = run, sim = "ordinary")
     finalres$boot <- bootres
     class(finalres) <- c("boot.mplus.model", "list")
   }
 
   if (run) {
-    results <- .run(data = data, i = 1:nrow(object$rdata), boot = FALSE, ...)
+    results <- .run(data = object$rdata, boot = FALSE, imputed = object$imputed, ...)
     finalres$model <- results
   } else {
-    prepareMplusData(df = object$rdata[, object$usevariables], filename = dataout,
-      inpfile = tempfile(), ...)
+    prepareMplusData(df = object$rdata,
+                     keepCols = object$usevariables,
+                     filename = dataout,
+                     inpfile = tempfile(),
+                     imputed = object$imputed,
+                     ...)
     return(object)
   }
   if (run == 1) {

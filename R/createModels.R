@@ -1213,6 +1213,9 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'   Defaults to \code{TRUE} to be consistent with prior behavior.
 #'   If \code{FALSE} and the file to write the data to already exists,
 #'   it will throw an error.
+#' @param imputed A logical whether data are multiply imputed.  Defaults
+#'   to \code{FALSE}.  If \code{TRUE}, the data should be a list,
+#'   where each element of the list is a multiply imputed dataset.
 #' @return Invisibly returns a character vector of the Mplus input
 #'   syntax. Primarily called for its side effect of creating Mplus
 #'   data files and optionally input files.
@@ -1275,72 +1278,117 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' }
 
 prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
-  interactive=TRUE, overwrite=TRUE) {
+  interactive=TRUE, overwrite=TRUE, imputed=FALSE) {
 
-  stopifnot(inherits(df, "data.frame"))
+  if (imputed) {
+      stopifnot(inherits(df, "list"))
+  } else {
+      stopifnot(inherits(df, "data.frame"))
+  }
 
-  #only allow keep OR drop.
+  ## only allow keep OR drop.
   if(!missing(keepCols) && !missing(dropCols)) {
     stop("keepCols and dropCols passed to prepareMplusData. You must choose one or the other, but not both.")
   }
 
-  # assert types allowed for keep and drop cols
+  ## assert types allowed for keep and drop cols
   stopifnot(missing(keepCols) || is.character(keepCols) ||
     is.numeric(keepCols) || is.logical(keepCols))
 
   stopifnot(missing(dropCols) || is.character(dropCols) ||
     is.numeric(dropCols) || is.logical(dropCols))
 
-  # if filename is missing and interactive is TRUE
-  # interactively (through GUI or console)
-  # request filename from user
+  ## if filename is missing and interactive is TRUE
+  ## interactively (through GUI or console)
+  ## request filename from user
   if (missing(filename) && interactive) {
     filename <- file.choose()
   }
 
-  # if filename is still missing at this point
-  # throw an error
+  ## if filename is still missing at this point
+  ## throw an error
   stopifnot(!missing(filename))
 
-  #keep only columns specified by keepCols
+  ## keep only columns specified by keepCols
   if (!missing(keepCols) && length(keepCols) > 0) {
-    df <- df[, keepCols] # works with all types
-  }
-  
-  #drop columns specified by dropCols
-  if (!missing(dropCols) && length(dropCols) > 0) {
-    if (is.character(dropCols)) {
-      df <- subset(df, select = -which(colnames(df) %in% dropCols))
-    } else if (is.numeric(dropCols)) {
-      df <- subset(df, select = -dropCols)
-    } else if (is.logical(dropCols)) {
-      df <- subset(df, select = !dropCols)
+    if (imputed) {
+      df <- lapply(df, function(d) d[, keepCols])
+    } else {
+      df <- df[, keepCols] # works with all types
     }
   }
-  
-  #convert factors to numbers
+
+  ## drop columns specified by dropCols
+  if (!missing(dropCols) && length(dropCols) > 0) {
+    if (is.character(dropCols)) {
+      if (imputed) {
+        df <- lapply(df, function(d) {subset(d, select = -which(colnames(d) %in% dropCols))})
+      } else {
+          df <- subset(df, select = -which(colnames(df) %in% dropCols))
+        }
+    } else if (is.numeric(dropCols)) {
+        if (imputed) {
+          df <- lapply(df, function(d) {subset(d, select = -dropCols)})
+        } else {
+            df <- subset(df, select = -dropCols)
+          }
+      } else if (is.logical(dropCols)) {
+          if (imputed) {
+            df <- lapply(df, function(d) {subset(d, select = !dropCols)})
+          } else {
+              df <- subset(df, select = !dropCols)
+            }
+        }
+  }
+
+  ## convert factors to numbers
+  if (imputed) {
+  df <- lapply(1:length(df), function(i) {
+     as.data.frame(qv <- lapply(1:ncol(df[[i]]), function(col) {
+            if (is.factor(df[[i]][, col])) {
+              ## numeric storage of the levels corresponds to the order of the levels
+              if (i == 1) {
+                cat("Factor variable:", names(df[[i]])[col], "; factor levels:", paste(levels(df[[i]][, col]), collapse=", "), "converted to numbers:",
+                    paste(seq_along(levels(df[[i]][, col])), collapse=", "), "\n\n")
+              }
+              col_value <- as.numeric(df[[i]][, col])
+            } else {
+              col_value <- df[[i]][, col]
+            }
+
+            if (is.character(df[[i]][, col])) {
+              if (i == 1) warning("Character data requested for output using prepareMplusData.\n  Mplus does not support character data.")
+            }
+
+            col_value <- list(col_value)
+            names(col_value) <- names(df[[i]])[col]
+            return(col_value)
+          }))
+   })
+  } else {
+
   df <- as.data.frame(qv <- lapply(1:ncol(df), function(col) {
             #can't use ifelse because is.factor returns only one element,
             #and ifelse enforces identical length
-            if (is.factor(df[,col])) {
+            if (is.factor(df[, col])) {
               # numeric storage of the levels corresponds to the order of the levels
-              cat("Factor variable:", names(df)[col], "; factor levels:", paste(levels(df[,col]), collapse=", "), "converted to numbers:",
+              message("Factor variable:", names(df)[col], "; factor levels:", paste(levels(df[,col]), collapse=", "), "converted to numbers:",
                   paste(seq_along(levels(df[,col])), collapse=", "), "\n\n")
               col_value <- as.numeric(df[,col])
             } else {
               col_value <- df[,col]
             }
-            
+
             if (is.character(df[,col])) {
               warning("Character data requested for output using prepareMplusData.\n  Mplus does not support character data.")
             }
-            
+
             col_value <- list(col_value)
             names(col_value) <- names(df)[col]
             return(col_value)
           }))
-  
-  
+  }
+
   if (file.exists(filename)) {
     if (overwrite) {
       warning(paste("The file", sQuote(basename(filename)),
@@ -1351,12 +1399,29 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
     }
   }
 
-  write.table(df, filename, sep = "\t", col.names = FALSE, row.names = FALSE, na=".")
+  if (imputed) {
+    filename.base <- gsub("\\.dat", "", filename)
+    junk <- lapply(1:length(df), function(i) {
+      write.table(df[[i]], paste0(filename.base, "_imp_", i, ".dat"), sep = "\t",
+        col.names = FALSE, row.names = FALSE, na=".")
+    })
+    cat(paste0(filename.base, "_imp_", 1:length(df), ".dat"), file = filename, sep = "\n")
+  } else {
+    write.table(df, filename, sep = "\t", col.names = FALSE, row.names = FALSE, na=".")
+  }
 
+  if (imputed) {
+    syntax <- c(
+    "TITLE: Your title goes here\n",
+    DATA <- paste0("DATA: FILE = \"", filename, "\";\n", "TYPE = IMPUTATION;\n"),
+    "VARIABLE: \n", createVarSyntax(df[[1]]), "MISSING=.;\n")
+
+  } else {
   syntax <- c(
     "TITLE: Your title goes here\n",
     DATA <- paste0("DATA: FILE = \"", filename, "\";\n"),
     "VARIABLE: \n", createVarSyntax(df), "MISSING=.;\n")
+  }
 
   # if inpfile is a logical value and is TRUE
   # then create the file using filename
