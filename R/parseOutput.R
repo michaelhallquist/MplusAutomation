@@ -312,7 +312,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
           i <- 0
           while(!grepl("^\\s*$", targetText[sectionStart+i], perl=T)) {
             i <- i + 1
-            if (i > 100000) { stop ("searched for next blank linke on 100000 rows without success.") }
+            if (i > 100000) { stop ("searched for next blank line on 100000 rows without success.") }
           }
           if (i == 0) {
             #first line of section was blank, so just set start and end to same
@@ -555,6 +555,7 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
         "Loglikelihood( Including the Auxiliary Part)*",
         "CFI/TLI",
         "Information Criteria( Including the Auxiliary Part)*",
+        "Information Criteria Including the Auxiliary Part",
         "RMSEA \\(Root Mean Square Error Of Approximation\\)",
         "WRMR \\(Weighted Root Mean Square Residual\\)",
         "Bayesian Posterior Predictive Checking using Chi-Square",
@@ -616,6 +617,11 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
             varName=c("AIC", "BIC", "aBIC"),
             regexPattern=c("Akaike \\(AIC\\)", "Bayesian \\(BIC\\)", "Sample-Size Adjusted BIC"),
             varType=c("dec", "dec", "dec"), stringsAsFactors=FALSE
+        ),
+        data.frame(
+            varName=c("ParametersWithAux"),
+            regexPattern=c("Number of Free Parameters"),
+            varType=c("int"), stringsAsFactors=FALSE
         ),
         data.frame(
             varName=c("RMSEA_Estimate", "RMSEA_90CI_LB", "RMSEA_90CI_UB", "RMSEA_pLT05"),
