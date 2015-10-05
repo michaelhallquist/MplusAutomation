@@ -228,7 +228,7 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #'   defaults). Allows the user to specify the name/path of the Mplus executable to be used for
 #'   running models. This covers situations where Mplus is not in the system's path,
 #'   or where one wants to test different versions of the Mplus program.
-#' @param killOnFail optional. Windows only for now. If \code{TRUE}, kill all processes named mplus.exe when 
+#' @param killOnFail optional. Windows only for now. If \code{TRUE}, kill all processes named mplus.exe when
 #'   \code{runModels} does not terminate normally. Defaults to \code{TRUE}.
 #'
 #' @return None. Function is used for its side effects (running models).
@@ -248,7 +248,13 @@ runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, sho
   #retain working directory and reset at end of run
   #need to set here to ensure that logTarget initialization below is within target directory, not getwd()
   curdir <- getwd()
-  directory <- sub("(\\\\|/)?$", "", directory, perl=TRUE) #remove trailing slash, which generates file.exists error on windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
+  ## remove trailing slash, which generates file.exists error on windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
+  directory <- sub("(\\\\|/)?$", "", directory, perl=TRUE)
+  ## however, trailing slash is needed if at root of a drive on Windows
+  if (.Platform$OS.type == "windows" && grepl("^[a-zA-Z]:$", directory)) {
+    directory <- paste0(directory, "/")
+  }
+
   if (!file.exists(directory)) { stop("runModels cannot change to directory: ", directory)}
   setwd(directory)
   normalComplete <- FALSE
@@ -280,7 +286,7 @@ runModels <- function(directory=getwd(), recursive=FALSE, filefilter = NULL, sho
   #if the function gets interrupted (e.g., the user presses escape), kill the Mplus process (doesn't happen automatically).
   exitRun <- function() {
     deleteOnKill <- TRUE #whether to delete unfinished output
-    
+
     if (normalComplete == FALSE && isLogOpen()) {
       writeLines("Run terminated abnormally", logTarget)
       flush(logTarget)
