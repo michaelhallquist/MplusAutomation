@@ -74,7 +74,7 @@ getSavedata_Fileinfo <- function(outfile) {
 #' @examples
 #' # make me!
 #' @keywords internal
-l_getSavedata_Fileinfo <- function(outfile, outfiletext) {
+l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
 
   sectionStarts <- c("Estimates", #estimates
       "Estimated Covariance Matrix for the Parameter Estimates", #tech3
@@ -207,9 +207,12 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext) {
       #bayesVarNames <- gsub("\\s+", "\\.", sapply(paramOrderSection, "[", 2), perl=TRUE)
 
       #15Mar2012: Workaround for bug: means for categorical latent variables are in output file listing
-      #but these are not actually present in bparameters. Filter out
-      paramOrderSection <- paramOrderSection[!grepl("Parameter\\s+\\d+, \\[ [^#]#\\d+ \\]", paramOrderSection, perl=TRUE)]
-
+      #but these are not actually present in bparameters. Filter these out.
+      #12Oct2015: This appears to have been fixed in Mplus 7 and beyond, so check version if available.    
+      if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7) {
+        paramOrderSection <- paramOrderSection[!grepl("Parameter\\s+\\d+, \\[ [^#]#\\d+ \\]", paramOrderSection, perl=TRUE)]
+      }
+      
       bayesVarNames <- gsub("\\s*,\\s*", "_", paramOrderSection, perl=TRUE)
       bayesVarNames <- gsub("\\[", "MEAN", bayesVarNames, perl=TRUE)
       bayesVarNames <- gsub("\\s*\\]\\s*", "", bayesVarNames, perl=TRUE)

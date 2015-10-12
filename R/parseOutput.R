@@ -73,7 +73,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$parameters <- extractParameters_1file(outfiletext, curfile)
     allFiles[[listID]]$class_counts <- extractClassCounts(outfiletext, curfile) #latent class counts
     allFiles[[listID]]$mod_indices <- extractModIndices_1file(outfiletext, curfile)
-    allFiles[[listID]]$savedata_info <- fileInfo <- l_getSavedata_Fileinfo(curfile, outfiletext)
+    allFiles[[listID]]$savedata_info <- fileInfo <- l_getSavedata_Fileinfo(curfile, outfiletext, allFiles[[listID]]$summaries)
 
     #missing widths indicative of MI/MC run
     if (!is.null(fileInfo) && is.na(fileInfo[["fileVarWidths"]])) {
@@ -381,8 +381,6 @@ extractSummaries_1plan <- function(arglist, sectionHeaders, sectionFields, textT
 
     #process all fields for this section
     sectionFieldDF <- sectionFields[[header]]
-
-	#browser()
 
     for (i in 1:nrow(sectionFieldDF)) {
       thisField <- sectionFieldDF[i,]
