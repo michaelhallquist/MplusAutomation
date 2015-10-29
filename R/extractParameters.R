@@ -168,7 +168,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
   allSectionParameters <- c() #will hold extracted params for all sections
 
-  betweenWithinMatches <- grep("^\\s*(Between|Within) Level\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
+  betweenWithinMatches <- grep("^\\s*(Between (?:\\s*\\w+\\s+)*Level|Within (?:\\s*\\w+\\s+)*Level)\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
   latentClassMatches <- grep("^\\s*Latent Class (Pattern )*(\\d+\\s*)+(\\(\\s*\\d+\\s*\\))*$", modelSection, ignore.case=TRUE, perl=TRUE)
   multipleGroupMatches <- grep("^\\s*Group \\w+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
@@ -184,8 +184,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
     matchIndex <- 1
     for (match in topLevelMatches) {
-
-      if (match %in% betweenWithinMatches) bwWi <- sub("^\\s*(Between|Within) Level\\s*$", "\\1", modelSection[match], perl=TRUE)
+      if (match %in% betweenWithinMatches) bwWi <- sub("\\s+Level\\s*$", "", modelSection[match], perl=TRUE)
       else if (match %in% latentClassMatches) {
         if ((pos <- regexpr("Pattern", modelSection[match], ignore.case=TRUE)) > 0) {
           #need to pull out and concatenate all numerical values following pattern
