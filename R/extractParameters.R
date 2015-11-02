@@ -9,42 +9,76 @@
 #' @param columnNames
 #' @return A data frame (or matrix?)
 #' @keywords internal
-extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
+extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionName) {
   if (missing(thisChunk) || is.na(thisChunk) || is.null(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
   if (missing(columnNames) || is.na(columnNames) || is.null(columnNames)) stop("Missing column names for chunk.\n  ", filename)
+  if (missing(sectionName)) { sectionName <- "" } #right now, just use sectionName for R-SQUARE section, where there are no subheaders per se
+  
+  #R-SQUARE sections are not divided into the usual subheader sections, and the order of top-level headers is not comparable to typical output.
+  #Create a single match for the whole section
+  #In addition, the column names typically need to be filtered out because of the absence of subheaders
+  if (sectionName == "r2") {
+    splitRows <- strsplit(thisChunk, "\\s+")
+    headerRows <- sapply(splitRows, function(x) {
+          if (identical(x, c("Observed")) ||
+              identical(x, c("Observed", "Two-Tailed", "Scale")) || 
+              identical(x, c("Latent", "Two-Tailed", "Scale")) ||
+              identical(x, c("Observed", "Two-Tailed", "Residual")) || 
+              identical(x, c("Latent", "Two-Tailed", "Residual")) ||
+              identical(x, c("Observed", "Two-Tailed")) ||
+              identical(x, c("Latent", "Two-Tailed")) ||
+              identical(x, c("Observed", "Residual")) ||
+              identical(x, c("Latent", "Residual")) ||
+              identical(x, c("Observed")) ||
+              identical(x, c("Latent")) ||
+              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Factors")) ||
+              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Variance")) ||
+              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value")) ||
+              identical(x, c("Variable", "Estimate")) ||
+              identical(x, c("Variable", "Estimate", "Variance")) ||
+              identical(x, c("Posterior", "One-Tailed", "95%", "C.I.")) ||
+              identical(x, c("Variable", "Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%"))
+          ) { TRUE } else { FALSE }
+        })
+     
+    thisChunk <- thisChunk[!headerRows]
+      
+    convertMatches <- data.frame(startline=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
+  } else {
+    #okay to match beginning and end of line because strip.white used in scan
+    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion)|([\\w_\\d+\\.#]+\\s+(BY|WITH|ON|\\|)))\\s*$", thisChunk, perl=TRUE)
+    
+    #more readable (than above) using ldply from plyr
+    convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
+    
+    #beware faulty logic below... assumes only one match per line (okay here)
+    convertMatches$startline <- 1:nrow(convertMatches)
+    
+    #only keep lines with a single match
+    #this removes rows that are -1 from gregexpr
+    convertMatches <- subset(convertMatches, start > 0)
+    
+    #sometimes chunks have no parameters because they are empty. e.g., stdyx for ex7.30
+    #in this case, return null
+    if (nrow(convertMatches)==0) return(NULL)
+    
+    #develop a dataframe that divides into keyword matches versus variable matches
+    convertMatches <- ddply(convertMatches, "startline", function(row) {
+          #pull the matching keyword based on the start/end attributes from gregexpr
+          match <- substr(thisChunk[row$startline], row$start, row$end)
+          
+          #check for keyword
+          if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", "Scales", "Item Difficulties", "Dispersion")) {
+            return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_))
+          }
+          else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
+            return(data.frame(startline=row$startline, keyword=NA_character_, varname=variable[1], operator=variable[2]))
+          }
+          else stop("failure to match keyword: ", match, "\n  ", filename)
+        })
+  }
 
-  #okay to match beginning and end of line because strip.white used in scan
-  matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion)|([\\w_\\d+\\.#]+\\s+(BY|WITH|ON|\\|)))\\s*$", thisChunk, perl=TRUE)
-
-  #more readable (than above) using ldply from plyr
-  convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
-
-  #beware faulty logic below... assumes only one match per line (okay here)
-  convertMatches$startline <- 1:nrow(convertMatches)
-
-  #only keep lines with a single match
-  #this removes rows that are -1 from gregexpr
-  convertMatches <- subset(convertMatches, start > 0)
-
-  #sometimes chunks have no parameters because they are empty. e.g., stdyx for ex7.30
-  #in this case, return null
-  if (nrow(convertMatches)==0) return(NULL)
-
-  #develop a dataframe that divides into keyword matches versus variable matches
-  convertMatches <- ddply(convertMatches, "startline", function(row) {
-        #pull the matching keyword based on the start/end attributes from gregexpr
-        match <- substr(thisChunk[row$startline], row$start, row$end)
-
-        #check for keyword
-        if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", "Scales", "Item Difficulties", "Dispersion")) {
-          return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_))
-        }
-        else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
-          return(data.frame(startline=row$startline, keyword=NA_character_, varname=variable[1], operator=variable[2]))
-        }
-        else stop("failure to match keyword: ", match, "\n  ", filename)
-      })
-
+  
   comboFrame <- c()
 
   #convertMatches will now contain a data.frame marking the section headers for the chunk
@@ -87,6 +121,24 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
           })
     }
 
+    #handle case of missing scale factors for non-categorical variables and residual variance in R-SQUARE output 
+    if (length(columnNames) == 6L && (columnNames[6L] == "scale_f" || columnNames[6L] == "resid_var")) {
+      splitParams <- lapply(splitParams, function(col) {
+            lcol <- length(col)
+            if (lcol == 5L) { col[6L] <- "NA_real_" } #NA-fill variables without a scale factor or residual variance
+            return(col)
+          })
+    }
+    
+    #similar problem for 3-column R-SQUARE output with missing residual variances
+    if (length(columnNames) == 3L && columnNames[3L] == "resid_var") {
+      splitParams <- lapply(splitParams, function(col) {
+            lcol <- length(col)
+            if (lcol == 2L) { col[3L] <- "NA_real_" } #NA-fill variables without a residual variance
+            return(col)
+          })
+    }
+    
     #rbind the split list as a data.frame
     parsedParams <- data.frame(do.call("rbind", splitParams), stringsAsFactors=FALSE)
 
@@ -96,7 +148,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
               #then sum the number of matches > 0 (i.e., where a number was found).
               #if the sum is the same as the length of the column, then all elements are purely numeric.
               if (all(col %in% c("TRUE", "FALSE"))) return(as.logical(col)) #True/False significance check above
-              else if (sum(sapply(gregexpr("^[\\d\\.-]+$", col, perl=TRUE), "[", 1) > 0) == length(col)) return(as.numeric(col))
+              else if (sum(sapply(gregexpr("^(NA_real_|[\\d\\.-]+)$", col, perl=TRUE), "[", 1) > 0) == length(col)) return(suppressWarnings(as.numeric(col)))
               else return(as.character(col))
             }), stringsAsFactors=FALSE)
 
@@ -115,6 +167,8 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames) {
 
   }
 
+  if (sectionName == "r2") { comboFrame$paramHeader <- NULL } #not relevant for this section
+  
   #under the new strsplit strategy, just return the dataframe
   return(comboFrame)
 
@@ -158,7 +212,14 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   } else { sectionType <- "model_results" }
 
   if (!exists("columnNames")) { columnNames <- detectColumnNames(filename, modelSection, sectionType) }
-
+  
+  #return nothing if unable to detect column names (this will then get filtered out in the extractParameters_1file process
+  if (is.null(columnNames)) {
+    x <- data.frame() #empty
+    class(x) <- c("data.frame", "mplus.params")
+    attr(x, "filename") <- filename
+    return(x)
+  }
   #Detect model section dividers
   #These include: 1) multiple groups: Group XYZ
   #  2) latent classes: Latent Class XYZ
@@ -169,7 +230,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   allSectionParameters <- c() #will hold extracted params for all sections
 
   betweenWithinMatches <- grep("^\\s*(Between (?:\\s*\\w+\\s+)*Level|Within (?:\\s*\\w+\\s+)*Level)\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
-  latentClassMatches <- grep("^\\s*Latent Class (Pattern )*(\\d+\\s*)+(\\(\\s*\\d+\\s*\\))*$", modelSection, ignore.case=TRUE, perl=TRUE)
+  latentClassMatches <- grep("^\\s*(Latent )*Class (Pattern )*(\\d+\\s*)+(\\(\\s*\\d+\\s*\\))*$", modelSection, ignore.case=TRUE, perl=TRUE)
   multipleGroupMatches <- grep("^\\s*Group \\w+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
   classPropMatches <- grep("^\\s*Class Proportions\\s*$", modelSection, ignore.case=TRUE)
@@ -192,7 +253,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
           #replace any spaces with periods to create usable unique lc levels
           lcNum <- gsub("\\s+", "\\.", postPattern, perl=TRUE)
         }
-        else lcNum <- sub("^\\s*Latent Class\\s+(\\d+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
+        else lcNum <- sub("^\\s*(?:Latent )*Class\\s+(\\d+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
       }
       else if (match %in% multipleGroupMatches) groupName <- sub("^\\s*Group (\\w+)\\s*$", "\\1", modelSection[match], perl=TRUE)
       else if (match %in% catLatentMatches) {
@@ -236,7 +297,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
       }
 
       if (chunkToParse == TRUE) {
-        parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames)
+        parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
 
         #only append if there are some rows
         if (!is.null(parsedChunk) && nrow(parsedChunk) > 0) {
@@ -251,7 +312,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
     }
 
   }
-  else allSectionParameters <- extractParameters_1chunk(filename, modelSection, columnNames) #just one model section
+  else allSectionParameters <- extractParameters_1chunk(filename, modelSection, columnNames, sectionName) #just one model section
 
   #if any std variable is one of the returned columns, we are dealing with an old-style combined results section (i.e.,
   #standardized results are not divided into their own sections, as with newer output).
@@ -355,6 +416,11 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
       allSections <- appendListElements(allSections, extractParameters_1section(filename, stdSection, "std.standardized"))
     }
 
+    r2Section <- getSection("^R-SQUARE$", outfiletext)
+    if (!is.null(r2Section)) {
+      allSections <- appendListElements(allSections, extractParameters_1section(filename, r2Section, "r2"))
+    }
+    
     #if all individual standardized sections are absent, but the standardized section is present, must be old-style
     #combined standardized section (affects WLS and MUML, too). Extract and process old section.
     if (all(is.null(stdYXSection), is.null(stdYSection), is.null(stdSection))) {
@@ -402,7 +468,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
   }
 
   # cleaner equivalent of above
-  listOrder <- c("unstandardized", "ci.unstandardized",
+  listOrder <- c("unstandardized", "r2", "ci.unstandardized",
       "irt.parameterization", "probability.scale",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",

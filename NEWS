@@ -2,6 +2,7 @@ Version 0.6-4
 - feature: prepareMplusData() and mplusObject() / mplusModeler() now handle multiply imputed data
 - feature: added extraction of Chi-Square Test of Model Fit for Binary and Ordered Categorical section
 - feature: added extraction of Chi-Square Test for MCAR under the Unrestricted Latent Class Indicator Model section.
+- feature: added extraction of R-SQUARE output
 - bugfix: read parameter level headers of TYPE=THREELEVEL output
 - bugfix: matrixExtract was failing to read in Mplus Fortran-style scientific notation (e.g., 1.5533D-06).
 - bugfix: extractParameters_1chunk was failing to read in Base Hazard Parameters sections from output files

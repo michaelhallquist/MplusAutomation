@@ -438,6 +438,11 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
           identical (nextLine, c("Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%")))
         varNames <- c("param", "est", "posterior_sd", "pval", "lower_2.5ci", "upper_2.5ci")
 
+      #Bayesian 6-column output for R-SQUARE (Just has "Variable" on the front)
+      if (identical(thisLine, c("Posterior", "One-Tailed", "95%", "C.I.")) &&
+          identical (nextLine, c("Variable", "Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%")))
+        varNames <- c("param", "est", "posterior_sd", "pval", "lower_2.5ci", "upper_2.5ci")
+      
       #Bayesian (ESTIMATOR=BAYES) 7-column output (Mplus v7)
       else if (identical(thisLine, c("Posterior", "One-Tailed", "95%", "C.I.")) &&
           identical (nextLine, c("Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%", "Significance")))
@@ -457,7 +462,32 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       else if (identical(thisLine, c("Two-Tailed")) &&
           identical(nextLine, c("Estimate", "S.E.", "Est./S.E.", "P-Value")))
         varNames <- c("param", "est", "se", "est_se", "pval")
+      
+      #Five-column output for R-Square that applies to most unstandardized and standardized sections in Mplus 5 and later
+      else if ((identical(thisLine, c("Observed", "Two-Tailed")) || identical(thisLine, c("Latent", "Two-Tailed"))) &&
+          identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value")))
+        varNames <- c("param", "est", "se", "est_se", "pval")
 
+      #6-column R-Square output for model with scale factors
+      else if ((identical(thisLine, c("Observed", "Two-Tailed", "Scale")) || identical(thisLine, c("Latent", "Two-Tailed", "Scale"))) &&
+          identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Factors")))
+        varNames <- c("param", "est", "se", "est_se", "pval", "scale_f")
+      
+      #6-column R-Square output for model with residual variances
+      else if ((identical(thisLine, c("Observed", "Two-Tailed", "Residual")) || identical(thisLine, c("Latent", "Two-Tailed", "Residual"))) &&
+          identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Variance")))
+        varNames <- c("param", "est", "se", "est_se", "pval", "resid_var")
+      
+      #2-column R-Square without estimates of uncertainty and p-values
+      else if ((identical(thisLine, c("Observed")) || identical(thisLine, c("Latent"))) &&
+          identical(nextLine, c("Variable", "Estimate")))
+        varNames <- c("param", "est")
+
+      #3-column R-Square output for model with residual variances
+      else if ((identical(thisLine, c("Observed", "Residual")) || identical(thisLine, c("Latent", "Residual"))) &&
+          identical(nextLine, c("Variable", "Estimate", "Variance")))
+        varNames <- c("param", "est", "resid_var")
+      
       #Just estimate available, such as in cases of nonconverged models
       else if (identical(thisLine, c("Estimate")))
         varNames <- c("param", "est")
@@ -517,8 +547,11 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
     line <- line + 1
     if (exists("varNames"))
       detectionFinished <- TRUE
-    else if (line > length(modelSection))
-      stop("Unable to determine column names for section ", sectionType, ".\n  ", filename)
+    else if (line > length(modelSection)) {
+      warning("Unable to determine column names for section ", sectionType, ".\n  ", filename)
+      return(NULL)
+    }
+      
 
   }
 
