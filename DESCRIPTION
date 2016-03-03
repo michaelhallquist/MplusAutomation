@@ -34,3 +34,4 @@ Suggests:
     relimp,
     testthat
 LazyLoad: yes
+RoxygenNote: 5.0.1
