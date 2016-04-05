@@ -3,10 +3,12 @@ Version 0.6-4
 - feature: added extraction of Chi-Square Test of Model Fit for Binary and Ordered Categorical section
 - feature: added extraction of Chi-Square Test for MCAR under the Unrestricted Latent Class Indicator Model section.
 - feature: added extraction of R-SQUARE output
+- feature: support extraction of equality tests of means using the BCH procedure
 - bugfix: read parameter level headers of TYPE=THREELEVEL output
 - bugfix: matrixExtract was failing to read in Mplus Fortran-style scientific notation (e.g., 1.5533D-06).
 - bugfix: extractParameters_1chunk was failing to read in Base Hazard Parameters sections from output files
 - bugfix: matrixExtract gave improper output when column headers were non-unique
+- bugfix: extract class counts properly from Mplus v7.3+, which changed the section headers
 - added new function, SummaryTable() which is a generic interface to create summary tables and output to the console, popup, HTML, LaTeX, or markdown to support a wider variety of reproducible documents.
 
 Version 0.6-3

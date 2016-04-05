@@ -71,7 +71,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$errors <- warn_err$errors
     allFiles[[listID]]$summaries <- extractSummaries_1file(outfiletext, curfile, input=inp)
     allFiles[[listID]]$parameters <- extractParameters_1file(outfiletext, curfile)
-    allFiles[[listID]]$class_counts <- extractClassCounts(outfiletext, curfile) #latent class counts
+    allFiles[[listID]]$class_counts <- extractClassCounts(outfiletext, curfile, allFiles[[listID]]$summaries) #latent class counts
     allFiles[[listID]]$mod_indices <- extractModIndices_1file(outfiletext, curfile)
     allFiles[[listID]]$savedata_info <- fileInfo <- l_getSavedata_Fileinfo(curfile, outfiletext, allFiles[[listID]]$summaries)
 
@@ -1835,7 +1835,7 @@ extractFacScoreStats <- function(outfiletext, filename) {
 #' @keywords internal
 #' @examples
 #' # make me!!!
-extractClassCounts <- function(outfiletext, filename) {
+extractClassCounts <- function(outfiletext, filename, summaries) {
 
   ####
   #TODO: Implement class count extraction for multiple categorical latent variable models.
@@ -1868,17 +1868,24 @@ extractClassCounts <- function(outfiletext, filename) {
 
   countlist <- list()
 
-  modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$", outfiletext)
+  #Starting in Mplus v7.3 and above, formatting of the class counts appears to have changed...
+  #Capture the alternatives here
+  if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
+    modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$", outfiletext)
+    ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$", outfiletext)
+    mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
+  } else {
+    modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON THE ESTIMATED MODEL$", outfiletext)
+    ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
+    mostLikelyCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)    
+  }
+
   countlist[["modelEstimated"]] <- getClassCols(modelCounts)
-
-  ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$", outfiletext)
   countlist[["posteriorProb"]] <- getClassCols(ppCounts)
-
-  mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
   countlist[["mostLikely"]] <- getClassCols(mostLikelyCounts)
-
+    
   #most likely by posterior probability section
-  mostLikelyProbs <- getSection("^Average Latent Class Probabilities for Most Likely Latent Class Membership \\(Row\\)$", outfiletext)
+  mostLikelyProbs <- getSection("^Average Latent Class Probabilities for Most Likely Latent Class Membership \\((Row|Column)\\)$", outfiletext)
   if (length(mostLikelyProbs) > 1L) { mostLikelyProbs <- mostLikelyProbs[-1L] } #remove line 1: "by Latent Class (Column)"
 
   #Example:
@@ -1899,13 +1906,14 @@ extractClassCounts <- function(outfiletext, filename) {
   countlist[["avgProbs.mostLikely"]] <- unlabeledMatrixExtract(mostLikelyProbs, filename)
 
   #same, but for classification probabilities
-  classificationProbs <- getSection("^Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)$", outfiletext)
+  #also, starting ~Mplus 7.3, the columns and rows appear to have switched in this and the logit section (hence the Column|Row syntax)
+  classificationProbs <- getSection("^Classification Probabilities for the Most Likely Latent Class Membership \\((Column|Row)\\)$", outfiletext)
   if (length(classificationProbs) > 1L) { classificationProbs <- classificationProbs[-1L] } #remove line 1: "by Latent Class (Column)"
 
   countlist[["classificationProbs.mostLikely"]] <- unlabeledMatrixExtract(classificationProbs, filename)
 
   #same, but for classification probability logits
-  classificationLogitProbs <- getSection("^Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)$", outfiletext)
+  classificationLogitProbs <- getSection("^Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\((Column|Row)\\)$", outfiletext)
   if (length(classificationLogitProbs) > 1L) { classificationLogitProbs <- classificationLogitProbs[-1L] } #remove line 1: "by Latent Class (Column)"
 
   countlist[["logitProbs.mostLikely"]] <- unlabeledMatrixExtract(classificationLogitProbs, filename)

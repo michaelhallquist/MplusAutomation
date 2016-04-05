@@ -10,28 +10,41 @@
 extractAux <- function(outfiletext, filename) {
   if (missing(outfiletext) || is.na(outfiletext) || is.null(outfiletext)) stop("Missing mean equality to parse.\n ", filename)
 
-  meanEqSection <- getSection("EQUALITY TESTS OF MEANS", outfiletext)
+  meanEqSection <- getSection("EQUALITY TESTS OF MEANS ACROSS CLASSES USING POSTERIOR PROBABILITY-BASED", outfiletext)
 
-  if (is.null(meanEqSection)) return(NULL) #model does not contain mean equality check
-
-  #check for whether there is one or two more trailing lines
-  twoGroupsOnly <- grepl("MULTIPLE IMPUTATIONS WITH 1 DEGREE(S) OF FREEDOM FOR THE OVERALL TEST", meanEqSection[1], fixed=TRUE)
-
-  if (twoGroupsOnly) {
-    dfOmnibus <- 1
+  bch <- FALSE
+  if (is.null(meanEqSection)) {
+    #check for BCH type output
+    meanEqSection <- getSection("EQUALITY TESTS OF MEANS ACROSS CLASSES USING THE BCH PROCEDURE", outfiletext)
+    if (!is.null(meanEqSection)) { bch <- TRUE 
+    } else { return(NULL) } #model does not contain mean equality check
+  }
+  
+  if (bch) {    
+    #appears this section does not have a pairwise df listed but is otherwise similar
+    dfOmnibus <- as.numeric(sub("^.*WITH (\\d+) DEGREE\\(S\\) OF FREEDOM FOR THE OVERALL TEST.*$", "\\1", meanEqSection[1], perl=TRUE))
     dfPairwise <- NA_integer_
-    #drop single df line and blank line
     meanEqSection <- meanEqSection[3:length(meanEqSection)]
+  } else {
+    #check for whether there is one or two more trailing lines
+    twoGroupsOnly <- grepl("MULTIPLE IMPUTATIONS WITH 1 DEGREE(S) OF FREEDOM FOR THE OVERALL TEST", meanEqSection[1], fixed=TRUE)
+    
+    if (twoGroupsOnly) {
+      dfOmnibus <- 1
+      dfPairwise <- NA_integer_
+      #drop single df line and blank line
+      meanEqSection <- meanEqSection[3:length(meanEqSection)]
+    }
+    else {
+      #get degrees of freedom
+      dfLines <- paste(meanEqSection[1:2], collapse=" ")
+      dfOmnibus <- as.numeric(sub("^.*MULTIPLE IMPUTATIONS WITH (\\d+) DEGREE\\(S\\) OF FREEDOM FOR THE OVERALL TEST.*$", "\\1", dfLines, perl=TRUE))
+      dfPairwise <- as.numeric(sub("^.*AND (\\d+) DEGREE OF FREEDOM FOR THE PAIRWISE TESTS.*$", "\\1", dfLines, perl=TRUE))
+      #drop two subsequent df lines and blank line
+      meanEqSection <- meanEqSection[2:length(meanEqSection)]
+    }
   }
-  else {
-    #get degrees of freedom
-    dfLines <- paste(meanEqSection[1:2], collapse=" ")
-    dfOmnibus <- as.numeric(sub("^.*MULTIPLE IMPUTATIONS WITH (\\d+) DEGREE\\(S\\) OF FREEDOM FOR THE OVERALL TEST.*$", "\\1", dfLines, perl=TRUE))
-    dfPairwise <- as.numeric(sub("^.*AND (\\d+) DEGREE OF FREEDOM FOR THE PAIRWISE TESTS.*$", "\\1", dfLines, perl=TRUE))
-    #drop two subsequent df lines and blank line
-    meanEqSection <- meanEqSection[2:length(meanEqSection)]
-  }
-
+  
   #need to handle case of 4+ classes, where it becomes four-column output...
   columnNames <- c("Mean", "S.E.")
 
@@ -148,7 +161,6 @@ extractAux <- function(outfiletext, filename) {
     vpairwise[[varnames[v]]] <- class.chi.p.pairwise
   }
 
-
   allMeans <- data.frame(do.call("rbind", vc), row.names=NULL)
   allMeans <- allMeans[,c("var", "class", "m", "se")]
 
@@ -169,7 +181,6 @@ extractAux <- function(outfiletext, filename) {
         df=numeric(0),
         p=numeric(0))
   }
-
 
   ret <- list(overall=allMeans, pairwise=allPairwise)
   class(ret) <- c("list", "mplus.auxE")

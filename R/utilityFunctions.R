@@ -292,6 +292,10 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE",
         "CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP",
         "Average Latent Class Probabilities for Most Likely Latent Class Membership \\(Row\\)",
+        "Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
+        "Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
+        "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
+        "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
         "MODEL RESULTS", "LOGISTIC REGRESSION ODDS RATIO RESULTS", "RESULTS IN PROBABILITY SCALE",
         "IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC METRIC",
         "IRT PARAMETERIZATION IN TWO-PARAMETER PROBIT METRIC",
@@ -308,7 +312,8 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "CONFIDENCE INTERVALS IN PROBABILITY SCALE",
         "CONFIDENCE INTERVALS OF TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS",
         "CONFIDENCE INTERVALS OF STANDARDIZED TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT,", #omitted "AND DIRECT EFFECTS"
-        "EQUALITY TESTS OF MEANS",
+        "EQUALITY TESTS OF MEANS ACROSS CLASSES USING POSTERIOR PROBABILITY-BASED",
+        "EQUALITY TESTS OF MEANS ACROSS CLASSES USING THE BCH PROCEDURE",
         "THE FOLLOWING DATA SET\\(S\\) DID NOT RESULT IN A COMPLETED REPLICATION:",
         "RESIDUAL OUTPUT", "MODEL MODIFICATION INDICES", "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
         "Available post-processing tools:",
@@ -319,7 +324,22 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
   
   if (!is.null(omit)) headers <- headers[which(!headers %in% omit)] #drop omit
   
-  beginSection <- grep(sectionHeader, outfiletext, perl=TRUE)[1]
+  #allow for syntax to include :: to specify a header that spans 2 rows. Example:
+  #FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+  #BASED ON THE ESTIMATED MODEL
+
+  #note that this will identify a unique match for the target sectionHeader, but the search for
+  #subsequent headers just uses the one-row list above. For now, this works in all cases I know of.
+  if (grepl("::", sectionHeader, fixed=TRUE)) {
+    firstLine <- sub("^(.*)::.*$", "\\1", sectionHeader, perl=TRUE)
+    nextLine <- sub("^.*::(.*)$", "\\1", sectionHeader, perl=TRUE)
+    candidates <- grep(firstLine, outfiletext, perl=TRUE) #will return NA if no match
+    bothMatch <- grep(nextLine, outfiletext[candidates+1], perl=TRUE)[1] #return first match among candidates
+    if (!is.na(bothMatch)) { beginSection <- candidates[bothMatch] + 1 #since it's a two-line header, skip the first to match typical case
+    } else { beginSection <- NA } #could not find section with both rows
+  } else {
+    beginSection <- grep(sectionHeader, outfiletext, perl=TRUE)[1]  
+  }
   
   #if section header cannot be found, then bail out
   if (is.na(beginSection)) return(NULL)
