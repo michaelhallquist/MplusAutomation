@@ -29,7 +29,7 @@
 runModels_Interactive <- function(directory=getwd(), recursive="0",
     showOutput="1", replaceOutfile="1", checkDate="0", logFile="1")
 {
-  if (!suppressWarnings(require(tcltk))) {
+  if (!suppressWarnings(requireNamespace("tcltk"))) {
     stop("The tcltk package is absent. Interactive folder selection cannot function.")
   }
 
@@ -60,8 +60,8 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #            "\nlogFileChecked:", logFileChecked, "\nlogFilename:", as.character(logFile_TCL), "\n"
 #            ))
 
-    tkgrab.release(top)
-    tkdestroy(top)
+    tcltk::tkgrab.release(top)
+    tcltk::tkdestroy(top)
 
     runModels(directory=directory, recursive=recursiveChecked,
         showOutput=showOutputChecked, replaceOutfile=replaceOutfileStr, logFile=logFile_TCL)

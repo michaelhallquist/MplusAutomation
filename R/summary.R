@@ -161,10 +161,10 @@ SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex",
   switch(type,
          screen = print(MplusData),
          popup = {
-           if (!suppressWarnings(require(relimp))) {
+           if (!suppressWarnings(requireNamespace("relimp"))) {
              stop("The relimp package is absent. Interactive folder selection cannot function.")
            }
-           showData(MplusData,
+           relimp::showData(MplusData,
                     placement = "+30+30",
                     maxwidth = 150,
                     maxheight = 50,
@@ -224,12 +224,12 @@ SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex",
 #' @examples
 #' # make me!!!
 showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courier 9") {
-  if (!suppressWarnings(require(relimp))) {
+  if (!suppressWarnings(requireNamespace("relimp"))) {
     stop("The relimp package is absent. Interactive folder selection cannot function.")
   }
 
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
-  showData(MplusData, font=font, placement="+30+30", maxwidth=150, maxheight=50, rownumbers=FALSE, title="Mplus Summary Table")
+  relimp::showData(MplusData, font=font, placement="+30+30", maxwidth=150, maxheight=50, rownumbers=FALSE, title="Mplus Summary Table")
 }
 
 #' Create an HTML file containing a summary table of Mplus model statistics

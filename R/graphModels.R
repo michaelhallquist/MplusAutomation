@@ -39,7 +39,7 @@ mplus.traceplot <- function(mplus.model, rows=4, cols=4, parameters_only=TRUE) {
   if (!inherits(mplus.model, "mplus.model")) stop("mplus.traceplot function requires an mplus.model object (from readModels).")
 
   #if(!(suppressWarnings(require(rhdf5)) && suppressWarnings(require(lattice)))) stop("mplus.traceplot requires rhdf5 and lattice packages")
-  if(!suppressWarnings(require(rhdf5))) {
+  if(!suppressWarnings(requireNamespace("rhdf5"))) {
     stop(paste(c("mplus.traceplot requires the rhdf5 package, which is not installed.\n",
                 "To install, in an R session, type:\n",
                 "  source(\"http://bioconductor.org/biocLite.R\")\n",
