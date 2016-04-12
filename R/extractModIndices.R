@@ -1,3 +1,64 @@
+#' Extract Modification Indices for One Chunk (Section)
+#'
+#' To do: add details.
+#'
+#' @param chunk
+#' @param columnNames
+#' @param filename
+#' @return A data frame
+#' @keywords internal
+extractModIndices_1chunk <- function(chunk, columnNames, filename) {
+  #only search for lines with actual MI data, not headers or blank lines
+  #remove spaces within mean/intercept brackets so that regexp works properly (treats the [I1] as a single var)
+  chunk <- gsub("\\[\\s*([^\\s]+)\\s*\\]", "[\\1]", chunk, perl=TRUE)
+  matches <- friendlyGregexpr("^\\s*([\\w_\\d+\\.#]+\\s+(BY|WITH|ON)\\s+[\\w_\\d+\\.#]+).*$", chunk)
+  matches <- rbind(matches, friendlyGregexpr("^\\s*\\[[\\s\\w\\d\\.#]+\\].*$", chunk)) #separate regexp for means/ints (just for ease of reading)
+  
+  if (is.null(matches)) return(NULL) #model contains the MI section, but no values. Occurs when no MI reaches above min threshold (e.g., 5)
+  
+  splitParams <- strsplit(matches$tag, "\\s+", perl=TRUE)
+  numCols <- length(columnNames)
+  for (line in 1:length(splitParams)) {
+    thisLine <- splitParams[[line]]
+    if (line < length(splitParams)) nextLine <- splitParams[[line+1]]
+    else nextLine <- NULL
+    
+    #in the on/by section, the on comes first with a trailing / and no data, followed by the by line with the MI data
+    #check for this and propagate data from subsequent row to this row
+    if (length(thisLine) < numCols && length(thisLine) >= 4 &&
+        thisLine[4] == "/" &&
+        length(nextLine) > 4 &&
+        nextLine[1] == thisLine[3] && #var1 of ON line corresponds to var2 of BY line
+        nextLine[3] == thisLine[1] #var2 of ON line corresponds to var1 of BY line
+        ) {
+      splitParams[[line]][4:length(nextLine)] <- nextLine[4:length(nextLine)]
+    } else if (length(thisLine) < numCols && substr(thisLine[1], 1, 1) == "[") {
+      splitParams[[line]] <- c(thisLine[1], "NA", "NA", thisLine[2:length(thisLine)]) #there is no V2 or operator here, so just pad with NA (technically this stays as char in output)
+    }
+      
+  }
+  
+  #rbind the split list as a data.frame
+  parsedParams <- data.frame(do.call("rbind", splitParams), stringsAsFactors=FALSE)
+  
+  #use the column names detected in extractParameters_1section
+  names(parsedParams) <- columnNames
+  
+  #for each column, convert to numeric if it is. Otherwise, return as character
+  parsedParams <- data.frame(lapply(parsedParams, function(col) {
+            #a bit convoluted, but we want to test for a purely numeric string by using a regexp that only allows numbers, periods, and the minus sign
+            #then sum the number of matches > 0 (i.e., where a number was found).
+            #if the sum is the same as the length of the column, then all elements are purely numeric.
+            
+            if (sum(sapply(gregexpr("^[\\d\\.-]+$", col, perl=TRUE), "[", 1) > 0) == length(col)) return(as.numeric(col))
+            else return(as.character(col))
+          }), stringsAsFactors=FALSE)
+  
+  return(parsedParams)
+  
+}
+
+
 #' Extract Modification Indices for One File
 #'
 #' To do: add details.
@@ -19,46 +80,48 @@ extractModIndices_1file <- function(outfiletext, filename) {
 
   if (is.na(columnNames) || is.null(columnNames)) stop("Missing column names for mod indices.\n  ", filename)
 
-  #only search for lines with actual MI data, not headers or blank lines
-  matches <- friendlyGregexpr("^\\s*([\\w_\\d+\\.#]+\\s+(BY|WITH|ON)\\s+[\\w_\\d+\\.#]+).*$", MISection)
+  #support multiple group output
+  multipleGroupMatches <- grep("^\\s*Group \\w+\\s*$", MISection, ignore.case=TRUE, perl=TRUE)
+  
+  if (length(multipleGroupMatches) > 0L) {
+    matchIndex <- 1
+    allSectionMI <- c()
+    for (match in multipleGroupMatches) {
+      groupName <- sub("^\\s*Group (\\w+)\\s*$", "\\1", MISection[match], perl=TRUE)
 
-  if (is.null(matches)) return(NULL) #model contains the MI section, but no values. Occurs when no MI reaches above min threshold (e.g., 5)
-
-  splitParams <- strsplit(matches$tag, "\\s+", perl=TRUE)
-  numCols <- length(columnNames)
-  for (line in 1:length(splitParams)) {
-    thisLine <- splitParams[[line]]
-    if (line < length(splitParams)) nextLine <- splitParams[[line+1]]
-    else nextLine <- NULL
-
-    #in the on/by section, the on comes first with a trailing / and no data, followed by the by line with the MI data
-    #check for this and propagate data from subsequent row to this row
-    if (length(thisLine) < numCols && length(thisLine) >= 4 &&
-        thisLine[4] == "/" &&
-        length(nextLine) > 4 &&
-        nextLine[1] == thisLine[3] && #var1 of ON line corresponds to var2 of BY line
-        nextLine[3] == thisLine[1] #var2 of ON line corresponds to var1 of BY line
-    )
-      splitParams[[line]][4:length(nextLine)] <- nextLine[4:length(nextLine)]
+      chunkToParse <- FALSE
+      if (matchIndex < length(multipleGroupMatches) &&
+          (multipleGroupMatches[matchIndex + 1] - multipleGroupMatches[matchIndex]) > 2) {
+        
+        #extract all text between this match and the next one (add one to omit this header row,
+        #subtract one to exclude the subsequent header row)
+        thisChunk <- MISection[(match+1):(multipleGroupMatches[matchIndex+1]-1)]
+        chunkToParse <- TRUE
+      } else if (matchIndex == length(multipleGroupMatches) && match+1 <= length(MISection)) {
+        #also assume that the text following the last multipleGroupMatch is also to be parsed
+        #second clause ensures that there is some chunk below the final header.
+        #this handles issues where a blank section terminates the results section, such as multilevel w/ no between
+        thisChunk <- MISection[(match+1):length(MISection)]
+        chunkToParse <- TRUE
+      }
+      
+      if (chunkToParse) {
+        parsedChunk <- extractModIndices_1chunk(thisChunk, columnNames, filename)
+        
+        #only append if there are some rows
+        if (!is.null(parsedChunk) && nrow(parsedChunk) > 0) {
+          parsedChunk$Group <- groupName
+          allSectionMI <- rbind(allSectionMI, parsedChunk)
+        }
+      }
+      matchIndex <- matchIndex + 1
+    }
+  } else {
+    #just one section to parse
+    allSectionMI <- extractModIndices_1chunk(MISection, columnNames, filename)
   }
-
-  #rbind the split list as a data.frame
-  parsedParams <- data.frame(do.call("rbind", splitParams), stringsAsFactors=FALSE)
-
-  #use the column names detected in extractParameters_1section
-  names(parsedParams) <- columnNames
-
-  #for each column, convert to numeric if it is. Otherwise, return as character
-  parsedParams <- data.frame(lapply(parsedParams, function(col) {
-            #a bit convoluted, but we want to test for a purely numeric string by using a regexp that only allows numbers, periods, and the minus sign
-            #then sum the number of matches > 0 (i.e., where a number was found).
-            #if the sum is the same as the length of the column, then all elements are purely numeric.
-
-            if (sum(sapply(gregexpr("^[\\d\\.-]+$", col, perl=TRUE), "[", 1) > 0) == length(col)) return(as.numeric(col))
-            else return(as.character(col))
-          }), stringsAsFactors=FALSE)
-
-  return(parsedParams)
+  
+  return(allSectionMI)
 }
 
 #' Extract model modification indices.
