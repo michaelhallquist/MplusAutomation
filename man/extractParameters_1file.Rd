@@ -6,6 +6,13 @@
 \usage{
 extractParameters_1file(outfiletext, filename, resultType)
 }
+\arguments{
+\item{outfiletext}{character vector of Mplus output file being processed}
+
+\item{filename}{name of Mplus output file being processed}
+
+\item{resultType}{(deprecated)}
+}
 \value{
 A list of parameters
 }

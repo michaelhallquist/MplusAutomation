@@ -6,6 +6,11 @@
 \usage{
 extractModIndices_1file(outfiletext, filename)
 }
+\arguments{
+\item{outfiletext}{character vector of Mplus output file being processed}
+
+\item{filename}{name of Mplus output file being processed}
+}
 \value{
 A data frame
 }

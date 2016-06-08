@@ -2,10 +2,11 @@
 #'
 #' To do: add details.
 #'
-#' @param outfiletext
-#' @param filename
+#' @param outfiletext character vector of Mplus output file from which to extract the AUX section
+#' @param filename filename of the Mplus output file being processed
 #' @return A data frame
 #' @importFrom gsubfn strapply
+#' @importFrom stats reshape
 #' @keywords internal
 extractAux <- function(outfiletext, filename) {
   if (missing(outfiletext) || is.na(outfiletext) || is.null(outfiletext)) stop("Missing mean equality to parse.\n ", filename)

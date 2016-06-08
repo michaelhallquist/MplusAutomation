@@ -6,6 +6,11 @@
 \usage{
 extractAux(outfiletext, filename)
 }
+\arguments{
+\item{outfiletext}{character vector of Mplus output file from which to extract the AUX section}
+
+\item{filename}{filename of the Mplus output file being processed}
+}
 \value{
 A data frame
 }

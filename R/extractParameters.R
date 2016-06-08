@@ -4,9 +4,9 @@
 #' output within a given file and given results section (e.g., stdyx section) There
 #' will be many chunks if latent classes, multiple groups, multilevel features are used.
 #'
-#' @param filename
-#' @param thisCunk
-#' @param columnNames
+#' @param filename name of Mplus output file being processed
+#' @param thisChunk character vector of output chunk from which to extract parameter values
+#' @param columnNames character vector of expected column names for output chunk
 #' @return A data frame (or matrix?)
 #' @keywords internal
 extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionName) {
@@ -178,9 +178,9 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
 #'
 #' To do: add details
 #'
-#' @param filename
-#' @param modelSection
-#' @param sectionName
+#' @param filename name of Mplus output file being processed
+#' @param modelSection name of model output section being processed
+#' @param sectionName name of output type to search for (e.g., "model_results") 
 #' @return A list of parameters
 #' @keywords internal
 #' @examples
@@ -360,9 +360,9 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 #'
 #' To do: add details
 #'
-#' @param filename
-#' @param modelSection
-#' @param sectionName
+#' @param outfiletext character vector of Mplus output file being processed
+#' @param filename name of Mplus output file being processed
+#' @param resultType (deprecated)
 #' @return A list of parameters
 #' @keywords internal
 extractParameters_1file <- function(outfiletext, filename, resultType) {

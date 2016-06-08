@@ -7,6 +7,10 @@
 lookupValue(tag, tagType, initCollection)
 }
 \arguments{
+\item{tag}{name of tag for which we want to know the current value}
+
+\item{tagType}{type of tag (simple, array, etc.) for the tag to lookup}
+
 \item{initCollection}{The list of all arguments parsed from the init section}
 }
 \value{

@@ -465,7 +465,7 @@ recurseReplace <- function(templateTags, initCollection, curiterator=1L) {
 
       filename <- finalInitCollection$filename
 
-      print (paste("writing file: ", filename))
+      cat(paste("writing file: ", filename, "\n", sep=""))
       curdir <- getwd()
 
       #figure out the output directory
@@ -559,8 +559,8 @@ replaceInitTags <- function(initTags, initCollection) {
 #'
 #' To do: fill in some details
 #'
-#' @param bodySection
-#' @param bodyTags
+#' @param bodySection character vector of body section of Mplus syntax
+#' @param bodyTags collection of tags used inside of the template body
 #' @param initCollection The list of all arguments parsed from the init section
 #' @return Returns updated bodySection
 #' @keywords internal
@@ -636,8 +636,8 @@ replaceBodyTags <- function(bodySection, bodyTags, initCollection) {
 #'
 #' To do: fill in some details
 #'
-#' @param tag
-#' @param tagType
+#' @param tag name of tag for which we want to know the current value
+#' @param tagType type of tag (simple, array, etc.) for the tag to lookup
 #' @param initCollection The list of all arguments parsed from the init section
 #' @return Current value
 #' @keywords internal
@@ -1220,6 +1220,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'   syntax. Primarily called for its side effect of creating Mplus
 #'   data files and optionally input files.
 #' @keywords interface
+#' @importFrom utils write.table
 #' @author Michael Hallquist
 #' @export
 #' @examples

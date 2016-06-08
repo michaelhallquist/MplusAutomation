@@ -9,6 +9,8 @@ addNode(dotModel, name, role, type)
 \arguments{
 \item{dotModel}{Basic model}
 
+\item{name}{name of model}
+
 \item{role}{The role of a variable (can be multiple)}
 
 \item{type}{The type of variable}

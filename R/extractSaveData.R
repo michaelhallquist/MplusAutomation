@@ -465,9 +465,10 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
 #' @param fileName The name of the file
 #' @param varNames The names of the variables to extract, comes from the fileInfo
 #' @param varWidths The widths of the variables to extract, comes from the fileInfo
-#' @param input
+#' @param input list of parsed Mplus input section extracted upstream in readModels
 #' @return A data frame of the extracted data.
 #' @keywords internal
+#' @importFrom utils read.table read.fwf
 l_getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileName, varNames, varWidths, input) {
   outfileDirectory <- splitFilePath(outfile)$directory
 

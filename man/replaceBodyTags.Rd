@@ -7,6 +7,10 @@
 replaceBodyTags(bodySection, bodyTags, initCollection)
 }
 \arguments{
+\item{bodySection}{character vector of body section of Mplus syntax}
+
+\item{bodyTags}{collection of tags used inside of the template body}
+
 \item{initCollection}{The list of all arguments parsed from the init section}
 }
 \value{

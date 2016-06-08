@@ -6,6 +6,13 @@
 \usage{
 extractParameters_1section(filename, modelSection, sectionName)
 }
+\arguments{
+\item{filename}{name of Mplus output file being processed}
+
+\item{modelSection}{name of model output section being processed}
+
+\item{sectionName}{name of output type to search for (e.g., "model_results")}
+}
 \value{
 A list of parameters
 }

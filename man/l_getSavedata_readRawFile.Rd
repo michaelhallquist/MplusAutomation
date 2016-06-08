@@ -19,6 +19,8 @@ l_getSavedata_readRawFile(outfile, outfiletext, format = "fixed", fileName,
 \item{varNames}{The names of the variables to extract, comes from the fileInfo}
 
 \item{varWidths}{The widths of the variables to extract, comes from the fileInfo}
+
+\item{input}{list of parsed Mplus input section extracted upstream in readModels}
 }
 \value{
 A data frame of the extracted data.

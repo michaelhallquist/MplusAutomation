@@ -33,6 +33,7 @@
 #'   plot(myModel$bparameters$valid_draw)
 #' }
 #' @keywords interface
+#' @importFrom graphics lines par plot
 mplus.traceplot <- function(mplus.model, rows=4, cols=4, parameters_only=TRUE) {
   #uses gh5 output, requires PLOT: TYPE=PLOT2
   
@@ -148,7 +149,7 @@ mplus.traceplot <- function(mplus.model, rows=4, cols=4, parameters_only=TRUE) {
 #' To do: add details
 #'
 #' @param dotModel Basic model
-#' @param name
+#' @param name name of model
 #' @param role The role of a variable (can be multiple)
 #' @param type The type of variable
 #' @return the dotModel with added node

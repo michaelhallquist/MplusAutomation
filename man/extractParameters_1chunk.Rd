@@ -6,6 +6,13 @@
 \usage{
 extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
 }
+\arguments{
+\item{filename}{name of Mplus output file being processed}
+
+\item{thisChunk}{character vector of output chunk from which to extract parameter values}
+
+\item{columnNames}{character vector of expected column names for output chunk}
+}
 \value{
 A data frame (or matrix?)
 }

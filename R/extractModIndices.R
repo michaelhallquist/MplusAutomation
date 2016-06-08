@@ -2,9 +2,9 @@
 #'
 #' To do: add details.
 #'
-#' @param chunk
-#' @param columnNames
-#' @param filename
+#' @param chunk character vector of current subsection from which to extract mod indices
+#' @param columnNames character vector of expected column (variable) names for section
+#' @param filename name of Mplus output file being parsed
 #' @return A data frame
 #' @keywords internal
 extractModIndices_1chunk <- function(chunk, columnNames, filename) {
@@ -63,8 +63,8 @@ extractModIndices_1chunk <- function(chunk, columnNames, filename) {
 #'
 #' To do: add details.
 #'
-#' @param outfiletext
-#' @param filename
+#' @param outfiletext character vector of Mplus output file being processed
+#' @param filename name of Mplus output file being processed
 #' @return A data frame
 #' @keywords internal
 extractModIndices_1file <- function(outfiletext, filename) {

@@ -4,7 +4,7 @@
 \alias{extractClassCounts}
 \title{Extract Latent Class Counts}
 \usage{
-extractClassCounts(outfiletext, filename)
+extractClassCounts(outfiletext, filename, summaries)
 }
 \arguments{
 \item{outfiletext}{The text of the output file}
