@@ -56,7 +56,8 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     
     #only keep lines with a single match
     #this removes rows that are -1 from gregexpr
-    convertMatches <- subset(convertMatches, start > 0)
+    convertMatches <- convertMatches[which(convertMatches$start > 0),]
+    #convertMatches <- subset(convertMatches, start > 0) #removed for compliance with CRAN
     
     #sometimes chunks have no parameters because they are empty. e.g., stdyx for ex7.30
     #in this case, return null

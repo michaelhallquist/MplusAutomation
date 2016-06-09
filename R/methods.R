@@ -242,6 +242,7 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
 #' See further documentation there.
 #'
 #' @rdname coef.mplus.model
+#' @importFrom stats coef
 #' @export
 coef.mplusObject <- function(object, ...) {
   coef(object$results, ...)
@@ -270,6 +271,7 @@ coef.mplusObject <- function(object, ...) {
 #' @name extract
 #' @rdname extract
 #' @aliases extract.mplus.model
+#' @importFrom stats coef
 #' @examples
 #' \dontrun{
 #' # simple example of a model using builtin data
