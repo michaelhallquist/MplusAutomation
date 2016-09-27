@@ -23,6 +23,7 @@
 #' @author Michael Hallquist
 #' @seealso \code{\link{runModels}}
 #' @keywords interface
+#' @importFrom utils choose.dir
 #' @export
 #' @examples
 #' # interactive, none

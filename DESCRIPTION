@@ -9,7 +9,7 @@ Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "jwiley.psych@gmail.com"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
 Description: Leverages the R language to automate latent variable model estimation
-	and interpretation using Mplus, a powerful latent variable modeling program 
+	and interpretation using Mplus, a powerful latent variable modeling program
 	developed by Muthen and Muthen (www.statmodel.com). Specifically, this package
     provides routines for creating related groups of models, running batches of
     models, and extracting and tabulating model parameters and fit statistics.
@@ -19,6 +19,7 @@ Depends:
     R (>= 2.15.0),
     methods
 Imports:
+    utils,
     boot,
     plyr,
     gsubfn,
@@ -33,4 +34,5 @@ Suggests:
     relimp,
     testthat
 LazyLoad: yes
+LazyData: yes
 RoxygenNote: 5.0.1
