@@ -556,8 +556,12 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
     }
     else if (sectionType == "confidence_intervals"){
       if (identical(thisLine, c("Lower",".5%","Lower","2.5%","Lower","5%",
-                        "Estimate","Upper","5%","Upper","2.5%","Upper",".5%" )))
-        varNames <- c("param", "low.5", "low2.5", "low5", "est", "up5", "up2.5", "up.5")
+              "Estimate","Upper","5%","Upper","2.5%","Upper",".5%" ))) {
+        varNames <- c("param", "low.5", "low2.5", "low5", "est", "up5", "up2.5", "up.5")                  
+      } else if (identical(thisLine, c("Lower",".5%","Lower","2.5%",
+              "Estimate","Upper","2.5%","Upper",".5%" ))) {
+        varNames <- c("param", "low.5", "low2.5", "est", "up2.5", "up.5")
+      }
     }
     else if (sectionType == "auxe") { #currently unused
       if (identical(thisLine, c("Mean", "S.E.", "Mean", "S.E."))) {
