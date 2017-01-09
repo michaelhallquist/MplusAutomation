@@ -52,6 +52,7 @@
 #' \item{usevariables}{A character vector of the variables from the \code{R} data set to be used.}
 #' \item{rdata}{The \code{R} data set to use for the model.}
 #' \item{imputed}{A logical whether the data are multiply imputed.}
+#' \item{writeData}{A logical indicating whether the data is to be written to disk (default). Can be modified by \code{update.mplusObject}.}
 #'
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @export
@@ -127,7 +128,8 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
     results = NULL,
     usevariables = usevariables,
     rdata = rdata,
-    imputed = imputed)
+    imputed = imputed,
+    writeData = TRUE)
 
   class(object) <- c("mplusObject", "list")
 
@@ -144,7 +146,9 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
 #' replace a given section with the new text.  Alternately, you can add
 #' additional text using \code{~ + "additional stuff"}. Combined these let you
 #' replace or add to a section.
-#'
+#' 
+#' If \code{rdata=NULL} (data is unchanged), the data will not be written to disk.
+#' 
 #' @param object An object of class mplusObject
 #' @param \dots Additional arguments to pass on
 #' @return An (updated) Mplus model object
@@ -197,7 +201,8 @@ update.mplusObject <- function(object, ...) {
   if (length(rIndex)) {
     object[rIndex] <- dots[rIndex]
   }
-
+  if(is.null(dots$rData)) object$writeData <- FALSE
+  
   return(object)
 }
 
@@ -424,10 +429,12 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                        keepCols = object$usevariables,
                        filename = dataout,
                        inpfile = tempfile(),
-                       imputed = imputed, ...)
+                       imputed = imputed, 
+                       writeData = object$writeData, ...)
     } else {
         prepareMplusData(df = data[i, object$usevariables],
-                         filename = dataout, inpfile = tempfile(), ...)
+                         filename = dataout, inpfile = tempfile(),
+                         writeData = object$writeData, ...)
     }
 
     runModels(filefilter = modelout, Mplus_command = Mplus_command)
@@ -471,6 +478,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                      filename = dataout,
                      inpfile = tempfile(),
                      imputed = object$imputed,
+                     writeData = object$writeData, 
                      ...)
     return(object)
   }
