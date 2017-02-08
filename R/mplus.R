@@ -306,7 +306,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #' This combination ensures that under most all circumstances, if the data changes,
 #' the hash will change.  The hash is appended to the specified data file name
 #' (which is controlled by the logical \code{hashfilename} argument).  Next R
-#' checks in the directoy where the data would normally be written.  If a data file
+#' checks in the directory where the data would normally be written.  If a data file
 #' exists in that directory that matches the hash generated from the data, R will
 #' use that existing data file instead of writing out the data again.
 #' A final option is \sQuote{never}.  If this option is used, R will not write

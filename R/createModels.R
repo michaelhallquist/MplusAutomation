@@ -1299,6 +1299,22 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' data file definition and variable names,
 #' is printed to the console or optionally to an input file.
 #'
+#' The \code{writeData} argument is new and can be used to reduce overhead
+#' from repeatedly writing the same data from R to the disk.  When using the
+#' \sQuote{always} option, \code{prepareMplusData} behaves as before, always writing
+#' data from R to the disk.  When \sQuote{ifmissing}, R generates an
+#' md5 hash of the data prior to writing it out to the disk.  The md5 hash is based on:
+#' (1) the dimensions of the dataset, (2) the variable names,
+#' (3) the class of every variable, and (4) the raw data from the first and last rows.
+#' This combination ensures that under most all circumstances, if the data changes,
+#' the hash will change.  The hash is appended to the specified data file name
+#' (which is controlled by the logical \code{hashfilename} argument).  Next R
+#' checks in the directory where the data would normally be written.  If a data file
+#' exists in that directory that matches the hash generated from the data, R will
+#' use that existing data file instead of writing out the data again.
+#' A final option is \sQuote{never}.  If this option is used, R will not write
+#' the data out even if no file matching the hash is found.
+#'
 #' @param df The R data.frame to be prepared for Mplus
 #' @param filename The path and filename for the tab-delimited data file
 #'   for use with Mplus. Example: "C:/Mplusdata/data1.dat"
@@ -1328,8 +1344,14 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' @param imputed A logical whether data are multiply imputed.  Defaults
 #'   to \code{FALSE}.  If \code{TRUE}, the data should be a list,
 #'   where each element of the list is a multiply imputed dataset.
-#' @param writeData Logical value indicating whether the data files
-#'   (*.dat) should be written to disk (defaults to \code{TRUE}).
+#' @param writeData A character vector, one of \sQuote{always},
+#'   \sQuote{ifmissing}, \sQuote{never} indicating whether the data files
+#'   (*.dat) should be written to disk.  Defaults to
+#'   \sQuote{always} for consistency with previous behavior.
+#'   See details for further information.
+#' @param hashfilename A logical whether or not to add a hash of the raw data to the
+#'   data file name.  Defaults to \code{FALSE} for consistency with previous
+#'   behavior where this feature was not available..
 #' @return Invisibly returns a character vector of the Mplus input
 #'   syntax. Primarily called for its side effect of creating Mplus
 #'   data files and optionally input files.
