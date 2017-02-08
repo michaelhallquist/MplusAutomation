@@ -23,9 +23,18 @@
 #' @param VARIABLE A character string of the variable section for Mplus (note, do not
 #'   define the variable names from the dataset as this is generated automatically)
 #' @param DEFINE A character string of the define section for Mplus (optional)
+#' @param MONTECARLO A character string of the montecarlo section for Mplus (optional).
+#'   If used, \code{autov} is defaults to \code{FALSE} instead of the usual default,
+#'   \code{TRUE}, but may still be overwritten, if desired.
+#' @param MODELPOPULATION A character string of the MODEL POPULATION section for Mplus (optional).
+#' @param MODELMISSING A character string of the MODEL MISSING section for Mplus (optional).
 #' @param ANALYSIS A character string of the analysis section for Mplus (optional)
 #' @param MODEL A character string of the model section for Mplus (optional, although
 #'   typically you want to define a model)
+#' @param MODELINDIRECT A character string of the MODEL INDIRECT section for Mplus (optional).
+#' @param MODELCONSTRAINT A character string of the MODEL CONSTRAINT section for Mplus (optional).
+#' @param MODELTEST A character string of the MODEL TEST section for Mplus (optional).
+#' @param MODELPRIORS A character string of the MODEL PRIORS section for Mplus (optional).
 #' @param OUTPUT A character string of the output section for Mplus (optional)
 #' @param SAVEDATA A character string of the savedata section for Mplus (optional)
 #' @param PLOT A character string of the plot section for Mplus (optional)
@@ -43,8 +52,15 @@
 #' \item{DATA}{The data section in Mplus (if defined)}
 #' \item{VARIABLE}{The variable section in Mplus (if defined)}
 #' \item{DEFINE}{The define section in Mplus (if defined)}
+#' \item{MONTECARLO}{The montecarlo section in Mplus (if defined)}
+#' \item{MODELPOPULATION}{The modelpopulation section in Mplus (if defined)}
+#' \item{MODELMISSING}{The modelmissing section in Mplus (if defined)}
 #' \item{ANALYSIS}{The analysis section in Mplus (if defined)}
 #' \item{MODEL}{The model section in Mplus (if defined)}
+#' \item{MODELINDIRECT}{The modelindirect section in Mplus (if defined)}
+#' \item{MODELCONSTRAINT}{The modelconstraint section in Mplus (if defined)}
+#' \item{MODELTEST}{The modeltest section in Mplus (if defined)}
+#' \item{MODELPRIORS}{The modelpriors section in Mplus (if defined)}
 #' \item{OUTPUT}{The output section in Mplus (if defined)}
 #' \item{SAVEDATA}{The savedata section in Mplus (if defined)}
 #' \item{PLOT}{The plot section in Mplus (if defined)}
@@ -77,7 +93,9 @@
 #'   autov = TRUE)
 #' rm(example3)
 mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NULL,
-  ANALYSIS = NULL, MODEL = NULL, OUTPUT = NULL, SAVEDATA = NULL, PLOT = NULL,
+  MONTECARLO = NULL, MODELPOPULATION = NULL, MODELMISSING = NULL, ANALYSIS = NULL,
+  MODEL = NULL, MODELINDIRECT = NULL, MODELCONSTRAINT = NULL, MODELTEST = NULL, MODELPRIORS = NULL,
+  OUTPUT = NULL, SAVEDATA = NULL, PLOT = NULL,
   usevariables = NULL, rdata = NULL, autov = TRUE, imputed = FALSE) {
 
   charOrNull <- function(x) {is.character(x) || is.null(x)}
@@ -85,11 +103,24 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
   stopifnot(charOrNull(DATA))
   stopifnot(charOrNull(VARIABLE))
   stopifnot(charOrNull(DEFINE))
+  stopifnot(charOrNull(MONTECARLO))
+  stopifnot(charOrNull(MODELPOPULATION))
+  stopifnot(charOrNull(MODELMISSING))
   stopifnot(charOrNull(ANALYSIS))
+
   stopifnot(charOrNull(MODEL))
+  stopifnot(charOrNull(MODELINDIRECT))
+  stopifnot(charOrNull(MODELCONSTRAINT))
+  stopifnot(charOrNull(MODELTEST))
+  stopifnot(charOrNull(MODELPRIORS))
+
   stopifnot(charOrNull(OUTPUT))
   stopifnot(charOrNull(SAVEDATA))
   stopifnot(charOrNull(PLOT))
+
+  if (!is.null(MONTECARLO) && missing(autov)) {
+    autov <- FALSE
+  }
 
   if (autov && is.null(usevariables) && !is.null(rdata) && !is.null(MODEL)) {
     if (imputed) {
@@ -119,8 +150,15 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
     DATA = DATA,
     VARIABLE = VARIABLE,
     DEFINE = DEFINE,
+    MONTECARLO = MONTECARLO,
+    MODELPOPULATION = MODELPOPULATION,
+    MODELMISSING = MODELMISSING,
     ANALYSIS = ANALYSIS,
     MODEL = MODEL,
+    MODELINDIRECT = MODELINDIRECT,
+    MODELCONSTRAINT = MODELCONSTRAINT,
+    MODELTEST = MODELTEST,
+    MODELPRIORS = MODELPRIORS,
     OUTPUT = OUTPUT,
     SAVEDATA = SAVEDATA,
     PLOT = PLOT,
@@ -172,7 +210,9 @@ update.mplusObject <- function(object, ...) {
   sectionNames <- names(dots)
 
   mplusList <- c("TITLE", "DATA", "VARIABLE", "DEFINE",
-    "ANALYSIS", "MODEL", "OUTPUT", "SAVEDATA", "PLOT")
+    "MONTECARLO", "MODELPOPULATION", "MODELMISSING", "ANALYSIS",
+    "MODEL", "MODELINDIRECT", "MODELCONSTRAINT", "MODELTEST", "MODELPRIORS",
+    "OUTPUT", "SAVEDATA", "PLOT")
   rList <- c("results", "usevariables", "rdata")
 
   mplusIndex <- sectionNames[which(sectionNames %in% mplusList)]
@@ -236,34 +276,48 @@ update.mplusObject <- function(object, ...) {
 #'   MODEL = ~ . + "\nmpg ON hp;",
 #'   usevariables = c("mpg", "hp", "wt")), "example1.dat"),
 #'   fill=TRUE)
-#' rm(example1)
+#' rm(example1
 createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE) {
   stopifnot(inherits(object, "mplusObject"))
 
-  mplusList <- c("TITLE", "DATA", "VARIABLE", "DEFINE",
-    "ANALYSIS", "MODEL", "OUTPUT", "SAVEDATA", "PLOT")
+  mplusList <- data.frame(
+    Names = c("TITLE", "DATA", "VARIABLE", "DEFINE",
+              "MONTECARLO", "MODELPOPULATION", "MODELMISSING", "ANALYSIS",
+              "MODEL", "MODELINDIRECT", "MODELCONSTRAINT", "MODELTEST", "MODELPRIORS",
+              "OUTPUT", "SAVEDATA", "PLOT"),
+    Labels = c("TITLE", "DATA", "VARIABLE", "DEFINE",
+              "MONTECARLO", "MODEL POPULATION", "MODEL MISSING", "ANALYSIS",
+              "MODEL", "MODEL INDIRECT", "MODEL CONSTRAINT", "MODEL TEST", "MODEL PRIORS",
+              "OUTPUT", "SAVEDATA", "PLOT"),
+    stringsAsFactors = FALSE)
 
-  dFile <- paste0("FILE = \"", filename, "\";\n")
-  if (imputed) {
-    dFile <- paste0(dFile, "TYPE = IMPUTATION;\n")
+  simulation <- !is.null(object$MONTECARLO)
+
+  if (!simulation && !missing(filename)) {
+    dFile <- paste0("FILE = \"", filename, "\";\n")
+    if (imputed) {
+      dFile <- paste0(dFile, "TYPE = IMPUTATION;\n")
+    }
+
+    object$DATA <- paste(dFile, object$DATA, collapse = "\n")
   }
 
-  object$DATA <- paste(dFile, object$DATA, collapse = "\n")
-
-  if (object$imputed) {
-    vNames <- createVarSyntax(object$rdata[[1]][, object$usevariables])
-  } else {
-    vNames <- createVarSyntax(object$rdata[, object$usevariables])
+  if (!is.null(object$rdata) && !is.null(object$usevariables)) {
+    if (object$imputed) {
+      vNames <- createVarSyntax(object$rdata[[1]][, object$usevariables])
+    } else {
+      vNames <- createVarSyntax(object$rdata[, object$usevariables])
+    }
+    object$VARIABLE <- paste(vNames, "MISSING=.;\n", object$VARIABLE, collapse = "\n")
   }
-  object$VARIABLE <- paste(vNames, "MISSING=.;\n", object$VARIABLE, collapse = "\n")
 
-  index <- sapply(object[mplusList], function(x) {
+  index <- sapply(object[mplusList$Names], function(x) {
     !(is.null(x) || !nzchar(gsub("\\s*", "", x, perl=TRUE)))
   })
 
-  sections <- mplusList[index]
+  sections <- mplusList$Names[index]
   body <- unlist(lapply(sections, function(n) {
-    c(paste0(n, ":"), object[[n]])
+    c(paste0(mplusList$Labels[match(n, mplusList$Names)], ":"), object[[n]])
   }))
   body <- paste(body, collapse = "\n")
 
@@ -443,6 +497,40 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'  unlink("model4.inp")
 #'  unlink("model4.out")
 #'  unlink("Mplus Run Models.log")
+#'
+#' # Monte Carlo Simulation Example
+#' montecarlo <- mplusObject(
+#'  TITLE = "Monte Carlo Example;",
+#'  MONTECARLO = "
+#'   NAMES ARE i1-i5;
+#'   NOBSERVATIONS = 100;
+#'   NREPS = 100;
+#'   SEED = 1234;",
+#'  MODELPOPULATION = "
+#'   f BY i1-i5*1;
+#'   f@1;
+#'   i1-i5*1;",
+#'  ANALYSIS = "
+#'   ESTIMATOR = BAYES;
+#'   PROC = 2;
+#'   fbiter = 100;",
+#'  MODEL = "
+#'   f BY i1-i5*.8 (l1-l5);
+#'   f@1;
+#'   i1-i5*1;",
+#'  MODELPRIORS = "
+#'    l1-l5 ~ N(.5 .1);",
+#'  OUTPUT = "TECH9;")
+#'
+#' fitMonteCarlo <- mplusModeler(montecarlo,
+#'   modelout = "montecarlo.inp",
+#'   run = 1L,
+#'   writeData = "always",
+#'   hashfilename = FALSE)
+#'
+#' unlink("montecarlo.inp")
+#' unlink("montecarlo.out")
+#' unlink("Mplus Run Models.log")
 #' }
 mplusModeler <- function(object, dataout, modelout, run = 0L,
                          check = FALSE, varwarnings = TRUE, Mplus_command="Mplus",
@@ -456,70 +544,82 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
 
   writeData <- match.arg(writeData)
 
+  simulation <- !is.null(object$MONTECARLO)
+
   if (missing(modelout) & missing(dataout)) {
     stop("You must specify either modelout or dataout")
-  } else if (missing(dataout)) {
+  } else if (missing(dataout) && !simulation) {
     dataout <- gsub("(^.*)(\\.inp$)", "\\1.dat", modelout)
   } else if (missing(modelout)) {
     modelout <- gsub("(.*)(\\..+$)", "\\1.inp", dataout)
   }
 
-  if (object$imputed) {
-    if (identical(writeData, "ifmissing")) {
+  if (simulation) {
+    if (run > 1) {
+      run <- 1L
+      message("run cannot be greater than 1 when using montecarlo simulation, setting run = 1")
+    }
+    dataout <- dataout2 <- NULL
+  } else if (!simulation) {
+    if (object$imputed) {
+      if (identical(writeData, "ifmissing")) {
+        writeData <- "always"
+        message("When imputed = TRUE, writeData cannot be 'ifmissing', setting to 'always'")
+      }
+      if (hashfilename) {
+        hashfilename <- FALSE
+        message("When imputed = TRUE, hashfilename cannot be TRUE, setting to FALSE")
+      }
+    }
+    if (run > 1) {
+      if (identical(writeData, "ifmissing")) {
+        writeData <- "always"
+        message("When run > 1, writeData cannot be 'ifmissing', setting to 'always'")
+      }
+      if (hashfilename) {
+        hashfilename <- FALSE
+        message("When run > 1, hashfilename cannot be TRUE, setting to FALSE")
+      }
+    }
+    if (!hashfilename && identical(writeData, "ifmissing")) {
       writeData <- "always"
-      message("When imputed = TRUE, writeData cannot be 'ifmissing', setting to 'always'")
+      message("When hashfilename = FALSE, writeData cannot be 'ifmissing', setting to 'always'")
     }
-    if (hashfilename) {
-      hashfilename <- FALSE
-      message("When imputed = TRUE, hashfilename cannot be TRUE, setting to FALSE")
-    }
-  }
-  if (run > 1) {
-    if (identical(writeData, "ifmissing")) {
-      writeData <- "always"
-      message("When run > 1, writeData cannot be 'ifmissing', setting to 'always'")
-    }
-    if (hashfilename) {
-      hashfilename <- FALSE
-      message("When run > 1, hashfilename cannot be TRUE, setting to FALSE")
-    }
-  }
-  if (!hashfilename && identical(writeData, "ifmissing")) {
-    writeData <- "always"
-    message("When hashfilename = FALSE, writeData cannot be 'ifmissing', setting to 'always'")
-  }
 
-  if (hashfilename) {
-    md5 <- .cleanHashData(
-      df = object$rdata,
-      keepCols = object$usevariables,
-      imputed = object$imputed)$md5
+    if (hashfilename) {
+      md5 <- .cleanHashData(
+        df = object$rdata,
+        keepCols = object$usevariables,
+        imputed = object$imputed)$md5
 
-    tmp <- .hashifyFile(dataout, md5,
-                        useexisting = identical(writeData, "ifmissing"))
-    dataout2 <- tmp$filename
-  } else {
-    dataout2 <- dataout
+      tmp <- .hashifyFile(dataout, md5,
+                          useexisting = identical(writeData, "ifmissing"))
+      dataout2 <- tmp$filename
+    } else {
+      dataout2 <- dataout
+    }
   }
 
   .run <- function(data, i, boot = TRUE, imputed = FALSE, ...) {
-    if (imputed) {
-      if(boot) stop("Cannot use imputed data and bootstrap")
-      prepareMplusData(df = data,
-                       keepCols = object$usevariables,
-                       filename = dataout,
-                       inpfile = tempfile(),
-                       imputed = imputed,
-                       writeData = writeData,
-                       hashfilename = hashfilename,
-                       ...)
-    } else {
-      prepareMplusData(df = data[i, , drop = FALSE],
-                       keepCols = object$usevariables,
-                       filename = dataout, inpfile = tempfile(),
-                       writeData = ifelse(boot, "always", writeData),
-                       hashfilename = ifelse(boot, FALSE, hashfilename),
-                       ...)
+    if (!simulation) {
+      if (imputed) {
+        if(boot) stop("Cannot use imputed data and bootstrap")
+        prepareMplusData(df = data,
+                         keepCols = object$usevariables,
+                         filename = dataout,
+                         inpfile = tempfile(),
+                         imputed = imputed,
+                         writeData = writeData,
+                         hashfilename = hashfilename,
+                         ...)
+      } else {
+        prepareMplusData(df = data[i, , drop = FALSE],
+                         keepCols = object$usevariables,
+                         filename = dataout, inpfile = tempfile(),
+                         writeData = ifelse(boot, "always", writeData),
+                         hashfilename = ifelse(boot, FALSE, hashfilename),
+                         ...)
+      }
     }
 
     runModels(filefilter = modelout, Mplus_command = Mplus_command)
@@ -544,29 +644,33 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   cat(body, file = modelout, sep = "\n")
   message("Wrote model to: ", modelout)
 
-  if (hashfilename && identical(writeData, "ifmissing")) {
-    if (tmp$fileexists) {
-      NULL
+  if (!simulation) {
+    if (hashfilename && identical(writeData, "ifmissing")) {
+      if (tmp$fileexists) {
+        NULL
+      } else {
+        message("Wrote data to: ", dataout2)
+      }
     } else {
       message("Wrote data to: ", dataout2)
     }
-  } else {
-    message("Wrote data to: ", dataout2)
   }
 
   results <- bootres <- NULL
   finalres <- list(model = results, boot = bootres)
 
-  if (run > 1 & !object$imputed) {
-    bootres <- boot(object$rdata, .run, R = run, sim = "ordinary")
-    finalres$boot <- bootres
-    class(finalres) <- c("boot.mplus.model", "list")
+  if (!simulation) {
+    if (run > 1 & !object$imputed) {
+      bootres <- boot(object$rdata, .run, R = run, sim = "ordinary")
+      finalres$boot <- bootres
+      class(finalres) <- c("boot.mplus.model", "list")
+    }
   }
 
   if (run) {
     results <- .run(data = object$rdata, boot = FALSE, imputed = object$imputed, ...)
     finalres$model <- results
-  } else {
+  } else if (!simulation) {
     prepareMplusData(df = object$rdata,
                      keepCols = object$usevariables,
                      filename = dataout,

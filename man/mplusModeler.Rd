@@ -186,6 +186,40 @@ test2 <- mplusObject(
  unlink("model4.inp")
  unlink("model4.out")
  unlink("Mplus Run Models.log")
+
+# Monte Carlo Simulation Example
+montecarlo <- mplusObject(
+ TITLE = "Monte Carlo Example;",
+ MONTECARLO = "
+  NAMES ARE i1-i5;
+  NOBSERVATIONS = 100;
+  NREPS = 100;
+  SEED = 1234;",
+ MODELPOPULATION = "
+  f BY i1-i5*1;
+  f@1;
+  i1-i5*1;",
+ ANALYSIS = "
+  ESTIMATOR = BAYES;
+  PROC = 2;
+  fbiter = 100;",
+ MODEL = "
+  f BY i1-i5*.8 (l1-l5);
+  f@1;
+  i1-i5*1;",
+ MODELPRIORS = "
+   l1-l5 ~ N(.5 .1);",
+ OUTPUT = "TECH9;")
+
+fitMonteCarlo <- mplusModeler(montecarlo,
+  modelout = "montecarlo.inp",
+  run = 1L,
+  writeData = "always",
+  hashfilename = FALSE)
+
+unlink("montecarlo.inp")
+unlink("montecarlo.out")
+unlink("Mplus Run Models.log")
 }
 }
 \author{

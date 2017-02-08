@@ -1,6 +1,6 @@
 Version 0.6-5
 - feature: prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
-
+- feature: mplusObject(), mplusModeler(), update(), and createSyntax() all now accomodate monte carlo simulations in Mplus
 Version 0.6-4
 - feature: prepareMplusData() and mplusObject() / mplusModeler() now handle multiply imputed data
 - feature: added extraction of Chi-Square Test of Model Fit for Binary and Ordered Categorical section
@@ -13,7 +13,7 @@ Version 0.6-4
 - bugfix:  extractParameters_1chunk was failing to read in Base Hazard Parameters sections from output files
 - bugfix:  matrixExtract gave improper output when column headers were non-unique
 - bugfix:  extract class counts properly from Mplus v7.3+, which changed the section headers
-- feature: added new function, SummaryTable() which is a generic interface to create summary tables and output to the 
+- feature: added new function, SummaryTable() which is a generic interface to create summary tables and output to the
            console, popup, HTML, LaTeX, or markdown to support a wider variety of reproducible documents.
 
 Version 0.6-3
