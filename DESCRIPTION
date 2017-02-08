@@ -27,7 +27,8 @@ Imports:
     xtable,
     lattice,
     texreg,
-    pander
+    pander,
+    digest
 Suggests:
     rhdf5,
     tcltk,

@@ -1178,6 +1178,118 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 
 }
 
+#' Clean data and calculate the md5 hash
+#'
+#' Internal utility function, primarily for \code{prepareMplusData}.
+#'
+#' @param df The R data.frame to be prepared for Mplus
+#' @param keepCols A character vector specifying the variable names
+#'   within \code{df} to be output to \code{filename} or a numeric
+#'   vector of the column indices to be output or a logical vector
+#'   corresponding to the same.
+#' @param dropCols A character vector specifying the variable names
+#'   within \code{df} to be omitted from the data output to \code{filename}
+#'   or a numeric vector of the column indices not to be output
+#'   or a logical vector corresponding to the same.
+#' @param imputed A logical whether data are multiply imputed.  Defaults
+#'   to \code{FALSE}.  If \code{TRUE}, the data should be a list,
+#'   where each element of the list is a multiply imputed dataset.
+#' @return A list of the data and the md5 hash.
+#' @keywords internal
+#' @importFrom digest digest
+#' @examples
+#' \dontrun{
+#'   MplusAutomation:::.cleanHashData(mtcars)
+#' }
+.cleanHashData <- function(df, keepCols, dropCols, imputed=FALSE) {
+  if (imputed) {
+    stopifnot(inherits(df, "list"))
+  } else {
+    stopifnot(inherits(df, "data.frame"))
+  }
+
+  ## only allow keep OR drop.
+  if(!missing(keepCols) && !missing(dropCols) && length(keepCols) && length(dropCols)) {
+    stop("keepCols and dropCols passed. You must choose one or the other, but not both.")
+  }
+
+  ## assert types allowed for keep and drop cols
+  stopifnot(missing(keepCols) || is.character(keepCols) ||
+            is.numeric(keepCols) || is.logical(keepCols))
+
+  stopifnot(missing(dropCols) || is.character(dropCols) ||
+            is.numeric(dropCols) || is.logical(dropCols))
+
+
+  ## keep only columns specified by keepCols
+  if (!missing(keepCols) && length(keepCols) > 0) {
+    if (imputed) {
+      df <- lapply(df, function(d) d[, keepCols, drop = FALSE])
+    } else {
+      df <- df[, keepCols, drop = FALSE] # works with all types
+    }
+  }
+
+  ## drop columns specified by dropCols
+  if (!missing(dropCols) && length(dropCols) > 0) {
+    if (is.character(dropCols)) {
+      if (imputed) {
+        df <- lapply(df, function(d) {subset(d, select = -which(colnames(d) %in% dropCols))})
+      } else {
+        df <- subset(df, select = -which(colnames(df) %in% dropCols))
+      }
+    } else if (is.numeric(dropCols)) {
+      if (imputed) {
+        df <- lapply(df, function(d) {subset(d, select = -dropCols)})
+      } else {
+        df <- subset(df, select = -dropCols)
+      }
+    } else if (is.logical(dropCols)) {
+      if (imputed) {
+        df <- lapply(df, function(d) {subset(d, select = !dropCols)})
+      } else {
+        df <- subset(df, select = !dropCols)
+      }
+    }
+  }
+
+  hash <- digest(as.vector(c(
+    dim(df),
+    unlist(lapply(df, class)),
+    unlist(dimnames(df)),
+    as.character(unlist(df[c(1, nrow(df)), ])))), "md5")
+
+  return(list(data = df, md5 = hash))
+}
+
+#' Check if a file exists with a given hash and add a hash to an existing filename
+#'
+#' Internal utility function, primarily for \code{prepareMplusData}.
+#'
+#' @param filename A character vector containing the filename
+#' @param hash A character vector with the hash to use
+#' @param useexisting A logical whether to use an existing file name
+#'   if one is found containing the hash.  Defaults to \code{FALSE}
+#'   in which case the hash is added to the user specified filename
+#' @return A list of the filename (plus hash) and a logical value
+#'   whether a filename with the hash already existed or not.
+#' @keywords internal
+#' @examples
+#' MplusAutomation:::.hashifyFile("testit.dat", "abc")
+.hashifyFile <- function(filename, hash, useexisting = FALSE) {
+  fileonly <- basename(filename)
+  allfiles <- list.files(path = dirname(filename))
+  existingfile <- grep(hash, allfiles, value=TRUE)[1]
+
+  fileexists <- length(existingfile) && !isTRUE(is.na(existingfile))
+
+  if (fileexists && useexisting) {
+    filename <- gsub(basename(filename), basename(existingfile), filename)
+  } else {
+    filename <- gsub("\\.dat$", paste0("_", hash, ".dat"), filename)
+  }
+  list(filename = filename, fileexists = fileexists)
+}
 
 #' Create tab-delimited file and Mplus input syntax from R data.frame
 #'
@@ -1216,9 +1328,8 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' @param imputed A logical whether data are multiply imputed.  Defaults
 #'   to \code{FALSE}.  If \code{TRUE}, the data should be a list,
 #'   where each element of the list is a multiply imputed dataset.
-#' @param writeData Logical value indicating whether the data files 
-#'   (*.dat) should be written to disk (defaults to \code{TRUE}). Can be 
-#'   set to FALSE when \code{mplusObject} is updated.
+#' @param writeData Logical value indicating whether the data files
+#'   (*.dat) should be written to disk (defaults to \code{TRUE}).
 #' @return Invisibly returns a character vector of the Mplus input
 #'   syntax. Primarily called for its side effect of creating Mplus
 #'   data files and optionally input files.
@@ -1241,6 +1352,20 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'
 #' # see that syntax was stored
 #' test01
+#'
+#' # by default, if re-run, data is re-written, with a note
+#' test01b <- prepareMplusData(mtcars, "test01.dat")
+#'
+#' # if we turn on hashing in the filename the first time,
+#' # we can avoid overwriting notes the second time
+#' test01c <- prepareMplusData(mtcars, "test01c.dat", hashfilename=TRUE)
+#'
+#' # now that the filename was hashed in test01c, future calls do not re-write data
+#' # as long as the hash matches
+#' test01d <- prepareMplusData(mtcars, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
+#'
+#' # however, if the data change, then the file is re-written
+#' test01e <- prepareMplusData(iris, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
 #'
 #' # tests for keeping and dropping variables
 #' prepareMplusData(mtcars, "test02.dat", keepCols = c("mpg", "hp"))
@@ -1280,72 +1405,76 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' prepareMplusData(mtcars, "test10.dat",
 #'   inpfile="test10alt.inp", overwrite=FALSE)
 #' }
-
 prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
-  interactive=TRUE, overwrite=TRUE, imputed=FALSE, writeData=TRUE) {
+                             interactive=TRUE, overwrite=TRUE, imputed=FALSE,
+                             writeData=c("always", "ifmissing", "never"), hashfilename=FALSE) {
 
-  if(writeData) {
-    if (imputed) {
-        stopifnot(inherits(df, "list"))
+  writeData <- match.arg(writeData)
+
+  ## message and then exit function if never write data
+  if (identical(writeData, "never")) {
+    message("No action taken as writeData = 'never'")
+    return(invisible(""))
+  }
+
+  if (imputed) {
+    if (identical(writeData, "ifmissing")) {
+      writeData <- "always"
+      message("When imputed = TRUE, writeData cannot be 'ifmissing', setting to 'always'")
+    }
+    if (hashfilename) {
+      hashfilename <- FALSE
+      message("When imputed = TRUE, hashfilename cannot be TRUE, setting to FALSE")
+    }
+  }
+
+  if (!hashfilename && identical(writeData, "ifmissing")) {
+    writeData <- "always"
+    message("When hashfilename = FALSE, writeData cannot be 'ifmissing', setting to 'always'")
+  }
+
+  if (missing(keepCols)) {
+    if (missing(dropCols)) {
+      cleand <- .cleanHashData(df = df, imputed = FALSE)
     } else {
-        stopifnot(inherits(df, "data.frame"))
+      cleand <- .cleanHashData(df = df, dropCols = dropCols, imputed = FALSE)
     }
-
-    ## only allow keep OR drop.
-    if(!missing(keepCols) && !missing(dropCols)) {
-      stop("keepCols and dropCols passed to prepareMplusData. You must choose one or the other, but not both.")
+  } else {
+    if (missing(dropCols)) {
+      cleand <- .cleanHashData(df = df, keepCols = keepCols, imputed = FALSE)
+    } else {
+      cleand <- .cleanHashData(df = df, keepCols = keepCols, dropCols = dropCols, imputed = FALSE)
     }
+  }
 
-    ## assert types allowed for keep and drop cols
-    stopifnot(missing(keepCols) || is.character(keepCols) ||
-      is.numeric(keepCols) || is.logical(keepCols))
+  df <- cleand$data
+  md5 <- cleand$md5
+  rm(cleand)
 
-    stopifnot(missing(dropCols) || is.character(dropCols) ||
-      is.numeric(dropCols) || is.logical(dropCols))
+  ## if filename is missing and interactive is TRUE
+  ## interactively (through GUI or console)
+  ## request filename from user
+  if (missing(filename) && interactive) {
+    filename <- file.choose()
+  }
 
-    ## if filename is missing and interactive is TRUE
-    ## interactively (through GUI or console)
-    ## request filename from user
-    if (missing(filename) && interactive) {
-      filename <- file.choose()
-    }
+  ## if filename is still missing at this point, throw an error
+  stopifnot(!missing(filename))
 
-    ## if filename is still missing at this point
-    ## throw an error
-    stopifnot(!missing(filename))
+  tmp <- .hashifyFile(filename, md5, useexisting = identical(writeData, "ifmissing"))
 
-    ## keep only columns specified by keepCols
-    if (!missing(keepCols) && length(keepCols) > 0) {
-      if (imputed) {
-        df <- lapply(df, function(d) d[, keepCols])
-      } else {
-        df <- df[, keepCols] # works with all types
-      }
-    }
+  if (hashfilename) {
+    filename <- tmp$filename
+  }
 
-    ## drop columns specified by dropCols
-    if (!missing(dropCols) && length(dropCols) > 0) {
-      if (is.character(dropCols)) {
-        if (imputed) {
-          df <- lapply(df, function(d) {subset(d, select = -which(colnames(d) %in% dropCols))})
-        } else {
-            df <- subset(df, select = -which(colnames(df) %in% dropCols))
-          }
-      } else if (is.numeric(dropCols)) {
-          if (imputed) {
-            df <- lapply(df, function(d) {subset(d, select = -dropCols)})
-          } else {
-              df <- subset(df, select = -dropCols)
-            }
-        } else if (is.logical(dropCols)) {
-            if (imputed) {
-              df <- lapply(df, function(d) {subset(d, select = !dropCols)})
-            } else {
-                df <- subset(df, select = !dropCols)
-              }
-          }
-    }
+  if (identical(writeData, "ifmissing") && tmp$fileexists) {
+    message(sprintf("File with md5 hash matching data found, using %s", filename))
+  } else {
+    ## even if writeData = 'ifmissing' if the data are missing, need to write out
+    writeData <- "always"
+  }
 
+  if (identical(writeData, "always")) {
     ## convert factors to numbers
     if (imputed) {
     df <- lapply(1:length(df), function(i) {
@@ -1457,6 +1586,6 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
   # write out syntax, either to stdout or to a file
   cat(syntax, file=inpfile, sep="")
 
-  # return invisible so it can be saved/reused if desired
+  # return syntax invisibly for later use/reuse
   return(invisible(syntax))
 }

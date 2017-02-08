@@ -1,3 +1,6 @@
+Version 0.6-5
+- feature: prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
+
 Version 0.6-4
 - feature: prepareMplusData() and mplusObject() / mplusModeler() now handle multiply imputed data
 - feature: added extraction of Chi-Square Test of Model Fit for Binary and Ordered Categorical section
