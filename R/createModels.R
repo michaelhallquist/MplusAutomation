@@ -1197,6 +1197,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' @return A list of the data and the md5 hash.
 #' @keywords internal
 #' @importFrom digest digest
+#' @rdname MplusAutomationUtils
 #' @examples
 #' \dontrun{
 #'   MplusAutomation:::.cleanHashData(mtcars)
@@ -1274,6 +1275,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' @return A list of the filename (plus hash) and a logical value
 #'   whether a filename with the hash already existed or not.
 #' @keywords internal
+#' @rdname MplusAutomationUtils
 #' @examples
 #' MplusAutomation:::.hashifyFile("testit.dat", "abc")
 .hashifyFile <- function(filename, hash, useexisting = FALSE) {
