@@ -1254,11 +1254,19 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
     }
   }
 
-  hash <- digest(as.vector(c(
-    dim(df),
-    unlist(lapply(df, class)),
-    unlist(dimnames(df)),
-    as.character(unlist(df[c(1, nrow(df)), ])))), "md5")
+  f <- function(x) {
+    as.vector(c(
+    dim(x),
+    unlist(lapply(x, class)),
+    unlist(dimnames(x)),
+    as.character(unlist(x[c(1, nrow(x)), ]))))
+  }
+
+  if (imputed) {
+    hash <- digest(as.vector(unlist(lapply(df, f))), "md5")
+  } else {
+    hash <- digest(f(df), "md5")
+  }
 
   return(list(data = df, md5 = hash))
 }
@@ -1459,15 +1467,15 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
 
   if (missing(keepCols)) {
     if (missing(dropCols)) {
-      cleand <- .cleanHashData(df = df, imputed = FALSE)
+      cleand <- .cleanHashData(df = df, imputed = imputed)
     } else {
-      cleand <- .cleanHashData(df = df, dropCols = dropCols, imputed = FALSE)
+      cleand <- .cleanHashData(df = df, dropCols = dropCols, imputed = imputed)
     }
   } else {
     if (missing(dropCols)) {
-      cleand <- .cleanHashData(df = df, keepCols = keepCols, imputed = FALSE)
+      cleand <- .cleanHashData(df = df, keepCols = keepCols, imputed = imputed)
     } else {
-      cleand <- .cleanHashData(df = df, keepCols = keepCols, dropCols = dropCols, imputed = FALSE)
+      cleand <- .cleanHashData(df = df, keepCols = keepCols, dropCols = dropCols, imputed = imputed)
     }
   }
 
