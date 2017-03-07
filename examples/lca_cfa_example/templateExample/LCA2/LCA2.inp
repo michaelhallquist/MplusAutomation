@@ -1,0 +1,16 @@
+
+TITLE: 2-class LCA
+DATA:   FILE = "../../lca_cfa_example.dat";
+VARIABLE: NAMES = u1-u6; MISSING=.;
+	  CATEGORICAL = u1-u6;
+
+   CLASSES = c(2);  
+
+ANALYSIS:
+   TYPE = MIXTURE;  STARTS = 250 25;  
+
+MODEL:
+   %OVERALL%  
+
+OUTPUT: TECH1 TECH8  TECH14 ;
+PLOT: TYPE=PLOT3;

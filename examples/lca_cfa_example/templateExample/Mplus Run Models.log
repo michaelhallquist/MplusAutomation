@@ -1,0 +1,14 @@
+------Begin Mplus Model Run: 12May2016 16:14:10------
+Target directory: .
+Run options:
+	Recursive (run models in subdirectories): TRUE
+	Show output on console: FALSE
+	Replace existing outfile: always
+------
+Currently running model: CFA.inp
+Currently running model: LCA2.inp
+Currently running model: LCA3.inp
+Currently running model: LCA4.inp
+Currently running model: LCA5.inp
+
+------End Mplus Model Run: 12May2016 16:14:15------

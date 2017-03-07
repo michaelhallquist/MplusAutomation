@@ -1,0 +1,26 @@
+title:
+	Analyze simulated dataset as LCA
+
+DATA:
+	FILE=lca_cfa_example.dat;
+
+VARIABLE:
+	NAMES = u1-u6;
+	categorical = u1-u6;
+	classes = c(2);
+analysis:
+	type = mixture;
+	estimator=mlr;
+	starts=1000 100;
+
+model:
+
+    %overall%
+
+	%c#1%
+
+	%c#2%
+
+output:
+	tech8 tech14;	
+	

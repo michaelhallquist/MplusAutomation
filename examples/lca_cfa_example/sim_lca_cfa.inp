@@ -1,0 +1,48 @@
+title:
+	Data generation of 2-class 6-indicator LCA dataset for use as example
+	in Hallquist & Wiley MplusAutomation manuscript
+	
+	(extension of User's Guide example 7.4)
+
+montecarlo:
+	NAMES = u1-u6;
+	generate = u1-u6(1);
+	categorical = u1-u6;
+	genclasses = c(2);
+	classes = c(2);
+	nobs = 1000;
+	seed = 3454367;
+	nrep = 100;
+	save = lca_cfa_example.dat;
+
+analysis:
+	type = mixture;
+	estimator=mlr;
+
+model population:
+
+	%overall%
+
+	[c#1*0];
+	
+	%c#1%
+	[u1$1*1 u2$1*1 u3$1*-1 u4$1*-1 u5$1*2 u6$1*2];
+
+	%c#2%
+	[u1$1*-1 u2$1*-1 u3$1*1 u4$1*1 u5$1*-2 u6$1*-2];
+
+model:
+
+    %overall%
+
+	[c#1*0];
+
+	%c#1%
+	[u1$1*1 u2$1*1 u3$1*-1 u4$1*-1 u5$1*2 u6$1*2];
+
+	%c#2%
+	[u1$1*-1 u2$1*-1 u3$1*1 u4$1*1 u5$1*-2 u6$1*-2];
+
+output:
+	tech8 tech9;	
+	

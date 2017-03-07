@@ -1,5 +1,6 @@
 products
 local
+examples
 pkg_build
 ^.*\.Rproj$
 ^\.Rproj\.user$

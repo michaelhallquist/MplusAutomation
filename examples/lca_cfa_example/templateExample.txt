@@ -1,0 +1,33 @@
+[[init]]
+iterators = model;
+model=1:5;
+modelnames#model = CFA LCA2 LCA3 LCA4 LCA5;
+title#model = "Confirmatory Factor Analysis"
+			"2-class LCA"
+			"3-class LCA"
+			"4-class LCA"
+			"5-class LCA";
+
+classes#model = 0 2 3 4 5;
+
+filename = "[[modelnames#model]].inp";
+outputDirectory = templateExample/[[modelnames#model]];
+[[/init]]
+
+TITLE: [[title#model]]
+DATA:   FILE = "../../lca_cfa_example.dat";
+VARIABLE: NAMES = u1-u6; MISSING=.;
+	  CATEGORICAL = u1-u6;
+
+[[model > 1]]   CLASSES = c([[classes#model]]);  [[/model > 1]]
+
+ANALYSIS:
+[[model == 1]]  TYPE=GENERAL; ESTIMATOR=MLR;  [[/model == 1]]
+[[model > 1]]   TYPE = MIXTURE;  STARTS = 250 25;  [[/model > 1]]
+
+MODEL:
+[[model==1]]    factor BY u1-u6; [[/model==1]]
+[[model > 1]]   %OVERALL%  [[/model > 1]]
+
+OUTPUT: TECH1 TECH8 [[model > 1]] TECH14 [[/model > 1]];
+PLOT: TYPE=PLOT3;
