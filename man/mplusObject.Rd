@@ -5,9 +5,11 @@
 \title{Create an Mplus model object}
 \usage{
 mplusObject(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NULL,
-  ANALYSIS = NULL, MODEL = NULL, OUTPUT = NULL, SAVEDATA = NULL,
-  PLOT = NULL, usevariables = NULL, rdata = NULL, autov = TRUE,
-  imputed = FALSE)
+  MONTECARLO = NULL, MODELPOPULATION = NULL, MODELMISSING = NULL,
+  ANALYSIS = NULL, MODEL = NULL, MODELINDIRECT = NULL,
+  MODELCONSTRAINT = NULL, MODELTEST = NULL, MODELPRIORS = NULL,
+  OUTPUT = NULL, SAVEDATA = NULL, PLOT = NULL, usevariables = NULL,
+  rdata = NULL, autov = TRUE, imputed = FALSE)
 }
 \arguments{
 \item{TITLE}{A character string of the title for Mplus.}
@@ -20,10 +22,26 @@ define the variable names from the dataset as this is generated automatically)}
 
 \item{DEFINE}{A character string of the define section for Mplus (optional)}
 
+\item{MONTECARLO}{A character string of the montecarlo section for Mplus (optional).
+If used, \code{autov} is defaults to \code{FALSE} instead of the usual default,
+\code{TRUE}, but may still be overwritten, if desired.}
+
+\item{MODELPOPULATION}{A character string of the MODEL POPULATION section for Mplus (optional).}
+
+\item{MODELMISSING}{A character string of the MODEL MISSING section for Mplus (optional).}
+
 \item{ANALYSIS}{A character string of the analysis section for Mplus (optional)}
 
 \item{MODEL}{A character string of the model section for Mplus (optional, although
 typically you want to define a model)}
+
+\item{MODELINDIRECT}{A character string of the MODEL INDIRECT section for Mplus (optional).}
+
+\item{MODELCONSTRAINT}{A character string of the MODEL CONSTRAINT section for Mplus (optional).}
+
+\item{MODELTEST}{A character string of the MODEL TEST section for Mplus (optional).}
+
+\item{MODELPRIORS}{A character string of the MODEL PRIORS section for Mplus (optional).}
 
 \item{OUTPUT}{A character string of the output section for Mplus (optional)}
 
@@ -49,8 +67,15 @@ A list of class \code{mplusObject} with elements
 \item{DATA}{The data section in Mplus (if defined)}
 \item{VARIABLE}{The variable section in Mplus (if defined)}
 \item{DEFINE}{The define section in Mplus (if defined)}
+\item{MONTECARLO}{The montecarlo section in Mplus (if defined)}
+\item{MODELPOPULATION}{The modelpopulation section in Mplus (if defined)}
+\item{MODELMISSING}{The modelmissing section in Mplus (if defined)}
 \item{ANALYSIS}{The analysis section in Mplus (if defined)}
 \item{MODEL}{The model section in Mplus (if defined)}
+\item{MODELINDIRECT}{The modelindirect section in Mplus (if defined)}
+\item{MODELCONSTRAINT}{The modelconstraint section in Mplus (if defined)}
+\item{MODELTEST}{The modeltest section in Mplus (if defined)}
+\item{MODELPRIORS}{The modelpriors section in Mplus (if defined)}
 \item{OUTPUT}{The output section in Mplus (if defined)}
 \item{SAVEDATA}{The savedata section in Mplus (if defined)}
 \item{PLOT}{The plot section in Mplus (if defined)}

@@ -5,7 +5,8 @@
 \title{Create tab-delimited file and Mplus input syntax from R data.frame}
 \usage{
 prepareMplusData(df, filename, keepCols, dropCols, inpfile = FALSE,
-  interactive = TRUE, overwrite = TRUE, imputed = FALSE)
+  interactive = TRUE, overwrite = TRUE, imputed = FALSE,
+  writeData = c("always", "ifmissing", "never"), hashfilename = FALSE)
 }
 \arguments{
 \item{df}{The R data.frame to be prepared for Mplus}
@@ -44,6 +45,16 @@ it will throw an error.}
 \item{imputed}{A logical whether data are multiply imputed.  Defaults
 to \code{FALSE}.  If \code{TRUE}, the data should be a list,
 where each element of the list is a multiply imputed dataset.}
+
+\item{writeData}{A character vector, one of \sQuote{always},
+\sQuote{ifmissing}, \sQuote{never} indicating whether the data files
+(*.dat) should be written to disk.  Defaults to
+\sQuote{always} for consistency with previous behavior.
+See details for further information.}
+
+\item{hashfilename}{A logical whether or not to add a hash of the raw data to the
+data file name.  Defaults to \code{FALSE} for consistency with previous
+behavior where this feature was not available..}
 }
 \value{
 Invisibly returns a character vector of the Mplus input
@@ -56,6 +67,23 @@ into a tab-delimited file (without header) to be used in an Mplus
 input file. The corresponding Mplus syntax, including the
 data file definition and variable names,
 is printed to the console or optionally to an input file.
+}
+\details{
+The \code{writeData} argument is new and can be used to reduce overhead
+from repeatedly writing the same data from R to the disk.  When using the
+\sQuote{always} option, \code{prepareMplusData} behaves as before, always writing
+data from R to the disk.  When \sQuote{ifmissing}, R generates an
+md5 hash of the data prior to writing it out to the disk.  The md5 hash is based on:
+(1) the dimensions of the dataset, (2) the variable names,
+(3) the class of every variable, and (4) the raw data from the first and last rows.
+This combination ensures that under most all circumstances, if the data changes,
+the hash will change.  The hash is appended to the specified data file name
+(which is controlled by the logical \code{hashfilename} argument).  Next R
+checks in the directory where the data would normally be written.  If a data file
+exists in that directory that matches the hash generated from the data, R will
+use that existing data file instead of writing out the data again.
+A final option is \sQuote{never}.  If this option is used, R will not write
+the data out even if no file matching the hash is found.
 }
 \examples{
 \dontrun{
@@ -72,6 +100,20 @@ test01 <- prepareMplusData(mtcars, "test01.dat")
 
 # see that syntax was stored
 test01
+
+# by default, if re-run, data is re-written, with a note
+test01b <- prepareMplusData(mtcars, "test01.dat")
+
+# if we turn on hashing in the filename the first time,
+# we can avoid overwriting notes the second time
+test01c <- prepareMplusData(mtcars, "test01c.dat", hashfilename=TRUE)
+
+# now that the filename was hashed in test01c, future calls do not re-write data
+# as long as the hash matches
+test01d <- prepareMplusData(mtcars, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
+
+# however, if the data change, then the file is re-written
+test01e <- prepareMplusData(iris, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
 
 # tests for keeping and dropping variables
 prepareMplusData(mtcars, "test02.dat", keepCols = c("mpg", "hp"))

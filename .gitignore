@@ -4,6 +4,8 @@
 .RData
 .Rproj.user
 .Rproj.user/
+# emacs files
+*~
 
 # README htmls in any folder
 README.html

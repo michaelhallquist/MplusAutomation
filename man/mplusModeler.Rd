@@ -5,7 +5,8 @@
 \title{Create, run, and read Mplus models.}
 \usage{
 mplusModeler(object, dataout, modelout, run = 0L, check = FALSE,
-  varwarnings = TRUE, Mplus_command = "Mplus", ...)
+  varwarnings = TRUE, Mplus_command = "Mplus", writeData = c("ifmissing",
+  "always", "never"), hashfilename = TRUE, ...)
 }
 \arguments{
 \item{object}{An object of class mplusObject}
@@ -34,6 +35,18 @@ default, or removed from the output file.}
 defaults). Allows the user to specify the name/path of the Mplus executable to be used for
 running models. This covers situations where Mplus is not in the system's path,
 or where one wants to test different versions of the Mplus program.}
+
+\item{writeData}{A character vector, one of \sQuote{ifmissing},
+\sQuote{always}, \sQuote{never} indicating whether the data files
+(*.dat) should be written to disk.  This is passed on to \code{prepareMplusData}.
+Note that previously, \code{mplusModeler} always (re)wrote the data to disk.
+However, now the default is to write the data to disk only if it is missing
+(i.e., \sQuote{ifmissing}).  See details for further information.}
+
+\item{hashfilename}{A logical whether or not to add a hash of the raw data to the
+data file name.  Defaults to \code{TRUE} in \code{mplusModeler}.  Note that this
+behavior is a change from previous versions and differs from \code{prepareMplusData}
+which maintains the old behavior by default of \code{FALSE}.}
 
 \item{\ldots}{additional arguments passed to the
 \code{\link[MplusAutomation]{prepareMplusData}} function.}
@@ -67,6 +80,24 @@ create one basic set of input, store it in a vector, and then just
 modify that (e.g., using regular expressions) and pass it to Mplus.
 You can even use loops or the \code{*apply} constructs to fit the same
 sort of model with little variants.
+
+The \code{writeData} argument is new and can be used to reduce overhead
+from repeatedly writing the same data from R to the disk.  When using the
+\sQuote{always} option, \code{mplusModeler} behaves as before, always writing
+data from R to the disk.  This remains the default for the \code{prepareMplusData}
+function to avoid confusion or breaking old code.  However, for \code{mplusModeler},
+the default has been set to \sQuote{ifmissing}.  In this case, R generates an
+md5 hash of the data prior to writing it out to the disk.  The md5 hash is based on:
+(1) the dimensions of the dataset, (2) the variable names,
+(3) the class of every variable, and (4) the raw data from the first and last rows.
+This combination ensures that under most all circumstances, if the data changes,
+the hash will change.  The hash is appended to the specified data file name
+(which is controlled by the logical \code{hashfilename} argument).  Next R
+checks in the directory where the data would normally be written.  If a data file
+exists in that directory that matches the hash generated from the data, R will
+use that existing data file instead of writing out the data again.
+A final option is \sQuote{never}.  If this option is used, R will not write
+the data out even if no file matching the hash is found.
 }
 \examples{
 \dontrun{
@@ -78,11 +109,26 @@ test <- mplusObject(MODEL = "mpg ON wt hp;
  # estimate the model in Mplus and read results back into R
  res <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
 
+ # when forcing writeData = "always" data gets overwritten (with a warning)
+ resb <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L,
+                      writeData = "always")
+
+ # using writeData = "ifmissing", the default, no data re-written
+ resc <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
+
+ # using writeData = "ifmissing", the default, data ARE written
+ # if data changes
+ test <- mplusObject(MODEL = "mpg ON wt hp;
+   wt WITH hp;", rdata = mtcars[-10, ])
+ resd <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
+
  # show summary
  summary(res)
 
  # remove files
- unlink("mtcars.dat")
+ unlink(res$results$input$data$file)
+ unlink(resc$results$input$data$file)
+ unlink(resd$results$input$data$file)
  unlink("model1.inp")
  unlink("model1.out")
 
@@ -99,7 +145,7 @@ test2 <- mplusObject(
  res2 <- mplusModeler(test2, "mtcars.dat", modelout = "model2.inp", run = 1L)
 
  # remove files
- unlink("mtcars.dat")
+ unlink(res2$results$input$data$file)
  unlink("model2.inp")
  unlink("model2.out")
 
@@ -108,7 +154,7 @@ test2 <- mplusObject(
  test3 <- update(test2, ANALYSIS = ~ "ESTIMATOR = MLR;")
 
  res3 <- mplusModeler(test3, "mtcars.dat", modelout = "model3.inp", run = 1L)
- unlink("mtcars.dat")
+ unlink(res3$results$input$data$file)
  unlink("model3.inp")
  unlink("model3.out")
 
@@ -140,6 +186,40 @@ test2 <- mplusObject(
  unlink("model4.inp")
  unlink("model4.out")
  unlink("Mplus Run Models.log")
+
+# Monte Carlo Simulation Example
+montecarlo <- mplusObject(
+ TITLE = "Monte Carlo Example;",
+ MONTECARLO = "
+  NAMES ARE i1-i5;
+  NOBSERVATIONS = 100;
+  NREPS = 100;
+  SEED = 1234;",
+ MODELPOPULATION = "
+  f BY i1-i5*1;
+  f@1;
+  i1-i5*1;",
+ ANALYSIS = "
+  ESTIMATOR = BAYES;
+  PROC = 2;
+  fbiter = 100;",
+ MODEL = "
+  f BY i1-i5*.8 (l1-l5);
+  f@1;
+  i1-i5*1;",
+ MODELPRIORS = "
+   l1-l5 ~ N(.5 .1);",
+ OUTPUT = "TECH9;")
+
+fitMonteCarlo <- mplusModeler(montecarlo,
+  modelout = "montecarlo.inp",
+  run = 1L,
+  writeData = "always",
+  hashfilename = FALSE)
+
+unlink("montecarlo.inp")
+unlink("montecarlo.out")
+unlink("Mplus Run Models.log")
 }
 }
 \author{
