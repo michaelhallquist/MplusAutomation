@@ -639,3 +639,32 @@ extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, 
 
   return(allFiles)
 }
+
+#in progress
+extractIndirect <- function(outfiletext, curfile) {
+  indirectSection <- getSection("^TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS$", outfiletext)
+  if (is.null(indirectSection)) return(list()) #no indirect output
+  
+  effectHeaders <- grep("^Effects from [A-z_0-9]+ to [A-z_0-9]+$", indirectSection, ignore.case=TRUE, perl=TRUE)
+  
+  indirectOutput <- list()
+  for (e in 1:length(effectHeaders)) {
+    elist <- list()
+    elist$pred <- sub("^Effects from ([A-z_0-9]+) to [A-z_0-9]+$", "\\1", indirectSection[effectHeaders[e]], ignore.case=TRUE, perl=TRUE)
+    elist$outcome <- sub("^Effects from [A-z_0-9]+ to ([A-z_0-9]+)$", "\\1", indirectSection[effectHeaders[e]], ignore.case=TRUE, perl=TRUE)
+    
+    end <- ifelse (e < length(effectHeaders), effectHeaders[e+1]-1, length(indirectSection)) 
+    esection <- indirectSection[(effectHeaders[e]+1):end]
+    
+    #parse total, total indirect, specific indirect, and direct
+    totalLine <- grep("Total\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE)
+    tot <- strsplit(trimSpace(totalLine), "\\s+", perl=TRUE)[[1]]
+    elist$total <- data.frame(est=as.numeric(tot[2]), se=as.numeric(tot[3])) 
+    browser()
+    
+    specSection <- getSection_Blanklines("Specific indirect", esection)
+    
+    indirectOutput[[e]] <- elist
+  }
+  
+}

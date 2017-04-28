@@ -92,6 +92,8 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$tech12 <- extractTech12(outfiletext, curfile) #observed versus estimated sample stats for TYPE=MIXTURE
     allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
 
+    #allFiles[[listID]]$indirect <- extractIndirect(outfiletext, curfile) #MODEL INDIRECT output (in progress)
+	
     #aux(e) means and pairwise comparisons
     allFiles[[listID]]$lcCondMeans <- extractAux(outfiletext, curfile)
 
