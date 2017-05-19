@@ -56,11 +56,10 @@ single directory or nested within subdirectories.
     Mplus_command="C:\\\\Users\\\\Michael\\\\Mplus Install\\\\Mplus51.exe")
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{runModels_Interactive}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

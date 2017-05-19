@@ -24,4 +24,3 @@ Function that extracts the Tech1 matrix
 \code{\link{matrixExtract}}
 }
 \keyword{internal}
-

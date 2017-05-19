@@ -30,4 +30,3 @@ This function is used by other extractor functions that read particular types of
 saved data such as factor scores or iterations from an MCMC chain.
 }
 \keyword{internal}
-

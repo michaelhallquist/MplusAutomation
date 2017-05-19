@@ -34,11 +34,10 @@ Bayesian Parameters (BPARAMETERS) file.
   fileInfo <- getSavedata_Fileinfo("C:/Program Files/Mplus/Test Output.out")
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{getSavedata_Data}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

@@ -63,17 +63,16 @@ License: \tab LGPL-3\cr
 LazyLoad: \tab yes\cr
 }
 }
-\author{
-Michael Hallquist \email{michael.hallquist@gmail.com},
-Joshua F. Wiley \email{jwiley.psych@gmail.com}
-
-Maintainer: Michael Hallquist \email{michael.hallquist@gmail.com}
-}
 \references{
 Mplus software. Muthen and Muthen. \url{http://www.statmodel.com}
 }
 \seealso{
 See \code{\link{runModels}} for an example running a model.
 }
-\keyword{package}
+\author{
+Michael Hallquist \email{michael.hallquist@gmail.com},
+Joshua F. Wiley \email{jwiley.psych@gmail.com}
 
+Maintainer: Michael Hallquist \email{michael.hallquist@gmail.com}
+}
+\keyword{package}

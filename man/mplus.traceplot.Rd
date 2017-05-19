@@ -46,11 +46,10 @@ Trace and density plots can also be obtained using the coda package and the bpar
   plot(myModel$bparameters$valid_draw)
 }
 }
-\author{
-Joseph Glass, Michael Hallquist
-}
 \seealso{
 \code{\link{plot.mcmc}}
 }
+\author{
+Joseph Glass, Michael Hallquist
+}
 \keyword{interface}
-

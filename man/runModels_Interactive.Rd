@@ -42,11 +42,10 @@ This function exists as a GUI wrapper for \code{runModels} and does not provide 
 \examples{
 # interactive, none
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{runModels}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

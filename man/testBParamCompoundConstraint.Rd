@@ -48,11 +48,10 @@ An example test in R logic would be \code{"(STAITOT.ON.CG > STAITOT.ON.UCG) & (B
   "(STDYX_STAITOT.ON.CG > STDYX_STAITOT.ON.UCG) & (STDYX_BDIM.ON.CG > STDYX_BDIM.ON.UCG)")
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{testBParamConstraint}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

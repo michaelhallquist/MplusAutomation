@@ -51,4 +51,3 @@ unlink("Mplus Run Models.log")
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \keyword{interface}
-

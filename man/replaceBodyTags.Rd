@@ -20,4 +20,3 @@ Returns updated bodySection
 To do: fill in some details
 }
 \keyword{internal}
-

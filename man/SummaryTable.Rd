@@ -80,11 +80,10 @@ You must choose between \code{keepCols} and \code{dropCols} because it is not se
  unlink("Mplus Run Models.log")
 }
 }
-\author{
-Joshua F. Wiley based on code by Michael Hallquist
-}
 \seealso{
 \code{\link{extractModelSummaries}}
 }
+\author{
+Joshua F. Wiley based on code by Michael Hallquist
+}
 \keyword{interface}
-

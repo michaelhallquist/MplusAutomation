@@ -27,12 +27,11 @@ print(mplusRcov(c("a", "b", "c"), type = "ar"))
 # to see all aspects of the raw/original object
 str(mplusRcov(c("a", "b", "c"), type = "ar"))
 }
+\seealso{
+Other Mplus-Formatting: \code{\link{coef.mplus.model}},
+  \code{\link{extract}}, \code{\link{summary.mplusObject}}
+}
 \author{
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
-\seealso{
-Other Mplus.Formatting: \code{\link{coef.mplus.model}},
-  \code{\link{extract}}, \code{\link{summary.mplusObject}}
-}
 \keyword{interface}
-

@@ -46,13 +46,12 @@ unlink("model1.out")
 unlink("Mplus Run Models.log")
 }
 }
-\author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
-}
 \seealso{
-Other Mplus.Formatting: \code{\link{coef.mplus.model}},
+Other Mplus-Formatting: \code{\link{coef.mplus.model}},
   \code{\link{extract}},
   \code{\link{print.MplusRstructure}}
 }
+\author{
+Joshua F. Wiley <jwiley.psych@gmail.com>
+}
 \keyword{interface}
-

@@ -22,4 +22,3 @@ the dotModel with added node
 To do: add details
 }
 \keyword{internal}
-

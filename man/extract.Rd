@@ -3,10 +3,10 @@
 \docType{methods}
 \name{extract}
 \alias{extract}
-\alias{extract,mplus.model-method}
-\alias{extract,mplusObject-method}
 \alias{extract.mplus.model}
 \alias{extract.mplusObject}
+\alias{extract,mplus.model-method}
+\alias{extract,mplusObject-method}
 \title{Extract function to make Mplus output work with the \pkg{texreg} package}
 \usage{
 extract.mplus.model(model, summaries = "none", ...)
@@ -74,15 +74,14 @@ unlink("model1.out")
 unlink("Mplus Run Models.log")
 }
 }
-\author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
-}
 \seealso{
 \code{\link{readModels}}
 
-Other Mplus.Formatting: \code{\link{coef.mplus.model}},
+Other Mplus-Formatting: \code{\link{coef.mplus.model}},
   \code{\link{print.MplusRstructure}},
   \code{\link{summary.mplusObject}}
 }
+\author{
+Joshua F. Wiley <jwiley.psych@gmail.com>
+}
 \keyword{interface}
-

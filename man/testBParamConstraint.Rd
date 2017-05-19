@@ -43,11 +43,10 @@ constructed from left-to-right. e.g., \code{testBParamConstraint(bparamsDF, "MGM
   testBParametersConstraint(btest, "STDYX_STAITOT.ON.CG", ">", "STDYX_STAITOT.ON.UCG")
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \link{testBParamCompoundConstraint}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

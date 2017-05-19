@@ -20,4 +20,3 @@ A string from start to end
 To do: add any details.
 }
 \keyword{internal}
-

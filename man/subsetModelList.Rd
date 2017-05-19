@@ -25,4 +25,3 @@ a helper function to be used by wrappers that generate HTML, LaTex, and on-scree
 # make me!!!
 }
 \keyword{internal}
-

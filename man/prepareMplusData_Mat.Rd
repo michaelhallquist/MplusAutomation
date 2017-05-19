@@ -20,4 +20,3 @@ A dataset
 support writing of covariance or means + covariance matrix (future)
 }
 \keyword{internal}
-

@@ -26,4 +26,3 @@ init collection (list of vars defined in the init section).
 This is an internal function.
 }
 \keyword{internal}
-

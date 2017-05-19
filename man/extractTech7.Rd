@@ -25,4 +25,3 @@ for each class using raw data weighted by the estimated posterior probabilities 
 \code{\link{matrixExtract}}
 }
 \keyword{internal}
-

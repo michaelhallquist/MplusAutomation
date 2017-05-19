@@ -34,14 +34,13 @@ and loads the dataset accordingly.
   fileInfo <- getSavedata_Data("C:/Program Files/Mplus/Test Output.out")
 }
 }
-\author{
-Michael Hallquist, Florian Boeing-Messing
-}
 \references{
 \url{http://www.statmodel.com/download/Bayes3.pdf}
 }
 \seealso{
 \code{\link{getSavedata_Fileinfo}}, \code{\link{getSavedata_Data}}
 }
+\author{
+Michael Hallquist, Florian Boeing-Messing
+}
 \keyword{interface}
-

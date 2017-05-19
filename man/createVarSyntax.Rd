@@ -23,4 +23,3 @@ MplusAutomation:::createVarSyntax(mtcars)
 \code{\link{prepareMplusData}}
 }
 \keyword{internal}
-

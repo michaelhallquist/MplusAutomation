@@ -22,4 +22,3 @@ A list of class \code{mcmc} and \code{mplus.bparameters}
 To do: add details.
 }
 \keyword{internal}
-

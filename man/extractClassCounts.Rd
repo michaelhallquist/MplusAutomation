@@ -21,4 +21,3 @@ Function for extracting counts of latent classes
 # make me!!!
 }
 \keyword{internal}
-

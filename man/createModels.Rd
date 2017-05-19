@@ -27,4 +27,3 @@ vignette and are not duplicated here at the moment. See this PDF:
 Michael Hallquist
 }
 \keyword{interface}
-

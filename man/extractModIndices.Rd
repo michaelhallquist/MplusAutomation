@@ -52,11 +52,10 @@ ex3.14 <- extractModIndices(
 	"C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/ex3.14.out")
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{readModels}}, \code{\link{extractModelSummaries}}, \code{\link{extractModelParameters}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

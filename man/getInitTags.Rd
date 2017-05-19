@@ -16,4 +16,3 @@ The initMatches
 An internal function
 }
 \keyword{internal}
-

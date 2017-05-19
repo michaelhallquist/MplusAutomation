@@ -41,4 +41,3 @@ rm(example1, x)
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \keyword{interface}
-

@@ -19,4 +19,3 @@ connectNodes(dotModel, node1, node2, connectionType)
 To do: add details
 }
 \keyword{internal}
-

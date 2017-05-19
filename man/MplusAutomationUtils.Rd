@@ -52,4 +52,3 @@ Internal utility function, primarily for \code{prepareMplusData}.
 MplusAutomation:::.hashifyFile("testit.dat", "abc")
 }
 \keyword{internal}
-

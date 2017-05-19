@@ -21,4 +21,3 @@ Helper function to divide an input section into key-value pair list taken from m
 # make me!!!
 }
 \keyword{internal}
-

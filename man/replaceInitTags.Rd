@@ -18,4 +18,3 @@ Returns updated initCollection
 To do: fill in some details
 }
 \keyword{internal}
-

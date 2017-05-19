@@ -23,4 +23,3 @@ Function for reading "free" output where a sequence of values populates a matrix
 # make me!!!
 }
 \keyword{internal}
-

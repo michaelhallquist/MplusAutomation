@@ -23,4 +23,3 @@ example: class counts output from latent class models.
 # make me!!!
 }
 \keyword{internal}
-

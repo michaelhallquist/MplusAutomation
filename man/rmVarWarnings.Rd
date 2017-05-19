@@ -31,11 +31,10 @@ when the \code{varwarnings = FALSE} argument is used.
 \examples{
 # to do
 }
-\author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
-}
 \seealso{
 \code{\link{mplusModeler}}
 }
+\author{
+Joshua F. Wiley <jwiley.psych@gmail.com>
+}
 \keyword{internal}
-

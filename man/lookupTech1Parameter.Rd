@@ -27,11 +27,10 @@ often printed in the warnings and errors section of Mplus output.
   param <- lookupTech1Parameter(models$tech1, 16)
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{readModels}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

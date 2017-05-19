@@ -84,11 +84,10 @@ infrastructure is in place to allow for user-specified selection of summary stat
     "C:/Program Files/Mplus/Mplus Examples/User's Guide Examples")
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{regex}}, \code{\link{runModels}}, \code{\link{readModels}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

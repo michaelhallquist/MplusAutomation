@@ -28,4 +28,3 @@ Worker function used in extractSummaries_1section
 # make me!!!
 }
 \keyword{internal}
-

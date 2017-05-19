@@ -20,4 +20,3 @@ Tags are classified as \sQuote{iterator}, \sQuote{array}, \sQuote{conditional}, 
 \sQuote{simple}. This is an internal function.
 }
 \keyword{internal}
-

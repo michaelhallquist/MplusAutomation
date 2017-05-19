@@ -162,4 +162,3 @@ mplusRcov(letters[1:4], "un", "rho", "e", FALSE)
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \keyword{interface}
-

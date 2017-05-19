@@ -222,10 +222,9 @@ unlink("montecarlo.out")
 unlink("Mplus Run Models.log")
 }
 }
-\author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
-}
 \seealso{
 \code{\link{runModels}} and \code{\link{readModels}}
 }
-
+\author{
+Joshua F. Wiley <jwiley.psych@gmail.com>
+}

@@ -40,11 +40,10 @@ You must choose between \code{keepCols} and \code{dropCols} because
 \examples{
 # make me!!!
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{extractModelSummaries}} \code{\link{HTMLSummaryTable}} \code{\link{LatexSummaryTable}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

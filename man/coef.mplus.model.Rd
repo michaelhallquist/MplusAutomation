@@ -24,12 +24,12 @@ extract.  Any combination of \dQuote{regression}, \dQuote{loading},
 single one can be passed or multiple.  By default, all are used and
 all parameters are returned.}
 
+\item{\dots}{Additional arguments to pass on (not currently used)}
+
 \item{raw}{A logical defaulting to \code{FALSE} indicating whether to
 parse and return coefficients based on the type (regression, etc.) and
 relabel using an arrow notation, or to return the raw coefficients in a named
 vector.}
-
-\item{\dots}{Additional arguments to pass on (not currently used)}
 }
 \value{
 Either a data frame of class \sQuote{mplus.model.coefs}, or in
@@ -77,15 +77,14 @@ unlink("model1.out")
 unlink("Mplus Run Models.log")
 }
 }
-\author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
-}
 \seealso{
 \code{\link{readModels}}
 
-Other Mplus.Formatting: \code{\link{extract}},
+Other Mplus-Formatting: \code{\link{extract}},
   \code{\link{print.MplusRstructure}},
   \code{\link{summary.mplusObject}}
 }
+\author{
+Joshua F. Wiley <jwiley.psych@gmail.com>
+}
 \keyword{interface}
-

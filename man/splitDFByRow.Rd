@@ -21,4 +21,3 @@ This is an internal function.
 MplusAutomation:::splitDFByRow(mtcars)
 }
 \keyword{internal}
-

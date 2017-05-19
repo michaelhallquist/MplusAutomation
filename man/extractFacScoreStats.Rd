@@ -24,4 +24,3 @@ Function for extracting matrices for factor scores
 \code{\link{matrixExtract}}
 }
 \keyword{internal}
-

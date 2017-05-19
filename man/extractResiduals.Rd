@@ -24,4 +24,3 @@ Function that extracts the residual matrices including standardized ones
 \code{\link{matrixExtract}}
 }
 \keyword{internal}
-

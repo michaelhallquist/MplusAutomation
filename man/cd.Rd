@@ -48,4 +48,3 @@ cd(base, pre, 2)
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
 \keyword{utilities}
-

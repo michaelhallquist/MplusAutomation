@@ -100,11 +100,10 @@ ex3.14 <- extractModelParameters(
 	"C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/ex3.14.out")
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{extractModelSummaries}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

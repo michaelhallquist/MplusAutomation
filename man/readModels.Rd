@@ -57,14 +57,13 @@ these into a list object, with one element per output file identified.
     "C:/Program Files/Mplus/Mplus Examples/User's Guide Examples", recursive=TRUE)
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{extractModelSummaries}},
 \code{\link{extractModelParameters}}, \code{\link{extractModIndices}},
 \code{\link{getSavedata_Fileinfo}}, \code{\link{getSavedata_Data}},
 \code{\link{getSavedata_Bparams}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

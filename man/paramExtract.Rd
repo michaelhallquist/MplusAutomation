@@ -61,11 +61,10 @@ the results returned from the \code{\link{readModels}} function.
   paramExtract(d, "v")
 }
 }
-\author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
-}
 \seealso{
 \code{\link{readModels}}
 }
+\author{
+Joshua F. Wiley <jwiley.psych@gmail.com>
+}
 \keyword{utils}
-

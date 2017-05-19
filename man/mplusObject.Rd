@@ -123,11 +123,10 @@ example3 <- mplusObject(MODEL = "basename_01 ON basename_02;",
   autov = TRUE)
 rm(example3)
 }
-\author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
-}
 \seealso{
 \code{\link{mplusModeler}}
 }
+\author{
+Joshua F. Wiley <jwiley.psych@gmail.com>
+}
 \keyword{interface}
-

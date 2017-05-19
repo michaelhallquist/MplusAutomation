@@ -22,4 +22,3 @@ output within a given file and given results section (e.g., stdyx section) There
 will be many chunks if latent classes, multiple groups, multilevel features are used.
 }
 \keyword{internal}
-

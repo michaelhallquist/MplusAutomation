@@ -19,4 +19,3 @@ Body tags currentValues are substituted at the bottom-most level
 after init collection is finalized (recursively process any nested tags)
 }
 \keyword{internal}
-

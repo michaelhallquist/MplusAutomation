@@ -27,4 +27,3 @@ a mixture across the latent classes.
 \code{\link{matrixExtract}}
 }
 \keyword{internal}
-

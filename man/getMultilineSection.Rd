@@ -28,4 +28,3 @@ New approach to multiline section: retain spaces and look for next line that has
 # make me!!!
 }
 \keyword{internal}
-

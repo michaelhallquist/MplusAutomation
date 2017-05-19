@@ -24,4 +24,3 @@ Calls \code{extractSummaries_1plan}
 # make me!!!
 }
 \keyword{internal}
-

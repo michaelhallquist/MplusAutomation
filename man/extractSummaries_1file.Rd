@@ -21,4 +21,3 @@ Description: This function parses an output file for specific model details. It 
 # make me!!!
 }
 \keyword{internal}
-

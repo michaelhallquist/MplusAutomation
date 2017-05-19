@@ -96,4 +96,3 @@ The \code{sort} parameter determines the order in which parameter estimates are 
 Michael Hallquist
 }
 \keyword{interface}
-

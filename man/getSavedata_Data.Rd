@@ -28,11 +28,10 @@ and loads the dataset accordingly.
   savedat <- getSavedata_Data("C:/Program Files/Mplus/Test Output.out")
 }
 }
-\author{
-Michael Hallquist
-}
 \seealso{
 \code{\link{getSavedata_Fileinfo}}
 }
+\author{
+Michael Hallquist
+}
 \keyword{interface}
-

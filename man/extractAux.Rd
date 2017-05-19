@@ -18,4 +18,3 @@ A data frame
 To do: add details.
 }
 \keyword{internal}
-

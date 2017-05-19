@@ -23,7 +23,6 @@
 #' @author Michael Hallquist
 #' @seealso \code{\link{runModels}}
 #' @keywords interface
-#' @importFrom utils choose.dir
 #' @export
 #' @examples
 #' # interactive, none
@@ -76,7 +75,7 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
     #choose.dir is a prettier way to select directory
     #tcltk::tclvalue(directoryVariable) <- tcltk::tclvalue(tcltk::tkchooseDirectory())
     if (.Platform$OS.type == "unix") runDir <- tcltk::tclvalue(tcltk::tkchooseDirectory())
-    else runDir <- tcltk::tclvalue(tcltk::tclVar(choose.dir(tcltk::tclvalue(directoryVariable), "Choose the Mplus Run Directory")))
+    else runDir <- tcltk::tclvalue(tcltk::tclVar(utils::choose.dir(tcltk::tclvalue(directoryVariable), "Choose the Mplus Run Directory")))
 
     if (!runDir == "NA") {
       tcltk::tclvalue(directoryVariable) <- runDir

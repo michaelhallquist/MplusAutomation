@@ -158,4 +158,3 @@ prepareMplusData(mtcars, "test10.dat",
 Michael Hallquist
 }
 \keyword{interface}
-

@@ -18,4 +18,3 @@ A boolean value indicating whether the conditional is true
 Note that at thie point the comparator must be a number (not another variable).
 }
 \keyword{internal}
-

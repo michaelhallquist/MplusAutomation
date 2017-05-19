@@ -21,4 +21,3 @@ Function to extract and parse mplus input syntax from the output file
 # make me!!!
 }
 \keyword{internal}
-
