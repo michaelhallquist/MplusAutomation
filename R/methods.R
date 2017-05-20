@@ -259,6 +259,8 @@ coef.mplusObject <- function(object, ...) {
 #'   but extract methods are defined for both.
 #' @param summaries A character vector which summaries to include.
 #'   Defaults to \dQuote{none}.
+#' @param escape.latex A logical value whether to escape dollar signs in
+#'   coefficient names for LaTeX.  Defaults to \code{FALSE}.
 #' @param ... Additional arguments passed to \code{\link{coef.mplus.model}}.
 #' @return A \code{texreg} object, or for multiple group models,
 #'   a list of \code{texreg} objects.
@@ -309,7 +311,7 @@ coef.mplusObject <- function(object, ...) {
 #' unlink("model1.out")
 #' unlink("Mplus Run Models.log")
 #' }
-extract.mplus.model <- function(model, summaries = "none", ...) {
+extract.mplus.model <- function(model, summaries = "none", escape.latex = FALSE, ...) {
   if (summaries[1] != "none") {
     stopifnot(all(summaries %in% colnames(model$summaries)))
 
@@ -356,7 +358,11 @@ extract.mplus.model <- function(model, summaries = "none", ...) {
 
   if (inherits(params, "mplus.model.coefs")) {
     tr <- createTexreg(
-      coef.names = as.character(params$Label),
+      coef.names = if (escape.latex) {
+                     gsub("\\$", "\\\\$", as.character(params$Label))
+                   } else {
+                     as.character(params$Label)
+                   },
       coef = params[, estimate],
       se = params[, se],
       pvalues = params[, pvalue],
@@ -366,7 +372,11 @@ extract.mplus.model <- function(model, summaries = "none", ...) {
   } else if (inherits(params, "mplus.model.coefs.list")) {
     tr <- lapply(params, function(params.i) {
       createTexreg(
-        coef.names = as.character(params.i$Label),
+        coef.names = if (escape.latex) {
+                     gsub("\\$", "\\\\$", as.character(params.i$Label))
+                   } else {
+                     as.character(params.i$Label)
+                   },
         coef = params.i[, estimate],
         se = params.i[, se],
         pvalues = params.i[, pvalue],

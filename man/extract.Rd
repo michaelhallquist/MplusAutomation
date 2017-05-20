@@ -9,11 +9,12 @@
 \alias{extract,mplusObject-method}
 \title{Extract function to make Mplus output work with the \pkg{texreg} package}
 \usage{
-extract.mplus.model(model, summaries = "none", ...)
+extract.mplus.model(model, summaries = "none", escape.latex = FALSE, ...)
 
 extract.mplusObject(model, summaries = "none", ...)
 
-\S4method{extract}{mplus.model}(model, summaries = "none", ...)
+\S4method{extract}{mplus.model}(model, summaries = "none",
+  escape.latex = FALSE, ...)
 
 \S4method{extract}{mplusObject}(model, summaries = "none", ...)
 }
@@ -25,6 +26,9 @@ but extract methods are defined for both.}
 
 \item{summaries}{A character vector which summaries to include.
 Defaults to \dQuote{none}.}
+
+\item{escape.latex}{A logical value whether to escape dollar signs in
+coefficient names for LaTeX.  Defaults to \code{FALSE}.}
 
 \item{...}{Additional arguments passed to \code{\link{coef.mplus.model}}.}
 }
