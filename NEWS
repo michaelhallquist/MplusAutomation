@@ -1,7 +1,9 @@
-Version 0.6-5
+Version 0.7 (in progress)
 - feature: prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
-- feature: mplusObject(), mplusModeler(), update(), and createSyntax() all now accomodate monte carlo simulations in Mplus
+- feature: mplusObject(), mplusModeler(), update(), and createSyntax() all now accommodate monte carlo simulations in Mplus
+- feature: initial support for extracting MODEL INDIRECT output. See $indirect element from readModels()
 - bugfix:  Support for Mplus v5 confidence intervals.
+- bugfix:  R2 extraction for models with estimates and scale factors alone
 
 Version 0.6-4
 - feature: prepareMplusData() and mplusObject() / mplusModeler() now handle multiply imputed data

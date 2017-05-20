@@ -21,6 +21,8 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     splitRows <- strsplit(thisChunk, "\\s+")
     headerRows <- sapply(splitRows, function(x) {
           if (identical(x, c("Observed")) ||
+              identical(x, c("Latent")) ||
+              identical(x, c("Observed", "Scale")) ||
               identical(x, c("Observed", "Two-Tailed", "Scale")) || 
               identical(x, c("Latent", "Two-Tailed", "Scale")) ||
               identical(x, c("Observed", "Two-Tailed", "Residual")) || 
@@ -29,18 +31,17 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
               identical(x, c("Latent", "Two-Tailed")) ||
               identical(x, c("Observed", "Residual")) ||
               identical(x, c("Latent", "Residual")) ||
-              identical(x, c("Observed")) ||
-              identical(x, c("Latent")) ||
               identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Factors")) ||
               identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Variance")) ||
               identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value")) ||
               identical(x, c("Variable", "Estimate")) ||
+              identical(x, c("Variable", "Estimate", "Factors")) ||
               identical(x, c("Variable", "Estimate", "Variance")) ||
               identical(x, c("Posterior", "One-Tailed", "95%", "C.I.")) ||
               identical(x, c("Variable", "Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%"))
           ) { TRUE } else { FALSE }
         })
-     
+
     thisChunk <- thisChunk[!headerRows]
       
     convertMatches <- data.frame(startline=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
@@ -131,8 +132,8 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
           })
     }
     
-    #similar problem for 3-column R-SQUARE output with missing residual variances
-    if (length(columnNames) == 3L && columnNames[3L] == "resid_var") {
+    #similar problem for 3-column R-SQUARE output with missing residual variances or scale factors
+    if (length(columnNames) == 3L && columnNames[3L] %in% c("resid_var", "scale_f")) {
       splitParams <- lapply(splitParams, function(col) {
             lcol <- length(col)
             if (lcol == 2L) { col[3L] <- "NA_real_" } #NA-fill variables without a residual variance
@@ -640,12 +641,14 @@ extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, 
   return(allFiles)
 }
 
-#in progress
+#Draft 1
 extractIndirect <- function(outfiletext, curfile) {
   indirectSection <- getSection("^TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS$", outfiletext)
   if (is.null(indirectSection)) return(list()) #no indirect output
   
   effectHeaders <- grep("^Effects from [A-z_0-9]+ to [A-z_0-9]+$", indirectSection, ignore.case=TRUE, perl=TRUE)
+  columnNames <- detectColumnNames(curfile, trimSpace(indirectSection[1:50]), "model_results") #assume that column headers are somewhere in the first 50 lines
+  columnNames[1] <- "outcome" #rename param -> outcome for clarity
   
   indirectOutput <- list()
   for (e in 1:length(effectHeaders)) {
@@ -657,14 +660,59 @@ extractIndirect <- function(outfiletext, curfile) {
     esection <- indirectSection[(effectHeaders[e]+1):end]
     
     #parse total, total indirect, specific indirect, and direct
-    totalLine <- grep("Total\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE)
-    tot <- strsplit(trimSpace(totalLine), "\\s+", perl=TRUE)[[1]]
-    elist$total <- data.frame(est=as.numeric(tot[2]), se=as.numeric(tot[3])) 
-    browser()
+    totalLine <- as.list(strsplit(trimSpace(grep("Total\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE)), "\\s+", perl=TRUE)[[1]])
+    names(totalLine) <- columnNames; totalLine$summary <- "Total"; totalLine$outcome <- NULL
     
-    specSection <- getSection_Blanklines("Specific indirect", esection)
+    totalIndirectLine <- as.list(strsplit(trimSpace(grep("Total indirect\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE)), "\\s+", perl=TRUE)[[1]])
+    totalIndirectLine[[1]] <- paste(totalIndirectLine[[1]], totalIndirectLine[[2]]); totalIndirectLine[[2]] <- NULL #because there is white space in "Total indirect", manually paste together first 2 elements  
+    names(totalIndirectLine) <- columnNames; totalIndirectLine$summary <- "Total indirect"; totalIndirectLine$outcome <- NULL
+    
+    directSection <- strsplit(trimSpace(getMultilineSection("Direct", esection, curfile)), "\\s+")
+    useful <- which(sapply(directSection, length) > 1L)
+    stopifnot(length(useful) == 1L) #should only be one line with parameters
+    direct <- as.list(directSection[[useful]])
+    names(direct) <- columnNames
+    direct$summary <- "Direct"; direct$outcome <- NULL
+
+    elist$summaries <- data.frame(pred=elist$pred, outcome=elist$outcome, rbind(totalLine, totalIndirectLine, direct), row.names=NULL)
+    
+    #reorder columns to put pred, outcome, summary first. Use columnNames vector without "outcome" to place remainder in order
+    elist$summaries <- elist$summaries[,c("pred", "outcome", "summary", columnNames[-1])]
+    
+    #use white space to demarcate ending of specific indirect subsection
+    specSection <- trimSpace(getMultilineSection("Specific indirect", esection, curfile))
+    blanks <- which(specSection=="")
+    thisEffect <- c()
+    for (i in 1:length(blanks)) {
+      if (i < length(blanks)) { 
+        toparse <- specSection[(blanks[i]+1):(blanks[i+1]-1)] 
+      } else { 
+        if (blanks[i]+1 < length(specSection)) { 
+          toparse <- specSection[(blanks[i]+1):length(specSection)]
+        } else { next } #nothing to parse, just a trailing blank
+      }
+      #if (length(toparse) < 2L) { next } #double blank line problem
+      source <- toparse[1] #first variable is the "source" (i.e., the variable furthest upstream) (X IND Y)
+      outcome <- strsplit(toparse[length(toparse)], "\\s+")[[1]] #this should always be the outcome and should have the statistics on it
+      names(outcome) <- columnNames
+      outcome <- data.frame(as.list(outcome))
+      intervening <- toparse[2:(length(toparse)-1)]
+      thisEffect <- rbind(thisEffect, data.frame(pred=source, intervening = paste(intervening, collapse="."), outcome))
+    }
+    elist$specific <- thisEffect
     
     indirectOutput[[e]] <- elist
   }
   
+  #name list elements according to 
+  names(indirectOutput) <- sapply(indirectOutput, function(el) { paste(el$pred, el$outcome, sep=".") })
+  
+  #change format to return two data.frames, one with all summaries, the other with all specific
+  summarydf <- do.call(rbind, lapply(indirectOutput, function(el) { el$summaries }))
+  specificdf <- do.call(rbind, lapply(indirectOutput, function(el) { el$specific }))
+  row.names(summarydf) <- NULL; row.names(specificdf) <- NULL 
+  toreturn <- list(overall=summarydf, specific=specificdf)
+  class(toreturn) <- "mplus.indirect"
+
+  return(toreturn)
 }
