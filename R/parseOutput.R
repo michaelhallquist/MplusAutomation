@@ -26,6 +26,7 @@
 #'   \item{parameters}{Model parameters from \code{extractModelParameters}, having structure as specified by that function}
 #'   \item{class_counts}{Latent class counts and proportions for models that include a categorical latent variable}
 #'   \item{mod_indices}{Model modification indices from \code{extractModIndices}, having structure as specified by that function}
+#'   \item{indirect}{Output of MODEL INDIRECT if available in output. Contains \code{$overall} and \cod{$specific} data.frames for indirect effects}
 #'   \item{savedata_info}{File information about SAVEDATA files related to this output}
 #'   \item{savedata}{SAVEDATA file as an R \code{data.frame}, as described in \code{getSavedata_Data}}
 #'   \item{bparameters}{an \code{mcmc.list} object containing the draws from the MCMC chains for a Bayesian model that uses the
@@ -91,8 +92,10 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$tech9 <- extractTech9(outfiletext, curfile) #tech 9 output (errors and warnings for Monte Carlo output)
     allFiles[[listID]]$tech12 <- extractTech12(outfiletext, curfile) #observed versus estimated sample stats for TYPE=MIXTURE
     allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
-
-    #allFiles[[listID]]$indirect <- extractIndirect(outfiletext, curfile) #MODEL INDIRECT output (in progress)
+    
+    allFiles[[listID]]$indirect <- extractIndirect(outfiletext, curfile) #MODEL INDIRECT output
+    allFiles[[listID]]$sampstat <- extractSampstat(outfiletext, curfile) #SAMPSTAT output
+    
 	
     #aux(e) means and pairwise comparisons
     allFiles[[listID]]$lcCondMeans <- extractAux(outfiletext, curfile)
@@ -1370,7 +1373,7 @@ extractTech1 <- function(outfiletext, filename) {
   if (is.null(tech1Section)) return(list()) #no tech1 output
 
   tech1List <- list()
-
+  
   paramSpecSubsections <- getMultilineSection("PARAMETER SPECIFICATION( FOR [\\w\\d\\s\\.,]+)*",
       tech1Section, filename, allowMultiple=TRUE)
 
@@ -1383,7 +1386,7 @@ extractTech1 <- function(outfiletext, filename) {
     groupNames <- make.names(gsub("^\\s*PARAMETER SPECIFICATION( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", tech1Section[matchlines], perl=TRUE))
   else #just one section, no groups
     groupNames <- ""
-
+  
   for (g in 1:length(paramSpecSubsections)) {
     targetList <- list()
 
@@ -1423,7 +1426,7 @@ extractTech1 <- function(outfiletext, filename) {
       tech1Section, filename, allowMultiple=TRUE)
 
   matchlines <- attr(startValSubsections, "matchlines")
-
+  
   startValList <- list()
   if (length(startValSubsections) == 0)
     warning ("No starting value sections found within TECH1 output.")
@@ -1473,6 +1476,60 @@ extractTech1 <- function(outfiletext, filename) {
   return(tech1List)
 
 }
+
+extractSampstat <- function(outfiletext, filename) {
+  sampstatSection <- getSection("^SAMPLE STATISTICS$", outfiletext)
+  if (is.null(sampstatSection)) return(list()) #no SAMPTSTAT output
+  
+  sampstatList <- list()
+  
+  sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,]+)*",
+      sampstatSection, filename, allowMultiple=TRUE)
+  
+  matchlines <- attr(sampstatSubsections, "matchlines")
+  
+  sampstatList <- list()
+  if (length(sampstatSubsections) == 0)
+    warning ("No sample statistics sections found within SAMPSTAT output.")
+  else if (length(sampstatSubsections) > 1)
+    groupNames <- make.names(gsub("^\\s*ESTIMATED SAMPLE STATISTICS( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", sampstatSection[matchlines], perl=TRUE))
+  else #just one section, no groups
+    groupNames <- ""
+  
+  for (g in 1:length(sampstatSubsections)) {
+    targetList <- list()
+    
+    targetList[["means"]] <- matrixExtract(sampstatSubsections[[g]], "Means", filename)
+    targetList[["covariances"]] <- matrixExtract(sampstatSubsections[[g]], "Covariances", filename)
+    targetList[["correlations"]] <- matrixExtract(sampstatSubsections[[g]], "Correlations", filename)
+    
+    #latent class indicator part includes subsections for each latent class, such as class-varying thresholds
+#    if (groupNames[g] == "LATENT.CLASS.INDICATOR.MODEL.PART") {
+#      tauLines <- grep("TAU\\(U\\) FOR LATENT CLASS \\d+", sampstatSubsections[[g]], perl=TRUE, value=TRUE)
+#      uniqueLC <- unique(gsub("^\\s*TAU\\(U\\) FOR LATENT CLASS (\\d+)\\s*$", "\\1", tauLines, perl=TRUE))
+#      for (lc in uniqueLC) {
+#        targetList[[paste0("tau.u.lc", lc)]] <- matrixExtract(sampstatSubsections[[g]], paste0("TAU\\(U\\) FOR LATENT CLASS ", lc), filename)
+#      }
+#    }
+    
+    if (length(sampstatSubsections) > 1) {
+      class(targetList) <- c("list", "mplus.sampstat")
+      sampstatList[[groupNames[g]]] <- targetList
+    }
+    else
+      sampstatList <- targetList
+  }
+  
+  class(sampstatList) <- c("list", "mplus.sampstat")
+  if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
+  
+#  tech1List <- list(parameterSpecification=paramSpecList, startingValues=startValList)
+#  class(tech1List) <- c("list", "mplus.tech1")
+  
+  return(sampstatList)
+  
+}
+
 
 #' Extract free file output
 #'
@@ -2048,6 +2105,30 @@ matrixExtract <- function(outfiletext, headerLine, filename) {
       #remove blank lines by comparing against character(0)
       #splitData2 <- splitData[sapply(splitData, function(x) !identical(x, character(0)))]
 
+      #May 2017: in Mplus v7*, there is a header on the beginning of each row, including for vectors such as NU,TAU, etc.
+      #example: 
+      # NU
+      #       Y             X1            X2            W
+      #       ________      ________      ________      ________
+      # 1           0             0             0             0
+      
+      #in Mplus v8, the "1" header on parameter vectors has been removed.
+      # NU
+      #    Y12T3         Y13T3         Y14T3
+      #    ________      ________      ________
+      #          0             0             0
+      
+      #To overcome this problem, check the number of columns in splitData compared to the number of column headers.
+      #If the number of columns is equal to the number of column headers, add a "1" at the beginning to make parsing code
+      #  consistent with v7 and expectation is matrix assembly in the aggMat section below.
+      #Only add this tweak if the first element of v is not identical to any column header.
+      #Otherwise this will add a "1" to some rows that are part of a matrix, not param vector.
+      splitData <- lapply(splitData, function(v) {
+            if (length(v) == length(colHeaders) && (! v[1L] %in% colHeaders)) { v <- c("1", v) }
+            return(v)
+          })
+      
+      #pull out row names from each element
       rowHeaders <- sapply(splitData, "[", 1)
 
       mat <- matrix(NA_real_, nrow=length(rowHeaders), ncol=length(colHeaders),
@@ -2061,7 +2142,6 @@ matrixExtract <- function(outfiletext, headerLine, filename) {
       }
 
       blockList[[m]] <- mat
-
     }
 
     #aggregate sections

@@ -1,9 +1,12 @@
-
-Version 0.6-5
-- feature: prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
-- feature: mplusObject(), mplusModeler(), update(), and createSyntax() all now accomodate monte carlo simulations in Mplus
-- feature: New methods for the confint() function to extract and format confidence intervals. This also allows confidence intervals with the texreg package
-- bugfix:  Support for Mplus v5 confidence intervals.
+Version 0.7 (in progress)
+- feature:      prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
+- feature:      mplusObject(), mplusModeler(), update(), and createSyntax() all now accommodate monte carlo simulations in Mplus
+- feature:      New methods for the confint() function to extract and format confidence intervals. This also allows confidence intervals with the texreg package
+- feature:      initial support for extracting MODEL INDIRECT output. See $indirect element from readModels()
+- feature:      initial support for extracting SAMPSTAT output. See $sampstat element from readModels()
+- bugfix:       Support for Mplus v5 confidence intervals.
+- bugfix:       R2 extraction for models with estimates and scale factors alone
+- v8 support :  Handle removal of leading '1' from TECH output row names for parameter vectors (matrixExtract)
 
 Version 0.6-4
 - feature: prepareMplusData() and mplusObject() / mplusModeler() now handle multiply imputed data

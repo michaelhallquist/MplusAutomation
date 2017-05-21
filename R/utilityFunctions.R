@@ -507,9 +507,15 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
         varNames <- c("param", "est")
 
       #3-column R-Square output for model with residual variances
+      else if ((identical(thisLine, c("Observed", "Scale")) || identical(thisLine, c("Latent", "Scale"))) &&
+          identical(nextLine, c("Variable", "Estimate", "Factors")))
+        varNames <- c("param", "est", "scale_f")
+
+      #3-column R-Square output for model with scale factors (WLSMV)
       else if ((identical(thisLine, c("Observed", "Residual")) || identical(thisLine, c("Latent", "Residual"))) &&
           identical(nextLine, c("Variable", "Estimate", "Variance")))
         varNames <- c("param", "est", "resid_var")
+      
       
       #Just estimate available, such as in cases of nonconverged models
       else if (identical(thisLine, c("Estimate")))
