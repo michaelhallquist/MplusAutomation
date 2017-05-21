@@ -5,9 +5,9 @@
 \alias{confint.mplusObject}
 \title{Return confidence intervals for an mplus.model object}
 \usage{
-\method{confint}{mplus.model}(object, parm, level = c(0.95, 0.9, 0.99),
-  type = c("un", "std", "stdy", "stdyx"), params = c("regression",
-  "loading", "undirected", "expectation", "variability", "new"), ...)
+\method{confint}{mplus.model}(object, parm, level = 0.95, type = c("un",
+  "std", "stdy", "stdyx"), params = c("regression", "loading", "undirected",
+  "expectation", "variability", "new"), ...)
 
 \method{confint}{mplusObject}(object, ...)
 }

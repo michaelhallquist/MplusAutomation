@@ -288,6 +288,7 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
 #'
 #' # there is also a method for mplusObject class
 #' confint(res)
+#' screenreg(res, cis = TRUE, single.row = TRUE)
 #'
 #' # remove files
 #' unlink("mtcars.dat")
@@ -295,13 +296,14 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
 #' unlink("model1.out")
 #' unlink("Mplus Run Models.log")
 #' }
-confint.mplus.model <- function(object, parm, level = c(.95, .90, .99),
+confint.mplus.model <- function(object, parm, level = .95,
   type = c("un", "std", "stdy", "stdyx"),
   params = c("regression", "loading", "undirected", "expectation", "variability", "new"),
   ...) {
 
   type <- match.arg(type)
-  level <- match.arg(level)
+
+  stopifnot(level %in% c(.95, .90, .99))
 
   stopifnot(!is.null(object$parameters))
 
@@ -348,7 +350,7 @@ confint.mplus.model <- function(object, parm, level = c(.95, .90, .99),
                "0.9" = "low5",
                "0.95" = "low2.5",
                "0.99" = "low.5")
-  hi <- switch(level,
+  hi <- switch(as.character(level),
                "0.9" = "up5",
                "0.95" = "up2.5",
                "0.99" = "up.5")
