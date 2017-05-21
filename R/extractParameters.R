@@ -660,19 +660,33 @@ extractIndirect <- function(outfiletext, curfile) {
     esection <- indirectSection[(effectHeaders[e]+1):end]
     
     #parse total, total indirect, specific indirect, and direct
-    totalLine <- as.list(strsplit(trimSpace(grep("Total\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE)), "\\s+", perl=TRUE)[[1]])
-    names(totalLine) <- columnNames; totalLine$summary <- "Total"; totalLine$outcome <- NULL
+    totalLine <- trimSpace(grep("Total\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE))
+    if (length(totalLine) > 0L) {
+      totalLine <- as.list(strsplit(totalLine, "\\s+", perl=TRUE)[[1]])
+      names(totalLine) <- columnNames; totalLine$summary <- "Total"; totalLine$outcome <- NULL
+    }
     
-    totalIndirectLine <- as.list(strsplit(trimSpace(grep("Total indirect\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE)), "\\s+", perl=TRUE)[[1]])
-    totalIndirectLine[[1]] <- paste(totalIndirectLine[[1]], totalIndirectLine[[2]]); totalIndirectLine[[2]] <- NULL #because there is white space in "Total indirect", manually paste together first 2 elements  
-    names(totalIndirectLine) <- columnNames; totalIndirectLine$summary <- "Total indirect"; totalIndirectLine$outcome <- NULL
+    totalIndirectLine <- trimSpace(grep("(Total|Sum of) indirect\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE))
+    if (length(totalIndirectLine) > 0L) {
+      totalIndirectLine <- as.list(strsplit(totalIndirectLine, "\\s+", perl=TRUE)[[1]])
+      if (paste(unlist(totalIndirectLine[1:3]), collapse=" ") == "Sum of indirect") { #mplus v6 output
+        totalIndirectLine <- totalIndirectLine[-1:-3]
+      } else if (paste(unlist(totalIndirectLine[1:2]), collapse=" ") == "Total indirect") {
+        totalIndirectLine <- totalIndirectLine[-1:-2]
+      } else { stop("Unable to parse header from total indirect line: ", totalIndirectLine)}
+      names(totalIndirectLine) <- columnNames[-1]; #don't include "outcome" from columnNames since this is added en masse to summaries below
+      totalIndirectLine$summary <- "Total indirect"
+    }
     
     directSection <- strsplit(trimSpace(getMultilineSection("Direct", esection, curfile)), "\\s+")
     useful <- which(sapply(directSection, length) > 1L)
-    stopifnot(length(useful) == 1L) #should only be one line with parameters
-    direct <- as.list(directSection[[useful]])
-    names(direct) <- columnNames
-    direct$summary <- "Direct"; direct$outcome <- NULL
+    if (length(useful) == 1L) {
+      direct <- as.list(directSection[[useful]])
+      names(direct) <- columnNames
+      direct$summary <- "Direct"; direct$outcome <- NULL
+    } else {
+      direct <- list()
+    }
 
     elist$summaries <- data.frame(pred=elist$pred, outcome=elist$outcome, rbind(totalLine, totalIndirectLine, direct), row.names=NULL)
     
@@ -684,8 +698,11 @@ extractIndirect <- function(outfiletext, curfile) {
     blanks <- which(specSection=="")
     thisEffect <- c()
     for (i in 1:length(blanks)) {
-      if (i < length(blanks)) { 
-        toparse <- specSection[(blanks[i]+1):(blanks[i+1]-1)] 
+      if (i < length(blanks)) {
+        startLine <- blanks[i]+1
+        endLine <- blanks[i+1]-1
+        if (startLine >= endLine) { next } #occurs with consecutive blanks -> skip out
+        toparse <- specSection[startLine:endLine] 
       } else { 
         if (blanks[i]+1 < length(specSection)) { 
           toparse <- specSection[(blanks[i]+1):length(specSection)]

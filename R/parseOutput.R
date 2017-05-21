@@ -92,8 +92,10 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
     allFiles[[listID]]$tech9 <- extractTech9(outfiletext, curfile) #tech 9 output (errors and warnings for Monte Carlo output)
     allFiles[[listID]]$tech12 <- extractTech12(outfiletext, curfile) #observed versus estimated sample stats for TYPE=MIXTURE
     allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
-
-    allFiles[[listID]]$indirect <- extractIndirect(outfiletext, curfile) #MODEL INDIRECT output (in progress)
+    
+    allFiles[[listID]]$indirect <- extractIndirect(outfiletext, curfile) #MODEL INDIRECT output
+    allFiles[[listID]]$sampstat <- extractSampstat(outfiletext, curfile) #SAMPSTAT output
+    
 	
     #aux(e) means and pairwise comparisons
     allFiles[[listID]]$lcCondMeans <- extractAux(outfiletext, curfile)
@@ -1371,7 +1373,6 @@ extractTech1 <- function(outfiletext, filename) {
   if (is.null(tech1Section)) return(list()) #no tech1 output
 
   tech1List <- list()
-
   
   paramSpecSubsections <- getMultilineSection("PARAMETER SPECIFICATION( FOR [\\w\\d\\s\\.,]+)*",
       tech1Section, filename, allowMultiple=TRUE)
@@ -1475,6 +1476,60 @@ extractTech1 <- function(outfiletext, filename) {
   return(tech1List)
 
 }
+
+extractSampstat <- function(outfiletext, filename) {
+  sampstatSection <- getSection("^SAMPLE STATISTICS$", outfiletext)
+  if (is.null(sampstatSection)) return(list()) #no SAMPTSTAT output
+  
+  sampstatList <- list()
+  
+  sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,]+)*",
+      sampstatSection, filename, allowMultiple=TRUE)
+  
+  matchlines <- attr(sampstatSubsections, "matchlines")
+  
+  sampstatList <- list()
+  if (length(sampstatSubsections) == 0)
+    warning ("No sample statistics sections found within SAMPSTAT output.")
+  else if (length(sampstatSubsections) > 1)
+    groupNames <- make.names(gsub("^\\s*ESTIMATED SAMPLE STATISTICS( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", sampstatSection[matchlines], perl=TRUE))
+  else #just one section, no groups
+    groupNames <- ""
+  
+  for (g in 1:length(sampstatSubsections)) {
+    targetList <- list()
+    
+    targetList[["means"]] <- matrixExtract(sampstatSubsections[[g]], "Means", filename)
+    targetList[["covariances"]] <- matrixExtract(sampstatSubsections[[g]], "Covariances", filename)
+    targetList[["correlations"]] <- matrixExtract(sampstatSubsections[[g]], "Correlations", filename)
+    
+    #latent class indicator part includes subsections for each latent class, such as class-varying thresholds
+#    if (groupNames[g] == "LATENT.CLASS.INDICATOR.MODEL.PART") {
+#      tauLines <- grep("TAU\\(U\\) FOR LATENT CLASS \\d+", sampstatSubsections[[g]], perl=TRUE, value=TRUE)
+#      uniqueLC <- unique(gsub("^\\s*TAU\\(U\\) FOR LATENT CLASS (\\d+)\\s*$", "\\1", tauLines, perl=TRUE))
+#      for (lc in uniqueLC) {
+#        targetList[[paste0("tau.u.lc", lc)]] <- matrixExtract(sampstatSubsections[[g]], paste0("TAU\\(U\\) FOR LATENT CLASS ", lc), filename)
+#      }
+#    }
+    
+    if (length(sampstatSubsections) > 1) {
+      class(targetList) <- c("list", "mplus.sampstat")
+      sampstatList[[groupNames[g]]] <- targetList
+    }
+    else
+      sampstatList <- targetList
+  }
+  
+  class(sampstatList) <- c("list", "mplus.sampstat")
+  if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
+  
+#  tech1List <- list(parameterSpecification=paramSpecList, startingValues=startValList)
+#  class(tech1List) <- c("list", "mplus.tech1")
+  
+  return(sampstatList)
+  
+}
+
 
 #' Extract free file output
 #'
