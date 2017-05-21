@@ -1,6 +1,8 @@
+
 Version 0.6-5
 - feature: prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
 - feature: mplusObject(), mplusModeler(), update(), and createSyntax() all now accomodate monte carlo simulations in Mplus
+- feature: New methods for the confint() function to extract and format confidence intervals. This also allows confidence intervals with the texreg package
 - bugfix:  Support for Mplus v5 confidence intervals.
 
 Version 0.6-4

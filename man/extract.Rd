@@ -9,14 +9,15 @@
 \alias{extract,mplusObject-method}
 \title{Extract function to make Mplus output work with the \pkg{texreg} package}
 \usage{
-extract.mplus.model(model, summaries = "none", escape.latex = FALSE, ...)
-
-extract.mplusObject(model, summaries = "none", ...)
-
-\S4method{extract}{mplus.model}(model, summaries = "none",
+extract.mplus.model(model, summaries = "none", cis = FALSE,
   escape.latex = FALSE, ...)
 
-\S4method{extract}{mplusObject}(model, summaries = "none", ...)
+extract.mplusObject(model, summaries = "none", cis = FALSE, ...)
+
+\S4method{extract}{mplus.model}(model, summaries = "none", cis = FALSE,
+  escape.latex = FALSE, ...)
+
+\S4method{extract}{mplusObject}(model, summaries = "none", cis = FALSE, ...)
 }
 \arguments{
 \item{model}{An Mplus model object.  This typically comes either from
@@ -26,6 +27,8 @@ but extract methods are defined for both.}
 
 \item{summaries}{A character vector which summaries to include.
 Defaults to \dQuote{none}.}
+
+\item{cis}{A logical whether to extract confidence intervals.}
 
 \item{escape.latex}{A logical value whether to escape dollar signs in
 coefficient names for LaTeX.  Defaults to \code{FALSE}.}
@@ -82,6 +85,7 @@ unlink("Mplus Run Models.log")
 \code{\link{readModels}}
 
 Other Mplus-Formatting: \code{\link{coef.mplus.model}},
+  \code{\link{confint.mplus.model}},
   \code{\link{print.MplusRstructure}},
   \code{\link{summary.mplusObject}}
 }

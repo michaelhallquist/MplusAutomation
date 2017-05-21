@@ -276,7 +276,7 @@ update.mplusObject <- function(object, ...) {
 #'   MODEL = ~ . + "\nmpg ON hp;",
 #'   usevariables = c("mpg", "hp", "wt")), "example1.dat"),
 #'   fill=TRUE)
-#' rm(example1
+#' rm(example1)
 createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE) {
   stopifnot(inherits(object, "mplusObject"))
 
