@@ -1,6 +1,7 @@
 Version 0.7 (in progress)
 - feature:      prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
 - feature:      mplusObject(), mplusModeler(), update(), and createSyntax() all now accommodate monte carlo simulations in Mplus
+- feature:      New methods for the confint() function to extract and format confidence intervals. This also allows confidence intervals with the texreg package
 - feature:      initial support for extracting MODEL INDIRECT output. See $indirect element from readModels()
 - feature:      initial support for extracting SAMPSTAT output. See $sampstat element from readModels()
 - feature:      runModels now accepts a single .inp file or a directory as the target

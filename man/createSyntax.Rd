@@ -44,7 +44,7 @@ cat(createSyntax(update(example1,
   MODEL = ~ . + "\\nmpg ON hp;",
   usevariables = c("mpg", "hp", "wt")), "example1.dat"),
   fill=TRUE)
-rm(example1
+rm(example1)
 }
 \seealso{
 \code{\link{prepareMplusData}}, \code{\link{mplusModeler}}

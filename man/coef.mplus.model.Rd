@@ -80,7 +80,8 @@ unlink("Mplus Run Models.log")
 \seealso{
 \code{\link{readModels}}
 
-Other Mplus-Formatting: \code{\link{extract}},
+Other Mplus-Formatting: \code{\link{confint.mplus.model}},
+  \code{\link{extract}},
   \code{\link{print.MplusRstructure}},
   \code{\link{summary.mplusObject}}
 }

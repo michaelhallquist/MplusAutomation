@@ -236,6 +236,144 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
   return(out)
 }
 
+#' Return confidence intervals for an mplus.model object
+#'
+#' This is a method for returning the confidence of an mplus.model object.
+#' It works directly on an object stored from \code{readModels} such as:
+#' \code{object <- readModels("/path/to/model/model.out")}.
+#'
+#' @param object An object of class mplusObject
+#' @param type A character vector indicating the type of confidence intervals
+#'   to return. One of \dQuote{un}, \dQuote{std}, \dQuote{stdy}, or \dQuote{stdyx}.
+#' @param parm Included as all \code{confint()} methods must include it.  Not used
+#'   currently for Mplus.
+#' @param params A character vector indicating what type of parameters to
+#'   extract.  Any combination of \dQuote{regression}, \dQuote{loading},
+#'   \dQuote{undirected}, \dQuote{expectation}, \dQuote{variability}, and
+#'   \dQuote{new}.  A single one can be passed or multiple.  By default, all
+#'   are used and all parameters are returned.
+#' @param level A numeric vector indicating the level of confidence interval to extract.
+#'   Options are .95, .90, or .99 as those are all Mplus provides.
+#' @param \dots Additional arguments to pass on (not currently used)
+#' @return A data frame of class \sQuote{mplus.model.cis}, or in
+#'   the case of multiple group models, a list of class \sQuote{mplus.model.cis},
+#'   where each element of the list is a data frame of class \sQuote{mplus.model.cis}.
+#' @seealso \code{\link{readModels}}
+#' @family Mplus-Formatting
+#' @export
+#' @method confint mplus.model
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
+#' @keywords interface
+#' @examples
+#' \dontrun{
+#' # simple example of a model using builtin data
+#' # demonstrates use
+#' test <- mplusObject(
+#'   TITLE = "test the MplusAutomation Package;",
+#'   MODEL = "
+#'     mpg ON wt hp;
+#'     wt WITH hp;",
+#'   OUTPUT = "STANDARDIZED; CINTERVAL;",
+#'   usevariables = c("mpg", "wt", "hp"),
+#'   rdata = mtcars)
+#'
+#' res <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
+#'
+#' # example of the confint method on an mplus.model object
+#' # note that res$results holds the results of readModels()
+#' confint(res$results)
+#' confint(res$results, type = "std")
+#' confint(res$results, type = "stdy")
+#' confint(res$results, type = "stdyx", level = .99)
+#'
+#' # there is also a method for mplusObject class
+#' confint(res)
+#' screenreg(res, cis = TRUE, single.row = TRUE)
+#'
+#' # remove files
+#' unlink("mtcars.dat")
+#' unlink("model1.inp")
+#' unlink("model1.out")
+#' unlink("Mplus Run Models.log")
+#' }
+confint.mplus.model <- function(object, parm, level = .95,
+  type = c("un", "std", "stdy", "stdyx"),
+  params = c("regression", "loading", "undirected", "expectation", "variability", "new"),
+  ...) {
+
+  type <- match.arg(type)
+
+  stopifnot(level %in% c(.95, .90, .99))
+
+  stopifnot(!is.null(object$parameters))
+
+  p <- switch(type,
+    un = object$parameters$ci.unstandardized,
+    std = object$parameters$ci.std.standardized,
+    stdy = object$parameters$ci.stdy.standardized,
+    stdyx = object$parameters$ci.stdyx.standardized)
+
+  p2 <- lapply(params, function(i) {
+    paramExtract(p, params = i)
+  })
+
+  p2 <- p2[!unlist(lapply(p2, is.null))]
+
+  p2 <- lapply(p2, function(res) {
+    names <- switch(attr(res, "type"),
+      regression = paste0(gsub("\\.ON", "<-", res[, "paramHeader"]), res[, "param"]),
+      loading = paste0(res[, "param"], "<-", gsub("\\.BY|\\.\\|", "", res[, "paramHeader"])),
+      undirected = paste0(gsub("\\.WITH", "<->", res[, "paramHeader"]), res[, "param"]),
+      expectation = paste0(res[, "param"], "<-", gsub("\\.Means|\\.Intercepts|\\.Thresholds", "", res[, "paramHeader"])),
+      variability = paste0(res[, "param"], "<->", res[, "param"]),
+      new = res[, 'param'])
+    cbind(Label = names, res, Section = attr(res, "type"))
+  })
+
+  out <- do.call(rbind.data.frame, p2)
+
+  extralabels <- rep("", nrow(out))
+
+  if ("LatentClass" %in% colnames(out)) {
+    extralabels <- paste0(extralabels, " C_", out[, "LatentClass"])
+  }
+
+  if ("BetweenWithin" %in% colnames(out)) {
+    extralabels <- paste0(extralabels, " ", substr(out[, "BetweenWithin"], 1, 1))
+  }
+
+  extralabels <- gsub("(\\s)(.*)$", "\\2", extralabels)
+
+  out$Label <- paste(extralabels, out$Label, sep = " ")
+
+  lo <- switch(as.character(level),
+               "0.9" = "low5",
+               "0.95" = "low2.5",
+               "0.99" = "low.5")
+  hi <- switch(as.character(level),
+               "0.9" = "up5",
+               "0.95" = "up2.5",
+               "0.99" = "up.5")
+
+  if ("Group" %in% colnames(out)) {
+    out <- split(out[, c("Label", lo, hi)], out[, "Group"])
+    out <- lapply(out, function(x) {
+      names(out) <- c("Label", "LowerCI", "UpperCI", "Group")
+      class(x) <- c("mplus.model.cis", "data.frame")
+      return(x)
+    })
+    class(out) <- c("mplus.model.cis.list", "list")
+  } else {
+    out <- out[, c("Label", lo, hi)]
+    names(out) <- c("Label", "LowerCI", "UpperCI")
+    class(out) <- c("mplus.model.cis", "data.frame")
+  }
+
+  attr(out, "level") <- level
+
+  return(out)
+}
+
 #' Extract coefficients from an mplusObject
 #'
 #' Method that calls \code{coef.mplus.model}.
@@ -246,6 +384,18 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
 #' @export
 coef.mplusObject <- function(object, ...) {
   coef(object$results, ...)
+}
+
+#' Extract confidence from an mplusObject
+#'
+#' Method that calls \code{confint.mplus.model}.
+#' See further documentation there.
+#'
+#' @rdname confint.mplus.model
+#' @importFrom stats confint
+#' @export
+confint.mplusObject <- function(object, ...) {
+  confint(object$results, ...)
 }
 
 #' Extract function to make Mplus output work with the \pkg{texreg} package
@@ -261,6 +411,7 @@ coef.mplusObject <- function(object, ...) {
 #'   Defaults to \dQuote{none}.
 #' @param escape.latex A logical value whether to escape dollar signs in
 #'   coefficient names for LaTeX.  Defaults to \code{FALSE}.
+#' @param cis A logical whether to extract confidence intervals.
 #' @param ... Additional arguments passed to \code{\link{coef.mplus.model}}.
 #' @return A \code{texreg} object, or for multiple group models,
 #'   a list of \code{texreg} objects.
@@ -273,7 +424,7 @@ coef.mplusObject <- function(object, ...) {
 #' @name extract
 #' @rdname extract
 #' @aliases extract.mplus.model
-#' @importFrom stats coef
+#' @importFrom stats coef confint
 #' @examples
 #' \dontrun{
 #' # simple example of a model using builtin data
@@ -311,7 +462,7 @@ coef.mplusObject <- function(object, ...) {
 #' unlink("model1.out")
 #' unlink("Mplus Run Models.log")
 #' }
-extract.mplus.model <- function(model, summaries = "none", escape.latex = FALSE, ...) {
+extract.mplus.model <- function(model, summaries = "none", cis = FALSE, escape.latex = FALSE, ...) {
   if (summaries[1] != "none") {
     stopifnot(all(summaries %in% colnames(model$summaries)))
 
@@ -352,6 +503,9 @@ extract.mplus.model <- function(model, summaries = "none", escape.latex = FALSE,
   }
 
   params <- coef(model, ...)
+  if (cis) {
+    ci <- confint(model, ...)
+  }
   estimate <- "est"
   se <- "se"
   pvalue <- "pval"
@@ -366,6 +520,8 @@ extract.mplus.model <- function(model, summaries = "none", escape.latex = FALSE,
       coef = params[, estimate],
       se = params[, se],
       pvalues = params[, pvalue],
+      ci.low = if (cis) ci[, "LowerCI"] else numeric(0),
+      ci.up = if (cis) ci[, "UpperCI"] else numeric(0),
       gof.names = summaries,
       gof = summary.values,
       gof.decimal = use.decimals)
@@ -380,6 +536,8 @@ extract.mplus.model <- function(model, summaries = "none", escape.latex = FALSE,
         coef = params.i[, estimate],
         se = params.i[, se],
         pvalues = params.i[, pvalue],
+        ci.low = if (cis) ci[, "LowerCI"] else numeric(0),
+        ci.up = if (cis) ci[, "UpperCI"] else numeric(0),
         gof.names = summaries,
         gof = summary.values,
         gof.decimal = use.decimals)
@@ -392,8 +550,8 @@ extract.mplus.model <- function(model, summaries = "none", escape.latex = FALSE,
 
 #' @rdname extract
 #' @export
-extract.mplusObject <- function(model, summaries = "none", ...) {
-  extract(model$results, summaries = summaries, ...)
+extract.mplusObject <- function(model, summaries = "none", cis = FALSE, ...) {
+  extract(model$results, summaries = summaries, cis = cis, ...)
 }
 
 #' @rdname extract
