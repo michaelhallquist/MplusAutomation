@@ -211,152 +211,6 @@ extractValue <- function(pattern, textToScan, filename, type="int") {
   return(returnVal)
 }
 
-#' Extract a multiline section from Mplus output
-#'
-#' New approach to multiline section: retain spaces and look for next line that has identical indentation.
-#'
-#' @param header Header section
-#' @param outfiletext Output file text
-#' @param filename The name of the file
-#' @param Logical indicating whether to allow multiple sections. Defaults to \code{FALSE}
-#' @param allowSpace Logical indicating whether to allow spaces. Defaults to \code{TRUE}.
-#' @return A list of sections
-#' @keywords internal
-#' @examples
-#' # make me!!!
-getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FALSE, allowSpace=TRUE) {
-  # Apr2015: Need greater flexibility in how a section is defined. For certain sections, indentation is unhelpful. Example:
-
-  # Chi-Square Test of Model Fit for the Binary and Ordered Categorical
-  # (Ordinal) Outcomes
-  #
-  # Pearson Chi-Square
-  #
-  # Value                             13.286
-  # Degrees of Freedom                     9
-  # P-Value                           0.1501
-  #
-  # Likelihood Ratio Chi-Square
-  #
-  # Value                             16.731
-  # Degrees of Freedom                     9
-  # P-Value                           0.0531
-
-  # Likewise, in the above example there is a second line to the header that should be skipped before developing the section
-  #
-  # New syntax:
-  # {+2i}Chi-Square Test of Model Fit for the Binary and Ordered Categorical::{+1b}Pearson Chi-Square
-  #
-  # +X specifies how many lines (after the header line itself) should be skipped prior to searching for the section end
-  # i,b specifies whether to use identical indentation {i} (which has been the standard up to now) or to use a blank line {b} to identify the section end
-  # If no curly braces are provided, assume {+1i}
-
-  #allow for multiple depths (subsections) separated by ::
-  #will just extract from deepest depth
-  header <- strsplit(header, "::", fixed=TRUE)[[1]]
-
-  sectionList <- list()
-  targetText <- outfiletext
-  for (level in 1:length(header)) {
-    if ((searchCmd <- regexpr("^\\{(\\+\\d+)*([ib])*\\}", header[level], perl=TRUE)) > 0) {
-      if ((o_start <- attr(searchCmd, "capture.start")[1]) > 0) {
-        offset <- substr(header[level], o_start, o_start + attr(searchCmd, "capture.length")[1] - 1)
-        offset <- as.integer(sub("+", "", offset, fixed=TRUE)) #remove + sign
-      } else {
-        offset <- 1
-      }
-
-      if ((s_start <- attr(searchCmd, "capture.start")[2]) > 0) {
-        stype <- substr(header[level], s_start, s_start + attr(searchCmd, "capture.length")[2] - 1)
-        stopifnot(nchar(stype) == 1 && stype %in% c("i", "b"))
-      } else {
-        stype <- "i"
-      }
-
-      #remove search type information from header
-      header[level] <- substr(header[level], searchCmd[1] + attr(searchCmd, "match.length"), nchar(header[level]))
-    } else {
-      offset <- 1
-      stype <- "i"
-    }
-
-    if (allowSpace==TRUE) headerRow <- grep(paste("^\\s*", header[level], "\\s*$", sep=""), targetText, perl=TRUE)
-    else headerRow <- grep(paste("^", header[level], "$", sep=""), targetText, perl=TRUE) #useful for equality of means where we just want anything with 0 spaces
-
-    if (length(headerRow) == 1L || (length(headerRow) > 0L && allowMultiple==TRUE)) {
-      for (r in 1:length(headerRow)) {
-        #locate the position of the first non-space character
-        numSpacesHeader <- regexpr("\\S+.*$", targetText[headerRow[r]], perl=TRUE) - 1
-
-        sectionStart <- headerRow[r] + offset #skip header row itself
-
-        if (stype == "i") {
-          sameLevelMatch <- FALSE
-          readStart <- sectionStart #counter variable to chunk through output
-          while(sameLevelMatch == FALSE) {
-            #read 20-line chunks of text to find next line with identical identation
-            #more efficient than running gregexpr on whole output
-            #match position of first non-space character, subtract 1 to get num spaces.
-            #blank lines will generate a value of -2, so shouldn't throw off top-level match
-            firstNonspaceCharacter <- lapply(gregexpr("\\S+.*$", targetText[readStart:(readStart+19)], perl=TRUE), FUN=function(x) x - 1)
-            samelevelMatches <- which(firstNonspaceCharacter == numSpacesHeader)
-            if (length(samelevelMatches) > 0) {
-              sameLevelMatch <- TRUE
-              sectionEnd <- readStart+samelevelMatches[1] - 2 #-1 for going to line before next header, another -1 for readStart
-            }
-            else if (readStart+19 >= length(targetText)) {
-              sameLevelMatch <- TRUE
-              sectionEnd <- length(targetText)
-            }
-            else readStart <- readStart + 20 #process next batch
-
-            #if (readStart > 100000) browser()#stop ("readStart exceeded 100000. Must be formatting problem.")
-          }
-        } else if (stype == "b") {
-          blankFound <- FALSE
-          i <- 0
-          while(!grepl("^\\s*$", targetText[sectionStart+i], perl=T)) {
-            i <- i + 1
-            if (i > 100000) { stop ("searched for next blank line on 100000 rows without success.") }
-          }
-          if (i == 0) {
-            #first line of section was blank, so just set start and end to same
-            #could force search to look beyond first line since it would be rare that a blank line after header match should count as empty
-            sectionEnd <- sectionStart
-          } else {
-            sectionEnd <- sectionStart + i - 1 #line prior to blank
-          }
-
-        }
-
-        #there will probably be collisions between use of nested headers :: and use of allowMultiple
-        #I haven't attempted to get both to work together as they're currently used for different purposes
-        if (isTRUE(allowMultiple))
-          sectionList[[r]] <- targetText[sectionStart:sectionEnd]
-        else
-          #set targetText as chunk from start to end. If there are multiple subsections, then the
-          #next iteration of the for loop will process within the subsetted targetText.
-          targetText <- targetText[sectionStart:sectionEnd]
-
-      }
-
-    }
-    else {
-      targetText <- NA_character_
-      if (length(headerRow) > 1L) warning(paste("Multiple matches for header: ", header, "\n  ", filename, sep=""))
-      break
-      #else if (length(headerRow) < 1) warning(paste("Could not locate section based on header: ", header, "\n  ", filename, sep=""))
-    }
-
-  }
-
-  if (length(sectionList) > 0L && allowMultiple) {
-    attr(sectionList, "matchlines") <- headerRow
-    return(sectionList)
-  }
-  else return(targetText)
-}
-
 #' Worker function used in extractSummaries_1section
 #'
 #' @param arglist The argument list
@@ -1007,7 +861,13 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 
   arglist$Estimator <- extractValue(pattern="^\\s*Estimator\\s*", analysisSummarySection, filename, type="str")
   arglist$Observations <- extractValue(pattern="^\\s*Number of observations\\s*", analysisSummarySection, filename, type="int")
-
+  arglist$NGroups <- extractValue(pattern="^\\s*Number of groups\\s*", analysisSummarySection, filename, type="int")
+  arglist$NDependentVars <- extractValue(pattern="^\\s*Number of dependent variables\\s*", analysisSummarySection, filename, type="int")
+  arglist$NIndependentVars <- extractValue(pattern="^\\s*Number of independent variables\\s*", analysisSummarySection, filename, type="int")
+  arglist$NContinuousLatentVars <- extractValue(pattern="^\\s*Number of continuous latent variables\\s*", analysisSummarySection, filename, type="int")
+  arglist$NCategoricalLatentVars <- extractValue(pattern="^\\s*Number of categorical latent variables\\s*", analysisSummarySection, filename, type="int")
+  arglist$InformationMatrix <- extractValue(pattern="^\\s*Information matrix\\s*", analysisSummarySection, filename, type="int")
+  
   #END ANALYSIS SUMMARY PROCESSING
 
   #BEGIN MODEL FIT STATISTICS PROCESSING
@@ -1242,6 +1102,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #'     "C:/Program Files/Mplus/Mplus Examples/User's Guide Examples")
 #' }
 extractModelSummaries <- function(target=getwd(), recursive=FALSE, filefilter) {
+  message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
   #retain working directory and reset at end of run
   curdir <- getwd()
 
@@ -1805,12 +1666,12 @@ extractTech10 <- function(outfiletext, filename) {
 #' @examples
 #' # make me!!!
 extractTech12 <- function(outfiletext, filename) {
-  #TODO: have empty list use mplus.tech12 class
   #not sure whether there are sometimes multiple groups within this section.
   tech12Section <- getSection("^TECHNICAL 12 OUTPUT$", outfiletext)
-  if (is.null(tech12Section)) return(list()) #no tech12 output
-
   tech12List <- list()
+  class(tech12List) <- c("list", "mplus.tech12")
+  
+  if (is.null(tech12Section)) return(tech12List) #no tech12 output
 
   tech12Subsections <- getMultilineSection("ESTIMATED MIXED MODEL AND RESIDUALS \\(OBSERVED - EXPECTED\\)",
       tech12Section, filename, allowMultiple=TRUE)

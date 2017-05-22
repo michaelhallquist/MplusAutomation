@@ -594,7 +594,8 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 #' 	"C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/ex3.14.out")
 #' }
 extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, dropDimensions=FALSE, resultType) {
-
+  message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
+  
   #function tree (top to bottom):
   #extractModelParameters: loop over one or more output files
   #extractParameters_1file: extract model parameters for all sections (unstandardized, stdyx, stdy, std in a single file

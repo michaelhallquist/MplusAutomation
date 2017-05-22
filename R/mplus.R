@@ -622,7 +622,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
       }
     }
 
-    runModels(filefilter = modelout, Mplus_command = Mplus_command)
+    runModels(target = modelout, Mplus_command = Mplus_command, logFile=NULL)
     outfile <- gsub("(^.*)(\\.inp$)", "\\1.out", modelout)
     results <- readModels(target = outfile)
     if (!boot) {
