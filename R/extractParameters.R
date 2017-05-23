@@ -47,7 +47,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     convertMatches <- data.frame(startline=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
   } else {
     #okay to match beginning and end of line because strip.white used in scan
-    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion)|([\\w_\\d+\\.#\\&]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&]+\\s*\\|\\s*[\\w_\\d+\\.#\\&]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
+    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Item Locations|Item Categories|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion|Steps)|([\\w_\\d+\\.#\\&]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&]+\\s*\\|\\s*[\\w_\\d+\\.#\\&]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
 
     #more readable (than above) using ldply from plyr
     convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
@@ -70,7 +70,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
           match <- substr(thisChunk[row$startline], row$start, row$end)
 
           #check for keyword
-          if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", "Scales", "Item Difficulties", "Dispersion")) {
+          if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", "Scales", "Item Difficulties", "Item Locations", "Item Categories", "Dispersion", "Steps")) {
             return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_, stringsAsFactors=FALSE))
           } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
             return(data.frame(startline=row$startline, keyword=NA_character_, varname=variable[1], operator=variable[2], stringsAsFactors=FALSE))
@@ -103,9 +103,33 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #"U3                 0.660      0.038     17.473      0.000"
     #"U4                 0.656      0.037     17.585      0.000"
 
+    if (!is.na(convertMatches[i,"keyword"]) && convertMatches[i,"keyword"] == "Item.Categories") {      
+      #handle item categories output from IRT (e.g. ex5.5pcm.out), where the output section looks like this:
+      # Item Categories
+      #  U1
+      #    Category 1         0.000      0.000      0.000      1.000
+      #    Category 2        -0.247      0.045     -5.534      0.000
+      #    Category 3         0.699      0.052     13.325      0.000
+      #    Category 4        -0.743      0.057    -12.938      0.000
+      #    Category 5         0.291      0.052      5.551      0.000
+      hlines <- grep("^\\s*([\\w_\\d+\\.#\\&]+)\\s*$", paramsToParse, perl=TRUE)
+      if (any(grepl("Category", paramsToParse[hlines]))) { 
+        stop("Failed to pull apart item categories section") 
+      } else {
+        reformat <- c()
+        for (vv in 1:length(hlines)) {
+          vname <- paramsToParse[hlines[vv]]
+          startLine <- hlines[vv]+1
+          endLine <- ifelse(hlines[vv] < max(hlines), hlines[vv+1]-1, length(paramsToParse))
+          reformat <- c(reformat, sub("Category (\\d+)", paste0(vname, ".Cat.\\1"), paramsToParse[startLine:endLine]))
+        }
+        paramsToParse <- reformat #move forward with the reparsed Item Categories chunk
+      }
+    }
+  
     #define the var title outside of the chunk processing because it will apply to all rows
     if (is.na(convertMatches[i,]$keyword)) {
-      slo <- convertMatches[i,"slope"]
+      slo <- convertMatches[i,"slope"] #support Mplus v8 output style S1 | Y1 ON Y1&1 (e.g., ex9.32.out) 
       prefix <- ifelse(is.null(slo) || is.na(slo), "", paste(slo, "|", sep=""))
       varTitle <- paste(prefix, convertMatches[i,"varname"], ".", convertMatches[i,"operator"], sep="")
     } else { varTitle <- as.character(convertMatches[i,"keyword"]) }
@@ -291,8 +315,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         #subtract one to exclude the subsequent header row)
         thisChunk <- modelSection[(match+1):(topLevelMatches[matchIndex+1]-1)]
         chunkToParse <- TRUE
-      }
-      else if (matchIndex == length(topLevelMatches) && match+1 <= length(modelSection)) {
+      } else if (matchIndex == length(topLevelMatches) && match+1 <= length(modelSection)) {
         #also assume that the text following the last topLevelMatch is also to be parsed
         #second clause ensures that there is some chunk below the final header.
         #this handles issues where a blank section terminates the results section, such as multilevel w/ no between
@@ -301,8 +324,34 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
       }
 
       if (chunkToParse == TRUE && !all(thisChunk=="")) { #omit completely blank chunks (v8 ex9.32.out)
+        #if (pauseme) { browser()}
         parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
 
+        #WORKAROUND: For confidence intervals in multilevel mixtures, the Categorical Latent Variables section does not
+        #follow the same formatting guidelines. Specifically, it does not print "Within Level" after "Categorical Latent Variables".
+        #As a result, the CI parser blows up because bwWi will be NULL. The inconsistent section is in my assessment always the within level
+        #See, for example CINTERVAL output for UG ex10.1. The first section pertains to the within level (e.g., -1.302 is the param estimate in MODEL RESULTS).
+        #
+        #  Categorical Latent Variables
+        #  
+        #  C#1      ON
+        #  X1              -1.979      -1.817      -1.734      -1.302      -0.869      -0.787      -0.625
+        #  
+        #  Intercepts
+        #  C#1             -0.692      -0.490      -0.386       0.153       0.692       0.795       0.997
+        #  
+        #  Between Level
+        #  
+        #  C#1      ON
+        #  W               -1.989      -1.785      -1.680      -1.134      -0.588      -0.484      -0.280
+        #  
+        #  Residual Variances
+        #  C#1             -0.325      -0.244      -0.203       0.013       0.230       0.271       0.352
+
+        if (sectionName == "ci.unstandardized" && lcNum=="Categorical.Latent.Variables" && is.null(bwWi) && length(betweenWithinMatches) > 0L) {
+          bwWi <- "Within"
+        }
+  
         #only append if there are some rows
         if (!is.null(parsedChunk) && nrow(parsedChunk) > 0) {
           parsedChunk$LatentClass <- lcNum
@@ -474,14 +523,18 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
   }
   
   #two-parameter IRT output
-  irtSection <- getSection("^IRT PARAMETERIZATION IN TWO-PARAMETER (PROBIT|LOGISTIC) METRIC$", outfiletext)
+  irtSection <- getSection("^IRT PARAMETERIZATION( IN TWO-PARAMETER (PROBIT|LOGISTIC) METRIC)*$", outfiletext)
   if (!is.null(irtSection)) {
-    #parse what the logit or probit is
-    probitLogit <- tolower(sub("^\\s*where the (probit|logit) is.*$", "\\1", irtSection[1L], ignore.case=TRUE, perl=TRUE))
-    def <- tolower(sub("^\\s*where the (?:probit|logit) is\\s+(.*)$", "\\1", irtSection[1L], ignore.case=TRUE, perl=TRUE))
-    irtSection <- irtSection[2:length(irtSection)] #drop line "WHERE THE LOGIT IS 1.7*DISCRIMINATION*(THETA - DIFFICULTY)"
+    hasprobitlogit <- FALSE
+    if (grepl("where the (probit|logit)", irtSection[1L], ignore.case=TRUE, perl=TRUE)) {
+      #parse what the logit or probit is
+      hasprobitlogit <- TRUE
+      probitLogit <- tolower(sub("^\\s*where the (probit|logit) is.*$", "\\1", irtSection[1L], ignore.case=TRUE, perl=TRUE))
+      def <- tolower(sub("^\\s*where the (?:probit|logit) is\\s+(.*)$", "\\1", irtSection[1L], ignore.case=TRUE, perl=TRUE))
+      irtSection <- irtSection[2:length(irtSection)] #drop line "WHERE THE LOGIT IS 1.7*DISCRIMINATION*(THETA - DIFFICULTY)"
+    }
     irtParsed <- extractParameters_1section(filename, irtSection, "irt.parameterization")
-    attr(irtParsed[["irt.parameterization"]], probitLogit) <- def #add probit/logit definition as attribute
+    if (hasprobitlogit) { attr(irtParsed[["irt.parameterization"]], probitLogit) <- def } #add probit/logit definition as attribute
     allSections <- appendListElements(allSections, irtParsed)
   }
 
