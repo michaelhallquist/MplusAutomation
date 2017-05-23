@@ -501,8 +501,7 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
                   varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
               ))
       )
-    }
-    else {
+    } else {
       modelFitSectionHeaders <- append(modelFitSectionHeaders, "SRMR \\(Standardized Root Mean Square Residual\\)")
       modelFitSectionFields <- c(modelFitSectionFields,
           list(data.frame(
@@ -624,7 +623,6 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
     )
 
     if (grepl("twolevel", arglist$AnalysisType, ignore.case=TRUE)) {
-
       modelFitSectionHeaders <- append(modelFitSectionHeaders, "SRMR \\(Standardized Root Mean Square Residual\\)")
 
       modelFitSectionFields <- c(modelFitSectionFields,
@@ -634,9 +632,17 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
                   varType=c("dec", "dec"), stringsAsFactors=FALSE
               ))
       )
-
-    }
-    else {
+    } else if (grepl("threelevel", arglist$AnalysisType, ignore.case=TRUE)) {
+      modelFitSectionHeaders <- append(modelFitSectionHeaders, "SRMR \\(Standardized Root Mean Square Residual\\)")
+      
+      modelFitSectionFields <- c(modelFitSectionFields,
+          list(data.frame(
+                  varName=c("SRMR.Within", "SRMR.Between.L2", "SRMR.Between.L3"),
+                  regexPattern=c("Value for Within", "Value for Between Level 2", "Value for Between Level 3"),
+                  varType=c("dec", "dec", "dec"), stringsAsFactors=FALSE
+              ))
+      )
+    } else {
 
       modelFitSectionHeaders <- append(modelFitSectionHeaders, "SRMR \\(Standardized Root Mean Square Residual\\)")
 
