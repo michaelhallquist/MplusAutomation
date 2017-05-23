@@ -1,14 +1,21 @@
 Version 0.7 (in progress)
+- notice:       extractModelSummaries and extractModelParameters are deprecated in favor of readModels. These will be removed in future.
 - feature:      prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
 - feature:      mplusObject(), mplusModeler(), update(), and createSyntax() all now accommodate monte carlo simulations in Mplus
 - feature:      New methods for the confint() function to extract and format confidence intervals. This also allows confidence intervals with the texreg package
-- feature:      initial support for extracting MODEL INDIRECT output. See $indirect element from readModels()
-- feature:      initial support for extracting SAMPSTAT output. See $sampstat element from readModels()
+- feature:      initial support for extracting MODEL INDIRECT output. See $indirect element from readModels().
+- feature:      initial support for extracting SAMPSTAT output. See $sampstat element from readModels().
+- feature:      extract covariance coverage from "COVARIANCE COVERAGE OF DATA" section. See $covariance.coverage element from readModels().
 - feature:      runModels now accepts a single .inp file or a directory as the target
-- notice:       extractModelSummaries and extractModelParameters are deprecated in favor of readModels. These will be removed in future.
+- feature:      readModels now uses tryCatch statements to wrap extraction. This should more gracefully handle unexpected errors. 
 - bugfix:       Support for Mplus v5 confidence intervals.
 - bugfix:       R2 extraction for models with estimates and scale factors alone
+- bugfix:       Handle outputs using DATA IMPUTATION to impute missing data, then analyze a model in older versions of Mplus
+- bugfix:       Handle parsing input section in older Mplus (v6.12 and before, I believe) where there was no termination statement 
 - v8 support:   Handle removal of leading '1' from TECH output row names for parameter vectors (matrixExtract)
+- v8 support:   Extract Prior Posterior Predictive P-Value. See $PriorPostPred_PValue in $summaries
+- v8 support:   Extract Within-Level Standardized Estimates for TWOLEVEL models (ex9.32.out). See $wilevel.standardized in $parameters from readModels().
+- v8 support:   Support output for AR(1) output variables labeled &1.
 
 Version 0.6-4
 - feature: prepareMplusData() and mplusObject() / mplusModeler() now handle multiply imputed data

@@ -282,7 +282,10 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "SUMMARY OF MISSING DATA PATTERNS FOR THE FIRST REPLICATION",
         "SUMMARY OF MISSING DATA PATTERNS",
         "COVARIANCE COVERAGE OF DATA FOR THE FIRST REPLICATION",
+        "COVARIANCE COVERAGE OF DATA", "UNIVARIATE SAMPLE STATISTICS",
+        "THE MODEL ESTIMATION TERMINATED NORMALLY",
         "SAMPLE STATISTICS", "SAMPLE STATISTICS FOR THE FIRST REPLICATION",
+        "RESULTS FOR BASIC ANALYSIS",
         "CROSSTABS FOR CATEGORICAL VARIABLES", "UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES",
         "RANDOM STARTS RESULTS RANKED FROM THE BEST TO THE WORST LOGLIKELIHOOD VALUES",
         "TESTS OF MODEL FIT", "MODEL FIT INFORMATION", "CLASSIFICATION QUALITY",
@@ -300,8 +303,10 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC METRIC",
         "IRT PARAMETERIZATION IN TWO-PARAMETER PROBIT METRIC",
         "BRANT WALD TEST FOR PROPORTIONAL ODDS",
+        "BETWEEN-LEVEL FACTOR SCORE COMPARISONS",
         "ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION",
         "LATENT CLASS ODDS RATIO RESULTS", "LOGRANK OUTPUT", "STANDARDIZED MODEL RESULTS",
+        "WITHIN-LEVEL STANDARDIZED MODEL RESULTS FOR CLUSTER \\d+",
         "R-SQUARE", "QUALITY OF NUMERICAL RESULTS", "TECHNICAL OUTPUT", "TECHNICAL \\d+ OUTPUT",
         "TECHNICAL 5/6 OUTPUT",
         "TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS",
@@ -375,7 +380,7 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
 #' @keywords internal
 #' @examples
 #' # make me!!!
-getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FALSE, allowSpace=TRUE) {
+getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FALSE, allowSpace=TRUE, ignore.case=FALSE) {
   # Apr2015: Need greater flexibility in how a section is defined. For certain sections, indentation is unhelpful. Example:
   
   # Chi-Square Test of Model Fit for the Binary and Ordered Categorical
@@ -431,8 +436,8 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
       stype <- "i"
     }
     
-    if (allowSpace==TRUE) headerRow <- grep(paste("^\\s*", header[level], "\\s*$", sep=""), targetText, perl=TRUE)
-    else headerRow <- grep(paste("^", header[level], "$", sep=""), targetText, perl=TRUE) #useful for equality of means where we just want anything with 0 spaces
+    if (allowSpace==TRUE) headerRow <- grep(paste("^\\s*", header[level], "\\s*$", sep=""), targetText, perl=TRUE, ignore.case=ignore.case)
+    else headerRow <- grep(paste("^", header[level], "$", sep=""), targetText, perl=TRUE, ignore.case=ignore.case) #useful for equality of means where we just want anything with 0 spaces
     
     if (length(headerRow) == 1L || (length(headerRow) > 0L && allowMultiple==TRUE)) {
       for (r in 1:length(headerRow)) {
@@ -491,8 +496,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
         
       }
       
-    }
-    else {
+    } else {
       targetText <- NA_character_
       if (length(headerRow) > 1L) warning(paste("Multiple matches for header: ", header, "\n  ", filename, sep=""))
       break
@@ -504,8 +508,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
   if (length(sectionList) > 0L && allowMultiple) {
     attr(sectionList, "matchlines") <- headerRow
     return(sectionList)
-  }
-  else return(targetText)
+  } else { return(targetText) }
 }
 
 

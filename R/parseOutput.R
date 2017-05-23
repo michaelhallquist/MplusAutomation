@@ -66,37 +66,136 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
 
     outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
-    allFiles[[listID]]$input <- inp <- extractInput_1file(outfiletext, curfile)
-    warn_err <- extractWarningsErrors_1file(outfiletext, curfile, input=inp)
+    #Parse Mplus input into a list by section
+    allFiles[[listID]]$input <- inp <- tryCatch(extractInput_1file(outfiletext, curfile), error=function(e) {
+          message("Error parsing input section of output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #Parse warnings and errors in output file
+    warn_err <- tryCatch(extractWarningsErrors_1file(outfiletext, curfile, input=inp), error=function(e) {
+          message("Error parsing warnings and errors in output file: ", curfile); print(e)
+          return(list())
+        })
+    
     allFiles[[listID]]$warnings <- warn_err$warnings
     allFiles[[listID]]$errors <- warn_err$errors
-    allFiles[[listID]]$summaries <- extractSummaries_1file(outfiletext, curfile, input=inp)
-    allFiles[[listID]]$parameters <- extractParameters_1file(outfiletext, curfile)
-    allFiles[[listID]]$class_counts <- extractClassCounts(outfiletext, curfile, allFiles[[listID]]$summaries) #latent class counts
-    allFiles[[listID]]$mod_indices <- extractModIndices_1file(outfiletext, curfile)
-    allFiles[[listID]]$savedata_info <- fileInfo <- l_getSavedata_Fileinfo(curfile, outfiletext, allFiles[[listID]]$summaries)
+    
+    #SAMPSTAT output
+    allFiles[[listID]]$sampstat <- tryCatch(extractSampstat(outfiletext, curfile), error=function(e) {
+          message("Error extracting SAMPSTAT in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #COVARIANCE COVERAGE OF DATA output
+    allFiles[[listID]]$covariance.coverage <- tryCatch(extractCovarianceCoverage(outfiletext, curfile), error=function(e) {
+          message("Error extracting COVARIANCE COVERAGE OF DATA in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    
+    #Model summary output (including MODEL FIT INFORMATION)
+    allFiles[[listID]]$summaries <- tryCatch(extractSummaries_1file(outfiletext, curfile, input=inp), error=function(e) {
+          message("Error extracting model summaries in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #Model parameters (MODEL RESULTS section)
+    allFiles[[listID]]$parameters <- tryCatch(extractParameters_1file(outfiletext, curfile), error=function(e) {
+          message("Error extracting MODEL RESULTS in output file: ", curfile); print(e)
+          return(list())
+        })
+
+    #Latent class counts
+    allFiles[[listID]]$class_counts <- tryCatch(extractClassCounts(outfiletext, curfile, allFiles[[listID]]$summaries), error=function(e) {
+          message("Error extracting latent class counts in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #MODEL INDIRECT
+    allFiles[[listID]]$indirect <- tryCatch(extractIndirect(outfiletext, curfile), error=function(e) {
+          message("Error extracting MODEL INDIRECT in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #MODINDICES
+    allFiles[[listID]]$mod_indices <- tryCatch(extractModIndices_1file(outfiletext, curfile), error=function(e) {
+          message("Error extracting MODINDICES in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #Extract model residuals (RESIDUAL)
+    allFiles[[listID]]$residuals <- tryCatch(extractResiduals(outfiletext, curfile), error=function(e) {
+          message("Error extracting RESIDUAL section in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #SAVEDATA file information
+    allFiles[[listID]]$savedata_info <- fileInfo <- tryCatch(l_getSavedata_Fileinfo(curfile, outfiletext, allFiles[[listID]]$summaries), error=function(e) {
+          message("Error extracting SAVEDATA file information in output file: ", curfile); print(e)
+          return(list())
+        })
 
     #missing widths indicative of MI/MC run
     if (!is.null(fileInfo) && is.na(fileInfo[["fileVarWidths"]])) {
-      allFiles[[listID]]$savedata <- l_getSavedata_readRawFile(curfile, outfiletext, format="free", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], input=inp)
+      allFiles[[listID]]$savedata <- tryCatch(l_getSavedata_readRawFile(curfile, outfiletext, format="free", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], input=inp),
+          error=function(e) {
+            message("Error reading SAVEDATA rawfile: ", fileInfo[["fileName"]] , " in output file: ", curfile); print(e)
+            return(list())
+          })
     } else {
-      allFiles[[listID]]$savedata <- l_getSavedata_readRawFile(curfile, outfiletext, format="fixed", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], varWidths=fileInfo[["fileVarWidths"]], input=inp)
+      allFiles[[listID]]$savedata <- tryCatch(l_getSavedata_readRawFile(curfile, outfiletext, format="fixed", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], varWidths=fileInfo[["fileVarWidths"]], input=inp),
+          error=function(e) {
+            message("Error reading SAVEDATA rawfile: ", fileInfo[["fileName"]] , " in output file: ", curfile); print(e)
+            return(list())
+          })
     }
 
-    allFiles[[listID]]$bparameters <- l_getSavedata_Bparams(curfile, outfiletext, fileInfo, discardBurnin=FALSE)
-    allFiles[[listID]]$residuals <- extractResiduals(outfiletext, curfile)
-    allFiles[[listID]]$tech1 <- extractTech1(outfiletext, curfile) #parameter specification
-    allFiles[[listID]]$tech3 <- extractTech3(outfiletext, fileInfo, curfile) #covariance/correlation matrix of parameter estimates
-    allFiles[[listID]]$tech4 <- extractTech4(outfiletext, curfile) #latent means
-    allFiles[[listID]]$tech7 <- extractTech7(outfiletext, curfile) #sample stats for each class
-    allFiles[[listID]]$tech9 <- extractTech9(outfiletext, curfile) #tech 9 output (errors and warnings for Monte Carlo output)
-    allFiles[[listID]]$tech12 <- extractTech12(outfiletext, curfile) #observed versus estimated sample stats for TYPE=MIXTURE
+    #Read BPARAMETERS (posterior draws) file from disk
+    allFiles[[listID]]$bparameters <- tryCatch(l_getSavedata_Bparams(curfile, outfiletext, fileInfo, discardBurnin=FALSE), error=function(e) {
+          message("Error reading BPARAMETERS file: ", fileInfo[["bayesFile"]], " in output file: ", curfile); print(e)
+          return(list())
+        })
+        
+    #TECHNICAL OUTPUT
+    #TECH1: parameter specification and starting values
+    allFiles[[listID]]$tech1 <- tryCatch(extractTech1(outfiletext, curfile), error=function(e) {
+          message("Error extracting TECH1 in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #TECH3: covariance/correlation matrix of parameter estimates
+    allFiles[[listID]]$tech3 <- tryCatch(extractTech3(outfiletext, fileInfo, curfile), error=function(e) {
+          message("Error extracting TECH3 in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #TECH4: latent means
+    allFiles[[listID]]$tech4 <- tryCatch(extractTech4(outfiletext, curfile), error=function(e) {
+          message("Error extracting TECH4 in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #TECH7: sample stats for each class
+    allFiles[[listID]]$tech7 <- tryCatch(extractTech7(outfiletext, curfile), error=function(e) {
+          message("Error extracting TECH7 in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #TECH9: errors and warnings for Monte Carlo output
+    allFiles[[listID]]$tech9 <- tryCatch(extractTech9(outfiletext, curfile), error=function(e) {
+          message("Error extracting TECH9 in output file: ", curfile); print(e)
+          return(list())
+        })
+    
+    #TECH12: observed versus estimated sample stats for TYPE=MIXTURE
+    allFiles[[listID]]$tech12 <- tryCatch(extractTech12(outfiletext, curfile), error=function(e) {
+          message("Error extracting TECH12 in output file: ", curfile); print(e)
+          return(list())
+        })
+    
     allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
-    
-    allFiles[[listID]]$indirect <- extractIndirect(outfiletext, curfile) #MODEL INDIRECT output
-    allFiles[[listID]]$sampstat <- extractSampstat(outfiletext, curfile) #SAMPSTAT output
-    
-	
+  
     #aux(e) means and pairwise comparisons
     allFiles[[listID]]$lcCondMeans <- extractAux(outfiletext, curfile)
 
@@ -268,10 +367,27 @@ extractSummaries_1plan <- function(arglist, sectionHeaders, sectionFields, textT
 #' @keywords internal
 #' @examples
 #' # make me!!!
-extractSummaries_1section <- function(modelFitSection, arglist, filename) {
+extractSummaries_1section <- function(modelFitSection, arglist, filename, input=list()) {
 
+  #DATA IMPUTATION outputs sometimes use the Mean/SD output (I believe in Mplus v6.12 and perhaps v7)
+  #In Mplus v8, Model fit statistics are output as usual (e.g., ex11.6.out). 
+  #This is confusing, so we should just test for the Mean/SD output here and use the MI-type output if found
+  useMIHeadings <- FALSE
+  if (!is.null(input$data.imputation)) {
+    header <- "Chi-Square Test of Model Fit"
+    fields <- list(data.frame(
+        varName=c("ChiSqM_DF", "ChiSqM_Mean", "ChiSqM_SD", "ChiSqM_NumComputations"),
+        regexPattern=c("Degrees of Freedom", "Mean", "Std Dev", "Number of successful computations"),
+        varType=c("int", "dec", "dec", "int"), stringsAsFactors=FALSE))
+    
+    test <- extractSummaries_1plan(arglist, header, fields, modelFitSection, filename)
+    if (!is.na(test$ChiSqM_Mean)) {
+      useMIHeadings <- TRUE
+    }    
+  }
+  
   #MI and Montecarlo data types have fundamentally different output (means and sds per fit stat)
-  if (grepl("imputation", arglist$DataType, ignore.case=TRUE) || grepl("montecarlo", arglist$DataType, ignore.case=TRUE)) {
+  if (useMIHeadings || grepl("imputation", arglist$DataType, ignore.case=TRUE) || grepl("montecarlo", arglist$DataType, ignore.case=TRUE)) {
     modelFitSectionHeaders <- c(
         "", #section-nonspecific parameters
         "Chi-Square Test of Model Fit",
@@ -285,9 +401,9 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
         "Information Criteria( Including the Auxiliary Part)*c::Sample-Size Adjusted BIC \\(n\\* = \\(n \\+ 2\\) / 24\\)",
         "RMSEA \\(Root Mean Square Error Of Approximation\\)",
         "WRMR \\(Weighted Root Mean Square Residual\\)",
-        "Information Criterion::Deviance \\(DIC\\)",
-        "Information Criterion::Estimated Number of Parameters \\(pD\\)",
-        "Information Criterion::Bayesian \\(BIC\\)"
+        "Information Criteri(a|on)::Deviance \\(DIC\\)", #
+        "Information Criteri(a|on)::Estimated Number of Parameters \\(pD\\)",
+        "Information Criteri(a|on)::Bayesian \\(BIC\\)"
     )
     modelFitSectionFields <- list(
         data.frame(
@@ -470,10 +586,10 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
             regexPattern=c("CFI", "TLI"),
             varType=c("dec", "dec"), stringsAsFactors=FALSE
         ),
-        data.frame(
-            varName=c("AIC", "BIC", "aBIC"),
-            regexPattern=c("Akaike \\(AIC\\)", "Bayesian \\(BIC\\)", "Sample-Size Adjusted BIC"),
-            varType=c("dec", "dec", "dec"), stringsAsFactors=FALSE
+        data.frame( #Information Criteria (v8 now includes DIC and pD here)
+            varName=c("AIC", "BIC", "aBIC", "DIC", "pD"),
+            regexPattern=c("Akaike \\(AIC\\)", "Bayesian \\(BIC\\)", "Sample-Size Adjusted BIC", "Deviance \\(DIC\\)", "Estimated Number of Parameters \\(pD\\)"),
+            varType=c("dec", "dec", "dec", "dec", "dec"), stringsAsFactors=FALSE
         ),
         data.frame(
             varName=c("ParametersWithAux"),
@@ -491,11 +607,11 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename) {
             varType=c("dec"), stringsAsFactors=FALSE
         ),
         data.frame( #Bayesian Posterior Predictive Checking using Chi-Square
-            varName=c("ObsRepChiSqDiff_95CI_LB", "ObsRepChiSqDiff_95CI_UB", "PostPred_PValue"),
-            regexPattern=c("+2:the Observed and the Replicated Chi-Square Values", "+2:the Observed and the Replicated Chi-Square Values", "Posterior Predictive P-Value"),
-            varType=c("dec[1]", "dec[2]", "dec"), stringsAsFactors=FALSE
+            varName=c("ObsRepChiSqDiff_95CI_LB", "ObsRepChiSqDiff_95CI_UB", "PostPred_PValue", "PriorPostPred_PValue"),
+            regexPattern=c("+2:the Observed and the Replicated Chi-Square Values", "+2:the Observed and the Replicated Chi-Square Values", "^\\s*Posterior Predictive P-Value", "Prior Posterior Predictive P-Value"),
+            varType=c("dec[1]", "dec[2]", "dec", "dec"), stringsAsFactors=FALSE
         ),
-        data.frame( #Information Criterion
+        data.frame( #Information Criterion (singular name under Mplus Bayes v7. Corrected to "Criteria" in v8)
             varName=c("DIC", "pD", "BIC"),
             regexPattern=c("Deviance \\(DIC\\)", "Estimated Number of Parameters \\(pD\\)", "Bayesian \\(BIC\\)"), #sometimes BIC is listed here (e.g., MI Bayes output)
             varType=c("dec", "dec", "dec"), stringsAsFactors=FALSE
@@ -768,9 +884,16 @@ extractInput_1file <- function(outfiletext, filename) {
 
   endInput <- grep("^\\s*(INPUT READING TERMINATED NORMALLY|\\*\\*\\* WARNING.*|\\d+ (?:ERROR|WARNING)\\(S\\) FOUND IN THE INPUT INSTRUCTIONS|\\*\\*\\* ERROR.*)\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
   if (length(endInput) == 0L) {
-    warning("Could not find end of input for: ", filename)
-    attr(input, "start.line") <- attr(input, "end.line") <- -1
-    return(input)
+    #In Mplus v6.12 (and perhaps at some other point in the evolution), the input parser output was not included.
+    #In such cases, try to fall back to the first line of the TITLE: XXX line, which is reprinted after input
+    title1 <- grep("\\s*TITLE:\\s*(.*)$", outfiletext[1:100], perl=TRUE) #assume it lives in first 100 lines
+    if (length(title1)==1L && length((endinputTitle <- grep(sub("\\s*TITLE:\\s*(.*)$", "^\\\\s*\\1\\\\s*$", outfiletext[title1], perl=TRUE), outfiletext)) == 1L)) {
+      endInput <- endinputTitle - 1L
+    } else {
+      warning("Could not find end of input for: ", filename)
+      attr(input, "start.line") <- attr(input, "end.line") <- -1
+      return(input)
+    }    
   } else { endInput <- endInput[1L] - 1L } #one line before first warning or end of instructions
 
   input.text <- outfiletext[startInput[1L]:endInput[1L]] #explicit first element because there could be both warnings and errors.
@@ -853,8 +976,10 @@ extractSummaries_1file <- function(outfiletext, filename, input)
     arglist$DataType <- "INDIVIDUAL" #Data type not specified, default to individual
   }
 
+  if (!is.null(input$data.imputation)) {
+    arglist$NImputedDatasets <- input$data.imputation$ndatasets #number of imputed datasets
+  }
   #End input instructions processing
-
 
   #BEGIN ANALYSIS SUMMARY PROCESSING
   analysisSummarySection <- getSection("^\\s*SUMMARY OF ANALYSIS\\s*$", outfiletext)
@@ -902,7 +1027,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   else {
 
     modelFitSection <- getSection("^(TESTS OF MODEL FIT|MODEL FIT INFORMATION)$", outfiletext)
-    arglist <- extractSummaries_1section(modelFitSection, arglist, filename)
+    arglist <- extractSummaries_1section(modelFitSection, arglist, filename, input)
   }
 
   #CLASSIFICATION QUALITY
@@ -1067,6 +1192,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #' \item{ObsRepChiSqDiff_95CI_LB}{Lower bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
 #' \item{ObsRepChiSqDiff_95CI_UB}{Upper bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
 #' \item{PostPred_PValue}{Posterior predictive p-value}
+#' \item{PriorPostPred_PValue}{Prior Posterior Predictive P-Value}
 #' \item{BLRT_RequestedDraws}{Number of requested bootstrap draws for TECH14.}
 #' \item{BLRT_KM1LL}{Log-likelihood of the K-1 model (one less class) for the Bootstrapped Likelihood Ratio Test (TECH14).}
 #' \item{BLRT_2xLLDiff}{Two times the log-likelihood difference of the models with K and K-1 classes (TECH14).}
@@ -1340,7 +1466,11 @@ extractTech1 <- function(outfiletext, filename) {
 
 extractSampstat <- function(outfiletext, filename) {
   sampstatSection <- getSection("^SAMPLE STATISTICS$", outfiletext)
-  if (is.null(sampstatSection)) return(list()) #no SAMPTSTAT output
+  if (is.null(sampstatSection)) {
+    #try output from TYPE=BASIC, which places these in a section of a different name
+    sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
+  } 
+  if (is.null(sampstatSection)) return(list()) #no SAMPSTAT output
   
   sampstatList <- list()
   
@@ -1349,7 +1479,6 @@ extractSampstat <- function(outfiletext, filename) {
   
   matchlines <- attr(sampstatSubsections, "matchlines")
   
-  sampstatList <- list()
   if (length(sampstatSubsections) == 0)
     warning ("No sample statistics sections found within SAMPSTAT output.")
   else if (length(sampstatSubsections) > 1)
@@ -1363,6 +1492,17 @@ extractSampstat <- function(outfiletext, filename) {
     targetList[["means"]] <- matrixExtract(sampstatSubsections[[g]], "Means", filename)
     targetList[["covariances"]] <- matrixExtract(sampstatSubsections[[g]], "Covariances", filename)
     targetList[["correlations"]] <- matrixExtract(sampstatSubsections[[g]], "Correlations", filename)
+    
+    #these seem to show up in DATA: TYPE=IMPUTATION outputs (e.g., ex11.8part2.out)
+    targetList[["means.intercepts.thresholds"]] <- matrixExtract(sampstatSubsections[[g]], "Means/Intercepts/Thresholds", filename, ignore.case=TRUE)
+    targetList[["within.level.variance.covariance"]] <- matrixExtract(sampstatSubsections[[g]], "WITHIN LEVEL VARIANCE/COVARIANCE", filename, ignore.case=TRUE)
+    targetList[["within.level.correlation"]] <- matrixExtract(sampstatSubsections[[g]], "WITHIN LEVEL CORRELATION", filename, ignore.case=TRUE)
+    targetList[["between.level.variance.covariance"]] <- matrixExtract(sampstatSubsections[[g]], "BETWEEN LEVEL VARIANCE/COVARIANCE", filename, ignore.case=TRUE)
+    targetList[["between.level.correlation"]] <- matrixExtract(sampstatSubsections[[g]], "BETWEEN LEVEL CORRELATION", filename, ignore.case=TRUE)
+    
+    #I think these are only in older outputs
+    targetList[["covariances.correlations.resid_correlations"]] <- matrixExtract(sampstatSubsections[[g]], "Covariances/Correlations/Residual Correlations", filename)
+    targetList[["slopes"]] <- matrixExtract(sampstatSubsections[[g]], "Slopes", filename)
     
     #latent class indicator part includes subsections for each latent class, such as class-varying thresholds
 #    if (groupNames[g] == "LATENT.CLASS.INDICATOR.MODEL.PART") {
@@ -1388,6 +1528,51 @@ extractSampstat <- function(outfiletext, filename) {
 #  class(tech1List) <- c("list", "mplus.tech1")
   
   return(sampstatList)
+  
+}
+
+extractCovarianceCoverage <- function(outfiletext, filename) {
+  #TODO: Return type is sometimes list, sometimes matrix; a bit inconsistent
+  covcoverageSection <- getSection("^COVARIANCE COVERAGE OF DATA$", outfiletext)
+  if (is.null(covcoverageSection)) { return(list()) } #no COVARIANCE COVERAGE OF DATA output
+  
+  covcoverageList <- list()
+  
+  covcoverageSubsections <- getMultilineSection("PROPORTION OF DATA PRESENT( FOR [\\w\\d\\s\\.,]+)*",
+      covcoverageSection, filename, allowMultiple=TRUE)
+  
+  matchlines <- attr(covcoverageSubsections, "matchlines")
+  
+  if (length(covcoverageSubsections) == 0 || is.na(covcoverageSubsections)) { #See UG ex9.7.out
+    message("No PROPORTION OF DATA PRESENT sections found within COVARIANCE COVERAGE OF DATA output.")
+    return(covcoverageList)
+  } else if (length(covcoverageSubsections) > 1) {
+    groupNames <- make.names(gsub("^\\s*PROPORTION OF DATA PRESENT( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", covcoverageSection[matchlines], perl=TRUE))
+  } else { #just one section, no groups
+    groupNames <- ""
+  }
+  
+  for (g in 1:length(covcoverageSubsections)) {
+    #targetList <- list()
+    
+    #for now, there is just one matrix extracted, so no need to label it or treat it as a list. Leaving scaffolding commented out if useful later
+    #targetList[["covcoverage"]] <- matrixExtract(covcoverageSubsections[[g]], "Covariance Coverage", filename)
+    
+    targetList <- matrixExtract(covcoverageSubsections[[g]], "Covariance Coverage", filename)
+    
+    if (length(covcoverageSubsections) > 1) {
+      #class(targetList) <- c("list", "mplus.covcoverage")
+      covcoverageList[[groupNames[g]]] <- targetList
+    }
+    else
+      covcoverageList <- targetList
+  }
+  
+  if (is.list(covcoverageList)) { class(covcoverageList) <- c("list", "mplus.covcoverage") 
+  } else { class(covcoverageList) <- c("matrix", "mplus.covcoverage") } #single numeric matrix
+  if (length(covcoverageSubsections) > 1) { attr(covcoverageList, "group.names") <- groupNames }
+  
+  return(covcoverageList)
   
 }
 
@@ -1940,8 +2125,8 @@ unlabeledMatrixExtract <- function(outfiletext, filename) {
 #' @keywords internal
 #' @examples
 #' # make me!!!
-matrixExtract <- function(outfiletext, headerLine, filename) {
-  matLines <- getMultilineSection(headerLine, outfiletext, filename, allowMultiple=TRUE)
+matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE) {
+  matLines <- getMultilineSection(headerLine, outfiletext, filename, allowMultiple=TRUE, ignore.case=ignore.case)
 
   if (!is.na(matLines[1])) {
     numBlocks <- length(matLines)

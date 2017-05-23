@@ -47,8 +47,8 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     convertMatches <- data.frame(startline=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
   } else {
     #okay to match beginning and end of line because strip.white used in scan
-    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion)|([\\w_\\d+\\.#]+\\s+(BY|WITH|ON|\\|)))\\s*$", thisChunk, perl=TRUE)
-    
+    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion)|([\\w_\\d+\\.#\\&]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&]+\\s*\\|\\s*[\\w_\\d+\\.#\\&]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
+
     #more readable (than above) using ldply from plyr
     convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
     
@@ -68,18 +68,17 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     convertMatches <- ddply(convertMatches, "startline", function(row) {
           #pull the matching keyword based on the start/end attributes from gregexpr
           match <- substr(thisChunk[row$startline], row$start, row$end)
-          
+
           #check for keyword
           if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", "Scales", "Item Difficulties", "Dispersion")) {
-            return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_))
-          }
-          else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
-            return(data.frame(startline=row$startline, keyword=NA_character_, varname=variable[1], operator=variable[2]))
-          }
-          else stop("failure to match keyword: ", match, "\n  ", filename)
+            return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_, stringsAsFactors=FALSE))
+          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
+            return(data.frame(startline=row$startline, keyword=NA_character_, varname=variable[1], operator=variable[2], stringsAsFactors=FALSE))
+          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&]+)\\s*\\|\\s*([\\w_\\d+\\.#\\&]+)\\s*(BY|WITH|ON)\\s*$", c, perl=TRUE)[[1]]) > 0) {
+            return(data.frame(startline=row$startline, keyword=NA_character_, slope=variable[1], varname=variable[2], operator=variable[3], stringsAsFactors=FALSE))
+          } else stop("failure to match keyword: ", match, "\n  ", filename)
         })
   }
-
   
   comboFrame <- c()
 
@@ -105,9 +104,12 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #"U4                 0.656      0.037     17.585      0.000"
 
     #define the var title outside of the chunk processing because it will apply to all rows
-    if (is.na(convertMatches[i,]$keyword)) varTitle <- paste(convertMatches[i,"varname"], ".", convertMatches[i,"operator"], sep="")
-    else varTitle <- as.character(convertMatches[i,"keyword"])
-
+    if (is.na(convertMatches[i,]$keyword)) {
+      slo <- convertMatches[i,"slope"]
+      prefix <- ifelse(is.null(slo) || is.na(slo), "", paste(slo, "|", sep=""))
+      varTitle <- paste(prefix, convertMatches[i,"varname"], ".", convertMatches[i,"operator"], sep="")
+    } else { varTitle <- as.character(convertMatches[i,"keyword"]) }
+   
     splitParams <- strsplit(paramsToParse, "\\s+", perl=TRUE)
 
     #for the Significance column in 7-column Mplus output, it may be missing for a chunk (all n.s./not tested), or for a given row.
@@ -230,8 +232,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   #  5) class proportions (only known class output?)
 
   allSectionParameters <- c() #will hold extracted params for all sections
-
-  betweenWithinMatches <- grep("^\\s*(Between (?:\\s*\\w+\\s+)*Level|Within (?:\\s*\\w+\\s+)*Level)\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
+  betweenWithinMatches <- grep("^\\s*(Between (?:\\s*\\w+\\s+)*Level|Within (?:\\s*\\w+\\s+)*Level|Within-Level (Standardized Estimates|R-Square) Averaged (Over|Across) Clusters)\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
   latentClassMatches <- grep("^\\s*(Latent )*Class (Pattern )*(\\d+\\s*)+(\\(\\s*\\d+\\s*\\))*$", modelSection, ignore.case=TRUE, perl=TRUE)
   multipleGroupMatches <- grep("^\\s*Group \\w+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
@@ -247,8 +248,10 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
     matchIndex <- 1
     for (match in topLevelMatches) {
-      if (match %in% betweenWithinMatches) bwWi <- sub("\\s+Level\\s*$", "", modelSection[match], perl=TRUE)
-      else if (match %in% latentClassMatches) {
+      if (grepl("\\s*Within-Level Standardized Estimates Averaged Over Clusters\\s*", modelSection[match], perl=TRUE)) {
+        bwWi <- "Within.Std.Averaged.Over.Clusters"
+      } else if (match %in% betweenWithinMatches) { bwWi <- sub("\\s+Level\\s*$", "", modelSection[match], perl=TRUE)
+      } else if (match %in% latentClassMatches) {
         if ((pos <- regexpr("Pattern", modelSection[match], ignore.case=TRUE)) > 0) {
           #need to pull out and concatenate all numerical values following pattern
           postPattern <- trimSpace(substr(modelSection[match], pos + attr(pos, "match.length"), nchar(modelSection[match])))
@@ -256,8 +259,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
           lcNum <- gsub("\\s+", "\\.", postPattern, perl=TRUE)
         }
         else lcNum <- sub("^\\s*(?:Latent )*Class\\s+(\\d+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
-      }
-      else if (match %in% multipleGroupMatches) groupName <- sub("^\\s*Group (\\w+)\\s*$", "\\1", modelSection[match], perl=TRUE)
+      } else if (match %in% multipleGroupMatches) groupName <- sub("^\\s*Group (\\w+)\\s*$", "\\1", modelSection[match], perl=TRUE)
       else if (match %in% catLatentMatches) {
         #the categorical latent variables section is truly "top level"
         #that is, it starts over in terms of bw/wi and latent classes
@@ -298,7 +300,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         chunkToParse <- TRUE
       }
 
-      if (chunkToParse == TRUE) {
+      if (chunkToParse == TRUE && !all(thisChunk=="")) { #omit completely blank chunks (v8 ex9.32.out)
         parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
 
         #only append if there are some rows
@@ -313,8 +315,9 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
       matchIndex <- matchIndex + 1
     }
 
+  } else {
+    allSectionParameters <- extractParameters_1chunk(filename, modelSection, columnNames, sectionName) #just one model section
   }
-  else allSectionParameters <- extractParameters_1chunk(filename, modelSection, columnNames, sectionName) #just one model section
 
   #if any std variable is one of the returned columns, we are dealing with an old-style combined results section (i.e.,
   #standardized results are not divided into their own sections, as with newer output).
@@ -432,6 +435,44 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 
   }
 
+  #Mplus v8 within-level standardized model results by cluster (ex9.32.out)
+  wiclusterSections <- grep("WITHIN-LEVEL STANDARDIZED MODEL RESULTS FOR CLUSTER \\d+", outfiletext, perl=TRUE)
+  if (length(wiclusterSections) > 0L) {
+    wiclusterSection <- lapply(wiclusterSections, function(w) {
+          cs <- getSection(trimSpace(outfiletext[w]), outfiletext)
+          clist <- list()
+          
+          stdYXSection <- getSection_Blanklines("^STDYX Standardization$", cs)
+          if (!is.null(stdYXSection)) { clist <- appendListElements(clist, extractParameters_1section(filename, stdYXSection, "stdyx.standardized")) }
+          
+          stdYSection <- getSection_Blanklines("^STDY Standardization$", cs)
+          if (!is.null(stdYSection)) { clist <- appendListElements(clist, extractParameters_1section(filename, stdYSection, "stdy.standardized")) }
+          
+          stdSection <- getSection_Blanklines("^STD Standardization$", cs)
+          if (!is.null(stdSection)) { clist <- appendListElements(clist, extractParameters_1section(filename, stdSection, "std.standardized")) }
+          
+          r2Section <- getSection_Blanklines("^WITHIN-LEVEL R-SQUARE FOR CLUSTER \\d+$", cs)
+          if (!is.null(r2Section)) { clist <- appendListElements(clist, extractParameters_1section(filename, r2Section, "r2")) }
+          
+          #add cluster number to each list
+          clist <- lapply(clist, function(el) { 
+                el$cluster <- as.numeric(sub("\\s*WITHIN-LEVEL STANDARDIZED MODEL RESULTS FOR CLUSTER (\\d+)\\s*", "\\1", outfiletext[w], perl=TRUE))
+                return(el)
+              })
+          
+          return(clist)          
+        })
+    
+    #glue together each subelement into its own aggregated list
+    wiclusterResults <- list()
+    wiclusterResults$stdyx.standardized <- do.call(rbind, lapply(wiclusterSection, "[[", "stdyx.standardized"))
+    wiclusterResults$stdy.standardized <- do.call(rbind, lapply(wiclusterSection, "[[", "stdy.standardized"))
+    wiclusterResults$std.standardized <- do.call(rbind, lapply(wiclusterSection, "[[", "std.standardized"))
+    wiclusterResults$r2 <- do.call(rbind, lapply(wiclusterSection, "[[", "r2"))
+    
+    allSections <- appendListElements(allSections, list(wilevel.standardized=wiclusterResults)) 
+  }
+  
   #two-parameter IRT output
   irtSection <- getSection("^IRT PARAMETERIZATION IN TWO-PARAMETER (PROBIT|LOGISTIC) METRIC$", outfiletext)
   if (!is.null(irtSection)) {
@@ -474,7 +515,8 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
       "irt.parameterization", "probability.scale",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",
-      "std.standardized", "ci.std.standardized")
+      "std.standardized", "ci.std.standardized",
+      "wilevel.standardized")
   listOrder <- listOrder[listOrder %in% names(allSections)]
 
 
