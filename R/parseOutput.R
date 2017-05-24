@@ -1473,9 +1473,7 @@ extractSampstat <- function(outfiletext, filename) {
   if (is.null(sampstatSection)) {
     #try output from TYPE=BASIC, which places these in a section of a different name
     sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
-  } 
-  if (is.null(sampstatSection)) return(list()) #no SAMPSTAT output
-  
+  }   
   sampstatList <- list()
   
   sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
@@ -1525,14 +1523,10 @@ extractSampstat <- function(outfiletext, filename) {
     else
       sampstatList <- targetList
   }
-  
-  class(sampstatList) <- c("list", "mplus.sampstat")
-  if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
-    
+      
   ##Extract Univariate counts and proportions
   univariateCountsSection <- getSection("^UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES$", outfiletext)
 
-  catList <- list()
   if (!is.null(univariateCountsSection)) {
     countSubsections <- getMultilineSection("Group\\s+([\\w\\d\\.,_]+)*",
         univariateCountsSection, filename, allowMultiple=TRUE)
@@ -1554,6 +1548,11 @@ extractSampstat <- function(outfiletext, filename) {
       df$proportion <- as.numeric(df$proportion)
       df$count <- as.numeric(df$count)
       
+      #divide variable column into variable and category for clarity
+      df$category <- as.numeric(sub(".*\\.Cat\\.(\\d+)", "\\1", df$variable, perl=TRUE))
+      df$variable <- sub("^(.*)\\.Cat\\.\\d+$", "\\1", df$variable, perl=TRUE)
+      df <- df[,c("variable", "category", "proportion", "count")] #reorder df
+      
       #targetList[["proportions.counts"]] <- df
       targetList <- df #just a single element at the moment
       
@@ -1561,18 +1560,17 @@ extractSampstat <- function(outfiletext, filename) {
       
       if (length(countSubsections) > 1) {
         #class(targetList) <- c("list", "mplus.propcounts")        
-        catList[[groupNames[g]]] <- targetList
+        sampstatList[[groupNames[g]]][["proportions.counts"]] <- targetList
       }
       else
-        catList <- targetList
-    }
-    if (length(countSubsections) > 1) {
-      attr(catList, "group.names") <- groupNames
-      class(catList) <- c("list", "mplus.propcounts")
+        sampstatList[["proportions.counts"]] <- targetList
     }
   }
 
-  return(list(sampstat=sampstatList, proportions.counts=catList))
+  class(sampstatList) <- c("list", "mplus.sampstat")
+  if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
+  
+  return(sampstatList)
   
 }
 

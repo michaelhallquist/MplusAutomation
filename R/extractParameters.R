@@ -96,6 +96,12 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #need +1 to eliminate header row from params
     paramsToParse <- thisChunk[(convertMatches[i, "startline"]+1):convertMatches[i, "endline"]]
 
+    #Very rarely, a section header is printed, but no parameters follow. In such cases, skip to the next match
+    #example:
+    #  I1       |
+    #
+    if (all(paramsToParse=="")) { next }
+    
     #should result in a short list of params to parse (that belong to a given header i)
     #Example:
     #"U1                 0.557      0.036     15.470      0.000"
@@ -103,8 +109,6 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #"U3                 0.660      0.038     17.473      0.000"
     #"U4                 0.656      0.037     17.585      0.000"
 
-
-  
     if (!is.na(convertMatches[i,"keyword"]) && convertMatches[i,"keyword"] == "Item.Categories") {      
       #handle item categories output from IRT (e.g. ex5.5pcm.out), where the output section looks like this:
       # Item Categories

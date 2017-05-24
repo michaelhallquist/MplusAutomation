@@ -16,6 +16,7 @@ Version 0.7 (in progress)
 - bugfix:       Extract SRMR from TYPE=THREELEVEL models, if available (Github issue 18)
 - bugfix:       Workaround for missing Within Level header for Categorical Latent Variable section of CINTERVAL output in multilevel mixtures (Github issue 25)
 - bugfix:       Extract summary statistics for EFA outputs with warning "Too many factors were requested for EFA." (Github issue 45) 
+- bugfix:       Skip over a parameter section header with no parameter estimates (rare output for growth model)
 - v8 support:   Handle removal of leading '1' from TECH output row names for parameter vectors (matrixExtract)
 - v8 support:   Extract Prior Posterior Predictive P-Value. See $PriorPostPred_PValue in $summaries
 - v8 support:   Extract Within-Level Standardized Estimates for TWOLEVEL models (ex9.32.out). See $wilevel.standardized in $parameters from readModels()
