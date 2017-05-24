@@ -1016,6 +1016,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
     factorLB <- as.numeric(sub(".*EFA\\s+(\\d+).*", "\\1", arglist$AnalysisType, perl=TRUE))
     factorUB <- as.numeric(sub(".*EFA\\s+\\d+\\s+(\\d+).*", "\\1", arglist$AnalysisType, perl=TRUE))
     factorSeq <- seq(factorLB, factorUB)
+    
     EFASections <- grep(paste("^\\s*EXPLORATORY FACTOR ANALYSIS WITH (",
             paste(factorSeq, collapse="|"), ") FACTOR\\(S\\):\\s*$", sep=""), outfiletext, perl=TRUE)
 
@@ -1028,7 +1029,6 @@ extractSummaries_1file <- function(outfiletext, filename, input)
     for (thisFactor in 1:length(EFASections)) {
       #subset output by starting text to be searched at the point where factor output begins
       modelFitSection <- getSection_Blanklines("^(TESTS OF MODEL FIT|MODEL FIT INFORMATION)$", outfiletext[EFASections[thisFactor]:length(outfiletext)])
-
       efaList[[thisFactor]] <- extractSummaries_1section(modelFitSection, arglistBase, filename)
       efaList[[thisFactor]]$NumFactors <- factorSeq[thisFactor]
     }

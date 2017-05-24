@@ -478,9 +478,9 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
         } else if (stype == "b") {
           blankFound <- FALSE
           i <- 0
-          while(!grepl("^\\s*$", targetText[sectionStart+i], perl=T)) {
+          while(!grepl("^\\s*$", targetText[sectionStart+i], perl=T) && i <= length(targetText) - sectionStart) { #ensure that i doesn't go beyond length of section
             i <- i + 1
-            if (i > 100000) { stop ("searched for next blank line on 100000 rows without success.") }
+            if (i > 10000) { stop("searched for next blank line on 10000 rows without success.") }
           }
           if (i == 0) {
             #first line of section was blank, so just set start and end to same
