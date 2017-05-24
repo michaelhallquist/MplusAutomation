@@ -31,6 +31,7 @@ the summaries, parameters, and savedata, not a list of files.
   \item{parameters}{Model parameters from \code{extractModelParameters}, having structure as specified by that function}
   \item{class_counts}{Latent class counts and proportions for models that include a categorical latent variable}
   \item{mod_indices}{Model modification indices from \code{extractModIndices}, having structure as specified by that function}
+  \item{indirect}{Output of MODEL INDIRECT if available in output. Contains \code{$overall} and \code{$specific} data.frames for indirect effects}
   \item{savedata_info}{File information about SAVEDATA files related to this output}
   \item{savedata}{SAVEDATA file as an R \code{data.frame}, as described in \code{getSavedata_Data}}
   \item{bparameters}{an \code{mcmc.list} object containing the draws from the MCMC chains for a Bayesian model that uses the
