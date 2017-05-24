@@ -47,7 +47,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     convertMatches <- data.frame(startline=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
   } else {
     #okay to match beginning and end of line because strip.white used in scan
-    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Item Locations|Item Categories|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion|Steps)|([\\w_\\d+\\.#\\&]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&]+\\s*\\|\\s*[\\w_\\d+\\.#\\&]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
+    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Item Locations|Item Categories|Item Guessing|Upper Asymptote|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion|Steps)|([\\w_\\d+\\.#\\&]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&]+\\s*\\|\\s*[\\w_\\d+\\.#\\&]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
 
     #more readable (than above) using ldply from plyr
     convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
@@ -70,7 +70,8 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
           match <- substr(thisChunk[row$startline], row$start, row$end)
 
           #check for keyword
-          if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", "Scales", "Item Difficulties", "Item Locations", "Item Categories", "Dispersion", "Steps")) {
+          if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", 
+              "Scales", "Item Difficulties", "Item Locations", "Item Categories", "Item Guessing", "Upper Asymptote", "Dispersion", "Steps")) {
             return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_, stringsAsFactors=FALSE))
           } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
             return(data.frame(startline=row$startline, keyword=NA_character_, varname=variable[1], operator=variable[2], stringsAsFactors=FALSE))
@@ -96,6 +97,12 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #need +1 to eliminate header row from params
     paramsToParse <- thisChunk[(convertMatches[i, "startline"]+1):convertMatches[i, "endline"]]
 
+    #Very rarely, a section header is printed, but no parameters follow. In such cases, skip to the next match
+    #example:
+    #  I1       |
+    #
+    if (all(paramsToParse=="")) { next }
+    
     #should result in a short list of params to parse (that belong to a given header i)
     #Example:
     #"U1                 0.557      0.036     15.470      0.000"
@@ -103,8 +110,6 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #"U3                 0.660      0.038     17.473      0.000"
     #"U4                 0.656      0.037     17.585      0.000"
 
-
-  
     if (!is.na(convertMatches[i,"keyword"]) && convertMatches[i,"keyword"] == "Item.Categories") {      
       #handle item categories output from IRT (e.g. ex5.5pcm.out), where the output section looks like this:
       # Item Categories
@@ -247,7 +252,8 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
   allSectionParameters <- c() #will hold extracted params for all sections
   betweenWithinMatches <- grep("^\\s*(Between (?:\\s*\\w+\\s+)*Level|Within (?:\\s*\\w+\\s+)*Level|Within-Level (Standardized Estimates|R-Square) Averaged (Over|Across) Clusters)\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
-  latentClassMatches <- grep("^\\s*(Latent )*Class (Pattern )*(\\d+\\s*)+(\\(\\s*\\d+\\s*\\))*$", modelSection, ignore.case=TRUE, perl=TRUE)
+  #latent class patterns can be "1 1 3 1" or something like "C#1" (see ex8.15.out for a complicated example)
+  latentClassMatches <- grep("^\\s*(Latent )*Class (Pattern )*([\\d\\w#_]+\\s*)+(\\(\\s*\\d+\\s*\\))*$", modelSection, ignore.case=TRUE, perl=TRUE)
   multipleGroupMatches <- grep("^\\s*Group \\w+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
   classPropMatches <- grep("^\\s*Class Proportions\\s*$", modelSection, ignore.case=TRUE)

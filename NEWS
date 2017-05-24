@@ -9,6 +9,7 @@ Version 0.7 (in progress)
 - feature:      extract covariance coverage from "COVARIANCE COVERAGE OF DATA" section. See $covariance.coverage element from readModels().
 - feature:      runModels now accepts a single .inp file or a directory as the target
 - feature:      readModels now uses tryCatch statements to wrap extraction. This should more gracefully handle unexpected errors.
+- feature:      extract potential scale reduction output for ESTIMATOR=BAYES models. See $tech8$psr element from readModels().
 - bugfix:       Support for Mplus v5 confidence intervals.
 - bugfix:       R2 extraction for models with estimates and scale factors alone
 - bugfix:       Handle outputs using DATA IMPUTATION to impute missing data, then analyze a model in older versions of Mplus
@@ -17,12 +18,15 @@ Version 0.7 (in progress)
 - bugfix:       Workaround for missing Within Level header for Categorical Latent Variable section of CINTERVAL output in multilevel mixtures (Github issue 25)
 - bugfix:       Extract summary statistics for EFA outputs with warning "Too many factors were requested for EFA." (Github issue 45)
 - bugfix:       initial support for mplusObject() to recognize lists of variables: x1-x5 expands to x1, x5, and all variables between, when autov=TRUE (Github issue 37)
+- bugfix:       Extract summary statistics for EFA outputs with warning "Too many factors were requested for EFA." (Github issue 45)
+- bugfix:       Skip over a parameter section header with no parameter estimates (rare output for growth model)
+- bugfix:       Support latent class output sections that contain non-numeric characters (ex8.15.out: "Latent Class C#1")
 - v8 support:   Handle removal of leading '1' from TECH output row names for parameter vectors (matrixExtract)
 - v8 support:   Extract Prior Posterior Predictive P-Value. See $PriorPostPred_PValue in $summaries
 - v8 support:   Extract Within-Level Standardized Estimates for TWOLEVEL models (ex9.32.out). See $wilevel.standardized in $parameters from readModels()
 - v8 support:   Support output for AR(1) output variables labeled &1
 - v8 support:   Extract Steps section from GPCM IRT output (e.g., ex5.5pcm.out)
-- v8 support:   Extract updated IRT PARAMETERIZATION output, including item discriminations, locations, and categories
+- v8 support:   Extract updated IRT PARAMETERIZATION output, including item discriminations, locations, categories, guessing, and upper asymptote
 
 Version 0.6-4
 - feature: prepareMplusData() and mplusObject() / mplusModeler() now handle multiply imputed data

@@ -182,6 +182,13 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter) {
           return(list())
         })
 
+    #TECH8: optimization history and chain tests in Bayes
+    allFiles[[listID]]$tech8 <- tryCatch(extractTech8(outfiletext, curfile), error=function(e) {
+          message("Error extracting TECH8 in output file: ", curfile); print(e)
+          lempty <- list(); class(lempty) <- c("list", "mplus.tech8")
+          return(lempty)
+        })
+
     #TECH9: errors and warnings for Monte Carlo output
     allFiles[[listID]]$tech9 <- tryCatch(extractTech9(outfiletext, curfile), error=function(e) {
           message("Error extracting TECH9 in output file: ", curfile); print(e)
@@ -1474,8 +1481,6 @@ extractSampstat <- function(outfiletext, filename) {
     #try output from TYPE=BASIC, which places these in a section of a different name
     sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
   }
-  if (is.null(sampstatSection)) return(list()) #no SAMPSTAT output
-
   sampstatList <- list()
 
   sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
@@ -1526,13 +1531,12 @@ extractSampstat <- function(outfiletext, filename) {
       sampstatList <- targetList
   }
 
-  class(sampstatList) <- c("list", "mplus.sampstat")
-  if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
-
   ##Extract Univariate counts and proportions
   univariateCountsSection <- getSection("^UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES$", outfiletext)
 
-  catList <- list()
+  #remove warning lines, which throw off the parser (e.g., ex6.15.out)
+  univariateCountsSection <- univariateCountsSection[!grepl("\\s*WARNING:.*", univariateCountsSection, perl=TRUE)]
+
   if (!is.null(univariateCountsSection)) {
     countSubsections <- getMultilineSection("Group\\s+([\\w\\d\\.,_]+)*",
         univariateCountsSection, filename, allowMultiple=TRUE)
@@ -1554,6 +1558,11 @@ extractSampstat <- function(outfiletext, filename) {
       df$proportion <- as.numeric(df$proportion)
       df$count <- as.numeric(df$count)
 
+      #divide variable column into variable and category for clarity
+      df$category <- as.numeric(sub(".*\\.Cat\\.(\\d+)", "\\1", df$variable, perl=TRUE))
+      df$variable <- sub("^(.*)\\.Cat\\.\\d+$", "\\1", df$variable, perl=TRUE)
+      df <- df[,c("variable", "category", "proportion", "count")] #reorder df
+
       #targetList[["proportions.counts"]] <- df
       targetList <- df #just a single element at the moment
 
@@ -1561,18 +1570,17 @@ extractSampstat <- function(outfiletext, filename) {
 
       if (length(countSubsections) > 1) {
         #class(targetList) <- c("list", "mplus.propcounts")
-        catList[[groupNames[g]]] <- targetList
+        sampstatList[[groupNames[g]]][["proportions.counts"]] <- targetList
       }
       else
-        catList <- targetList
-    }
-    if (length(countSubsections) > 1) {
-      attr(catList, "group.names") <- groupNames
-      class(catList) <- c("list", "mplus.propcounts")
+        sampstatList[["proportions.counts"]] <- targetList
     }
   }
 
-  return(list(sampstat=sampstatList, proportions.counts=catList))
+  class(sampstatList) <- c("list", "mplus.sampstat")
+  if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
+
+  return(sampstatList)
 
 }
 
@@ -1822,6 +1830,46 @@ extractTech7 <- function(outfiletext, filename) {
   class(tech7List) <- c("list", "mplus.tech7")
 
   return(tech7List)
+}
+
+
+#' Extract Technical 8 from Mplus
+#'
+#' The TECH8 option is used to print the optimization history of a model.
+#' It also prints the potential scale reduction in Bayesian models.
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech8}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractTech8 <- function(outfiletext, filename) {
+  #not sure whether there are sometimes multiple groups within this section.
+  #for now, this function only extract PSR in Bayes models
+  tech8Section <- getSection("^TECHNICAL 8 OUTPUT$", outfiletext)
+  tech8List <- list()
+  class(tech8List) <- c("list", "mplus.tech8")
+  psr <- data.frame(); class(psr) <- c("data.frame", "mplus.psr.data.frame"); tech8List[["psr"]] <- psr
+
+  if (is.null(tech8Section)) return(tech8List) #no tech8 output
+
+  bayesPSR <- getMultilineSection("TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION", tech8Section, filename, allowMultiple=FALSE)
+
+  if (!is.na(bayesPSR[1L])) {
+    startline <- grep("ITERATION\\s+SCALE REDUCTION\\s+HIGHEST PSR", bayesPSR, perl=TRUE)
+    if (length(startline) > 0L) {
+      firstBlank <- which(bayesPSR == "")
+      firstBlank <- firstBlank[firstBlank > startline][1L] #first blank after starting line
+      toparse <- bayesPSR[(startline+1):firstBlank]
+      psr <- data.frame(matrix(as.numeric(unlist(strsplit(trimSpace(toparse), "\\s+", perl=TRUE))), ncol=3, byrow=TRUE, dimnames=list(NULL, c("iteration", "psr", "param.highest.psr"))))
+      class(psr) <- c("data.frame", "mplus.psr.data.frame")
+      tech8List[["psr"]] <- psr
+    }
+  }
+
+  return(tech8List)
 }
 
 
