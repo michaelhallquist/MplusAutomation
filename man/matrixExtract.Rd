@@ -4,7 +4,7 @@
 \alias{matrixExtract}
 \title{Reconstruct matrix from multi-line text output}
 \usage{
-matrixExtract(outfiletext, headerLine, filename)
+matrixExtract(outfiletext, headerLine, filename, ignore.case = FALSE)
 }
 \arguments{
 \item{outfiletext}{The text of the output file}

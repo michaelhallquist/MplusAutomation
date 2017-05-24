@@ -46,6 +46,7 @@ The \code{data.frame} contains some of the following variables (depends on model
 \item{ObsRepChiSqDiff_95CI_LB}{Lower bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
 \item{ObsRepChiSqDiff_95CI_UB}{Upper bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
 \item{PostPred_PValue}{Posterior predictive p-value}
+\item{PriorPostPred_PValue}{Prior Posterior Predictive P-Value}
 \item{BLRT_RequestedDraws}{Number of requested bootstrap draws for TECH14.}
 \item{BLRT_KM1LL}{Log-likelihood of the K-1 model (one less class) for the Bootstrapped Likelihood Ratio Test (TECH14).}
 \item{BLRT_2xLLDiff}{Two times the log-likelihood difference of the models with K and K-1 classes (TECH14).}
