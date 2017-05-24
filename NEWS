@@ -5,6 +5,7 @@ Version 0.7 (in progress)
 - feature:      New methods for the confint() function to extract and format confidence intervals. This also allows confidence intervals with the texreg package
 - feature:      initial support for extracting MODEL INDIRECT output. See $indirect element from readModels().
 - feature:      initial support for extracting SAMPSTAT output. See $sampstat element from readModels().
+- feature:      initial support for extracting counts and proportions of categorical data. See $sampstat$proportions.counts element from readModels().
 - feature:      extract covariance coverage from "COVARIANCE COVERAGE OF DATA" section. See $covariance.coverage element from readModels().
 - feature:      runModels now accepts a single .inp file or a directory as the target
 - feature:      readModels now uses tryCatch statements to wrap extraction. This should more gracefully handle unexpected errors. 
@@ -13,7 +14,8 @@ Version 0.7 (in progress)
 - bugfix:       Handle outputs using DATA IMPUTATION to impute missing data, then analyze a model in older versions of Mplus
 - bugfix:       Handle parsing input section in older Mplus (v6.12 and before, I believe) where there was no termination statement
 - bugfix:       Extract SRMR from TYPE=THREELEVEL models, if available (Github issue 18)
-- bugfix:       Workaround for missing Within Level header for Categorical Latent Variable section of CINTERVAL output in multilevel mixtures (Github issue 25) 
+- bugfix:       Workaround for missing Within Level header for Categorical Latent Variable section of CINTERVAL output in multilevel mixtures (Github issue 25)
+- bugfix:       Extract summary statistics for EFA outputs with warning "Too many factors were requested for EFA." (Github issue 45) 
 - v8 support:   Handle removal of leading '1' from TECH output row names for parameter vectors (matrixExtract)
 - v8 support:   Extract Prior Posterior Predictive P-Value. See $PriorPostPred_PValue in $summaries
 - v8 support:   Extract Within-Level Standardized Estimates for TWOLEVEL models (ex9.32.out). See $wilevel.standardized in $parameters from readModels()

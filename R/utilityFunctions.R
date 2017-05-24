@@ -289,6 +289,7 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "CROSSTABS FOR CATEGORICAL VARIABLES", "UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES",
         "RANDOM STARTS RESULTS RANKED FROM THE BEST TO THE WORST LOGLIKELIHOOD VALUES",
         "TESTS OF MODEL FIT", "MODEL FIT INFORMATION", "CLASSIFICATION QUALITY",
+        "SUMMARY OF MODEL FIT INFORMATION", "RESULTS FOR EXPLORATORY FACTOR ANALYSIS",
         "FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES",
         "FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS",
         "LATENT TRANSITION PROBABILITIES BASED ON THE ESTIMATED MODEL",
@@ -382,6 +383,8 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
 #' @examples
 #' # make me!!!
 getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FALSE, allowSpace=TRUE, ignore.case=FALSE) {
+  # TODO: May2017: update this function to return an empty list in the case of match failure instead of NA_character_.
+  #                Will also need to update behavior of all calls accordingly
   # Apr2015: Need greater flexibility in how a section is defined. For certain sections, indentation is unhelpful. Example:
   
   # Chi-Square Test of Model Fit for the Binary and Ordered Categorical
@@ -512,6 +515,41 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
   } else { return(targetText) }
 }
 
+#' Helper function for parsing output with variables and categories
+#' Example:
+#' UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+#'
+#' SOP2A
+#'   Category 1    0.254      631.000
+#'   Category 2    0.425     1056.000
+#'   Category 3    0.174      432.000
+#'   Category 4    0.147      365.000
+#' 
+#' Or Item Categories in IRT Parameterization
+#' 
+#' Item Categories
+#'  U1
+#'    Category 1         0.000      0.000      0.000      1.000
+#'    Category 2        -0.247      0.045     -5.534      0.000
+#'    Category 3         0.699      0.052     13.325      0.000
+#'    Category 4        -0.743      0.057    -12.938      0.000
+#'    Category 5         0.291      0.052      5.551      0.000
+#' 
+parseCatOutput <- function(text) {
+  hlines <- grep("^\\s*([\\w_\\d+\\.#\\&]+)\\s*$", text, perl=TRUE)
+  if (any(grepl("Category", text[hlines]))) { 
+    stop("Failed to parse categorical output") 
+  } 
+  
+  reformat <- c()
+  for (vv in 1:length(hlines)) {
+    vname <- text[hlines[vv]]
+    startLine <- hlines[vv]+1
+    endLine <- ifelse(hlines[vv] < max(hlines), hlines[vv+1]-1, length(text))
+    reformat <- c(reformat, sub("Category (\\d+)", paste0(vname, ".Cat.\\1"), text[startLine:endLine]))
+  }
+  return(reformat)
+}
 
 #could this also be used by runModels to locate input files?
 #seems like that function would do well to allow for directories and single files, too.

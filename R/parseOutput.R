@@ -1006,7 +1006,6 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   #do this by extracting model fit sections for each and using an rbind call
 
   if (grepl("(?!MIXTURE|TWOLEVEL)\\s*EFA\\s+", arglist$AnalysisType, ignore.case=TRUE, perl=TRUE)) {
-
     factorLB <- as.numeric(sub(".*EFA\\s+(\\d+).*", "\\1", arglist$AnalysisType, perl=TRUE))
     factorUB <- as.numeric(sub(".*EFA\\s+\\d+\\s+(\\d+).*", "\\1", arglist$AnalysisType, perl=TRUE))
     factorSeq <- seq(factorLB, factorUB)
@@ -1019,8 +1018,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
     arglistBase <- as.data.frame(arglist, stringsAsFactors=FALSE)
 
     efaList <- list()
-    for (thisFactor in 1:length(factorSeq)) {
-
+    for (thisFactor in 1:length(EFASections)) {
       #subset output by starting text to be searched at the point where factor output begins
       modelFitSection <- getSection_Blanklines("^(TESTS OF MODEL FIT|MODEL FIT INFORMATION)$", outfiletext[EFASections[thisFactor]:length(outfiletext)])
 
@@ -1308,7 +1306,7 @@ extractResiduals <- function(outfiletext, filename) {
   if (is.null(residSection)) return(list()) #no residuals output
 
   #allow for multiple groups
-  residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR [\\w\\d\\s\\.,]+)*",
+  residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR [\\w\\d\\s\\.,_]+)*",
       residSection, filename, allowMultiple=TRUE)
 
   matchlines <- attr(residSubsections, "matchlines")
@@ -1318,7 +1316,7 @@ extractResiduals <- function(outfiletext, filename) {
     return(list())
   }
   else if (length(residSubsections) > 1)
-    groupNames <- make.names(gsub("^\\s*ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", residSection[matchlines], perl=TRUE))
+    groupNames <- make.names(gsub("^\\s*ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", residSection[matchlines], perl=TRUE))
 
   residList <- list()
   #multiple groups possible
@@ -1367,7 +1365,7 @@ extractTech1 <- function(outfiletext, filename) {
 
   tech1List <- list()
   
-  paramSpecSubsections <- getMultilineSection("PARAMETER SPECIFICATION( FOR [\\w\\d\\s\\.,]+)*",
+  paramSpecSubsections <- getMultilineSection("PARAMETER SPECIFICATION( FOR [\\w\\d\\s\\.,_]+)*",
       tech1Section, filename, allowMultiple=TRUE)
 
   matchlines <- attr(paramSpecSubsections, "matchlines")
@@ -1376,7 +1374,7 @@ extractTech1 <- function(outfiletext, filename) {
   if (length(paramSpecSubsections) == 0)
     warning ("No parameter specfication sections found within TECH1 output.")
   else if (length(paramSpecSubsections) > 1)
-    groupNames <- make.names(gsub("^\\s*PARAMETER SPECIFICATION( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", tech1Section[matchlines], perl=TRUE))
+    groupNames <- make.names(gsub("^\\s*PARAMETER SPECIFICATION( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", tech1Section[matchlines], perl=TRUE))
   else #just one section, no groups
     groupNames <- ""
   
@@ -1415,7 +1413,7 @@ extractTech1 <- function(outfiletext, filename) {
   class(paramSpecList) <- c("list", "mplus.parameterSpecification")
   if (length(paramSpecSubsections) > 1) attr(paramSpecList, "group.names") <- groupNames
 
-  startValSubsections <- getMultilineSection("STARTING VALUES( FOR [\\w\\d\\s\\.,]+)*",
+  startValSubsections <- getMultilineSection("STARTING VALUES( FOR [\\w\\d\\s\\.,_]+)*",
       tech1Section, filename, allowMultiple=TRUE)
 
   matchlines <- attr(startValSubsections, "matchlines")
@@ -1424,7 +1422,7 @@ extractTech1 <- function(outfiletext, filename) {
   if (length(startValSubsections) == 0)
     warning ("No starting value sections found within TECH1 output.")
   else if (length(startValSubsections) > 1)
-    groupNames <- make.names(gsub("^\\s*STARTING VALUES( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", tech1Section[matchlines], perl=TRUE))
+    groupNames <- make.names(gsub("^\\s*STARTING VALUES( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", tech1Section[matchlines], perl=TRUE))
   else
     groupNames <- ""
 
@@ -1480,7 +1478,7 @@ extractSampstat <- function(outfiletext, filename) {
   
   sampstatList <- list()
   
-  sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,]+)*",
+  sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
       sampstatSection, filename, allowMultiple=TRUE)
   
   matchlines <- attr(sampstatSubsections, "matchlines")
@@ -1488,7 +1486,7 @@ extractSampstat <- function(outfiletext, filename) {
   if (length(sampstatSubsections) == 0)
     warning ("No sample statistics sections found within SAMPSTAT output.")
   else if (length(sampstatSubsections) > 1)
-    groupNames <- make.names(gsub("^\\s*ESTIMATED SAMPLE STATISTICS( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", sampstatSection[matchlines], perl=TRUE))
+    groupNames <- make.names(gsub("^\\s*ESTIMATED SAMPLE STATISTICS( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", sampstatSection[matchlines], perl=TRUE))
   else #just one section, no groups
     groupNames <- ""
   
@@ -1498,6 +1496,7 @@ extractSampstat <- function(outfiletext, filename) {
     targetList[["means"]] <- matrixExtract(sampstatSubsections[[g]], "Means", filename)
     targetList[["covariances"]] <- matrixExtract(sampstatSubsections[[g]], "Covariances", filename)
     targetList[["correlations"]] <- matrixExtract(sampstatSubsections[[g]], "Correlations", filename)
+    targetList[["correlations.vardiag"]] <- matrixExtract(sampstatSubsections[[g]], "CORRELATION MATRIX \\(WITH VARIANCES ON THE DIAGONAL\\)", filename, ignore.case=TRUE)
     
     #these seem to show up in DATA: TYPE=IMPUTATION outputs (e.g., ex11.8part2.out)
     targetList[["means.intercepts.thresholds"]] <- matrixExtract(sampstatSubsections[[g]], "Means/Intercepts/Thresholds", filename, ignore.case=TRUE)
@@ -1529,11 +1528,51 @@ extractSampstat <- function(outfiletext, filename) {
   
   class(sampstatList) <- c("list", "mplus.sampstat")
   if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
-  
-#  tech1List <- list(parameterSpecification=paramSpecList, startingValues=startValList)
-#  class(tech1List) <- c("list", "mplus.tech1")
-  
-  return(sampstatList)
+    
+  ##Extract Univariate counts and proportions
+  univariateCountsSection <- getSection("^UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES$", outfiletext)
+
+  catList <- list()
+  if (!is.null(univariateCountsSection)) {
+    countSubsections <- getMultilineSection("Group\\s+([\\w\\d\\.,_]+)*",
+        univariateCountsSection, filename, allowMultiple=TRUE)
+    
+    matchlines <- attr(countSubsections, "matchlines")
+    
+    if (!is.list(countSubsections) && is.na(countSubsections[1])) {
+      countSubsections <- list(univariateCountsSection) #no sublists by group
+    } else if (length(countSubsections) > 1)
+      groupNames <- make.names(gsub("^\\s*Group\\s+([\\w\\d\\s\\.,_]+)\\s*$", "\\1", univariateCountsSection[matchlines], perl=TRUE))
+    else #just one section, no groups
+      stop("not sure how we got here")
+    
+    for (g in 1:length(countSubsections)) {
+      targetList <- list()
+      
+      df <- data.frame(do.call(rbind, strsplit(trimSpace(parseCatOutput(countSubsections[[g]])), "\\s+", perl=TRUE)), stringsAsFactors=FALSE)
+      names(df) <- c("variable", "proportion", "count")
+      df$proportion <- as.numeric(df$proportion)
+      df$count <- as.numeric(df$count)
+      
+      #targetList[["proportions.counts"]] <- df
+      targetList <- df #just a single element at the moment
+      
+      class(targetList) <- c("data.frame", "mplus.propcounts.data.frame")
+      
+      if (length(countSubsections) > 1) {
+        #class(targetList) <- c("list", "mplus.propcounts")        
+        catList[[groupNames[g]]] <- targetList
+      }
+      else
+        catList <- targetList
+    }
+    if (length(countSubsections) > 1) {
+      attr(catList, "group.names") <- groupNames
+      class(catList) <- c("list", "mplus.propcounts")
+    }
+  }
+
+  return(list(sampstat=sampstatList, proportions.counts=catList))
   
 }
 
@@ -1544,7 +1583,7 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
   
   covcoverageList <- list()
   
-  covcoverageSubsections <- getMultilineSection("PROPORTION OF DATA PRESENT( FOR [\\w\\d\\s\\.,]+)*",
+  covcoverageSubsections <- getMultilineSection("PROPORTION OF DATA PRESENT( FOR [\\w\\d\\s\\.,_]+)*",
       covcoverageSection, filename, allowMultiple=TRUE)
   
   matchlines <- attr(covcoverageSubsections, "matchlines")
@@ -1553,7 +1592,7 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
     message("No PROPORTION OF DATA PRESENT sections found within COVARIANCE COVERAGE OF DATA output.")
     return(covcoverageList)
   } else if (length(covcoverageSubsections) > 1) {
-    groupNames <- make.names(gsub("^\\s*PROPORTION OF DATA PRESENT( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", covcoverageSection[matchlines], perl=TRUE))
+    groupNames <- make.names(gsub("^\\s*PROPORTION OF DATA PRESENT( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", covcoverageSection[matchlines], perl=TRUE))
   } else { #just one section, no groups
     groupNames <- ""
   }
@@ -1699,7 +1738,7 @@ extractTech4 <- function(outfiletext, filename) {
 
   tech4List <- list()
 
-  tech4Subsections <- getMultilineSection("ESTIMATES DERIVED FROM THE MODEL( FOR [\\w\\d\\s\\.,]+)*",
+  tech4Subsections <- getMultilineSection("ESTIMATES DERIVED FROM THE MODEL( FOR [\\w\\d\\s\\.,_]+)*",
       tech4Section, filename, allowMultiple=TRUE)
 
   matchlines <- attr(tech4Subsections, "matchlines")
@@ -1709,7 +1748,7 @@ extractTech4 <- function(outfiletext, filename) {
     return(list())
   }
   else if (length(tech4Subsections) > 1) {
-    groupNames <- make.names(gsub("^\\s*ESTIMATES DERIVED FROM THE MODEL( FOR ([\\w\\d\\s\\.,]+))*\\s*$", "\\2", tech4Section[matchlines], perl=TRUE))
+    groupNames <- make.names(gsub("^\\s*ESTIMATES DERIVED FROM THE MODEL( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", tech4Section[matchlines], perl=TRUE))
   }
 
   for (g in 1:length(tech4Subsections)) {

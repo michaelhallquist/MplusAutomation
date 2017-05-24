@@ -103,6 +103,8 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #"U3                 0.660      0.038     17.473      0.000"
     #"U4                 0.656      0.037     17.585      0.000"
 
+
+  
     if (!is.na(convertMatches[i,"keyword"]) && convertMatches[i,"keyword"] == "Item.Categories") {      
       #handle item categories output from IRT (e.g. ex5.5pcm.out), where the output section looks like this:
       # Item Categories
@@ -111,20 +113,8 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
       #    Category 2        -0.247      0.045     -5.534      0.000
       #    Category 3         0.699      0.052     13.325      0.000
       #    Category 4        -0.743      0.057    -12.938      0.000
-      #    Category 5         0.291      0.052      5.551      0.000
-      hlines <- grep("^\\s*([\\w_\\d+\\.#\\&]+)\\s*$", paramsToParse, perl=TRUE)
-      if (any(grepl("Category", paramsToParse[hlines]))) { 
-        stop("Failed to pull apart item categories section") 
-      } else {
-        reformat <- c()
-        for (vv in 1:length(hlines)) {
-          vname <- paramsToParse[hlines[vv]]
-          startLine <- hlines[vv]+1
-          endLine <- ifelse(hlines[vv] < max(hlines), hlines[vv+1]-1, length(paramsToParse))
-          reformat <- c(reformat, sub("Category (\\d+)", paste0(vname, ".Cat.\\1"), paramsToParse[startLine:endLine]))
-        }
-        paramsToParse <- reformat #move forward with the reparsed Item Categories chunk
-      }
+      #    Category 5         0.291      0.052      5.551      0.000    
+      paramsToParse <- parseCatOutput(paramsToParse) #reformat into U1.Cat.1 etc.
     }
   
     #define the var title outside of the chunk processing because it will apply to all rows
@@ -324,7 +314,6 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
       }
 
       if (chunkToParse == TRUE && !all(thisChunk=="")) { #omit completely blank chunks (v8 ex9.32.out)
-        #if (pauseme) { browser()}
         parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
 
         #WORKAROUND: For confidence intervals in multilevel mixtures, the Categorical Latent Variables section does not
@@ -737,7 +726,6 @@ extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, 
   return(allFiles)
 }
 
-#Draft 1
 extractIndirect <- function(outfiletext, curfile) {
   indirectSection <- getSection("^TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS$", outfiletext)
   if (is.null(indirectSection)) return(list()) #no indirect output
@@ -762,16 +750,21 @@ extractIndirect <- function(outfiletext, curfile) {
       names(totalLine) <- columnNames; totalLine$summary <- "Total"; totalLine$outcome <- NULL
     }
     
-    totalIndirectLine <- trimSpace(grep("(Total|Sum of) indirect\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE))
+    totalIndirectLine <- trimSpace(grep("(Indirect|(Total|Sum of) indirect)\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE))
     if (length(totalIndirectLine) > 0L) {
       totalIndirectLine <- as.list(strsplit(totalIndirectLine, "\\s+", perl=TRUE)[[1]])
-      if (paste(unlist(totalIndirectLine[1:3]), collapse=" ") == "Sum of indirect") { #mplus v6 output
+      if (paste(unlist(totalIndirectLine[1:3]), collapse=" ") == "Sum of indirect") { #mplus v6 output? Not sure what generates sum versus total
         totalIndirectLine <- totalIndirectLine[-1:-3]
+        hname <- "Sum of indirect"
       } else if (paste(unlist(totalIndirectLine[1:2]), collapse=" ") == "Total indirect") {
         totalIndirectLine <- totalIndirectLine[-1:-2]
+        hname <- "Total indirect"
+      } else if (unlist(totalIndirectLine[1]) == "Indirect") {
+        totalIndirectLine <- totalIndirectLine[-1]
+        hname <- "Indirect"
       } else { stop("Unable to parse header from total indirect line: ", totalIndirectLine)}
       names(totalIndirectLine) <- columnNames[-1]; #don't include "outcome" from columnNames since this is added en masse to summaries below
-      totalIndirectLine$summary <- "Total indirect"
+      totalIndirectLine$summary <- hname #relabel according to Mplus output
     }
     
     directSection <- strsplit(trimSpace(getMultilineSection("Direct", esection, curfile)), "\\s+")
@@ -792,28 +785,30 @@ extractIndirect <- function(outfiletext, curfile) {
     #use white space to demarcate ending of specific indirect subsection
     specSection <- trimSpace(getMultilineSection("Specific indirect", esection, curfile))
     blanks <- which(specSection=="")
-    thisEffect <- c()
-    for (i in 1:length(blanks)) {
-      if (i < length(blanks)) {
-        startLine <- blanks[i]+1
-        endLine <- blanks[i+1]-1
-        if (startLine >= endLine) { next } #occurs with consecutive blanks -> skip out
-        toparse <- specSection[startLine:endLine] 
-      } else { 
-        if (blanks[i]+1 < length(specSection)) { 
-          toparse <- specSection[(blanks[i]+1):length(specSection)]
-        } else { next } #nothing to parse, just a trailing blank
+    if (length(blanks) > 0L) {
+      thisEffect <- NULL
+      
+      for (i in 1:length(blanks)) {
+        if (i < length(blanks)) {
+          startLine <- blanks[i]+1
+          endLine <- blanks[i+1]-1
+          if (startLine >= endLine) { next } #occurs with consecutive blanks -> skip out
+          toparse <- specSection[startLine:endLine] 
+        } else { 
+          if (blanks[i]+1 < length(specSection)) { 
+            toparse <- specSection[(blanks[i]+1):length(specSection)]
+          } else { next } #nothing to parse, just a trailing blank
+        }
+        #if (length(toparse) < 2L) { next } #double blank line problem
+        source <- toparse[1] #first variable is the "source" (i.e., the variable furthest upstream) (X IND Y)
+        outcome <- strsplit(toparse[length(toparse)], "\\s+")[[1]] #this should always be the outcome and should have the statistics on it
+        names(outcome) <- columnNames
+        outcome <- data.frame(as.list(outcome))
+        intervening <- toparse[2:(length(toparse)-1)]
+        thisEffect <- rbind(thisEffect, data.frame(pred=source, intervening = paste(intervening, collapse="."), outcome))
       }
-      #if (length(toparse) < 2L) { next } #double blank line problem
-      source <- toparse[1] #first variable is the "source" (i.e., the variable furthest upstream) (X IND Y)
-      outcome <- strsplit(toparse[length(toparse)], "\\s+")[[1]] #this should always be the outcome and should have the statistics on it
-      names(outcome) <- columnNames
-      outcome <- data.frame(as.list(outcome))
-      intervening <- toparse[2:(length(toparse)-1)]
-      thisEffect <- rbind(thisEffect, data.frame(pred=source, intervening = paste(intervening, collapse="."), outcome))
+      elist$specific <- thisEffect
     }
-    elist$specific <- thisEffect
-    
     indirectOutput[[e]] <- elist
   }
   
