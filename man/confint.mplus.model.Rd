@@ -68,6 +68,7 @@ confint(res$results, type = "stdyx", level = .99)
 
 # there is also a method for mplusObject class
 confint(res)
+screenreg(res, cis = TRUE, single.row = TRUE)
 
 # remove files
 unlink("mtcars.dat")

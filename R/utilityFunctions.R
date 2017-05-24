@@ -334,9 +334,9 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
         "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
     )
-  
+
   if (!is.null(omit)) headers <- headers[which(!headers %in% omit)] #drop omit
-  
+
   #allow for syntax to include :: to specify a header that spans 2 rows. Example:
   #FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
   #BASED ON THE ESTIMATED MODEL
@@ -351,25 +351,25 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
     if (!is.na(bothMatch)) { beginSection <- candidates[bothMatch] + 1 #since it's a two-line header, skip the first to match typical case
     } else { beginSection <- NA } #could not find section with both rows
   } else {
-    beginSection <- grep(sectionHeader, outfiletext, perl=TRUE)[1]  
+    beginSection <- grep(sectionHeader, outfiletext, perl=TRUE)[1]
   }
-  
+
   #if section header cannot be found, then bail out
   if (is.na(beginSection)) return(NULL)
-  
+
   #form alternation pattern for regular expression (currently adds leading and trailing spaces permission to each header)
   headerRegexpr <- paste("(", paste(gsub("(.*)", "^\\\\s*\\1\\\\s*$", headers, perl=TRUE), sep="", collapse="|"), ")", sep="")
   headerLines <- grep(headerRegexpr, outfiletext, perl=TRUE)
   subsequentHeaders <- which(headerLines > beginSection)
-  
+
   if (length(subsequentHeaders) == 0) nextHeader <- length(outfiletext) #just return the whole enchilada
   else nextHeader <- headerLines[subsequentHeaders[1]] - 1
-  
+
   section.found <- outfiletext[(beginSection+1):nextHeader]
   attr(section.found, "lines") <- beginSection:nextHeader
-  
+
   return(section.found)
-  
+
 }
 
 #' Extract a multiline section from Mplus output
@@ -389,7 +389,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
   # TODO: May2017: update this function to return an empty list in the case of match failure instead of NA_character_.
   #                Will also need to update behavior of all calls accordingly
   # Apr2015: Need greater flexibility in how a section is defined. For certain sections, indentation is unhelpful. Example:
-  
+
   # Chi-Square Test of Model Fit for the Binary and Ordered Categorical
   # (Ordinal) Outcomes
   #
@@ -404,7 +404,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
   # Value                             16.731
   # Degrees of Freedom                     9
   # P-Value                           0.0531
-  
+
   # Likewise, in the above example there is a second line to the header that should be skipped before developing the section
   #
   # New syntax:
@@ -413,11 +413,11 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
   # +X specifies how many lines (after the header line itself) should be skipped prior to searching for the section end
   # i,b specifies whether to use identical indentation {i} (which has been the standard up to now) or to use a blank line {b} to identify the section end
   # If no curly braces are provided, assume {+1i}
-  
+
   #allow for multiple depths (subsections) separated by ::
   #will just extract from deepest depth
   header <- strsplit(header, "::", fixed=TRUE)[[1]]
-  
+
   sectionList <- list()
   targetText <- outfiletext
   for (level in 1:length(header)) {
@@ -428,31 +428,31 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
       } else {
         offset <- 1
       }
-      
+
       if ((s_start <- attr(searchCmd, "capture.start")[2]) > 0) {
         stype <- substr(header[level], s_start, s_start + attr(searchCmd, "capture.length")[2] - 1)
         stopifnot(nchar(stype) == 1 && stype %in% c("i", "b"))
       } else {
         stype <- "i"
       }
-      
+
       #remove search type information from header
       header[level] <- substr(header[level], searchCmd[1] + attr(searchCmd, "match.length"), nchar(header[level]))
     } else {
       offset <- 1
       stype <- "i"
     }
-    
+
     if (allowSpace==TRUE) headerRow <- grep(paste("^\\s*", header[level], "\\s*$", sep=""), targetText, perl=TRUE, ignore.case=ignore.case)
     else headerRow <- grep(paste("^", header[level], "$", sep=""), targetText, perl=TRUE, ignore.case=ignore.case) #useful for equality of means where we just want anything with 0 spaces
-    
+
     if (length(headerRow) == 1L || (length(headerRow) > 0L && allowMultiple==TRUE)) {
       for (r in 1:length(headerRow)) {
         #locate the position of the first non-space character
         numSpacesHeader <- regexpr("\\S+.*$", targetText[headerRow[r]], perl=TRUE) - 1
-        
+
         sectionStart <- headerRow[r] + offset #skip header row itself
-        
+
         if (stype == "i") {
           sameLevelMatch <- FALSE
           readStart <- sectionStart #counter variable to chunk through output
@@ -472,7 +472,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
               sectionEnd <- length(targetText)
             }
             else readStart <- readStart + 20 #process next batch
-            
+
             #if (readStart > 100000) browser()#stop ("readStart exceeded 100000. Must be formatting problem.")
           }
         } else if (stype == "b") {
@@ -489,9 +489,9 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
           } else {
             sectionEnd <- sectionStart + i - 1 #line prior to blank
           }
-          
+
         }
-        
+
         #there will probably be collisions between use of nested headers :: and use of allowMultiple
         #I haven't attempted to get both to work together as they're currently used for different purposes
         if (isTRUE(allowMultiple))
@@ -500,18 +500,18 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
           #set targetText as chunk from start to end. If there are multiple subsections, then the
           #next iteration of the for loop will process within the subsetted targetText.
           targetText <- targetText[sectionStart:sectionEnd]
-        
+
       }
-      
+
     } else {
       targetText <- NA_character_
       if (length(headerRow) > 1L) warning(paste("Multiple matches for header: ", header, "\n  ", filename, sep=""))
       break
       #else if (length(headerRow) < 1) warning(paste("Could not locate section based on header: ", header, "\n  ", filename, sep=""))
     }
-    
+
   }
-  
+
   if (length(sectionList) > 0L && allowMultiple) {
     attr(sectionList, "matchlines") <- headerRow
     return(sectionList)
@@ -527,9 +527,9 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
 #'   Category 2    0.425     1056.000
 #'   Category 3    0.174      432.000
 #'   Category 4    0.147      365.000
-#' 
+#'
 #' Or Item Categories in IRT Parameterization
-#' 
+#'
 #' Item Categories
 #'  U1
 #'    Category 1         0.000      0.000      0.000      1.000
@@ -537,13 +537,13 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
 #'    Category 3         0.699      0.052     13.325      0.000
 #'    Category 4        -0.743      0.057    -12.938      0.000
 #'    Category 5         0.291      0.052      5.551      0.000
-#' 
+#'
 parseCatOutput <- function(text) {
   hlines <- grep("^\\s*([\\w_\\d+\\.#\\&]+)\\s*$", text, perl=TRUE)
-  if (any(grepl("Category", text[hlines]))) { 
-    stop("Failed to parse categorical output") 
-  } 
-  
+  if (any(grepl("Category", text[hlines]))) {
+    stop("Failed to parse categorical output")
+  }
+
   reformat <- c()
   for (vv in 1:length(hlines)) {
     vname <- text[hlines[vv]]
@@ -605,8 +605,8 @@ splitFilePath <- function(abspath) {
   if (nchar(abspath) < 1 || is.na(abspath)) stop("Path is missing or of zero length")
 
   #trailing slash screws up file.exists call on Windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
-  abspath <- sub("(\\\\|/)?$", "", abspath, perl=TRUE)  
-  
+  abspath <- sub("(\\\\|/)?$", "", abspath, perl=TRUE)
+
   components <- strsplit(abspath, split="[\\/]")[[1]]
   lcom <- length(components)
 
@@ -657,7 +657,7 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       if (identical(thisLine, c("Posterior", "One-Tailed", "95%", "C.I.")) &&
           identical (nextLine, c("Variable", "Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%")))
         varNames <- c("param", "est", "posterior_sd", "pval", "lower_2.5ci", "upper_2.5ci")
-      
+
       #Bayesian (ESTIMATOR=BAYES) 7-column output (Mplus v7)
       else if (identical(thisLine, c("Posterior", "One-Tailed", "95%", "C.I.")) &&
           identical (nextLine, c("Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%", "Significance")))
@@ -677,7 +677,7 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       else if (identical(thisLine, c("Two-Tailed")) &&
           identical(nextLine, c("Estimate", "S.E.", "Est./S.E.", "P-Value")))
         varNames <- c("param", "est", "se", "est_se", "pval")
-      
+
       #Five-column output for R-Square that applies to most unstandardized and standardized sections in Mplus 5 and later
       else if ((identical(thisLine, c("Observed", "Two-Tailed")) || identical(thisLine, c("Latent", "Two-Tailed"))) &&
           identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value")))
@@ -687,12 +687,12 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       else if ((identical(thisLine, c("Observed", "Two-Tailed", "Scale")) || identical(thisLine, c("Latent", "Two-Tailed", "Scale"))) &&
           identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Factors")))
         varNames <- c("param", "est", "se", "est_se", "pval", "scale_f")
-      
+
       #6-column R-Square output for model with residual variances
       else if ((identical(thisLine, c("Observed", "Two-Tailed", "Residual")) || identical(thisLine, c("Latent", "Two-Tailed", "Residual"))) &&
           identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Variance")))
         varNames <- c("param", "est", "se", "est_se", "pval", "resid_var")
-      
+
       #2-column R-Square without estimates of uncertainty and p-values
       else if ((identical(thisLine, c("Observed")) || identical(thisLine, c("Latent"))) &&
           identical(nextLine, c("Variable", "Estimate")))
@@ -707,8 +707,8 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       else if ((identical(thisLine, c("Observed", "Residual")) || identical(thisLine, c("Latent", "Residual"))) &&
           identical(nextLine, c("Variable", "Estimate", "Variance")))
         varNames <- c("param", "est", "resid_var")
-      
-      
+
+
       #Just estimate available, such as in cases of nonconverged models
       else if (identical(thisLine, c("Estimate")))
         varNames <- c("param", "est")
@@ -731,15 +731,15 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       #if user specifically requests just stdyx STANDARDIZED(STDYX);
       else if (identical(thisLine, c("StdYX")) && identical (nextLine, c("Estimate")))
         varNames <- c("param", "stdyx")
-      
+
       #if user specifically requests just stdy STANDARDIZED(STDY);
       else if (identical(thisLine, c("StdY")) && identical (nextLine, c("Estimate")))
         varNames <- c("param", "stdy")
-      
+
       #if user specifically requests just std STANDARDIZED(STD);
       else if (identical(thisLine, c("Std")) && identical (nextLine, c("Estimate")))
         varNames <- c("param", "std")
-      
+
       #Also, even with new versions of Mplus (e.g., 6.11), sometimes have stdyx, stdy, and std in old-style column format
       #The current case I'm aware of is the use of bootstrapped confidence intervals (BOOTSTRAP + OUTPUT:CINTERVAL).
       else if (identical(thisLine, c("StdYX", "StdY", "Std")) && identical (nextLine, c("Estimate", "Estimate", "Estimate")))
@@ -756,7 +756,7 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
     else if (sectionType == "confidence_intervals"){
       if (identical(thisLine, c("Lower",".5%","Lower","2.5%","Lower","5%",
               "Estimate","Upper","5%","Upper","2.5%","Upper",".5%" ))) {
-        varNames <- c("param", "low.5", "low2.5", "low5", "est", "up5", "up2.5", "up.5")                  
+        varNames <- c("param", "low.5", "low2.5", "low5", "est", "up5", "up2.5", "up.5")
       } else if (identical(thisLine, c("Lower",".5%","Lower","2.5%",
               "Estimate","Upper","2.5%","Upper",".5%" ))) {
         varNames <- c("param", "low.5", "low2.5", "est", "up2.5", "up.5")
@@ -776,7 +776,7 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       warning("Unable to determine column names for section ", sectionType, ".\n  ", filename)
       return(NULL)
     }
-      
+
 
   }
 
@@ -797,4 +797,36 @@ trimSpace <- function(string) {
 mplus_as.numeric <- function(vec) {
   vec <- sub("D", "E", vec, fixed=TRUE)
   as.numeric(vec)
+}
+
+#' Separate Hyphenated Variable Strings
+#'
+#' This code is a simplified form of \code{expandCmd} from the \pkg{lavaan} package.
+#' It separates hyphenated variable strings into a list of vectors, while ignoring
+#' hyphens that may be used in numbers.
+#'
+#' Note that this is an internal function only.
+#'
+#' @param cmd A character string
+#' @return The character string if no hyphens, or a list of vectors if there are hyphens.
+#' @author Michael Hallquist revised by Joshua Wiley
+#' @keywords interface
+#' @examples
+#'
+#' MplusAutomation:::separateHyphens("x1x4")
+#' MplusAutomation:::separateHyphens("x1-x4")
+#' MplusAutomation:::separateHyphens("x1-x4; x1*-1; v1-v3;")
+separateHyphens <- function(cmd) {
+  hyphens <- gregexpr(
+    "(?!<(\\*|\\.))\\w+(?!(\\*|\\.))\\s*-\\s*(?!<(\\*|\\.))\\w+(?!(\\*|\\.))",
+    cmd, perl=TRUE)[[1]]
+  if (hyphens[1L] > 0) {
+    lapply(seq_along(hyphens), function(v) {
+      #match one keyword before and after hyphen
+      strsplit(substr(cmd, hyphens[v], hyphens[v] + attr(hyphens, "match.length")[v] - 1),
+               "\\s*-\\s*", perl=TRUE)[[1]][1:2]
+    }) ## return variables separated by hyphens
+  } else {
+    return(cmd) ## no hyphens to expand
+  }
 }

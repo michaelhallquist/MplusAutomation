@@ -86,12 +86,20 @@
 #' str(example2)
 #' rm(example2)
 #'
+#' # R can also try to figure out a list of variables when
+#' # variable names are hyphenated first-last variable, all variables
+#' # between the first and last one will be included
+#' example3 <- mplusObject(MODEL = "mpg ON wt-vs;",
+#'   rdata = mtcars, autov = TRUE)
+#' str(example3)
+#' rm(example3)
+#'
 #' # R warns if the first 8 characters of a (used) variable name are not unique
 #' # as they will be indistinguishable in the Mplus output
-#' example3 <- mplusObject(MODEL = "basename_01 ON basename_02;",
+#' example4 <- mplusObject(MODEL = "basename_01 ON basename_02;",
 #'   rdata = data.frame(basename_01 = 1:5, basename_02 = 5:1),
 #'   autov = TRUE)
-#' rm(example3)
+#' rm(example4)
 mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NULL,
   MONTECARLO = NULL, MODELPOPULATION = NULL, MODELMISSING = NULL, ANALYSIS = NULL,
   MODEL = NULL, MODELINDIRECT = NULL, MODELCONSTRAINT = NULL, MODELTEST = NULL, MODELPRIORS = NULL,
@@ -128,16 +136,59 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
     } else {
       v <- colnames(rdata)
     }
-    v.model <- v[sapply(v, grepl, x = MODEL, ignore.case=TRUE)]
-    v.setup <- v[sapply(v, grepl, x = paste(c(VARIABLE, DEFINE), collapse = "\n"), ignore.case=TRUE)]
-    message("No R variables to use specified. \nSelected automatically as any variable name that occurs in the MODEL or DEFINE section.")
-    usevariables <- unique(c(v.model, v.setup))
 
-    if (!isTRUE(grepl("usevariables", VARIABLE, ignore.case=TRUE)) && length(v.setup) & length(v.model)) {
-      message("There are define or analysis variables, but no USEVARIABLES statement in Mplus.\nYou may need to add any defined variables.\nSuggest:")
-      message(sprintf("USEVARIABLES = %s;", paste(v.model, collapse = " ")))
+    tmpVARIABLE <- unlist(c(
+      tryCatch(unlist(strsplit(VARIABLE, split = ";")), error = function(e) ""),
+      tryCatch(unlist(strsplit(DEFINE, split = ";")), error = function(e) ""),
+      tryCatch(unlist(strsplit(MODEL, split = ";")), error = function(e) "")))
+    tmpVARIABLE <- na.omit(tmpVARIABLE)
+    tmpVARIABLE <- tmpVARIABLE[nzchar(tmpVARIABLE)]
+
+    tmpVARIABLE <- gsub("\\s", "", unique(unlist(lapply(tmpVARIABLE, function(x) {
+      x <- gsub("\n|\t|\r", "", gsub("^(.*)(=| ARE | are | IS | is )(.*)$", "\\3", x))
+      xalt <- unique(unlist(strsplit(x, split = "\\s")))
+
+      y <- separateHyphens(x)
+      if (is.list(y)) {
+        lapply(y, function(z) {
+          if (all(sapply(z, function(var) any(grepl(var, x = v, ignore.case=TRUE))))) {
+            i1 <- which(grepl(z[[1]], x = v, ignore.case = TRUE))
+            if (length(i1) > 1) {
+              test <- tolower(z[[1]]) == tolower(v)
+              if (any(test)) {
+                i1 <- which(test)[1]
+              }
+            }
+            i2 <- which(grepl(z[[2]], x = v, ignore.case = TRUE))
+            if (length(i2) > 1) {
+              test <- tolower(z[[2]]) == tolower(v)
+              if (any(test)) {
+                i2 <- which(test)[1]
+              }
+            }
+            if (length(i1) && length(i2)) {
+              c(v[i1:i2], xalt)
+            }
+          } else  {
+            c(unlist(z), xalt)
+          }
+        })
+      } else {
+        xalt
+      }
+    }))))
+
+    message("No R variables to use specified. \nSelected automatically as any variable name that occurs in the MODEL, VARIABLE, or DEFINE section.")
+    usevariables <- unique(v[sapply(v, function(var) any(grepl(var, x = tmpVARIABLE, ignore.case = TRUE)))])
+
+    if (!isTRUE(grepl("usevariables", VARIABLE, ignore.case=TRUE))) {
+
+      message(sprintf("If any issues, suggest explicitly specifying USEVARIABLES.\nA starting point may be:\nUSEVARIABLES = %s;",
+                      paste(usevariables, collapse = " ")))
+
     }
   }
+
 
   i <- duplicated(substr(usevariables, start = 1, stop = 8))
   if (any(i)) {
