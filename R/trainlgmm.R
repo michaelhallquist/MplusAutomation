@@ -241,7 +241,7 @@ long2LGMM <- function(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE
 ##'   the needed arguments for \code{long2LGMM()}.
 ##' @export
 ##' @examples
-\dontrun{
+##' \dontrun{
 ##' ## This example is not run by default because even with very limitted number of
 ##' ## random starts and iterations, it can take several minutes
 ##' setwd(tempdir())
