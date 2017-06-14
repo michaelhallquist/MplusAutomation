@@ -83,6 +83,7 @@ A list of class \code{mplusObject} with elements
 \item{usevariables}{A character vector of the variables from the \code{R} data set to be used.}
 \item{rdata}{The \code{R} data set to use for the model.}
 \item{imputed}{A logical whether the data are multiply imputed.}
+\item{autov}{A logical whether the data should have the usevariables detected automatically or not}
 }
 \description{
 This is a function to create an Mplus model object in \code{R}.
