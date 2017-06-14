@@ -1,3 +1,97 @@
+#' Automatically detect variables from an Mplus model object
+#'
+#' This is a function to automatically detect the variables used in an
+#' Mplus model object.
+#'
+#'
+#' @param object An Mplus model object from \code{mplusObject}.#'
+#' @return A vector of variables from the R dataset to use.
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
+#' @export
+#' @seealso \code{\link{mplusModeler}}, \code{\link{mplusObject}}
+#' @keywords interface
+#' @examples
+#'
+#' example1 <- mplusObject(MODEL = "mpg ON wt;",
+#'   rdata = mtcars, autov = FALSE)
+#' example1$usevariables
+#' MplusAutomation:::detectVariables(example1)
+#'
+#' example2 <- mplusObject(MODEL = "mpg ON wt;",
+#'   rdata = mtcars, autov = TRUE)
+#' example2$usevariables
+#' example3 <- update(example2,
+#'   MODEL = ~ . + "mpg ON qsec; wt WITH qsec;",
+#'   autov = TRUE)
+#' example3$usevariables
+#' rm(example1, example2, example3)
+detectVariables <- function(object) {
+  if (!is.null(object$MONTECARLO)) {
+    stop("detectVariables() does not work with MONTECARLO models")
+  }
+
+  if (!is.null(object$rdata) && !is.null(object$MODEL)) {
+    if (object$imputed) {
+      v <- colnames(object$rdata[[1]])
+    } else {
+      v <- colnames(object$rdata)
+    }
+
+    tmpVARIABLE <- unlist(c(
+      tryCatch(unlist(strsplit(object$VARIABLE, split = ";")), error = function(e) ""),
+      tryCatch(unlist(strsplit(object$DEFINE, split = ";")), error = function(e) ""),
+      tryCatch(unlist(strsplit(object$MODEL, split = ";")), error = function(e) "")))
+    tmpVARIABLE <- na.omit(tmpVARIABLE)
+    tmpVARIABLE <- tmpVARIABLE[nzchar(tmpVARIABLE)]
+
+    tmpVARIABLE <- gsub("\\s", "", unique(unlist(lapply(tmpVARIABLE, function(x) {
+      x <- gsub("\n|\t|\r", "", gsub("^(.*)(=| ARE | are | IS | is )(.*)$", "\\3", x))
+      xalt <- unique(unlist(strsplit(x, split = "\\s")))
+
+      y <- separateHyphens(x)
+      if (is.list(y)) {
+        lapply(y, function(z) {
+          if (all(sapply(z, function(var) any(grepl(var, x = v, ignore.case=TRUE))))) {
+            i1 <- which(grepl(z[[1]], x = v, ignore.case = TRUE))
+            if (length(i1) > 1) {
+              test <- tolower(z[[1]]) == tolower(v)
+              if (any(test)) {
+                i1 <- which(test)[1]
+              }
+            }
+            i2 <- which(grepl(z[[2]], x = v, ignore.case = TRUE))
+            if (length(i2) > 1) {
+              test <- tolower(z[[2]]) == tolower(v)
+              if (any(test)) {
+                i2 <- which(test)[1]
+              }
+            }
+            if (length(i1) && length(i2)) {
+              c(v[i1:i2], xalt)
+            }
+          } else  {
+            c(unlist(z), xalt)
+          }
+        })
+      } else {
+        xalt
+      }
+    }))))
+
+    message("R variables selected automatically as any variable name that\noccurs in the MODEL, VARIABLE, or DEFINE section.")
+    usevariables <- unique(v[sapply(v, function(var) any(grepl(var, x = tmpVARIABLE, ignore.case = TRUE)))])
+
+    if (!isTRUE(grepl("usevariables", object$VARIABLE, ignore.case=TRUE))) {
+
+      message(sprintf("If any issues, suggest explicitly specifying USEVARIABLES.\nA starting point may be:\nUSEVARIABLES = %s;",
+                      paste(usevariables, collapse = " ")))
+
+    }
+  }
+
+  return(usevariables)
+}
+
 #' Create an Mplus model object
 #'
 #' This is a function to create an Mplus model object in \code{R}.
@@ -68,6 +162,7 @@
 #' \item{usevariables}{A character vector of the variables from the \code{R} data set to be used.}
 #' \item{rdata}{The \code{R} data set to use for the model.}
 #' \item{imputed}{A logical whether the data are multiply imputed.}
+#' \item{autov}{A logical whether the data should have the usevariables detected automatically or not}
 #'
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @export
@@ -126,76 +221,6 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
   stopifnot(charOrNull(SAVEDATA))
   stopifnot(charOrNull(PLOT))
 
-  if (!is.null(MONTECARLO) && missing(autov)) {
-    autov <- FALSE
-  }
-
-  if (autov && is.null(usevariables) && !is.null(rdata) && !is.null(MODEL)) {
-    if (imputed) {
-      v <- colnames(rdata[[1]])
-    } else {
-      v <- colnames(rdata)
-    }
-
-    tmpVARIABLE <- unlist(c(
-      tryCatch(unlist(strsplit(VARIABLE, split = ";")), error = function(e) ""),
-      tryCatch(unlist(strsplit(DEFINE, split = ";")), error = function(e) ""),
-      tryCatch(unlist(strsplit(MODEL, split = ";")), error = function(e) "")))
-    tmpVARIABLE <- na.omit(tmpVARIABLE)
-    tmpVARIABLE <- tmpVARIABLE[nzchar(tmpVARIABLE)]
-
-    tmpVARIABLE <- gsub("\\s", "", unique(unlist(lapply(tmpVARIABLE, function(x) {
-      x <- gsub("\n|\t|\r", "", gsub("^(.*)(=| ARE | are | IS | is )(.*)$", "\\3", x))
-      xalt <- unique(unlist(strsplit(x, split = "\\s")))
-
-      y <- separateHyphens(x)
-      if (is.list(y)) {
-        lapply(y, function(z) {
-          if (all(sapply(z, function(var) any(grepl(var, x = v, ignore.case=TRUE))))) {
-            i1 <- which(grepl(z[[1]], x = v, ignore.case = TRUE))
-            if (length(i1) > 1) {
-              test <- tolower(z[[1]]) == tolower(v)
-              if (any(test)) {
-                i1 <- which(test)[1]
-              }
-            }
-            i2 <- which(grepl(z[[2]], x = v, ignore.case = TRUE))
-            if (length(i2) > 1) {
-              test <- tolower(z[[2]]) == tolower(v)
-              if (any(test)) {
-                i2 <- which(test)[1]
-              }
-            }
-            if (length(i1) && length(i2)) {
-              c(v[i1:i2], xalt)
-            }
-          } else  {
-            c(unlist(z), xalt)
-          }
-        })
-      } else {
-        xalt
-      }
-    }))))
-
-    message("No R variables to use specified. \nSelected automatically as any variable name that occurs in the MODEL, VARIABLE, or DEFINE section.")
-    usevariables <- unique(v[sapply(v, function(var) any(grepl(var, x = tmpVARIABLE, ignore.case = TRUE)))])
-
-    if (!isTRUE(grepl("usevariables", VARIABLE, ignore.case=TRUE))) {
-
-      message(sprintf("If any issues, suggest explicitly specifying USEVARIABLES.\nA starting point may be:\nUSEVARIABLES = %s;",
-                      paste(usevariables, collapse = " ")))
-
-    }
-  }
-
-
-  i <- duplicated(substr(usevariables, start = 1, stop = 8))
-  if (any(i)) {
-    message(sprintf("The following variables are not unique in the first 8 characters:\n %s",
-      paste(usevariables[i], collapse = ", ")))
-  }
-
   object <- list(
     TITLE = TITLE,
     DATA = DATA,
@@ -216,9 +241,24 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
     results = NULL,
     usevariables = usevariables,
     rdata = rdata,
-    imputed = imputed)
+    imputed = imputed,
+    autov = autov)
 
   class(object) <- c("mplusObject", "list")
+
+  if (!is.null(MONTECARLO) && missing(autov)) {
+    object$autov <- autov <- FALSE
+  }
+
+  if (autov && is.null(usevariables) && !is.null(rdata) && !is.null(MODEL)) {
+      object$usevariables  <- detectVariables(object)
+  }
+
+  i <- duplicated(substr(object$usevariables, start = 1, stop = 8))
+  if (any(i)) {
+    message(sprintf("The following variables are not unique in the first 8 characters:\n %s",
+      paste(object$usevariables[i], collapse = ", ")))
+  }
 
   return(object)
 }
@@ -287,6 +327,10 @@ update.mplusObject <- function(object, ...) {
 
   if (length(rIndex)) {
     object[rIndex] <- dots[rIndex]
+  }
+
+  if (object$autov) {
+    object$usevariables <- detectVariables(object)
   }
 
   return(object)
@@ -982,8 +1026,6 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
 
   return(Rstruc)
 }
-
-
 
 
 #' Extract parameters from a data frame of Mplus estimates
