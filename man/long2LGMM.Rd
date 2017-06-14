@@ -51,7 +51,7 @@ trajectories by class.}
 \item{cov}{A character string indicating the random covariance structure to use}
 
 \item{model}{An optional argument, can pass an existing model, the output from
-mplusModeler()..}
+mplusModeler().}
 }
 \description{
 This function streamlines the process of converting long data into a format

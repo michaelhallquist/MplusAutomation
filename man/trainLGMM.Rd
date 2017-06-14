@@ -20,7 +20,7 @@ indicates the particular assessment point for each timepoint.}
 trajectories by class or \code{FALSE} if no predictions to be made
 (the default).}
 
-\item{tuneGrid}{A dataframe, data.table, or list.  It should have names for
+\item{tuneGrid}{A dataframe or list.  It should have names for
 the needed arguments for \code{long2LGMM()}.}
 }
 \description{
