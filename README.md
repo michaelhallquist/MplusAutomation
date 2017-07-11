@@ -23,9 +23,9 @@ Hadley Wickham's `devtools` package. If you do not have `devtools`
 installed, first install it and then install `MplusAutomation`.
 
     #install.packages("devtools")
-    require(devtools)
+    library(devtools)
 
-    install_github("MplusAutomation", "michaelhallquist")
+    install_github("michaelhallquist/MplusAutomation")
 
 Questions
 ---------
