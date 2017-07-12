@@ -254,7 +254,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   betweenWithinMatches <- grep("^\\s*(Between (?:\\s*\\w+\\s+)*Level|Within (?:\\s*\\w+\\s+)*Level|Within-Level (Standardized Estimates|R-Square) Averaged (Over|Across) Clusters)\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
   #latent class patterns can be "1 1 3 1" or something like "C#1" (see ex8.15.out for a complicated example)
   latentClassMatches <- grep("^\\s*(Latent )*Class (Pattern )*([\\d\\w#_]+\\s*)+(\\(\\s*\\d+\\s*\\))*$", modelSection, ignore.case=TRUE, perl=TRUE)
-  multipleGroupMatches <- grep("^\\s*Group \\w+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
+  multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", modelSection, ignore.case=TRUE, perl=TRUE) #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
   classPropMatches <- grep("^\\s*Class Proportions\\s*$", modelSection, ignore.case=TRUE)
 
@@ -279,7 +279,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
           lcNum <- gsub("\\s+", "\\.", postPattern, perl=TRUE)
         }
         else lcNum <- sub("^\\s*(?:Latent )*Class\\s+(\\d+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
-      } else if (match %in% multipleGroupMatches) groupName <- sub("^\\s*Group (\\w+)\\s*$", "\\1", modelSection[match], perl=TRUE)
+      } else if (match %in% multipleGroupMatches) groupName <- sub("^\\s*Group (\\w+)(?:\\s+\\(\\d+\\))*\\s*$", "\\1", modelSection[match], perl=TRUE)
       else if (match %in% catLatentMatches) {
         #the categorical latent variables section is truly "top level"
         #that is, it starts over in terms of bw/wi and latent classes
@@ -434,12 +434,26 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 
     return(target)
   }
-
+  
   allSections <- list() #holds parameters for all identified sections
-  unstandardizedSection <- getSection("^MODEL RESULTS$", outfiletext)
-  if (!is.null(unstandardizedSection)) {
-    allSections <- appendListElements(allSections, extractParameters_1section(filename, unstandardizedSection, "unstandardized"))
+  if (length(multisectionMatches <- grep("^\\s*MODEL RESULTS FOR .*", outfiletext, perl=TRUE, value=TRUE)) > 0L) {
+    sectionNames <- make.names(sub("^\\s*MODEL RESULTS FOR\\s+(?:THE)*\\s*([\\w\\.]+)", "\\1", multisectionMatches, perl=TRUE))
+    #mercifully, for now, these invariance testing outputs only appear to generate unstandardized parameters (otherwise we'd need to wrap this whole function and pass in a suffix parameter)
+    unstandardizedList <- list()
+    for (s in 1:length(sectionNames)) {
+      unstandardizedSection <- getSection(multisectionMatches[s], outfiletext)
+      if (!is.null(unstandardizedSection)) {
+        unstandardizedList[[ sectionNames[s] ]] <- extractParameters_1section(filename, unstandardizedSection, "unstandardized")
+      }      
+    }
+    allSections$unstandardized <- unstandardizedList
+  } else {
+    unstandardizedSection <- getSection("^MODEL RESULTS$", outfiletext)
+    if (!is.null(unstandardizedSection)) {
+      allSections <- appendListElements(allSections, extractParameters_1section(filename, unstandardizedSection, "unstandardized"))
+    }      
   }
+  
 
   standardizedSection <- getSection("^STANDARDIZED MODEL RESULTS$", outfiletext)
 

@@ -1011,7 +1011,6 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   #BEGIN MODEL FIT STATISTICS PROCESSING
   #handle EFA output, which has separate model fit sections within each file
   #do this by extracting model fit sections for each and using an rbind call
-
   if (grepl("(?!MIXTURE|TWOLEVEL)\\s*EFA\\s+", arglist$AnalysisType, ignore.case=TRUE, perl=TRUE)) {
     factorLB <- as.numeric(sub(".*EFA\\s+(\\d+).*", "\\1", arglist$AnalysisType, perl=TRUE))
     factorUB <- as.numeric(sub(".*EFA\\s+\\d+\\s+(\\d+).*", "\\1", arglist$AnalysisType, perl=TRUE))
@@ -1019,12 +1018,12 @@ extractSummaries_1file <- function(outfiletext, filename, input)
     
     EFASections <- grep(paste("^\\s*EXPLORATORY FACTOR ANALYSIS WITH (",
             paste(factorSeq, collapse="|"), ") FACTOR\\(S\\):\\s*$", sep=""), outfiletext, perl=TRUE)
-
+    
     if (!length(EFASections) > 0) stop("Unable to locate section headers for EFA model fit statistics")
-
+    
     #need to convert from list to data.frame format to allow for proper handling of rbind below
     arglistBase <- as.data.frame(arglist, stringsAsFactors=FALSE)
-
+    
     efaList <- list()
     for (thisFactor in 1:length(EFASections)) {
       #subset output by starting text to be searched at the point where factor output begins
@@ -1032,15 +1031,28 @@ extractSummaries_1file <- function(outfiletext, filename, input)
       efaList[[thisFactor]] <- extractSummaries_1section(modelFitSection, arglistBase, filename)
       efaList[[thisFactor]]$NumFactors <- factorSeq[thisFactor]
     }
-
+    
     arglist <- do.call(rbind, efaList)
-  }
-  else {
-
+  } else if (length(multisectionMatches <- grep("^\\s*MODEL FIT INFORMATION FOR .*", outfiletext, perl=TRUE, value=TRUE)) > 0L) {
+    #support Mplus v8 invariance testing outputs with one model fit section per variant (MODEL FIT INFORMATION FOR THE SCALAR MODEL etc.)
+    #need to convert from list to data.frame format to allow for proper handling of rbind below
+    arglistBase <- as.data.frame(arglist, stringsAsFactors=FALSE)
+    multiList <- list()
+    sectionNames <- sub("^\\s*MODEL FIT INFORMATION FOR\\s+(?:THE)*\\s*([\\w\\.]+)", "\\1", multisectionMatches, perl=TRUE)
+    for (s in 1:length(multisectionMatches)) {
+      fitinfo <- getSection(multisectionMatches[s], outfiletext)
+      if (!is.null(fitinfo)) {
+        multiList[[s]] <- extractSummaries_1section(fitinfo, arglistBase, filename, input)
+      }      
+    }
+    arglist <- do.call(rbind, multiList)
+    arglist$Model <- sectionNames #add model info
+  } else {
     modelFitSection <- getSection("^(TESTS OF MODEL FIT|MODEL FIT INFORMATION)$", outfiletext)
     arglist <- extractSummaries_1section(modelFitSection, arglist, filename, input)
   }
-
+  
+    
   #CLASSIFICATION QUALITY
   classificationQuality <- getSection("^CLASSIFICATION QUALITY$", outfiletext)
 

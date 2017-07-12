@@ -27,6 +27,7 @@ Version 0.7 (in progress)
 - v8 support:   Support output for AR(1) output variables labeled &1
 - v8 support:   Extract Steps section from GPCM IRT output (e.g., ex5.5pcm.out)
 - v8 support:   Extract updated IRT PARAMETERIZATION output, including item discriminations, locations, categories, guessing, and upper asymptote
+- v8 support:   Initial support for measurement invariance outputs having multiple model fit and results sections
 
 Version 0.6-4
 - feature: prepareMplusData() and mplusObject() / mplusModeler() now handle multiply imputed data
