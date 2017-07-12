@@ -40,8 +40,7 @@
 ##'   trajectories by class.
 ##' @param cov A character string indicating the random covariance structure to use
 ##' @param model An optional argument, can pass an existing model, the output from
-##'   mplusModeler()..
-##' @import data.table
+##'   mplusModeler().
 ##' @export
 ##' @examples
 ##' ## Make me!
@@ -67,7 +66,7 @@ long2LGMM <- function(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE
     predict <- TRUE
   }
 
-  ## ensure data table object and select only relevant variables
+  ## select only relevant variables
   data <- data[, c(idvar, assessmentvar, dv, timevars)]
 
   ## assessment labels, used for wide data
@@ -171,7 +170,7 @@ long2LGMM <- function(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE
   }
 
   ## extract the intercept and slope parameters
-  x <- as.data.table(coef(m$results, param = "exp"))
+  x <- as.data.frame(coef(m$results, param = "exp"))
 
   if (k==1) {
     prefix <- ""
@@ -180,18 +179,18 @@ long2LGMM <- function(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE
   }
 
   ## only get I and S parameter means
-  x <- x[grepl(paste0(prefix, " [IS][1-9]<-Means"), Label)]
+  x <- x[grepl(paste0(prefix, " [IS][1-9]<-Means"), Label), drop = FALSE]
   ## exclude the 'redundant' intercepts
-  x <- x[!grepl(paste0(prefix, " [I][2-9]<-Means"), Label)]
+  x <- x[!grepl(paste0(prefix, " [I][2-9]<-Means"), Label), drop = FALSE]
 
   if (k==1) {
-    x[, Class := 1L]
+    x$Class <- 1L
   } else {
-    x[, Class := as.integer(gsub("C_([1-9]).*", "\\1", Label))]
+    x$Class <- as.integer(gsub("C_([1-9]).*", "\\1", x$Label))
   }
 
-  x[, Type := gsub(paste0(prefix, " ([IS][1-9])<-Means"), "\\1", Label)]
-  x[, Type := ifelse(Type == "I1", "Intercept", Type)]
+  x$Type <- gsub(paste0(x$prefix, " ([IS][1-9])<-Means"), "\\1", x$Label)
+  x$Type <- ifelse(x$Type == "I1", "Intercept", x$Type)
 
   if (k==1) {
     classcounts <- data.frame(
@@ -237,7 +236,7 @@ long2LGMM <- function(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE
 ##' @param newdata A data frame of new values to use for generating predicted
 ##'   trajectories by class or \code{FALSE} if no predictions to be made
 ##'   (the default).
-##' @param tuneGrid A dataframe, data.table, or list.  It should have names for
+##' @param tuneGrid A dataframe or list.  It should have names for
 ##'   the needed arguments for \code{long2LGMM()}.
 ##' @export
 ##' @examples

@@ -13,7 +13,7 @@ Installation
 ------------
 
 You can install the latest release of `MplusAutomation` directly from
-[CRAN](http://cran.r-project.org/package=MplusAutomation) by running
+[CRAN](https://cran.r-project.org/web/packages/MplusAutomation/) by running
 
     install.packages("MplusAutomation")
 
@@ -23,9 +23,9 @@ Hadley Wickham's `devtools` package. If you do not have `devtools`
 installed, first install it and then install `MplusAutomation`.
 
     #install.packages("devtools")
-    require(devtools)
+    library(devtools)
 
-    install_github("MplusAutomation", "michaelhallquist")
+    install_github("michaelhallquist/MplusAutomation")
 
 Questions
 ---------
@@ -52,19 +52,16 @@ the `mtcars` dataset built into `R`.
        MODEL = "
          mpg ON hp;
          wt ON disp;",
+	   OUTPUT = "CINTERVAL;",
        rdata = mtcars)
 
-    ## No R variables to use specified.
-    ## Selected automatically as any variable name that occurs in the MODEL or DEFINE section.
+    ## R variables selected automatically as any variable name that occurs in the MODEL, VARIABLE, or DEFINE section.
+    ## If any issues, suggest explicitly specifying USEVARIABLES.
+    ## A starting point may be:
+    ## USEVARIABLES = mpg disp hp wt;
 
-    fit <- mplusModeler(pathmodel, "mtcars.dat", modelout = "model1.inp", run = 1L)
+    fit <- mplusModeler(pathmodel, modelout = "model1.inp", run = 1L)
 
-    ## Wrote model to: model1.inp
-    ## Wrote data to: mtcars.dat
-
-    ##
-    ## Running model: model1.inp
-    ## Reading model:  model1.out
 
 That is all it takes to run Mplus! `MplusAutomation` takes care of
 figuring out which variables from your `R` dataset are used in the model
@@ -104,16 +101,8 @@ The fit is not great, to add some extra paths we can update the model.
         mpg ON disp;
         wt ON hp;")
 
-    fit2 <- mplusModeler(pathmodel2, "mtcars2.dat", modelout = "model2.inp", run = 1L)
+    fit2 <- mplusModeler(pathmodel2, modelout = "model2.inp", run = 1L)
 
-    ## Wrote model to: model2.inp
-    ## Wrote data to: mtcars2.dat
-
-    ## Warning: The file 'mtcars2.dat' currently exists and will be overwritten
-
-    ##
-    ## Running model: model2.inp
-    ## Reading model:  model2.out
 
 We can make some pretty output of both models:
 
@@ -144,6 +133,41 @@ SRMR               0.14              0.00
 ====================================================
 *** p &lt; 0.001, ** p &lt; 0.01, * p &lt; 0.05
 </code></pre>
+
+
+If you want confidence intervals, those can also be printed, 
+so long as they were requested as part of the output
+(we did in the initial model, which propogates to later models
+that were updated()ed based on the original model):
+
+```r
+screenreg(list(
+  extract(fit, cis=TRUE, summaries = c("Observations", "CFI", "SRMR")),
+  extract(fit2, cis=TRUE, summaries = c("Observations", "CFI", "SRMR"))),
+  single.row=TRUE)
+```
+
+<pre><code>
+================================================================
+                  Model 1                 Model 2               
+----------------------------------------------------------------
+ MPG<-HP          -0.06 [-0.08; -0.05] *  -0.02 [-0.05;  0.00]  
+ WT<-DISP          0.01 [ 0.00;  0.01] *   0.01 [ 0.01;  0.01] *
+ WT<->MPG         -1.02 [-1.77; -0.27] *  -0.73 [-1.25; -0.21] *
+ MPG<-Intercepts  29.59 [26.59; 32.58] *  30.74 [28.25; 33.22] *
+ WT<-Intercepts    1.82 [ 1.46;  2.17] *   1.68 [ 1.31;  2.04] *
+ MPG<->MPG        14.04 [ 7.14; 20.95] *   8.86 [ 4.52; 13.20] *
+ WT<->WT           0.21 [ 0.10;  0.32] *   0.19 [ 0.10;  0.28] *
+ MPG<-DISP                                -0.03 [-0.04; -0.02] *
+ WT<-HP                                   -0.00 [-0.00;  0.00]  
+----------------------------------------------------------------
+Observations      32                      32                    
+CFI                0.87                    1.00                 
+SRMR               0.14                    0.00                 
+================================================================
+* 0 outside the confidence interval
+</code></pre>
+
 
 How to Help
 -----------
