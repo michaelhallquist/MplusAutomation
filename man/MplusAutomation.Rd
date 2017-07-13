@@ -24,7 +24,14 @@ The MplusAutomation package has four primary purposes:
 The core routine for running batches of models is \code{\link{runModels}}, with
   an easy-to-use GUI wrapper, \code{\link{runModels_Interactive}}.
 
-To extract model summary statistics from one or more output files, see
+The core routine for extracting information from Mplus outputs is \code{\link{readModels}}, which
+  returns a list containing all output sections that the package can extract.
+To extract summaries, parameters, modification indices, SAVEDATA output, and all other sections that the package
+  can understand, use the \code{\link{readModels}} function. This is the
+  recommended way to extract Mplus output with this package.
+
+Note: \code{\link{extractModelSummaries}} is deprecated and \code{\link{readModels}} should be preferred.
+  To extract model summary statistics from one or more output files, see
   \code{\link{extractModelSummaries}}, which returns a \code{data.frame} of
   fit statistics for models located within a directory. Model fit results can
   be summarized in tabular form (for comparing among models) using
@@ -33,15 +40,11 @@ To extract model summary statistics from one or more output files, see
   or \code{\link{LatexSummaryTable}} (returns a LaTex-formatted table of
   summary statistics).
 
-To extract raw data created by the SAVEDATA command (e.g., class membership probabilities
+Deprecated: To extract raw data created by the SAVEDATA command (e.g., class membership probabilities
   or factor scores), see \code{\link{getSavedata_Data}}.
 
-To extract unstandardized or standardized parameter estimates from a single output file,
+Deprecated: To extract unstandardized or standardized parameter estimates from a single output file,
   see \code{\link{extractModelParameters}}.
-
-Summaries, parameters, modification indices, and SAVEDATA output can be extracted
-  simultaneously using the \code{\link{readModels}} function, and this is the
-  recommended way to extract output with this package.
 
 Model fit and parameter comparisons between models can be obtained using
   \code{\link{compareModels}}.
@@ -57,8 +60,8 @@ In addition to the major functions above, a function for converting an R data.fr
 \tabular{ll}{
 Package: \tab MplusAutomation\cr
 Type: \tab Package\cr
-Version: \tab 0.6-3\cr
-Date: \tab 2014-10-08\cr
+Version: \tab 0.7\cr
+Date: \tab 2017-07-12\cr
 License: \tab LGPL-3\cr
 LazyLoad: \tab yes\cr
 }

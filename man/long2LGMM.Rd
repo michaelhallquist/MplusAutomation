@@ -2,7 +2,7 @@
 % Please edit documentation in R/trainlgmm.R
 \name{long2LGMM}
 \alias{long2LGMM}
-\title{Long data two wide latent growth mixture model}
+\title{Long data to wide latent growth mixture model}
 \usage{
 long2LGMM(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE,
   k = 1L, title = "Trajectory Model", base = "trajmodel_", run = FALSE,

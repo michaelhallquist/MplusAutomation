@@ -1,4 +1,4 @@
-##' Long data two wide latent growth mixture model
+##' Long data to wide latent growth mixture model
 ##'
 ##' This function streamlines the process of converting long data into a format
 ##' that Mplus can use for latent growth mixture models in wide form.  It makes
@@ -239,6 +239,7 @@ long2LGMM <- function(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE
 ##' @param tuneGrid A dataframe or list.  It should have names for
 ##'   the needed arguments for \code{long2LGMM()}.
 ##' @export
+##' @importFrom parallel makeCluster stopCluster clusterEvalQ clusterExport parLapplyLB
 ##' @examples
 ##' \dontrun{
 ##' ## This example is not run by default because even with very limitted number of

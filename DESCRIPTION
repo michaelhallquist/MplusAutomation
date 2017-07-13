@@ -28,7 +28,8 @@ Imports:
     lattice,
     texreg,
     pander,
-    digest
+    digest,
+    parallel
 Suggests:
     rhdf5,
     tcltk,
