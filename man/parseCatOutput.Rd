@@ -2,20 +2,30 @@
 % Please edit documentation in R/utilityFunctions.R
 \name{parseCatOutput}
 \alias{parseCatOutput}
-\title{Helper function for parsing output with variables and categories
-Example:
-UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES}
+\title{Parse Categorical Output}
 \usage{
 parseCatOutput(text)
 }
+\arguments{
+\item{text}{The output to parse.}
+}
+\value{
+The parsed output
+}
 \description{
+Helper function for parsing output with variables and categories.
+}
+\examples{
+"
+Example:
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
 SOP2A
   Category 1    0.254      631.000
   Category 2    0.425     1056.000
   Category 3    0.174      432.000
   Category 4    0.147      365.000
-}
-\details{
+
 Or Item Categories in IRT Parameterization
 
 Item Categories
@@ -25,4 +35,9 @@ Item Categories
    Category 3         0.699      0.052     13.325      0.000
    Category 4        -0.743      0.057    -12.938      0.000
    Category 5         0.291      0.052      5.551      0.000
+"
 }
+\author{
+Michael Hallquist
+}
+\keyword{interface}

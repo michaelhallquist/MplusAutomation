@@ -14,9 +14,11 @@ getMultilineSection(header, outfiletext, filename, allowMultiple = FALSE,
 
 \item{filename}{The name of the file}
 
+\item{allowMultiple}{Logical indicating whether to allow multiple sections. Defaults to \code{FALSE}.}
+
 \item{allowSpace}{Logical indicating whether to allow spaces. Defaults to \code{TRUE}.}
 
-\item{Logical}{indicating whether to allow multiple sections. Defaults to \code{FALSE}}
+\item{ignore.case}{Logical whether or not to ignore the case.  Defaults to \code{FALSE}.}
 }
 \value{
 A list of sections

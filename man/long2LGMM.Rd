@@ -69,5 +69,97 @@ time models or piecewise models.  Using facilities in R, spline models
 are also comparatively easy to specify.
 }
 \examples{
-## Make me!
+\dontrun{
+## Simulate Some Data from 3 classes
+library(MASS)
+set.seed(1234)
+allcoef <- rbind(
+  cbind(1, mvrnorm(n = 200,
+                   mu = c(0, 2, 0),
+                   Sigma = diag(c(.2, .1, .01)),
+                   empirical = TRUE)),
+  cbind(2, mvrnorm(n = 200,
+                   mu = c(-3.35, 2, 2),
+                   Sigma = diag(c(.2, .1, .1)),
+                   empirical = TRUE)),
+  cbind(3, mvrnorm(n = 200,
+                   mu = c(3.35, 2, -2),
+                   Sigma = diag(c(.2, .1, .1)),
+                   empirical = TRUE)))
+allcoef <- as.data.frame(allcoef)
+names(allcoef) <- c("Class", "I", "L", "Q")
+allcoef$ID <- 1:nrow(allcoef)
+d <- do.call(rbind, lapply(1:nrow(allcoef), function(i) {
+  out <- data.frame(
+    ID = allcoef$ID[i],
+    Class = allcoef$Class[i],
+    Assess = 1:11,
+    x = sort(runif(n = 11, min = -2, max = 2)))
+  out$y <- rnorm(11,
+    mean = allcoef$I[i] + allcoef$L[i] * out$x + allcoef$Q[i] * out$x^2,
+    sd = .1)
+  return(out)
+}))
+
+## create splines
+library(splines)
+time_splines <- ns(d$x, df = 3, Boundary.knots = quantile(d$x, probs = c(.02, .98)))
+d$t1 <- time_splines[, 1]
+d$t2 <- time_splines[, 2]
+d$t3 <- time_splines[, 3]
+d$xq <- d$x^2
+
+## create new data to be used for predictions
+nd <- data.frame(ID = 1,
+                 x = seq(from = -2, to = 2, by = .1))
+nd.splines <- with(attributes(time_splines),
+                   ns(nd$x, df = degree, knots = knots,
+                      Boundary.knots = Boundary.knots))
+nd$t1 <- nd.splines[, 1]
+nd$t2 <- nd.splines[, 2]
+nd$t3 <- nd.splines[, 3]
+nd$xq <- nd$x^2
+
+## create a tuning grid of models to try
+## all possible combinations are created of different time trends
+## different covariance structures of the random effects
+## and different number of classes
+tuneGrid <- expand.grid(
+  dv = "y",
+  timevars = list(c("t1", "t2", "t3"), "x", c("x", "xq")),
+  starts = "2 1",
+  cov = c("independent", "zero"),
+  k = c(1L, 3L),
+  processors = 1L, run = TRUE,
+  misstrick = TRUE, stringsAsFactors = FALSE)
+tuneGrid$title <- paste0(
+  c("linear", "quad", "spline")[sapply(tuneGrid$timevars, length)],
+  "_",
+  sapply(tuneGrid$cov, function(x) if(nchar(x)==4) substr(x, 1, 4) else substr(x, 1, 3)),
+  "_",
+  tuneGrid$k)
+tuneGrid$base <- paste0(
+  c("linear", "quad", "spline")[sapply(tuneGrid$timevars, length)],
+  "_",
+  sapply(tuneGrid$cov, function(x) if(nchar(x)==4) substr(x, 1, 4) else substr(x, 1, 3)))
+
+## example using long2LGMM to fit one model at a time
+mres <- long2LGMM(
+        data = d,
+        idvar = "ID",
+        assessmentvar = "Assess",
+        dv = tuneGrid$dv[1],
+        timevars = tuneGrid$timevars[[1]],
+        misstrick = tuneGrid$misstrick[1],
+        k = tuneGrid$k[1],
+        title = paste0(tuneGrid$title[1], tuneGrid$k[1]),
+        base = tuneGrid$base[1],
+        run = tuneGrid$run[1],
+        processors = tuneGrid$processors[1],
+        starts = tuneGrid$starts[1],
+        newdata = nd,
+        cov = tuneGrid$cov[1])
+
+rm(mres)
+}
 }

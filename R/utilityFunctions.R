@@ -173,6 +173,19 @@ testBParamCompoundConstraint <- function(bparams, test) {
   print(proportions)
 }
 
+#' Friendly Regular Expression
+#'
+#' Creates data frame documenting the start and end of all tags.
+#'
+#' @param pattern The pattern to search for
+#' @param charvector Character vector
+#' @param perl A logical whether or not to use perl based
+#'   regular expressions.  Defaults to \code{TRUE}.
+#' @return A \code{data.frame}
+#' @author Michael Hallquist
+#' @keywords internal
+#' @examples
+#' ## make me
 friendlyGregexpr <- function(pattern, charvector, perl=TRUE) {
   #require(plyr)
   #now create data frame documenting the start and end of all tags
@@ -272,7 +285,16 @@ getSection_Blanklines <- function(sectionHeader, outfiletext) {
 #IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC (or PROBIT) METRIC
 #LOGISTIC REGRESSION ODDS RATIO RESULTS
 
-
+#' Get an Output Section
+#'
+#' @param sectionHeader Header section
+#' @param outfiletext Output file text
+#' @param headers Can pass custom headers but defaults to a standard set.
+#' @param omit TODO.
+#' @return Section
+#' @keywords internal
+#' @examples
+#' # make me!!!
 getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL) {
   #encode the top-level major headers here, but allow for custom headers to be passed in
   #omit allows for one or more strings from headers not to be considered
@@ -287,7 +309,7 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
         "SAMPLE STATISTICS", "SAMPLE STATISTICS FOR THE FIRST REPLICATION",
         "RESULTS FOR BASIC ANALYSIS",
         "CROSSTABS FOR CATEGORICAL VARIABLES", "UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES",
-        "SUMMARY OF CENSORED LIMITS", "COUNT PROPORTION OF ZERO, MINIMUM AND MAXIMUM VALUES", 
+        "SUMMARY OF CENSORED LIMITS", "COUNT PROPORTION OF ZERO, MINIMUM AND MAXIMUM VALUES",
         "RANDOM STARTS RESULTS RANKED FROM THE BEST TO THE WORST LOGLIKELIHOOD VALUES",
         "TESTS OF MODEL FIT", "MODEL FIT INFORMATION", "MODEL FIT INFORMATION FOR .*", "CLASSIFICATION QUALITY",
         "SUMMARY OF MODEL FIT INFORMATION", "RESULTS FOR EXPLORATORY FACTOR ANALYSIS",
@@ -379,8 +401,9 @@ getSection <- function(sectionHeader, outfiletext, headers="standard", omit=NULL
 #' @param header Header section
 #' @param outfiletext Output file text
 #' @param filename The name of the file
-#' @param Logical indicating whether to allow multiple sections. Defaults to \code{FALSE}
+#' @param allowMultiple Logical indicating whether to allow multiple sections. Defaults to \code{FALSE}.
 #' @param allowSpace Logical indicating whether to allow spaces. Defaults to \code{TRUE}.
+#' @param ignore.case Logical whether or not to ignore the case.  Defaults to \code{FALSE}.
 #' @return A list of sections
 #' @keywords internal
 #' @examples
@@ -518,7 +541,18 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
   } else { return(targetText) }
 }
 
-#' Helper function for parsing output with variables and categories
+
+#' Parse Categorical Output
+#'
+#' Helper function for parsing output with variables and categories.
+#'
+#' @param text The output to parse.
+#' @return The parsed output
+#' @author Michael Hallquist
+#' @export
+#' @keywords interface
+#' @examples
+#' "
 #' Example:
 #' UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
 #'
@@ -537,7 +571,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
 #'    Category 3         0.699      0.052     13.325      0.000
 #'    Category 4        -0.743      0.057    -12.938      0.000
 #'    Category 5         0.291      0.052      5.551      0.000
-#'
+#' "
 parseCatOutput <- function(text) {
   hlines <- grep("^\\s*([\\w_\\d+\\.#\\&]+)\\s*$", text, perl=TRUE)
   if (any(grepl("Category", text[hlines]))) {
@@ -554,13 +588,26 @@ parseCatOutput <- function(text) {
   return(reformat)
 }
 
+
+#' Get Output File List
+#'
+#' This is a helper function used by extractModelSummaries and extractModelParameters.
+#' It determines whether the target is a single file or a directory.
+#' If it is a directory, all .out files are returned (perhaps recursively)
+#' It also permits the files to be filtered using a certain regular expression.
+#'
+#' @param target The target file or directory
+#' @param recursive A logical value whether to search recursively.
+#'   Defaults to \code{FALSE}.
+#' @param filefilter A regular expression passed to \code{grep}
+#'   used to filter the output files.
+#' @return A character vector of the output files
+#' @keywords internal
+#' @examples
+#' # make me!!!
+getOutFileList <- function(target, recursive=FALSE, filefilter) {
 #could this also be used by runModels to locate input files?
 #seems like that function would do well to allow for directories and single files, too.
-getOutFileList <- function(target, recursive=FALSE, filefilter) {
-  #This is a helper function used by extractModelSummaries and extractModelParameters.
-  #It determines whether the target is a single file or a directory.
-  #If it is a directory, all .out files are returned (perhaps recursively)
-  #It also permits the files to be filtered using a certain regular expression.
 
   #determine whether target is a file or a directory
   if (file.exists(target)) {
@@ -597,10 +644,18 @@ getOutFileList <- function(target, recursive=FALSE, filefilter) {
   return(outfiles)
 }
 
-#helper function
+#' Split File and Path into Separate Parts
+#'
+#' This is a helper function to split path into path and filename.
+#' Code adapted from R.utils filePath command.
+#'
+#' @param abspath A character string of the file path
+#' @return A list with elements for the directory, filename,
+#'   and absolute path.
+#' @keywords internal
+#' @examples
+#' # make me!!!
 splitFilePath <- function(abspath) {
-  #function to split path into path and filename
-  #code adapted from R.utils filePath command
   if (!is.character(abspath)) stop("Path not a character string")
   if (nchar(abspath) < 1 || is.na(abspath)) stop("Path is missing or of zero length")
 
@@ -632,7 +687,18 @@ splitFilePath <- function(abspath) {
 }
 
 
-#helper function to detect model results columns
+#' Detect Column Names
+#'
+#' Helper function to detect model results columns.
+#'
+#' @param filename The file name
+#' @param modelSection The model section
+#' @param sectionType A character string.  Defaults to \dQuote{model_results}.
+#' @return A list with elements for the directory, filename,
+#'   and absolute path.
+#' @keywords internal
+#' @examples
+#' # make me!!!
 detectColumnNames <- function(filename, modelSection, sectionType="model_results") {
 
   detectionFinished <- FALSE
@@ -784,6 +850,15 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
 
 }
 
+#' Trim White Space
+#'
+#' Helper function to remove white space from a character vector
+#'
+#' @param string The character vector to trim white space from.
+#' @return A character vector with the white space removed.
+#' @keywords internal
+#' @examples
+#' MplusAutomation:::trimSpace(c("    test", "another    "))
 trimSpace <- function(string) {
   stringTrim <- sapply(string, function(x) {
         x <- sub("^\\s*", "", x, perl=TRUE)
@@ -793,7 +868,17 @@ trimSpace <- function(string) {
   return(stringTrim)
 }
 
-#helper function to convert strings formatted in Mplus Fortran-style scientific notation using D to indicate double.
+#' Convert Mplus Number to Numeric
+#'
+#' Helper function to convert strings formatted in Mplus
+#' Fortran-style scientific notation using D to indicate double.
+#'
+#' @param vec A character vector of Mplus numbers
+#'   to convert to numeric
+#' @return A numeric vector
+#' @keywords internal
+#' @examples
+#' MplusAutomation:::mplus_as.numeric("3.1D2")
 mplus_as.numeric <- function(vec) {
   vec <- sub("D", "E", vec, fixed=TRUE)
   as.numeric(vec)
