@@ -4,26 +4,30 @@
 #'
 #' @description The MplusAutomation package leverages the flexibility of the
 #'   R language to automate latent variable model estimation and interpretation
-#'   using Mplus, a powerful latent variable modeling program developed by Muthen
-#'   and Muthen (www.statmodel.com). Specifically, MplusAutomation provides routines
+#'   using 'Mplus', a powerful latent variable modeling program developed by Muthen
+#'   and Muthen (\url{http://www.statmodel.com}). Specifically, MplusAutomation provides routines
 #'   for creating related groups of models, running batches of models, and extracting
 #'   and tabulating model parameters and fit statistics.
 #'
 #' @details The MplusAutomation package has four primary purposes:
 #' \enumerate{
 #'   \item To automatically run groups/batches of models.
-#'   \item To provide routines to extract model fit statistics, parameter estimates, and raw data from Mplus output files.
+#'   \item To provide routines to extract model fit statistics, parameter estimates, and raw data from 'Mplus' output files.
 #'   \item To facilitate comparisons among models
 #'   \item To provide a template language that allows for the creation of related input files.
 #' }
 #' The core routine for running batches of models is \code{\link{runModels}}, with
 #'   an easy-to-use GUI wrapper, \code{\link{runModels_Interactive}}.
 #'
-#' The core routine for extracting information from Mplus outputs is \code{\link{readModels}}, which
+#' The core routine for extracting information from 'Mplus' outputs is \code{\link{readModels}}, which
 #'   returns a list containing all output sections that the package can extract.
+#' 
 #' To extract summaries, parameters, modification indices, SAVEDATA output, and all other sections that the package
-#'   can understand, use the \code{\link{readModels}} function. This is the
-#'   recommended way to extract Mplus output with this package.
+#'   can understand, use the \code{\link{readModels}} function. This is the recommended way to extract 'Mplus'
+#'   output with this package. If the \code{target} argument to \code{\link{readModels}} is a single .out file,
+#'   an \code{mplus.model} (that is also a \code{list}) will be returned containing all output sections that
+#'   the package can extract. If \code{target} is a directory, a list of \code{mplus.model} objects will be returned,
+#'   named according to the output filenames.
 #'
 #' Note: \code{\link{extractModelSummaries}} is deprecated and \code{\link{readModels}} should be preferred.
 #'   To extract model summary statistics from one or more output files, see
@@ -41,16 +45,16 @@
 #' Deprecated: To extract unstandardized or standardized parameter estimates from a single output file,
 #'   see \code{\link{extractModelParameters}}.
 #'
-#' Model fit and parameter comparisons between models can be obtained using
+#' Detailed model fit and parameter comparisons between two models can be obtained using
 #'   \code{\link{compareModels}}.
 #'
 #' To create a group of related models from a single template, see \code{\link{createModels}}.
 #'   Please read the MplusAutomation vignette provided along with the package (and on the CRAN website)
-#'   in order to understand the template language.
+#'   in order to understand the template language: vignette("Vignette", package="MplusAutomation").
 #'
 #' In addition to the major functions above, a function for converting an R data.frame
-#'   for use with Mplus is provided: \code{\link{prepareMplusData}}. This converts the
-#'   data.frame to a tab-delimited file and provides an Mplus syntax stub for variable names.
+#'   for use with 'Mplus' is provided: \code{\link{prepareMplusData}}. This converts the
+#'   data.frame to a tab-delimited file and provides an 'Mplus' syntax stub for variable names.
 #'
 #' \tabular{ll}{
 #' Package: \tab MplusAutomation\cr

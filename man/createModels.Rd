@@ -15,8 +15,7 @@ No value is returned by this function. It is solely used to process an Mplus tem
 \description{
 The \code{createModels} function processes a single Mplus template file and creates a group of related
 model input files. Definitions and examples for the template language are provided in the MplusAutomation
-vignette and are not duplicated here at the moment. See this PDF:
-\url{http://cran.r-project.org/web/packages/MplusAutomation/vignettes/Vignette.pdf}
+vignette and are not duplicated here at the moment. See this documentation: \code{vignette("Vignette", package="MplusAutomation")}
 }
 \examples{
 \dontrun{

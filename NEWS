@@ -1,4 +1,4 @@
-Version 0.7 (in progress)
+Version 0.7
 - notice:       extractModelSummaries and extractModelParameters are deprecated in favor of readModels. These will be removed in future.
 - feature:      prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
 - feature:      mplusObject(), mplusModeler(), update(), and createSyntax() all now accommodate monte carlo simulations in Mplus

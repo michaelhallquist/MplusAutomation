@@ -13,7 +13,7 @@ Installation
 ------------
 
 You can install the latest release of `MplusAutomation` directly from
-[CRAN](https://cran.r-project.org/web/packages/MplusAutomation/) by running
+[CRAN](https://CRAN.R-project.org/package=MplusAutomation) by running
 
     install.packages("MplusAutomation")
 
