@@ -405,7 +405,7 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
         "CFI/TLI::TLI",
         "Information Criteria( Including the Auxiliary Part)*::Akaike \\(AIC\\)",
         "Information Criteria( Including the Auxiliary Part)*::Bayesian \\(BIC\\)",
-        "Information Criteria( Including the Auxiliary Part)*c::Sample-Size Adjusted BIC \\(n\\* = \\(n \\+ 2\\) / 24\\)",
+        "Information Criteria( Including the Auxiliary Part)*::Sample-Size Adjusted BIC \\(n\\* = \\(n \\+ 2\\) / 24\\)",
         "RMSEA \\(Root Mean Square Error Of Approximation\\)",
         "WRMR \\(Weighted Root Mean Square Residual\\)",
         "Information Criteri(a|on)::Deviance \\(DIC\\)", #
@@ -1033,7 +1033,8 @@ extractSummaries_1file <- function(outfiletext, filename, input)
     }
     
     arglist <- do.call(rbind, efaList)
-  } else if (length(multisectionMatches <- grep("^\\s*MODEL FIT INFORMATION FOR .*", outfiletext, perl=TRUE, value=TRUE)) > 0L) {
+  } else if (length(multisectionMatches <- grep("^\\s*MODEL FIT INFORMATION FOR (?!THE LATENT CLASS INDICATOR MODEL PART).*", outfiletext, perl=TRUE, value=TRUE)) > 0L) {
+    #use negative lookahead to ensure we don't grab the TECH10 output for LCA where it lists model fit info for latent class part
     #support Mplus v8 invariance testing outputs with one model fit section per variant (MODEL FIT INFORMATION FOR THE SCALAR MODEL etc.)
     #need to convert from list to data.frame format to allow for proper handling of rbind below
     arglistBase <- as.data.frame(arglist, stringsAsFactors=FALSE)

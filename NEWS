@@ -1,3 +1,6 @@
+Version 0.7-1
+- bugfix:       Correction for false positive match on model fit information from new LCA TECH10 output.
+
 Version 0.7
 - notice:       extractModelSummaries and extractModelParameters are deprecated in favor of readModels. These will be removed in future.
 - feature:      prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
