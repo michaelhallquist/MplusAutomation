@@ -79,7 +79,7 @@ The default distribution of Tcl/Tk shipped with Mac OS X is not compatible with 
 should download and install the Tcl/Tk distribution here: \url{http://cran.r-project.org/bin/macosx/tools}.
 
 \subsection{Determine the version of MplusAutomation on your machine}
-To verify the version of Mplus loaded in your R session, type:
+To verify the version of MplusAutomation loaded in your R session, type:
 
 \lstinline|> sessionInfo()|
 
