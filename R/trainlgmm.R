@@ -256,7 +256,7 @@ long2LGMM <- function(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE
     PLOT = sprintf("TYPE = PLOT3;\n SERIES = %s;",
                    paste(paste0(w.dv, " (", seq_along(assesslabs), ")"), collapse = "\n")),
     usevariables = colnames(dataw),
-    rdata = dataw), paste0(base, k, ".dat"), run = run)
+    rdata = dataw), modelout = paste0(base, k, ".inp"), run = run)
   } else {
     m <- model
   }
@@ -514,6 +514,8 @@ long2LGMM <- function(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE
 trainLGMM <- function(data, idvar, assessmentvar, newdata = FALSE, tuneGrid, cl, ncores = 1L) {
   stopifnot(is.integer(ncores))
 
+  data <- as.data.frame(data)
+
   if (ncores > 1L) {
 
     if (missing(cl)) {
@@ -529,8 +531,7 @@ trainLGMM <- function(data, idvar, assessmentvar, newdata = FALSE, tuneGrid, cl,
 
     clusterExport(cl,
                   c("data", "idvar", "assessmentvar",
-                    "newdata", "tuneGrid",
-                    "long2LGMM"),
+                    "newdata", "tuneGrid"),
                   envir = e)
 
     bigRes <- parLapplyLB(cl, 1:nrow(tuneGrid), function(i) {
