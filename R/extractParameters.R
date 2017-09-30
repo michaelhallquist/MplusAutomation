@@ -449,12 +449,12 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     allSections$unstandardized <- unstandardizedList
   } else {
     unstandardizedSection <- getSection("^MODEL RESULTS$", outfiletext)
+    
     if (!is.null(unstandardizedSection)) {
       allSections <- appendListElements(allSections, extractParameters_1section(filename, unstandardizedSection, "unstandardized"))
     }      
   }
   
-
   standardizedSection <- getSection("^STANDARDIZED MODEL RESULTS$", outfiletext)
 
   if (!is.null(standardizedSection)) {

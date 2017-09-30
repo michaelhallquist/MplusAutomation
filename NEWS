@@ -1,5 +1,11 @@
 Version 0.7-1
 - bugfix:       Correction for false positive match on model fit information from new LCA TECH10 output.
+- bugfix:       Extract delta (scale factors) vector from TECH1.
+- feature:      Refactored readModels parser for identifying major sections. Speeds up function by 7-12%.
+- feature:      new 'quiet' parameter for readModels to suppress progress messages.
+- feature:      new 'what' parameter for readModels to specify sections to extract  
+- feature:      Switch to readLines instead of scan for readModels. 1-2% speed increase.
+- notice:      For consistency, covariance.coverage has been renamed covariance_coverage in the list returned from readModels
 
 Version 0.7
 - notice:       extractModelSummaries and extractModelParameters are deprecated in favor of readModels. These will be removed in future.
