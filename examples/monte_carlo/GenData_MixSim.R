@@ -1,15 +1,19 @@
 #simulate replications from a 3-class latent class model
 #varying sample size, mean indicator separation, and noise proportion
 
-setwd("/Volumes/HD/scatter_sim")
-srcdir <- "/Volumes/HD/scatter_sim"
+## It is necessary to set the working directory if you are not working from the Rstudio project
+# setwd("/path/to/directory/containing/simulation/R/scripts")
 
-source("code/mixsim_generation_functions.R") #extensions of MixSim functions for data simulation
+datadir <- file.path("~/mplus_tmp/data") #destination of simulation datasets (can be relative or absolute path)
+if (!file.exists(datadir)) { dir.create(datadir, recursive=TRUE, showWarnings=FALSE) }
 
+source("mixsim_generation_functions.R") #extensions of MixSim functions for data simulation
+
+# cells of simulation design
 sampsize <- c(45, 90, 180, 360, 720, 1440)
 separation <- c(0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0)
 noiseProp <- c(0, .025, .05, .10, .15, .20, .25, .30)
-replications <- 1:1000
+replications <- 1:5 #how many replication datasets to generate per cell (would be ~1000 in a real Monte Carlo study)
 nc <- 3 #number of classes used to simulate data from latent class model
 nv <- 5 #number of variables in latent class model
 fitClasses <- 2:5 #number of classes in LPMs to be fit
@@ -22,12 +26,13 @@ clusterobj <- makeSOCKcluster(njobs); registerDoSNOW(clusterobj)
 for (ss in sampsize) {
   for (sep in separation) {
     for (np in noiseProp) {
-      dirTarget <- paste0(srcdir, "/n", ss, "/p", gsub(".", "_", np*100, fixed=TRUE), "/s", gsub(".", "_", sep, fixed=TRUE))
+      dirTarget <- paste0(datadir, "/n", ss, "/p", gsub(".", "_", np*100, fixed=TRUE), "/s", gsub(".", "_", sep, fixed=TRUE))
       fileTarget <- paste0(dirTarget, "/c", nc, "_v", nv, ".RData")
       
       #do not re-run simulation if data already exist
       if (file.exists(fileTarget)) { cat("Skip, file exists:", fileTarget, "\n"); next }
       
+      #generate replications in parallel
       fmm_sim <- foreach(r=iter(replications), .inorder=FALSE, .multicombine=TRUE, .packages=c("MASS", "plyr")) %dopar% {
         fmm_pi <- rep(1/nc, nc) #equal class sizes
         fmm_mu <- rbind(c1=rep(-sep, nv), c2=rep(0, nv), c3=rep(sep, nv)) #setup latent mean separation
@@ -88,15 +93,15 @@ cfalist <- list()
 for (ss in sampsize) {
   for (sep in separation) {
     for (np in noiseProp) {
-      fname_sourceReps <- paste0(srcdir, "/n", ss, "/p", gsub(".", "_", np*100, fixed=TRUE), "/s", gsub(".", "_", sep, fixed=TRUE), "/c", nc, "_v", nv, ".RData")
-      fname_resultsRData <- paste0("data/external_montecarlo_results/cfa_n", ss, "_p", gsub(".", "_", np*100, fixed=TRUE), "_s", gsub(".", "_", sep, fixed=TRUE), "_c", nc, "_v", nv, ".RData")
+      fname_sourceReps <- paste0("n", ss, "/p", gsub(".", "_", np*100, fixed=TRUE), "/s", gsub(".", "_", sep, fixed=TRUE), "/c", nc, "_v", nv, ".RData")
+      fname_resultsRData <- paste0("cfa_n", ss, "_p", gsub(".", "_", np*100, fixed=TRUE), "_s", gsub(".", "_", sep, fixed=TRUE), "_c", nc, "_v", nv, ".RData") #unique filename for results from this cell
       mname <- paste0("cfa_n", ss, "_p", gsub(".", "_", np*100, fixed=TRUE), "_s", gsub(".", "_", sep, fixed=TRUE), "_c", nc, "_v", nv) #model name
       
       cfalist[[mname]] <- list(nc=nc, nv=nv, ss=ss, sep=sep, np=np, fname_sourceReps=fname_sourceReps, fname_resultsRData=fname_resultsRData)
       
       for (fc in fitClasses) {
-        fname_sourceReps <- paste0(srcdir, "/n", ss, "/p", gsub(".", "_", np*100, fixed=TRUE), "/s", gsub(".", "_", sep, fixed=TRUE), "/c", nc, "_v", nv, ".RData")
-        fname_resultsRData <- paste0("data/external_montecarlo_results/fmm", fc, "_n", ss, "_p", gsub(".", "_", np*100, fixed=TRUE), "_s", gsub(".", "_", sep, fixed=TRUE), "_c", nc, "_v", nv, ".RData")
+        fname_sourceReps <- paste0("n", ss, "/p", gsub(".", "_", np*100, fixed=TRUE), "/s", gsub(".", "_", sep, fixed=TRUE), "/c", nc, "_v", nv, ".RData")
+        fname_resultsRData <- paste0("fmm", fc, "_n", ss, "_p", gsub(".", "_", np*100, fixed=TRUE), "_s", gsub(".", "_", sep, fixed=TRUE), "_c", nc, "_v", nv, ".RData")
         mname <- paste0("fmm", fc, "_n", ss, "_p", gsub(".", "_", np*100, fixed=TRUE), "_s", gsub(".", "_", sep, fixed=TRUE), "_c", nc, "_v", nv) #model name
         
         lcalist[[mname]] <- list(nc=nc, nv=nv, ss=ss, sep=sep, np=np, fc=fc, fname_sourceReps=fname_sourceReps, fname_resultsRData=fname_resultsRData)
@@ -106,5 +111,5 @@ for (ss in sampsize) {
   }
 }
 
-save(lcalist, file=file.path(basedir, "data", "lcaMasterList.RData"))
-save(cfalist, file=file.path(basedir, "data", "cfaMasterList.RData"))
+save(lcalist, file=file.path(datadir, "lcaMasterList.RData"))
+save(cfalist, file=file.path(datadir, "cfaMasterList.RData"))

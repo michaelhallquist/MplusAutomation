@@ -4,7 +4,7 @@
 \alias{getSection}
 \title{Get an Output Section}
 \usage{
-getSection(sectionHeader, outfiletext, headers = "standard", omit = NULL)
+getSection(sectionHeader, outfiletext, headers = "standard")
 }
 \arguments{
 \item{sectionHeader}{Header section}
@@ -12,8 +12,6 @@ getSection(sectionHeader, outfiletext, headers = "standard", omit = NULL)
 \item{outfiletext}{Output file text}
 
 \item{headers}{Can pass custom headers but defaults to a standard set.}
-
-\item{omit}{TODO.}
 }
 \value{
 Section

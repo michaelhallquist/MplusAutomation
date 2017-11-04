@@ -19,6 +19,7 @@
 #' @param what a character vector denoting what aspects of Mplus output to extract.
 #'    Defaults to \code{"all"}, which will extract all supported output sections.
 #'    See details for additional information.
+#' @param quiet whether to suppress printing to the screen the file currently being processed. Defaults to FALSE. 
 #' 
 #' @details 
 #' 

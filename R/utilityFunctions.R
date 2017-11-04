@@ -290,7 +290,6 @@ getSection_Blanklines <- function(sectionHeader, outfiletext) {
 #' @param sectionHeader Header section
 #' @param outfiletext Output file text
 #' @param headers Can pass custom headers but defaults to a standard set.
-#' @param omit TODO.
 #' @return Section
 #' @keywords internal
 #' @examples

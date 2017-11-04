@@ -1,6 +1,6 @@
 #these functions are slightly adapted (or largely just documented from the MixSim package
 #tweaked to let me separate the simulation and noising processes.
-
+#code largely attributable to Volodymyr Melnykov, Wei-Chen Chen, and Ranjan Maitra.
 simdata <- function (n, Pi, Mu, S, n.noise = 0, n.out = 0, alpha = 0.001, 
     max.out = 1e+05, int = NULL, lambda = NULL) 
 {
