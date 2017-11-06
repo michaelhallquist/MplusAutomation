@@ -757,6 +757,11 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
           identical(nextLine, c("Estimate", "S.E.", "Est./S.E.", "P-Value", "Missing")))
         varNames <- c("param", "est", "se", "est_se", "pval", "rate_missing")
 
+      #Multiple imputation output for R2 including rate of missing (introduced in v8, I think)
+      else if (identical(thisLine, c("Observed", "Two-Tailed", "Rate", "of")) &&
+          identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Missing")))
+        varNames <- c("param", "est", "se", "est_se", "pval", "rate_missing")
+            
       #Usual five-column output that applies to most unstandardized and standardized sections in Mplus 5 and later
       else if (identical(thisLine, c("Two-Tailed")) &&
           identical(nextLine, c("Estimate", "S.E.", "Est./S.E.", "P-Value")))
@@ -860,12 +865,9 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       warning("Unable to determine column names for section ", sectionType, ".\n  ", filename)
       return(NULL)
     }
-
-
   }
 
   return(varNames)
-
 }
 
 #' Trim White Space

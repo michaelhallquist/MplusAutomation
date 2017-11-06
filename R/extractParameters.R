@@ -38,7 +38,8 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
               identical(x, c("Variable", "Estimate", "Factors")) ||
               identical(x, c("Variable", "Estimate", "Variance")) ||
               identical(x, c("Posterior", "One-Tailed", "95%", "C.I.")) ||
-              identical(x, c("Variable", "Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%"))
+              identical(x, c("Variable", "Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%")) ||
+              identical(x, c("Observed", "Two-Tailed", "Rate", "of")) #r2 output for MI v8 with rate of missing
           ) { TRUE } else { FALSE }
         })
 
@@ -235,7 +236,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   } else { sectionType <- "model_results" }
 
   if (!exists("columnNames")) { columnNames <- detectColumnNames(filename, modelSection, sectionType) }
-  
+
   #return nothing if unable to detect column names (this will then get filtered out in the extractParameters_1file process
   if (is.null(columnNames)) {
     x <- data.frame() #empty
@@ -699,7 +700,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 #' }
 extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, dropDimensions=FALSE, resultType) {
   #message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
-  message("extractModelParameters has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"parameters\") to replicate the old functionality.")
+  message("extractModelParameters has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"parameters\")$parameters to replicate the old functionality.")
   
   #function tree (top to bottom):
   #extractModelParameters: loop over one or more output files

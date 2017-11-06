@@ -7,7 +7,7 @@
 runModels(target = getwd(), recursive = FALSE, filefilter = NULL,
   showOutput = FALSE, replaceOutfile = "always",
   logFile = "Mplus Run Models.log", Mplus_command = "Mplus",
-  killOnFail = TRUE)
+  killOnFail = TRUE, local_tmpdir = FALSE)
 }
 \arguments{
 \item{target}{the directory containing Mplus input files (.inp) to run
@@ -43,6 +43,10 @@ or where one wants to test different versions of the Mplus program.}
 
 \item{killOnFail}{optional. Windows only for now. If \code{TRUE}, kill all processes named mplus.exe when
 \code{runModels} does not terminate normally. Defaults to \code{TRUE}.}
+
+\item{local_tmpdir}{optional. Linux/Mac for now. If \code{TRUE}, set the TMPDIR environment variable to the
+location of the .inp file prior to execution. This is useful in Monte Carlo studies where many instances of Mplus
+may run in parallel and we wish to avoid collisions in temporary files among processes.}
 }
 \value{
 None. Function is used for its side effects (running models).

@@ -1012,7 +1012,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #' }
 extractModelSummaries <- function(target=getwd(), recursive=FALSE, filefilter) {
   #message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
-  message("extractModelSummaries has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"summaries\") to replicate the old functionality.")
+  message("extractModelSummaries has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"summaries\")$summaries to replicate the old functionality.")
   
   #retain working directory and reset at end of run
 #  curdir <- getwd()
