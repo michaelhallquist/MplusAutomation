@@ -698,7 +698,8 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
 #' 	"C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/ex3.14.out")
 #' }
 extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, dropDimensions=FALSE, resultType) {
-  message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
+  #message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
+  message("extractModelParameters has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"parameters\") to replicate the old functionality.")
   
   #function tree (top to bottom):
   #extractModelParameters: loop over one or more output files
@@ -706,33 +707,33 @@ extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, 
   #extractParameters_1section: extract model parameters for a given section.
   #extractParameters_1chunk: extract model parameters for a given chunk (e.g., Latent class 2, Between Level) within a given section.
 
-  outfiles <- getOutFileList(target, recursive, filefilter)
-
-  allFiles <- list()
-  for (curfile in outfiles) {
-    #if not recursive, then each element is uniquely identified (we hope!) by filename alone
-    if (recursive==FALSE)	listID <- make.names(splitFilePath(curfile)$filename) #each list element is named by the respective file
-    else listID <- make.names(curfile) #each list element is named by the respective file
-
-    outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
-
-    allFiles[[listID]] <- extractParameters_1file(outfiletext, curfile, resultType)
-  }
-
-
-  #dropDimensions <- TRUE
-  if (length(allFiles) == 1) allFiles <- allFiles[[1]] # when only extracting a single file, return just the parameters list for the single model
-  else if (dropDimensions == TRUE) {
-    #in the case of multi-file output, we want to ensure that the interior lists (which contain model sections like stdyx.standardized)
-    #all have a similar structure. But if all of them have only one element
-    allNames <- sapply(allFiles, names)
-    allLengths <- sapply(allNames, length)
-
-    #if there is only one unique name in the bunch and all sub-list lengths are 1, then collapse
-    #could probably just check for one unique name.
-    if (length(unique(unlist(allLengths))) == 1 && length(unique(unlist(allNames))) == 1) {
-      allFiles <- sapply(allFiles, "[", 1)
-    }
+#  outfiles <- getOutFileList(target, recursive, filefilter)
+#
+#  allFiles <- list()
+#  for (curfile in outfiles) {
+#    #if not recursive, then each element is uniquely identified (we hope!) by filename alone
+#    if (recursive==FALSE)	listID <- make.names(splitFilePath(curfile)$filename) #each list element is named by the respective file
+#    else listID <- make.names(curfile) #each list element is named by the respective file
+#
+#    outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
+#
+#    allFiles[[listID]] <- extractParameters_1file(outfiletext, curfile, resultType)
+#  }
+#
+#
+#  #dropDimensions <- TRUE
+#  if (length(allFiles) == 1) allFiles <- allFiles[[1]] # when only extracting a single file, return just the parameters list for the single model
+#  else if (dropDimensions == TRUE) {
+#    #in the case of multi-file output, we want to ensure that the interior lists (which contain model sections like stdyx.standardized)
+#    #all have a similar structure. But if all of them have only one element
+#    allNames <- sapply(allFiles, names)
+#    allLengths <- sapply(allNames, length)
+#
+#    #if there is only one unique name in the bunch and all sub-list lengths are 1, then collapse
+#    #could probably just check for one unique name.
+#    if (length(unique(unlist(allLengths))) == 1 && length(unique(unlist(allNames))) == 1) {
+#      allFiles <- sapply(allFiles, "[", 1)
+#    }
 #		nameLengths <- sapply(allNames, length)
 #		names(nameLengths) <- NULL
 #		numUniqueLengths <- length(unique(nameLengths))
@@ -741,9 +742,9 @@ extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, 
 #			#need to check for identical names
 #
 #		}
-  }
-
-  return(allFiles)
+#  }
+#
+#  return(allFiles)
 }
 
 extractIndirect <- function(outfiletext, curfile) {

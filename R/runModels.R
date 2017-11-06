@@ -232,6 +232,9 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #'   or where one wants to test different versions of the Mplus program.
 #' @param killOnFail optional. Windows only for now. If \code{TRUE}, kill all processes named mplus.exe when
 #'   \code{runModels} does not terminate normally. Defaults to \code{TRUE}.
+#' @param local_tmpdir optional. Linux/Mac for now. If \code{TRUE}, set the TMPDIR environment variable to the
+#'   location of the .inp file prior to execution. This is useful in Monte Carlo studies where many instances of Mplus
+#'   may run in parallel and we wish to avoid collisions in temporary files among processes.
 #'
 #' @return None. Function is used for its side effects (running models).
 #' @author Michael Hallquist
@@ -245,7 +248,7 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #'     Mplus_command="C:\\Users\\Michael\\Mplus Install\\Mplus51.exe")
 #' }
 runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOutput=FALSE,
-    replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus", killOnFail=TRUE) {
+    replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus", killOnFail=TRUE, local_tmpdir=FALSE) {
   
   #TODO: would be good to come back and make this more versatile, supporting a vector target
   if (length(target) > 1L) { stop("target for runModels must be a single file or single directory")}
@@ -466,6 +469,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
       #need to switch to each directory, then run Mplus within using just the filename
       oldwd <- getwd()
       setwd(dirtocd)
+      if (local_tmpdir) { Sys.setenv(TMPDIR=dirtocd) } #define TMPDIR local to the .inp file to execute
       exitCode <- system2(Mplus_command, args=c(shQuote(inputSplit$filename)), stdout=stdout.value, wait=TRUE)
       if (exitCode > 0L) {
         warning("Mplus returned error code: ", exitCode, ", for model: ", inputSplit$filename, "\n")

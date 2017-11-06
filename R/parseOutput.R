@@ -1011,47 +1011,49 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #'     "C:/Program Files/Mplus/Mplus Examples/User's Guide Examples")
 #' }
 extractModelSummaries <- function(target=getwd(), recursive=FALSE, filefilter) {
-  message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
+  #message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
+  message("extractModelSummaries has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"summaries\") to replicate the old functionality.")
+  
   #retain working directory and reset at end of run
-  curdir <- getwd()
-
-  outfiles <- getOutFileList(target, recursive, filefilter)
-
-  details <- list()
-
-  #for each output file, use the extractSummaries_1file function to extract relevant data
-  #note that extractSummaries_1file returns data as a list
-  #rbind creates an array of lists by appending each extractSummaries_1file return value
-  for (i in 1:length(outfiles)) {
-    #read the file
-    readfile <- scan(outfiles[i], what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
-
-    #bomb out for EFA files
-    if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", readfile, ignore.case=TRUE, perl=TRUE)) > 0) {
-      warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelSummaries.\n  Skipping outfile: ", outfiles[i]))
-      next #skip file
-    }
-
-    #append params for this file to the details array
-    #note that this is a memory-inefficient solution because of repeated copying. Better to pre-allocate.
-
-    inp <- extractInput_1file(readfile, outfiles[i])
-    details[[i]] <- extractSummaries_1file(readfile, outfiles[i], inp)
-  }
-
-  #if there are several output files, then use rbind.fill to align fields
-  if (length(details) > 1L) details <- do.call(rbind.fill, details)
-  else details <- details[[1L]]
-
-  #reset working directory
-  setwd(curdir)
-
-  #cleanup columns containing only NAs
-  for (col in names(details)) {
-    if (all(is.na(details[[col]]))) details[[col]] <- NULL
-  }
-
-  return(details)
+#  curdir <- getwd()
+#
+#  outfiles <- getOutFileList(target, recursive, filefilter)
+#
+#  details <- list()
+#
+#  #for each output file, use the extractSummaries_1file function to extract relevant data
+#  #note that extractSummaries_1file returns data as a list
+#  #rbind creates an array of lists by appending each extractSummaries_1file return value
+#  for (i in 1:length(outfiles)) {
+#    #read the file
+#    readfile <- scan(outfiles[i], what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
+#
+#    #bomb out for EFA files
+#    if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", readfile, ignore.case=TRUE, perl=TRUE)) > 0) {
+#      warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelSummaries.\n  Skipping outfile: ", outfiles[i]))
+#      next #skip file
+#    }
+#
+#    #append params for this file to the details array
+#    #note that this is a memory-inefficient solution because of repeated copying. Better to pre-allocate.
+#
+#    inp <- extractInput_1file(readfile, outfiles[i])
+#    details[[i]] <- extractSummaries_1file(readfile, outfiles[i], inp)
+#  }
+#
+#  #if there are several output files, then use rbind.fill to align fields
+#  if (length(details) > 1L) details <- do.call(rbind.fill, details)
+#  else details <- details[[1L]]
+#
+#  #reset working directory
+#  setwd(curdir)
+#
+#  #cleanup columns containing only NAs
+#  for (col in names(details)) {
+#    if (all(is.na(details[[col]]))) details[[col]] <- NULL
+#  }
+#
+#  return(details)
 }
 
 

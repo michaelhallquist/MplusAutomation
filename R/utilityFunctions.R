@@ -19,6 +19,12 @@
 #'   param <- lookupTech1Parameter(models$tech1, 16)
 #' }
 lookupTech1Parameter <- function(tech1Output, paramNumber) {
+  #accept mplus model object
+  if (inherits(tech1Output, c("mplus.model"))) {
+    tech1Output <- tech1Output$tech1
+  }
+  
+  #or accept $tech1
   if (!inherits(tech1Output, c("mplus.parameterSpecification", "mplus.tech1"))) {
     warning("tech1Output passed into lookupTech1Parameter does not appear to be the right data type.")
     return(NULL)
@@ -40,12 +46,11 @@ lookupTech1Parameter <- function(tech1Output, paramNumber) {
   if (matchFound) {
     cat("Matrix name:", matName, "\n\n")
     print(as.data.frame(matchVars))
-  }
-  else
+    return(invisible(as.data.frame(matchVars)))
+  } else {
     cat("Unable to find matching parameter in TECH1 output for parameter number:", paramNumber)
-
-  return(as.data.frame(matchVars))
-
+    return(invisible(NULL))
+  }
 }
 
 #' Test inequality-constrained hypothesis for two parameters based on iterations of MCMC chains

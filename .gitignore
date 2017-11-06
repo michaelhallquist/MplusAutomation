@@ -16,3 +16,6 @@ devtools.zip
 pkg_build
 local
 products
+
+#from mac
+.DS_Store
