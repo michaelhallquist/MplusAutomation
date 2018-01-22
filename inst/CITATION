@@ -1,0 +1,19 @@
+citHeader("To cite MplusAutomation in publications use:")
+
+citEntry(entry = "Article",
+  title        = "{MplusAutomation}: An {R} Package for Facilitating Large-Scale Latent Variable Analyses in {Mplus}",
+  author       = personList(person(c("Michael", "N."), "Hallquist"),
+                   person(c("Joshua", "F."), "Wiley")),
+  journal      = "Structural Equation Modeling",
+  year         = "2018",
+  pages        = "1--18",
+  doi          = "10.1080/10705511.2017.1402334",
+  url          = "http://www.tandfonline.com/doi/full/10.1080/10705511.2017.1402334",
+
+  textVersion  =
+  paste("Hallquist, M. N. & Wiley, J. F. (2018).",
+        "MplusAutomation: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus",
+        "Structural Equation Modeling, 1-18.",
+        "doi: 10.1080/10705511.2017.1402334.")
+  )
+

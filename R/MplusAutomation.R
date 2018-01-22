@@ -21,7 +21,7 @@
 #'
 #' The core routine for extracting information from 'Mplus' outputs is \code{\link{readModels}}, which
 #'   returns a list containing all output sections that the package can extract.
-#' 
+#'
 #' To extract summaries, parameters, modification indices, SAVEDATA output, and all other sections that the package
 #'   can understand, use the \code{\link{readModels}} function. This is the recommended way to extract 'Mplus'
 #'   output with this package. If the \code{target} argument to \code{\link{readModels}} is a single .out file,
@@ -75,3 +75,25 @@
 #' @seealso See \code{\link{runModels}} for an example running a model.
 #' @references Mplus software. Muthen and Muthen. \url{http://www.statmodel.com}
 NULL
+
+
+# display version number and citation when the package is loaded
+.onAttach <- function(libname, pkgname) {
+
+  desc  <- packageDescription(pkgname, libname)
+
+  packageStartupMessage(
+
+      'Version:  ', desc$Version, '\n',
+
+    'We work hard to write this free software. Please help us get credit by citing: \n\n',
+
+    paste("Hallquist, M. N. & Wiley, J. F. (2018).",
+      "MplusAutomation: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus",
+      "Structural Equation Modeling, 1-18.",
+      "doi: 10.1080/10705511.2017.1402334.\n\n"),
+
+    '-- see citation("MplusAutomation").'
+
+  )
+}
