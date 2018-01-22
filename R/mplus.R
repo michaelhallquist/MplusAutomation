@@ -514,26 +514,47 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'   wt WITH hp;", rdata = mtcars)
 #'
 #'  # estimate the model in Mplus and read results back into R
-#'  res <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
+#'  res <- mplusModeler(test, modelout = "model1.inp", run = 1L)
 #'
 #'  # when forcing writeData = "always" data gets overwritten (with a warning)
-#'  resb <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L,
+#'  resb <- mplusModeler(test, modelout = "model1.inp", run = 1L,
 #'                       writeData = "always")
 #'
 #'  # using writeData = "ifmissing", the default, no data re-written
-#'  resc <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
+#'  resc <- mplusModeler(test, modelout = "model1.inp", run = 1L)
 #'
 #'  # using writeData = "ifmissing", the default, data ARE written
 #'  # if data changes
 #'  test <- mplusObject(MODEL = "mpg ON wt hp;
 #'    wt WITH hp;", rdata = mtcars[-10, ])
-#'  resd <- mplusModeler(test, "mtcars.dat", modelout = "model1.inp", run = 1L)
+#'  resd <- mplusModeler(test, modelout = "model1.inp", run = 1L)
 #'
 #'  # show summary
-#'  summary(res)
+#'  summary(resd)
+#'
+#'  # show coefficients
+#'  coef(resd)
+#'
+#'  # what if you wanted confidence intervals
+#'  # and standardized values?
+#'  # first update to tell Mplus you want them, re-run and print
+#'  test <- update(test, OUTPUT = ~ "CINTERVAL; STDYX;")
+#'  resd <- mplusModeler(test, modelout = "model1.inp", run = 1L)
+#'
+#' coef(resd)
+#' confint(resd)
+#'
+#' # now standardized
+#' coef(resd, type = "stdyx")
+#' confint(resd, type = "stdyx")
+#'
+#' # put together in one data frame if desired
+#' merge(
+#'   coef(resd, type = "stdyx"),
+#'   confint(resd, type = "stdyx"),
+#'   by = "Label")
 #'
 #'  # remove files
-#'  unlink(res$results$input$data$file)
 #'  unlink(resc$results$input$data$file)
 #'  unlink(resd$results$input$data$file)
 #'  unlink("model1.inp")
@@ -549,7 +570,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'   usevariables = c("mpg", "wt", "hp"),
 #'   rdata = mtcars)
 #'
-#'  res2 <- mplusModeler(test2, "mtcars.dat", modelout = "model2.inp", run = 1L)
+#'  res2 <- mplusModeler(test2, modelout = "model2.inp", run = 1L)
 #'
 #'  # remove files
 #'  unlink(res2$results$input$data$file)
@@ -560,7 +581,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'  # and showing how an existing model can be easily updated and reused
 #'  test3 <- update(test2, ANALYSIS = ~ "ESTIMATOR = MLR;")
 #'
-#'  res3 <- mplusModeler(test3, "mtcars.dat", modelout = "model3.inp", run = 1L)
+#'  res3 <- mplusModeler(test3, modelout = "model3.inp", run = 1L)
 #'  unlink(res3$results$input$data$file)
 #'  unlink("model3.inp")
 #'  unlink("model3.out")
@@ -584,7 +605,8 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'    usevariables = c("mpg", "wt", "cyl"),
 #'    rdata = mtcars)
 #'
-#'  res4 <- mplusModeler(test4, "mtcars.dat", modelout = "model4.inp", run = 10L)
+#'  res4 <- mplusModeler(test4, "mtcars.dat", modelout = "model4.inp", run = 10L,
+#'    hashfilename = FALSE)
 #'  # see the results
 #'  res4$results$boot
 #'
@@ -592,7 +614,6 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'  unlink("mtcars.dat")
 #'  unlink("model4.inp")
 #'  unlink("model4.out")
-#'  unlink("Mplus Run Models.log")
 #'
 #' # Monte Carlo Simulation Example
 #' montecarlo <- mplusObject(
@@ -626,7 +647,44 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'
 #' unlink("montecarlo.inp")
 #' unlink("montecarlo.out")
-#' unlink("Mplus Run Models.log")
+#'
+#'
+#' # Example including ID variable and extracting factor scores
+#' dat <- mtcars
+#' dat$UID <- 1:nrow(mtcars)
+#'
+#' testIDs <- mplusObject(
+#'   TITLE = "test the mplusModeler wrapper with IDs;",
+#'   VARIABLE = "IDVARIABLE = UID;",
+#'   MODEL = "
+#'     F BY mpg wt hp;",
+#'   SAVEDATA = "
+#'     FILE IS testid_fscores.dat;
+#'     SAVE IS fscores;
+#'     FORMAT IS free;",
+#'   usevariables = c("UID", "mpg", "wt", "hp"),
+#'   rdata = dat)
+#'
+#'  resIDs <- mplusModeler(testIDs, modelout = "testid.inp", run = 1L)
+#'
+#' # view the saved data from Mplus, including factor scores
+#' # the indicator variables, and the ID variable we specified
+#' head(resIDs$results$savedata)
+#'
+#' # merge the factor scores with the rest of the original data
+#' # merge together by the ID column
+#' dat <- merge(dat, resIDs$results$savedata[, c("F", "UID")],
+#'   by = "UID")
+#'
+#' # correlate merged factor scores against some other new variable
+#' with(dat, cor(F, qsec))
+#'
+#'  # remove files
+#'  unlink(resIDs$results$input$data$file)
+#'  unlink("testid.inp")
+#'  unlink("testid.out")
+#'  unlink("testid_fscores.dat")
+#'  unlink("Mplus Run Models.log")
 #' }
 mplusModeler <- function(object, dataout, modelout, run = 0L,
                          check = FALSE, varwarnings = TRUE, Mplus_command="Mplus",
