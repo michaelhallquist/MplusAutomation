@@ -66,7 +66,7 @@ Its is to parse all (supported) aspects of Mplus output and to combine
 these into a list object, with one element per output file identified.
 }
 \details{
-The \code{what} parameter defaults to "all", which extracts all supported output. If you would like to extract a 
+The \code{what} parameter defaults to "all", which extracts all supported output. If you would like to extract a
 reduced set of output sections (especially to speed up the function when reading many files), specify the sections
 as a character vector from the following options:
 
