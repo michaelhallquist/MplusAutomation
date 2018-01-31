@@ -59,8 +59,8 @@
 #' \tabular{ll}{
 #' Package: \tab MplusAutomation\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.7\cr
-#' Date: \tab 2017-07-12\cr
+#' Version: \tab 0.7-1\cr
+#' Date: \tab 2018-01-31\cr
 #' License: \tab LGPL-3\cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -72,6 +72,7 @@
 #' Maintainer: Michael Hallquist \email{michael.hallquist@@gmail.com}
 #' @keywords package
 #' @import plyr
+#' @importFrom utils packageDescription
 #' @seealso See \code{\link{runModels}} for an example running a model.
 #' @references Mplus software. Muthen and Muthen. \url{http://www.statmodel.com}
 NULL

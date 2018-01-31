@@ -382,6 +382,8 @@ parse_into_sections <- function(outfiletext) {
       "R-SQUARE", "QUALITY OF NUMERICAL RESULTS", "QUALITY OF NUMERICAL RESULTS FOR .*", "TECHNICAL OUTPUT", "TECHNICAL \\d+ OUTPUT",
       "TECHNICAL \\d+ OUTPUT FOR .*", "TECHNICAL 5/6 OUTPUT",
       "TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS",
+      "TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS FOR LATENT RESPONSE VARIABLES",
+      "TOTAL, INDIRECT, AND DIRECT EFFECTS BASED ON COUNTERFACTUALS \\(CAUSALLY-DEFINED EFFECTS\\)",
       "STANDARDIZED TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS", "CONFIDENCE INTERVALS OF MODEL RESULTS",
       "CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS",
       "CREDIBILITY INTERVALS OF MODEL RESULTS",
@@ -458,7 +460,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
   #allow for multiple depths (subsections) separated by ::
   #will just extract from deepest depth
   header <- strsplit(header, "::", fixed=TRUE)[[1]]
-
+  
   sectionList <- list()
   targetText <- outfiletext
   for (level in 1:length(header)) {
@@ -507,12 +509,10 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
             if (length(samelevelMatches) > 0) {
               sameLevelMatch <- TRUE
               sectionEnd <- readStart+samelevelMatches[1] - 2 #-1 for going to line before next header, another -1 for readStart
-            }
-            else if (readStart+19 >= length(targetText)) {
+            } else if (readStart+19 >= length(targetText)) {
               sameLevelMatch <- TRUE
               sectionEnd <- length(targetText)
-            }
-            else readStart <- readStart + 20 #process next batch
+            } else { readStart <- readStart + 20 } #process next batch
 
             #if (readStart > 100000) browser()#stop ("readStart exceeded 100000. Must be formatting problem.")
           }
