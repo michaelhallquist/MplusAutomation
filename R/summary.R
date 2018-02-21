@@ -87,8 +87,8 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
 #'
 #' @param modelList A list of models returned from the \code{extractModelSummaries} function.
 #' @param type A character vector indicating the type of output format to be generated.  One of:
-#'   \dQuote{screen}, \dQuote{popup}, \dQuote{html}, \dQuote{latex}, or \dQuote{markdown}. Screen results in a simple
-#'   summary table being sent to the R console.
+#'   \dQuote{none}, \dQuote{screen}, \dQuote{popup}, \dQuote{html}, \dQuote{latex}, or \dQuote{markdown}. 
+#'   Screen results in a simple summary table being sent to the R console.
 #' @param filename The name of the file to be created. Can be an absolute or relative path. If \code{filename}
 #'   is a relative path or just the filename, then it is assumed that the file resides in the working
 #'   directory \code{getwd()}. Example: \code{"Mplus Summary.html"}.  By default, no filename is given,
@@ -140,7 +140,7 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
 #'  unlink("mtcars.out")
 #'  unlink("Mplus Run Models.log")
 #' }
-SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex", "markdown"),
+SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex", "markdown", "none"),
                          filename = "", keepCols, dropCols, sortBy, caption = "",
                          display = FALSE, ..., include.rownames = FALSE) {
   type <- match.arg(type)
@@ -159,6 +159,7 @@ SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex",
   }
 
   switch(type,
+         none = return(MplusData),
          screen = print(MplusData),
          popup = {
            if (!suppressWarnings(requireNamespace("relimp"))) {
