@@ -201,17 +201,17 @@ mixtureSummaryTable <- function(modelList,
 #' @param parameter Which parameter to plot (from Mplus parameter estimates).
 #' Defaults to 'Means'.
 #' @param ci What confidence interval should the errorbars span? Defaults to
-#' a 95% confidence interval. Set to NULL to remove errorbars.
+#' a 95\% confidence interval. Set to NULL to remove errorbars.
 #' @param bw Logical. Should the plot be black and white (for print), or color?
 #' @param rawdata Should raw data be plotted in the background? Setting this to
 #' TRUE might result in long plotting times. Requires including the Mplus syntax
 #' 'SAVEDATA: FILE IS "filename"; SAVE = cprobabilities' in the Mplus input.
 #' @param alpha_range The minimum and maximum values of alpha (transparancy) for
 #' the raw data. Minimum should be 0; lower maximum values of alpha can help
-#' reduce overplotting.#'
+#' reduce overplotting.
 #' @return An object of class 'ggplot'.
 #' @author Caspar J. van Lissa
-#' @keywords internal
+#' @keywords plot mixture mplus
 #' @examples
 #' createMixtures(classes = 1:4, filename_stem = "cars",
 #'                model_overall = "wt ON drat;",
