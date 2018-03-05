@@ -194,12 +194,13 @@ mixtureSummaryTable <- function(modelList,
 #'
 #' Creates a profile plot for a single object of class 'mplus.model', or a
 #' faceted plot of profile plots for an object of class 'mplus.model.list'.
-#' @param modelList A list object of Mplus models, or a single Mplus model
+#' @param modelList A list of Mplus mixture models, or a single mixture model
 #' @param coefficients Which type of coefficients to plot on the y-axis; default
 #' is 'unstandardized'. Options include: c('stdyx.standardized',
 #' 'stdy.standardized', 'std.standardized')
-#' @param parameter Which parameter to plot (from Mplus parameter estimates).
-#' Defaults to 'Means'.
+#' @param parameter Which parameter to plot (from Mplus parameter estimate
+#' headings included in the output).
+#' Defaults to c('Means', 'Intercepts').
 #' @param ci What confidence interval should the errorbars span? Defaults to
 #' a 95\% confidence interval. Set to NULL to remove errorbars.
 #' @param bw Logical. Should the plot be black and white (for print), or color?
@@ -240,6 +241,7 @@ plotMixtures <- function(modelList,
                          rawdata = FALSE,
                          alpha_range = c(0, .1))
 {
+  coefficients <- coefficients[1]
   # Check if mplusModel is of class mplus.model
   if (!(inherits(modelList, "mplus.model") |
         all(sapply(modelList, function(x) {
@@ -297,8 +299,6 @@ plotMixtures <- function(modelList,
   }
   # Prepare plot data
   # Get coefficients
-  if (length(coefficients) > 1)
-    coefficients <- coefficients[1]
   missing_coefficients <-
     which(sapply(modelList, function(x) {
       is.null(x$parameters[[coefficients]])
@@ -343,7 +343,8 @@ plotMixtures <- function(modelList,
   # Get some classy names
   names(plotdat)[which(names(plotdat) %in% c("param", "est", "LatentClass"))] <-
     c("Variable", "Value", "Class")
-  plotdat$Variable <- factor(tolower(plotdat$Variable))
+  plotdat$Variable <- factor(plotdat$Variable)
+  levels(plotdat$Variable) <- paste0(toupper(substring(levels(plotdat$Variable), 1, 1)), tolower(substring(levels(plotdat$Variable), 2)))
   # Basic plot
   if (bw) {
     classplot <-
@@ -403,12 +404,17 @@ plotMixtures <- function(modelList,
           var_names <-
             matrix(names(var_names)[which(var_names == max(var_names))], ncol = 1)
         }
-        
+        if(!any(tolower(levels(plotdat$Variable)) %in% tolower(var_names[,1]))){
+          warning("None of the requested variables were found in the Mplus savedata.")
+        } else{
+          if(any(!(tolower(levels(plotdat$Variable)) %in% tolower(var_names[,1])))){
+            warning("Some of the requested variables were not found in the Mplus savedata.")
+          }
         raw.data <-
           lapply(modelList, function(x) {
             subset(x$savedata,
                    select = c(
-                     names(x$savedata)[which(levels(plotdat$Variable) %in% tolower(names(x$savedata)))],
+                     names(x$savedata)[which(tolower(names(x$savedata)) %in% tolower(levels(plotdat$Variable)))],
                      grep("^CPROB", names(x$savedata), value = TRUE)
                    ))
           })
@@ -429,8 +435,6 @@ plotMixtures <- function(modelList,
             data.frame(Title = modelList[[x]]$input$title, raw.data[[x]])
           }))
         
-        
-        
         names(raw.data)[which(!names(raw.data) %in% c("Title", "Class", "Probability"))] <-
           paste0("Value.", names(raw.data)[which(!names(raw.data) %in% c("Title", "Class", "Probability"))])
         raw.data <- reshape(
@@ -440,7 +444,8 @@ plotMixtures <- function(modelList,
           timevar = "Variable"
         )[, c("Title", "Class", "Probability", "Variable", "Value")]
         
-        raw.data$Variable <- factor(tolower(raw.data$Variable))
+        raw.data$Variable <- factor(raw.data$Variable)
+        levels(raw.data$Variable) <- paste0(toupper(substring(levels(raw.data$Variable), 1, 1)), tolower(substring(levels(raw.data$Variable), 2)))
         if (!all(levels(raw.data$Variable) %in% levels(plotdat$Variable))) {
           try_to_order <-
             pmatch(levels(raw.data$Variable),
@@ -457,8 +462,6 @@ plotMixtures <- function(modelList,
         }
         raw.data$Class <- ordered(raw.data$Class)
         
-        #raw.data$Probability <- ((raw.data$Probability - min(raw.data$Probability))/max(raw.data$Probability))
-        
         classplot <- classplot +
           geom_jitter(
             data = raw.data,
@@ -471,6 +474,7 @@ plotMixtures <- function(modelList,
             )
           ) +
           scale_alpha_continuous(range = alpha_range, guide = FALSE)
+        }
       }
     }
   }
@@ -511,11 +515,13 @@ plotMixtures <- function(modelList,
 #' to their posterior class probabilities. Note that rawdata must be TRUE in
 #' order to obtain polynomial smooth lines, because these are calculated on the
 #' raw data.
-#' @param alpha_range Numeric vector. The minimum and maximum values of alpha (transparancy) for
-#' the raw data. Minimum should be 0; lower maximum values of alpha can help
-#' reduce overplotting.
-#' @param linear_time Character. Indicate the name of the coefficient which encodes linear
-#' time. Commonly specified as 'S' (e.g., i s | ), but your syntax might differ.
+#' @param alpha_range Numeric vector. The minimum and maximum values of alpha
+#' (transparancy) for the raw data. Minimum should be 0; lower maximum values of
+#' alpha can help reduce overplotting.
+#' @param growth_variables Character vector. Indicate the names of the latent 
+#' variables for the growth trajectory to plot. If NULL (default), all latent
+#' growth variables are used. Use this option to plot one trajectory when a
+#' model contains multiple latent growth trajectories.
 #' @param time_scale Numeric vector. In case some of the loadings of the growth model are freely
 #' estimated, provide the correct time scale here (e.g., c(0, 1, 2)).
 #' @param jitter_lines Numeric. Indicate the amount (expressed in fractions of a
@@ -573,7 +579,7 @@ plotGrowthMixtures <-
            estimated = TRUE,
            poly = FALSE,
            alpha_range = c(0, .1),
-           linear_time = "S",
+           growth_variables = NULL,
            time_scale = NULL,
            jitter_lines = NULL,
            coefficients = "unstandardized") {
@@ -594,20 +600,23 @@ plotGrowthMixtures <-
     })
     mixtures[which(mixtures)] <-
       sapply(modelList[which(mixtures)], function(x) {
-        x$input$analysis$type == "mixture"
+        tolower(x$input$analysis$type) == "mixture"
       })
-    if (!any(mixtures))
-      stop(
-        "plotMixtures requires a list of mixture models, or one mixture model, as its first argument."
-      )
-    if (any(!mixtures))
+    
+    if (any(!mixtures)){
+      if (!any(mixtures))
+        stop(
+          "plotMixtures requires a list of mixture models, or one mixture model, as its first argument."
+        )
       warning(
         "Some output files were excluded because they are not mixture models; specifically: ",
-        paste(names(mixtures)[which(!mixtures)], collapse = ", "),
+        paste(names(modelList)[which(!mixtures)], collapse = ", "),
         call. = FALSE
       )
+      modelList <- modelList[which(mixtures)]
+    }
     # Remove models which are not type "mixture"
-    modelList <- modelList[which(mixtures)]
+    
     # Check if all models were run on the same dataset
     if (length(unique(sapply(modelList, function(x) {
       x$input$data$file
@@ -627,11 +636,28 @@ plotGrowthMixtures <-
       )
       modelList <- modelList[-missing_cols]
     }
+    
+    # Check if all models are growth models
+    is_growth_model <- sapply(modelList, function(x){
+      any(grepl("\\|$", x$parameters[[coefficients]]$paramHeader))
+    })
+    if (any(!is_growth_model)){
+      if (!any(is_growth_model))
+        stop(
+          "plotMixtures requires a list of growth models, or one growth model, as its first argument."
+        )
+      warning(
+        "Some output files were excluded because they are not growth models; specifically: ",
+        paste(names(modelList)[which(!is_growth_model)], collapse = ", "),
+        call. = FALSE
+      )
+      # Remove models which are not growth models
+      modelList <- modelList[which(is_growth_model)]
+    }
+    
+    
     # Prepare plot data
     # Get coefficients
-    modelList[[3]]$parameters$stdyxstandardized <-
-      modelList[[2]]$parameters$unstandardized
-    coefficients <- "unstandardized"
     missing_coefficients <- sapply(modelList, function(x) {
       is.null(x$parameters[[coefficients]])
     })
@@ -646,6 +672,7 @@ plotGrowthMixtures <-
       )
       modelList <- modelList[-which(missing_coefficients)]
     }
+    
     if (length(modelList) < 1)
       stop("No data left to plot.", call. = FALSE)
     
@@ -657,8 +684,21 @@ plotGrowthMixtures <-
     # Get matrix of loadings
     loadings <-
       lapply(plotdat, function(x) {
-        x[grep("\\|", x[x$LatentClass == 1, ]$paramHeader), c("paramHeader", "est", "param", "est_se")]
+        tmp <- subset(
+          x,
+          subset = if (is.null(growth_variables)) {
+            grepl("\\|$", x$paramHeader)
+          } else {
+            x$paramHeader %in% paste0(toupper(growth_variables), ".|")
+          },
+          select = c("paramHeader", "est", "param", "est_se", "LatentClass")
+        )
+        tmp$paramHeader <- gsub("\\.\\|$", "", tmp$paramHeader)
+        tmp
       })
+    
+    if(is.null(growth_variables)) growth_variables <- unique(unlist(lapply(loadings, function(x){x$paramHeader})))
+    
     # Set time scale
     if (is.null(time_scale) &
         !all(unlist(lapply(loadings, function(x) {
@@ -668,66 +708,63 @@ plotGrowthMixtures <-
         "Factor loadings freely estimated. Please specify the correct time scale in the argument time_scale."
       )
     }
-    growth_variables <-
+    
+    observed_variables <-
       table(unlist(lapply(loadings, function(x) {
         x$param
       })))
-    if (any(growth_variables != max(growth_variables))) {
+    if (any(observed_variables != max(observed_variables))) {
       stop("Different variables used for latent growth analyses across models.")
     }
+    
     loadings <- lapply(loadings, function(x) {
-      x$paramHeader <- gsub("\\.\\|$", "", x$paramHeader)
-      x$paramHeader <-
-        ordered(x$paramHeader, levels = unique(x$paramHeader))
-      x
-    })
-    loadings <- lapply(loadings, function(x) {
-      sapply(levels(x$paramHeader), function(i) {
-        x[x$paramHeader == i, ]$est
-      })
+      array(x$est, dim=c(length(unique(x$param)), length(unique(x$paramHeader)), length(unique(x$LatentClass))))
     })
     
-    # Drop useless stuff
-    plotdat <- lapply(names(plotdat), function(x) {
+    num_loadings <- sapply(loadings, nrow)
+    if(!all(num_loadings == max(num_loadings))){
+      stop("Different models appear to be on different time scales (not the same number of loadings for latent growth variables.")
+    } else {
+      if(is.null(time_scale)) time_scale <- 0:(max(num_loadings)-1)
+    }
+    
+    # Extract estimates
+    estimates <- lapply(plotdat, function(x) {
       subset(
-        plotdat[[x]],
-        select = c(param, est, se, LatentClass),
-        subset = (param %in% colnames(loadings[[x]])) &
-          (paramHeader %in% c("Means", "Intercepts"))
-      )
+        x,
+        select = c(param, est, LatentClass),
+        subset = (param %in% toupper(growth_variables)) &
+          (paramHeader %in% c("Means", "Intercepts")))
     })
     
-    predicted_trajectories <-
-      lapply(1:length(plotdat), function(x) {
-        data.frame(t(sapply(unique(plotdat[[x]]$LatentClass), function(class) {
-          c(as.numeric(class), colSums(plotdat[[x]][plotdat[[x]]$LatentClass == class,]$est * t(loadings[[x]])))
-        })))
-      })
+    estimates <- lapply(estimates, function(x) {
+      array(sapply(x$est, rep, length(time_scale)), dim=c(length(time_scale), length(unique(x$param)), length(unique(x$LatentClass))))
+    })
+
+    predicted_trajectories <- lapply(1:length(plotdat), function(x){
+      loadings[[x]] * estimates[[x]]
+    })
     
-    predicted_trajectories <-
-      lapply(1:length(predicted_trajectories), function(x) {
-        names(predicted_trajectories[[x]]) <-
-          c("Class", if (is.null(time_scale)) {
-            paste0("Value.", loadings[[x]][, linear_time])
-          } else {
-            paste0("Value.", time_scale)
-          })
-        reshape(
-          predicted_trajectories[[x]],
-          direction = "long",
-          varying = names(predicted_trajectories[[x]])[-1],
-          timevar = "Time"
-        )[, c("Class", "Time", "Value")]
-      })
+    predicted_trajectories <- lapply(predicted_trajectories, apply, 3, rowSums)
     
-    predicted_trajectories <-
-      do.call(rbind, lapply(1:length(predicted_trajectories), function(x) {
-        data.frame(Title = modelList[[x]]$input$title, predicted_trajectories[[x]])
-      }))
-    predicted_trajectories$Class <-
-      ordered(predicted_trajectories$Class)
-    predicted_trajectories$Time <-
-      as.numeric(predicted_trajectories$Time)
+    predicted_trajectories <- unlist(lapply(predicted_trajectories, matrix))
+    #Time <- rep(time_scale, length(predicted_trajectories)/length(time_scale))                                     
+    Time <- time_scale
+    classes <- sapply(loadings, function(x){ dim(x)[3]})
+    Class <- unlist(sapply(classes, function(x){
+      sort(rep(1:x, length(time_scale)))
+    }), use.names = FALSE)
+    Title <- unlist(mapply(FUN = function(Title, Times){
+      rep(Title, Times*length(time_scale))
+    }, Title = sapply(names(loadings), function(x){
+      trimws(modelList[[x]]$input$title)
+    }), Times = classes))
+    
+    predicted_trajectories <- data.frame(Time = Time, 
+                                         Value = predicted_trajectories, 
+                                         Class = ordered(Class),
+                                         Title = Title, row.names = NULL)
+    
     line_plot <- ggplot(NULL)
     if (!rawdata &
         poly)
@@ -760,7 +797,7 @@ plotGrowthMixtures <-
           lapply(modelList, function(x) {
             subset(x$savedata,
                    select = c(
-                     names(growth_variables),
+                     names(observed_variables),
                      grep("^CPROB", names(x$savedata), value = TRUE)
                    ))
           })
@@ -792,17 +829,12 @@ plotGrowthMixtures <-
         })
         raw.data <-
           do.call(rbind, lapply(names(modelList), function(x) {
-            data.frame(Title = modelList[[x]]$input$title, raw.data[[x]])
+            data.frame(Title = trimws(modelList[[x]]$input$title), raw.data[[x]])
           }))
         
         raw.data$Time <- factor(raw.data$Time)
+        levels(raw.data$Time) <- time_scale
         
-        if (is.null(time_scale)) {
-          levels(raw.data$Time) <- loadings[[1]][, linear_time]
-          
-        } else {
-          levels(raw.data$Time) <- time_scale
-        }
         raw.data$Time <-
           as.numeric(levels(raw.data$Time))[raw.data$Time]
         raw.data$Class <- ordered(raw.data$Class)
@@ -963,6 +995,11 @@ plotGrowthMixtures <-
 #' @param alpha Numeric (0-1). Only used when bw and conditional are FALSE. Sets
 #' the transparency of geom_density, so that classes with a small number of
 #' cases remain visible.
+#' @param facet_labels Named character vector, the names of which should 
+#' correspond to the facet labels one wishes to rename, and the values of which
+#' provide new names for these facets. For example, to rename variables, in the
+#' example with the 'iris' data below, one could specify: 
+#' \code{facet_labels = c("Pet_leng" = "Petal length")}.
 #' @return An object of class 'ggplot'.
 #' @author Caspar J. van Lissa
 #' @note This function returns warnings, indicating that sum(weights) != 1.
@@ -996,7 +1033,8 @@ plotMixtureDensities <-
            variables = NULL,
            bw = FALSE,
            conditional = FALSE,
-           alpha = .2) {
+           alpha = .2,
+           facet_labels = NULL) {
     # Check if mplusModel is of class mplus.model
     if (!(inherits(modelList, "mplus.model") |
           all(sapply(modelList, function(x) {
@@ -1074,11 +1112,11 @@ plotMixtureDensities <-
       variables <- var_names[, 1]
       variables <- variables[!variables %in% "C"]
     } else {
-      variables <- variables[which(variables %in% var_names[, 1])]
+      variables <- variables[which(toupper(variables) %in% var_names[, 1])]
     }
     raw.data <-
       lapply(modelList, function(x) {
-        x$savedata[, which(names(x$savedata) %in% c(grep("^CPROB", names(x$savedata), value = TRUE), variables))]
+        x$savedata[, which(names(x$savedata) %in% c(grep("^CPROB", names(x$savedata), value = TRUE), toupper(variables)))]
       })
     raw.data <- lapply(raw.data, function(x) {
       if (length(grep("^CPROB", names(x))) == 1) {
@@ -1112,11 +1150,14 @@ plotMixtureDensities <-
     
     raw.data <-
       do.call(rbind, lapply(names(modelList), function(x) {
-        data.frame(Title = modelList[[x]]$input$title, raw.data[[x]])
+        data.frame(Title = trimws(modelList[[x]]$input$title), raw.data[[x]])
       }))
     
-    names(raw.data)[-which(names(raw.data) %in% c("Title", "Class", "Probability", "ID"))] <-
-      paste0("Value.", names(raw.data)[-which(names(raw.data) %in% c("Title", "Class", "Probability", "ID"))])
+    variable_names <- which(!(names(raw.data) %in% c("Title", "Class", "Probability", "ID")))
+    
+    names(raw.data)[variable_names] <- sapply(names(raw.data)[variable_names], function(x){
+      paste(c("Value.", toupper(substring(x, 1, 1)), tolower(substring(x, 2))), collapse = "")})
+    
     raw.data <- reshape(
       raw.data,
       direction = "long",
@@ -1129,6 +1170,7 @@ plotMixtureDensities <-
     raw.data$Class <- factor(raw.data$Class)
     raw.data$Class <-
       ordered(raw.data$Class, levels = c("Total", levels(raw.data$Class)[-length(levels(raw.data$Class))]))
+
     # Plot figure
     if (bw) {
       if (conditional) {
@@ -1162,24 +1204,37 @@ plotMixtureDensities <-
           geom_density(alpha = alpha)
       }
     }
+    # Relabel facets
+    label_facets <- c(levels(raw.data$Variable), levels(raw.data$Title))
+    names(label_facets) <- label_facets
+    if(!is.null(plot_labels)){
+      if(!(is.null(plot_labels[["facets"]]))){
+        label_facets[which(tolower(names(label_facets)) %in% tolower(names(plot_labels$facets)))] <- plot_labels$facets[which(tolower(names(plot_labels$facets)) %in% tolower(names(label_facets)))]
+      }
+    }
+    # Facet the plot
     if (length(modelList) > 1) {
       if (length(variables) > 1) {
-        density_plot <- density_plot +
-          facet_grid(Title ~ Variable)
+
+        density_plot <- density_plot + 
+          facet_grid(Title ~ Variable, labeller = labeller(Title = label_facets, Variable = label_facets))
+
       } else {
         density_plot <- density_plot +
-          facet_grid( ~ Title)
+          facet_grid( ~ Title, labeller = labeller(Title = label_facets))
       }
     } else {
       if (length(variables) > 1) {
         density_plot <- density_plot +
-          facet_grid( ~ Variable)
+          facet_grid( ~ Variable, labeller = labeller(Variable = label_facets))
       }
     }
+    
     density_plot <- density_plot +
       theme_bw() +
       scale_x_continuous(expand = c(0, 0)) +
       scale_y_continuous(expand = c(0, 0))
+
     suppressWarnings(print(density_plot))
     return(invisible(density_plot))
   }
@@ -1234,11 +1289,16 @@ createMixtures <- function(classes = 1L,
     )
   Args <- match.call()
   if (!hasArg(usevariables) & !hasArg(DEFINE)) {
-    warning(
-      "No usevariables provided, or variables defined. All variables in rdata were used.",
-      call. = FALSE
-    )
+    message(
+      "No usevariables provided, or variables defined. All variables in rdata were used.")
     Args[["usevariables"]] <- names(rdata)
+  }
+  if(any(sapply(Args[["usevariables"]], nchar) > 8)){
+    warning("Some variable names exceed 8 characters and will be truncated by Mplus. This can cause problems when plotting mixture models. Please rename variables.")
+  }
+  if(any(sapply(Args[["usevariables"]], grepl, "\\."))){
+    Args[["usevariables"]] <- gsub("\\.", "_", Args[["usevariables"]])
+    warning("Some variable names contain periods ('.'). These were replaced with underscores.")
   }
   Args[["MODEL"]] <-
     paste(c("%OVERALL%\n", model_overall, "\n"), collapse = "")
