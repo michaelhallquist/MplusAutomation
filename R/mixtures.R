@@ -195,6 +195,8 @@ mixtureSummaryTable <- function(modelList,
 #' Creates a profile plot for a single object of class 'mplus.model', or a
 #' faceted plot of profile plots for an object of class 'mplus.model.list'.
 #' @param modelList A list of Mplus mixture models, or a single mixture model
+#' @param variables A character vectors with the names of the variables
+#' (included in the Mplus output) to be plotted.
 #' @param coefficients Which type of coefficients to plot on the y-axis; default
 #' is 'unstandardized'. Options include: c('stdyx.standardized',
 #' 'stdy.standardized', 'std.standardized')
@@ -212,6 +214,8 @@ mixtureSummaryTable <- function(modelList,
 #' reduce overplotting.
 #' @return An object of class 'ggplot'.
 #' @author Caspar J. van Lissa
+#' @export
+#' @import ggplot2
 #' @keywords plot mixture mplus
 #' @examples
 #' createMixtures(classes = 1:4, filename_stem = "cars",
@@ -330,8 +334,8 @@ plotMixtures <- function(modelList,
   plotdat <-
     subset(
       plotdat,
-      subset = !grepl("#", param),
-      select = -c(paramHeader, est_se, pval)
+      subset = !grepl("#", plotdat$param),
+      select = -match(c("paramHeader", "est_se", "pval"), names(plotdat))
     )
   
   # Select only requested variables, or else, all variables
@@ -348,25 +352,25 @@ plotMixtures <- function(modelList,
   # Basic plot
   if (bw) {
     classplot <-
-      ggplot2::ggplot(NULL,
-                      aes(
-                        x = Variable,
-                        y = Value,
-                        group = Class,
-                        linetype = Class,
-                        shape = Class
+      ggplot(NULL,
+                      aes_string(
+                        x = "Variable",
+                        y = "Value",
+                        group = "Class",
+                        linetype = "Class",
+                        shape = "Class"
                       ))
   } else {
     classplot <-
-      ggplot2::ggplot(
+      ggplot(
         NULL,
-        aes(
-          x = Variable,
-          y = Value,
-          group = Class,
-          linetype = Class,
-          shape = Class,
-          colour = Class
+        aes_string(
+          x = "Variable",
+          y = "Value",
+          group = "Class",
+          linetype = "Class",
+          shape = "Class",
+          colour = "Class"
         )
       )
   }
@@ -421,13 +425,12 @@ plotMixtures <- function(modelList,
         
         raw.data <- lapply(raw.data, function(x) {
           names(x) <- gsub("^CPROB", "Probability.", names(x))
-          subset(reshape(
+          reshape(
             x,
             direction = "long",
             varying = grep("^Probability", names(x)),
             timevar = "Class"
-          ),
-          select = -id)
+          )[ , 1:(length(names(x)[-grep("^Probability", names(x))])+2)]
         })
         
         raw.data <-
@@ -466,11 +469,11 @@ plotMixtures <- function(modelList,
           geom_jitter(
             data = raw.data,
             width = .2,
-            aes(
-              x = Variable,
-              y = Value,
-              shape = Class,
-              alpha = Probability
+            aes_string(
+              x = "Variable",
+              y = "Value",
+              shape = "Class",
+              alpha = "Probability"
             )
           ) +
           scale_alpha_continuous(range = alpha_range, guide = FALSE)
@@ -483,10 +486,18 @@ plotMixtures <- function(modelList,
     theme_bw()
   # Add errorbars
   if (!is.null(ci)) {
-    ci <- qnorm(.5 * (1 - ci))
+    ci <- stats::qnorm(.5 * (1 - ci))
+    plotdat$error_min <- apply(plotdat[, c("Value", "se")], 1, function(x){
+      x[1]-(ci*x[2])
+    })
+    plotdat$error_max <- apply(plotdat[, c("Value", "se")], 1, function(x){
+      x[1]+(ci*x[2])
+    })
     classplot <-
-      classplot + geom_errorbar(data = plotdat, aes(ymin = (Value - (ci * se)), ymax =
-                                                      (Value + (ci * se))), width = .2)
+      classplot + geom_errorbar(data = plotdat,
+                                aes_string(ymin = "error_min", 
+                                           ymax = "error_max"),
+                                width = .2)
   }
   # If modelList is really a list, facet_wrap the plots by input file
   if (length(modelList) > 1) {
@@ -530,16 +541,10 @@ plotMixtures <- function(modelList,
 #' overplotting.
 #' @return An object of class 'ggplot'.
 #' @author Caspar J. van Lissa
+#' @export
+#' @import ggplot2
 #' @keywords internal
 #' @examples
-#' createMixtures(classes = 1:4, filename_stem = "cars",
-#'                model_class_specific = "wt;  qsec;",
-#'                rdata = mtcars,
-#'                usevariables = c("wt", "qsec"),
-#'                OUTPUT = "standardized")
-#' runModels(replaceOutfile = "modifiedDate")
-#' cars_results <- readModels(filefilter = "cars")
-#' plotMixtures(cars_results, rawdata = TRUE)
 #' \dontrun{
 #' library(RCurl)
 #' myfile <- getURL('http://statmodel.com/usersguide/chap8/ex8.2.dat',
@@ -572,6 +577,7 @@ plotMixtures <- function(modelList,
 #' plotGrowthMixtures(mplus_output, estimated = FALSE, rawdata = TRUE,
 #'                   poly = TRUE, bw = TRUE, time_scale = c(0, 1, 2, 3))
 #' }
+
 plotGrowthMixtures <-
   function(modelList,
            bw = FALSE,
@@ -732,9 +738,9 @@ plotGrowthMixtures <-
     estimates <- lapply(plotdat, function(x) {
       subset(
         x,
-        select = c(param, est, LatentClass),
-        subset = (param %in% toupper(growth_variables)) &
-          (paramHeader %in% c("Means", "Intercepts")))
+        select = c("param", "est", "LatentClass"),
+        subset = (x$param %in% toupper(growth_variables)) &
+          (x$paramHeader %in% c("Means", "Intercepts")))
     })
     
     estimates <- lapply(estimates, function(x) {
@@ -846,32 +852,32 @@ plotGrowthMixtures <-
             data = if (!is.null(jitter_lines)) {
               data.frame(raw.data[,-6],
                          Value = raw.data$Value +
-                           rnorm(nrow(raw.data),
+                           stats::rnorm(nrow(raw.data),
                                  sd = (
-                                   jitter_lines * sd(raw.data$Value, na.rm = TRUE)
+                                   jitter_lines * stats::sd(raw.data$Value, na.rm = TRUE)
                                  )))
             } else {
               raw.data
             },
-            aes(
-              x = Time,
-              y = Value,
-              group = ID,
-              linetype = Class,
-              alpha = Probability
+            aes_string(
+              x = "Time",
+              y = "Value",
+              group = "ID",
+              linetype = "Class",
+              alpha = "Probability"
             )
           ) +
             scale_alpha_continuous(range = alpha_range, guide = FALSE)
         } else {
           line_plot <- line_plot + geom_path(
             data = raw.data,
-            aes(
-              x = Time,
-              y = Value,
-              group = ID,
-              linetype = Class,
-              colour = Class,
-              alpha = Probability
+            aes_string(
+              x = "Time",
+              y = "Value",
+              group = "ID",
+              linetype = "Class",
+              colour = "Class",
+              alpha = "Probability"
             )
           ) +
             scale_alpha_continuous(range = alpha_range, guide = FALSE)
@@ -881,11 +887,11 @@ plotGrowthMixtures <-
             line_plot <- line_plot +
               stat_smooth(
                 data = raw.data,
-                aes(
-                  x = Time,
-                  y = Value,
-                  linetype = Class,
-                  weight = Probability
+                aes_string(
+                  x = "Time",
+                  y = "Value",
+                  linetype = "Class",
+                  weight = "Probability"
                 ),
                 method = "lm",
                 formula = y ~ poly(x, (nrow(
@@ -898,12 +904,12 @@ plotGrowthMixtures <-
             line_plot <- line_plot +
               stat_smooth(
                 data = raw.data,
-                aes(
-                  x = Time,
-                  y = Value,
-                  colour = Class,
-                  linetype = Class,
-                  weight = Probability
+                aes_string(
+                  x = "Time",
+                  y = "Value",
+                  colour = "Class",
+                  linetype = "Class",
+                  weight = "Probability"
                 ),
                 method = "lm",
                 formula = y ~ poly(x, (nrow(
@@ -922,21 +928,21 @@ plotGrowthMixtures <-
         line_plot <- line_plot +
           geom_point(
             data = predicted_trajectories,
-            aes(
-              x = Time,
-              y = Value,
-              group = Class,
-              shape = Class
+            aes_string(
+              x = "Time",
+              y = "Value",
+              group = "Class",
+              shape = "Class"
             ),
             size = 2
           ) +
           geom_line(
             data = predicted_trajectories,
-            aes(
-              x = Time,
-              y = Value,
-              group = Class,
-              linetype = Class
+            aes_string(
+              x = "Time",
+              y = "Value",
+              group = "Class",
+              linetype = "Class"
             ),
             size = 1
           )
@@ -944,23 +950,23 @@ plotGrowthMixtures <-
         line_plot <- line_plot +
           geom_point(
             data = predicted_trajectories,
-            aes(
-              x = Time,
-              y = Value,
-              group = Class,
-              shape = Class,
-              colour = Class
+            aes_string(
+              x = "Time",
+              y = "Value",
+              group = "Class",
+              shape = "Class",
+              colour = "Class"
             ),
             size = 2
           ) +
           geom_line(
             data = predicted_trajectories,
-            aes(
-              x = Time,
-              y = Value,
-              group = Class,
-              linetype = Class,
-              colour = Class
+            aes_string(
+              x = "Time",
+              y = "Value",
+              group = "Class",
+              linetype = "Class",
+              colour = "Class"
             ),
             size = 1
           )
@@ -1008,8 +1014,8 @@ plotGrowthMixtures <-
 #' 1. This results in a normal density plot for the "Total", which is subdivided
 #' by the latent classes, in proportion to the posterior probabilities of
 #' participants being assigned to those clases.
-#' @import ggplot2
 #' @export
+#' @import ggplot2
 #' @keywords mixture models mplus
 #' @examples
 #' createMixtures(classes = 1:4, filename_stem = "iris", rdata = iris)
@@ -1177,12 +1183,12 @@ plotMixtureDensities <-
         raw.data <- raw.data[-which(raw.data$Class == "Total"),]
         density_plot <-
           ggplot(raw.data,
-                 aes(Value, ..count.., fill = Class, weight = Probability)) +
+                 aes_string(x = "Value", y = "..count..", fill = "Class", weight = "Probability")) +
           geom_density(position = "fill") + scale_fill_grey(start = 0.2, end = 0.8)
       } else{
         density_plot <-
           ggplot(raw.data,
-                 aes(Value, linetype = Class, weight = Probability)) +
+                 aes_string(x = "Value", linetype = "Class", weight = "Probability")) +
           geom_density()
       }
     } else{
@@ -1190,16 +1196,15 @@ plotMixtureDensities <-
         raw.data <- raw.data[-which(raw.data$Class == "Total"),]
         density_plot <-
           ggplot(raw.data,
-                 aes(Value, ..count.., fill = Class, weight = Probability)) +
+                 aes_string(x = "Value", y = "..count..", fill = "Class", weight = "Probability")) +
           geom_density(position = "fill")
       } else{
         density_plot <-
           ggplot(raw.data,
-                 aes(
-                   Value,
-                   fill = Class,
-                   colour = Class,
-                   weight = Probability
+                 aes_string(x = "Value",
+                   fill = "Class",
+                   colour = "Class",
+                   weight = "Probability"
                  )) +
           geom_density(alpha = alpha)
       }
@@ -1207,10 +1212,8 @@ plotMixtureDensities <-
     # Relabel facets
     label_facets <- c(levels(raw.data$Variable), levels(raw.data$Title))
     names(label_facets) <- label_facets
-    if(!is.null(plot_labels)){
-      if(!(is.null(plot_labels[["facets"]]))){
-        label_facets[which(tolower(names(label_facets)) %in% tolower(names(plot_labels$facets)))] <- plot_labels$facets[which(tolower(names(plot_labels$facets)) %in% tolower(names(label_facets)))]
-      }
+    if(!is.null(facet_labels)){
+      label_facets[which(tolower(names(label_facets)) %in% tolower(names(facet_labels)))] <- facet_labels[which(tolower(names(facet_labels)) %in% tolower(names(label_facets)))]
     }
     # Facet the plot
     if (length(modelList) > 1) {
@@ -1263,6 +1266,8 @@ plotMixtureDensities <-
 #' model. The character string \dQuote{\{C\}} is substituted with the correct
 #' class number, for example to make unique parameter labels for each class.
 #' @param rdata Data.frame. An R dataset to be used for the model.
+#' @param usevariables Character vector, specifying the names of variables in 
+#' the rdata object which should be included in the Mplus data file and model.
 #' @param SAVEDATA Character. Syntax for Mplus' savedata option. Highly
 #' recommended when conducting mixture models. The default option will often be
 #' adequate.
@@ -1283,12 +1288,12 @@ createMixtures <- function(classes = 1L,
                            usevariables = NULL,
                            SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;",
                            ...) {
-  if (hasArg(MODEL))
+  if (hasArg("MODEL"))
     warning(
       "MODEL argument was dropped: createMixtures constructs its own MODEL argument from model_overall and model_class_specific."
     )
   Args <- match.call()
-  if (!hasArg(usevariables) & !hasArg(DEFINE)) {
+  if (!hasArg(usevariables) & !hasArg("DEFINE")) {
     message(
       "No usevariables provided, or variables defined. All variables in rdata were used.")
     Args[["usevariables"]] <- names(rdata)
@@ -1302,7 +1307,7 @@ createMixtures <- function(classes = 1L,
   }
   Args[["MODEL"]] <-
     paste(c("%OVERALL%\n", model_overall, "\n"), collapse = "")
-  if (hasArg(ANALYSIS)) {
+  if (hasArg("ANALYSIS")) {
     Args[["ANALYSIS"]] <-
       paste0("TYPE = mixture;\n", Args[["ANALYSIS"]])
   } else {
