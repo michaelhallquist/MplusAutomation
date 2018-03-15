@@ -49,18 +49,23 @@ mixtureSummaryTable <- function(modelList,
                                   "min_prob",
                                   "max_prob"
                                 )) {
-  # Check if modelList is a list of (mixture) models
-  if (!inherits(modelList, "mplus.model.list"))
-    if (!all(sapply(modelList, function(x) {
-      inherits(x, "mplus.model")
-    })))
-      stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
+  # Check if modelList is of class mplus.model
+  if (!(inherits(modelList, "mplus.model") |
+        all(sapply(modelList, function(x) {
+          inherits(x, "mplus.model")
+        })))) {
+    stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
+  }
+  if (inherits(modelList, "mplus.model")) {
+    modelList <- list(Model_1 = modelList)
+  }
+      
   # Check if all models in the list are mixture models
   mixtures <- sapply(modelList, function(x) {
     !is.null(x$input$analysis[["type"]])
   })
   mixtures[mixtures] <- sapply(modelList[mixtures], function(x) {
-    x$input$analysis$type == "mixture"
+    tolower(x$input$analysis$type) == "mixture"
   })
   if (!any(mixtures))
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
@@ -1378,3 +1383,164 @@ createMixtures <- function(classes = 1L,
   })))
   
 }
+
+#' Plot latent transition model
+#'
+#' Plots latent transition probabilities and classification probabilities for
+#' a single latent transition model (a model with multiple categorical latent
+#' variables, regressed on one another). Stroke thickness of nodes represents
+#' the proportion of cases most likely assigned to that class, with wider 
+#' strokes representing greater probability. Edge thickness and transparency
+#' represent the probability of making a particular transition (left to right),
+#' with thicker/darker edges representing greater probability.
+#' @param mplusModel A single Mplus model object, returned by . This
+#' function additionally requires the model to be a mixture model with multiple
+#' categorical latent variables.
+#' @param node_stroke Integer. Base stroke thickness for nodes. Set to 
+#' \code{NULL} to give each node the same stroke thickness.
+#' @param max_edge_width Integer. Maximum width of edges.
+#' @param node_labels Character vector, defaults to \code{"variable.class"}, 
+#' which labels each node by the name of the variable, and the number of the 
+#' class it represents. Set to \code{"class"} to display only class numbers, or
+#' provide a named character vector where the names correspond to original class
+#' labels, and the values correspond to their substitute values.
+#' @param x_labels Character vector, defaults to \code{"variable"}, which labels
+#' the x-axis with the names of the categorical latent variables. Set to
+#' \code{NULL} to remove axis labels, or provide a named character vector where
+#' the names correspond to original x-axis labels, and the values correspond to
+#' their substitute values.
+#' @return An object of class 'ggplot'.
+#' @author Caspar J. van Lissa
+#' @export
+#' @import ggplot2
+#' @importFrom stats complete.cases setNames
+#' @keywords internal
+#' @examples
+#' #Make me!!!
+plotLTA <-
+  function(mplusModel,
+           node_stroke = 2,
+           max_edge_width = 2,
+           node_labels = "variable.class",
+           x_labels = "variable") {
+    
+    # Check if mplusModel is of class mplus.model
+    if (!(inherits(mplusModel, "mplus.model"))) {
+      stop(
+        "plotLTA requires an object of class 'mplus.model' as its first argument."
+      )
+    }
+    if(is.null(mplusModel$input$analysis[["type"]]))
+      stop(
+        "plotLTA requires a mixture model as its first argument."
+      )
+    if(!tolower(mplusModel$input$analysis$type) == "mixture")
+      stop(
+        "plotLTA requires a mixture model as its first argument."
+      )
+    if(!mplusModel$summaries$NCategoricalLatentVars > 1)
+      stop(
+      "plotLTA requires a mixture model with multiple categorical latent variables as its first argument."
+    )
+    
+    # Remove models which are not type "mixture"
+    edges <- mplusModel$class_counts$transitionProbs
+    
+    all_classes <- unique(c(edges$from, edges$to))
+    latent_variables <- unique(gsub("\\..+$", "", all_classes))
+    
+    edges$x <-
+      as.numeric(factor(gsub("\\..+$", "", as.character(edges$from)), levels = latent_variables))
+    edges$xend <-
+      as.numeric(factor(gsub("\\..+$", "", as.character(edges$to)), levels = latent_variables))
+    edges$y <-
+      as.numeric(gsub("^.+\\.", "", as.character(edges$from)))
+    edges$yend <-
+      as.numeric(gsub("^.+\\.", "", as.character(edges$to)))
+    
+    nodes <-
+      rbind(edges[, c(1, 4, 6)], setNames(edges[, c(2, 5, 7)], names(edges)[c(1, 4, 6)]))
+    nodes <- nodes[!duplicated(nodes),]
+    names(nodes)[1] <- "nodeID"
+    
+    n_prop <- mplusModel$class_counts$mostLikely
+    if (!is.null(node_stroke)) {
+      n_prop$proportion <-
+        node_stroke * n_prop$proportion * inverse.rle(list(
+          lengths = rle(n_prop$variable)$lengths,
+          values = rle(n_prop$variable)$lengths
+        ))
+    } else {
+      n_prop$proportion <- 1
+    }
+    
+    n_prop$nodeID <- paste(n_prop$variable, n_prop$class, sep = ".")
+    nodes <- merge(nodes, n_prop, by = "nodeID")
+    
+    if (!node_labels %in% c("variable.class", "class")) {
+      nodes$nodeID[which(nodes$nodeID %in% names(node_labels))] <-
+        node_labels
+    } else {
+      if(node_labels == "class")
+        nodes$nodeID <- gsub(".+?\\.", "", nodes$nodeID)
+    }
+    nodesize <- max(max(sapply(nodes$nodeID, nchar)) * 3.880556, 6)
+    p <- ggplot(NULL)
+    p <- p + geom_segment(
+      data = edges,
+      aes_string(
+        x = "x",
+        y = "y",
+        xend = "xend",
+        yend = "yend",
+        size = "probability",
+        alpha = "probability"
+      )
+    )
+    p <-
+      p + geom_point(
+        data = nodes,
+        shape = 21,
+        size = nodesize,
+        colour = "black",
+        fill = "white",
+        aes_string(x = "x", y = "y", stroke = "proportion")
+      )
+    p <-
+      p + geom_text(data = nodes, aes_string(x = "x", y = "y", label = "nodeID"))
+    p <-  p +
+      scale_y_continuous(expand = c(.1, .1)) +
+      theme(
+        text = element_text(size=11, colour = "black"),
+        axis.line = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none",
+        panel.background = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_blank()
+      ) + scale_size_continuous(range = c(1, max_edge_width))
+    if (!is.null(x_labels)) {
+      uselabels <- unique(nodes$variable)
+      if (!x_labels == "variable") {
+        uselabels[which(uselabels %in% names(x_labels))] <- x_labels
+      }
+      p <-
+        p + scale_x_continuous(
+          expand = c(.1, .1),
+          breaks = unique(nodes$x),
+          labels = uselabels,
+          position = "top"
+        ) +
+        theme(axis.line.x = element_line(color = "black"))
+      
+    } else {
+      p <- p +
+        theme(axis.text.x = element_blank())
+    }
+    p
+  }

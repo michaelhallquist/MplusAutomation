@@ -1842,7 +1842,8 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   }
 
   countlist <- list()
-
+  
+  if(missing(summaries)||summaries$NCategoricalLatentVars==1){
   #Starting in Mplus v7.3 and above, formatting of the class counts appears to have changed...
   #Capture the alternatives here
   if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
@@ -1892,8 +1893,101 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   if (length(classificationLogitProbs) > 1L) { classificationLogitProbs <- classificationLogitProbs[-1L] } #remove line 1: "by Latent Class (Column)"
 
   countlist[["logitProbs.mostLikely"]] <- unlabeledMatrixExtract(classificationLogitProbs, filename)
+  } else {
+    # Exctract class_counts for multiple categorical latent variables
+    getClassCols <- function(sectiontext) {
+      #numberLines <- grep("^\\s*([a-zA-Z0-9]+)?\\s*\\d+\\s+[0-9\\.-]+\\s+[0-9\\.-]+\\s*$", sectiontext, perl=TRUE)
+      numberLines <- grep("^\\s*([a-zA-Z0-9]+)?(\\s+[0-9\\.-]{1,}){1,}$", sectiontext, perl=TRUE)
+      if (length(numberLines) > 0) {
+        parsedlines <- strsplit(trimSpace(sectiontext[numberLines]), "\\s+", perl=TRUE)
+        num_values <- sapply(parsedlines, length)
+        if(length(unique(num_values)) == 1){
+          counts <- data.frame(t(sapply(parsedlines, as.numeric)), stringsAsFactors = FALSE)
+        } else {
+          parsedlines[which(num_values != max(num_values))] <- lapply(parsedlines[which(num_values != max(num_values))], function(x){
+            c(rep(NA, (max(num_values) - length(x))), x)
+          })
+          counts <- do.call(rbind, parsedlines)
+          counts[,1] <- inverse.rle(list(lengths = diff(c(which(!is.na(counts[,1])), (nrow(counts)+1))), values = counts[,1][complete.cases(counts[,1])]))
+          counts <- data.frame(counts, stringsAsFactors = FALSE)
+          counts[, 2:4] <- lapply(counts[, 2:4], as.numeric)
+        }
+        return(counts)
+      } else {
+        return(NULL)
+      }
+    }
+    if (is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
+      warning("MplusAutomation currently only reads output with multiple categorical latent variables for Mplus version 8 and up.")
+    } else {
+      modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE$::^BASED ON THE ESTIMATED MODEL$", outfiletext)
+      ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
+      mostLikelyCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE$::^BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
+    }
+    
+    countlist[["modelEstimated"]] <- getClassCols(modelCounts)
+    names(countlist[["modelEstimated"]]) <- c("variable", "class", "count", "proportion")
+    countlist[["posteriorProb"]] <- getClassCols(ppCounts)
+    names(countlist[["posteriorProb"]]) <- 
+      c(paste0("class.", unique(countlist[["modelEstimated"]]$variable)), "count", "proportion")
+    countlist[["mostLikely"]] <- getClassCols(mostLikelyCounts)
+    names(countlist[["mostLikely"]]) <- c("variable", "class", "count", "proportion")
+    
+    #most likely by posterior probability section
+    mostLikelyProbs <- 
+      outfiletext[(grep("^Average Latent Class Probabilities for Most Likely Latent Class Pattern \\((Row|Column)\\)$", outfiletext)+2):grep("^MODEL RESULTS$", outfiletext)-1]
+    
+    column_headers <- strsplit(trimws(mostLikelyProbs[grep("\\s*Latent Class\\s{2,}", mostLikelyProbs)]), "\\s+", perl=TRUE)[[1]][-1]
+    variable_pattern_rows <- grep(paste(c("^(\\s{2,}\\d+){", length(column_headers), "}$"), collapse = ""), mostLikelyProbs, perl=TRUE)
+    variable_pattern_rows <- variable_pattern_rows[!c(FALSE, diff(variable_pattern_rows) != 1)]
+    variable_patterns <- mostLikelyProbs[variable_pattern_rows]
+    variable_patterns <- data.frame(t(sapply(strsplit(trimws(variable_patterns), "\\s+", perl=TRUE), as.numeric)))
+    names(variable_patterns) <- c("Latent Class Pattern No.", column_headers[-1])
+    
+    probs <- grep(paste(c("^\\s+\\d{1,}(\\s{2,}[0-9\\.-]+)+$"), collapse = ""), mostLikelyProbs[(variable_pattern_rows[length(variable_pattern_rows)]+1):length(mostLikelyProbs)], perl=TRUE, value = TRUE)
+    if(length(probs) %% nrow(variable_patterns) > 1){
+      
+      for(i in 2:(length(probs) %% nrow(variable_patterns))){
+        probs[1:(nrow(variable_patterns)+1)] <- 
+          paste(probs[1:(nrow(variable_patterns)+1)],
+                                                       substring(probs[((i-1)*(nrow(variable_patterns)+1)+1):(i*(nrow(variable_patterns)+1))], first = 8)
+                                                              )
+      }
+      probs <- probs[1:nrow(variable_patterns)]
+    }
+    probs <- t(sapply(strsplit(trimws(probs[-1]), "\\s+", perl=TRUE), as.numeric))[,-1]
 
-
+    countlist[["avgProbs.mostLikely"]] <- probs
+    countlist[["avgProbs.mostLikely.patterns"]] <- variable_patterns
+    
+    # AFAIK this section is not reported for multiple categorical variables
+    countlist[["classificationProbs.mostLikely"]] <- NULL#unlabeledMatrixExtract(classificationProbs, filename)
+    # AFAIK this section is not reported for multiple categorical variables
+    countlist[["logitProbs.mostLikely"]] <- NULL#unlabeledMatrixExtract(classificationLogitProbs, filename)
+    transitionProbs <- getSection("^LATENT TRANSITION PROBABILITIES BASED ON THE ESTIMATED MODEL$", outfiletext)
+    section_starts <- grep("\\(Columns\\)$", transitionProbs)
+    transitionProbs <- mapply(FUN = function(begin, end){
+      probs <- transitionProbs[begin:end][grep("^\\s+\\d{1,}(\\s{2,}[0-9\\.-]{2,}){1,}$", transitionProbs[begin:end], perl=TRUE)]
+      probs <- do.call(rbind, strsplit(trimws(probs), "\\s+", perl=TRUE))[,-1]
+      cbind(paste(gsub("\\s+(\\w+) Classes.*$", "\\1", transitionProbs[begin]) , ".", rep(c(1:nrow(probs)), ncol(probs)), sep = ""),
+            paste(gsub(".+?by (\\w+) Classes.*$", "\\1", transitionProbs[begin]) , ".", as.vector(sapply(1:ncol(probs), rep, nrow(probs))), sep = ""),
+            as.vector(probs))
+      
+      #data.frame(from = paste(gsub("\\s+(\\w+) Classes.*$", "\\1", transitionProbs[begin]) , ".", rep(c(1:nrow(probs)), ncol(probs)), sep = ""),
+      #           to = paste(gsub(".+?by (\\w+) Classes.*$", "\\1", transitionProbs[begin]) , ".", as.vector(sapply(1:nrow(probs), rep, ncol(probs))), sep = ""),
+      #           probability = as.vector(probs), stringsAsFactors = FALSE)
+      },
+           begin = section_starts, end = c(section_starts[-1], length(transitionProbs)), SIMPLIFY = FALSE)
+    if(length(transitionProbs) > 1){
+      transitionProbs <- do.call(rbind, transitionProbs)
+    } else {
+      transitionProbs <- transitionProbs[[1]]
+    }
+    transitionProbs <- data.frame(transitionProbs, stringsAsFactors = FALSE)
+    names(transitionProbs) <- c("from", "to", "probability")
+    transitionProbs$probability <- as.numeric(transitionProbs$probability)
+    countlist[["transitionProbs"]] <- transitionProbs
+  }
   return(countlist)
 }
 
