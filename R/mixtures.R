@@ -851,19 +851,12 @@ plotGrowthMixtures <-
         raw.data$Class <- ordered(raw.data$Class)
         raw.data$ID <-
           paste(raw.data$Title, raw.data$Class, raw.data$ID, sep = "")
-        
+        if (!is.null(jitter_lines)) {
+          raw.data$Value <- raw.data$Value + stats::rnorm(nrow(raw.data), sd = (jitter_lines * stats::sd(raw.data$Value, na.rm = TRUE)))
+        }
         if (bw) {
           line_plot <- line_plot + geom_path(
-            data = if (!is.null(jitter_lines)) {
-              data.frame(raw.data[,-6],
-                         Value = raw.data$Value +
-                           stats::rnorm(nrow(raw.data),
-                                 sd = (
-                                   jitter_lines * stats::sd(raw.data$Value, na.rm = TRUE)
-                                 )))
-            } else {
-              raw.data
-            },
+            data = raw.data,
             aes_string(
               x = "Time",
               y = "Value",
