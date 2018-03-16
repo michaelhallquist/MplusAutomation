@@ -68,7 +68,7 @@ createMixtures(classes = 1:3, filename_stem = "ex8.2",
                                                            "V4", "V5"))
 runModels(replaceOutfile = "modifiedDate")
 mplus_output <- readModels(filefilter = "ex8.2")
-plotGrowthMixtures(mplus_output, estimated = TRUE, rawdata = TRUE)
+plotGrowthMixtures(mplus_output, estimated = TRUE, rawdata = TRUE, time_scale = c(0, 1, 2, 3))
 plotGrowthMixtures(mplus_output, estimated = FALSE, rawdata = TRUE,
                   poly = TRUE)
 

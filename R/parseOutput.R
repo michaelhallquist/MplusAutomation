@@ -1843,7 +1843,7 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
 
   countlist <- list()
   
-  if(missing(summaries)||summaries$NCategoricalLatentVars==1){
+  if(missing(summaries)||summaries$NCategoricalLatentVars==1||is.na(summaries$NCategoricalLatentVars)){
   #Starting in Mplus v7.3 and above, formatting of the class counts appears to have changed...
   #Capture the alternatives here
   if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {

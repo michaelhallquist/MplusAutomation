@@ -326,15 +326,13 @@ plotMixtures <- function(modelList,
     stop("No data left to plot.", call. = FALSE)
   plotdat <-
     lapply(modelList, function(x) {
-      x$parameters[[coefficients]]
+      subset(x$parameters[[coefficients]], x$parameters[[coefficients]]$paramHeader %in% parameter)
     })
   # Bind into one df with identifying variable
   plotdat <- do.call(rbind, lapply(names(modelList), function(x) {
     data.frame(Title = modelList[[x]]$input$title, plotdat[[x]])
   }))
   
-  # Select the requested parameter
-  plotdat <- plotdat[plotdat$paramHeader %in% parameter, ]
   # Drop useless stuff
   plotdat <-
     subset(
@@ -399,10 +397,21 @@ plotMixtures <- function(modelList,
           call. = FALSE
         )
       } else {
+        
+        rawdata <-
+          lapply(modelList, function(x) {
+            replacethese <- pmatch(tolower(names(x$savedata)), tolower(substring(levels(plotdat$Variable), first = 1, last = 8)))
+            names(x$savedata)[which(!is.na(replacethese))] <- levels(plotdat$Variable)[na.omit(replacethese)]
+            subset(x$savedata,
+                   select = c(
+                     names(x$savedata)[which(names(x$savedata) %in% levels(plotdat$Variable))],
+                     grep("^CPROB", names(x$savedata), value = TRUE)
+                   ))
+          })
         # Check if all variables (except CPROBs) are identical across models
         var_names <-
-          sapply(modelList, function(x) {
-            names(x$savedata)[-c(which(names(x$savedata) == "C"), grep("^CPROB", names(x$savedata)))]
+          sapply(rawdata, function(x) {
+            names(x)[-c(which(names(x) == "C"), grep("^CPROB", names(x)))]
           })
         if (!is.matrix(var_names)) {
           var_names <- table(unlist(var_names))
@@ -413,22 +422,15 @@ plotMixtures <- function(modelList,
           var_names <-
             matrix(names(var_names)[which(var_names == max(var_names))], ncol = 1)
         }
-        if(!any(tolower(levels(plotdat$Variable)) %in% tolower(var_names[,1]))){
+        
+        if(!any(levels(plotdat$Variable) %in% var_names[,1])){
           warning("None of the requested variables were found in the Mplus savedata.")
         } else{
-          if(any(!(tolower(levels(plotdat$Variable)) %in% tolower(var_names[,1])))){
+          if(any(!(levels(plotdat$Variable) %in% var_names[,1]))){
             warning("Some of the requested variables were not found in the Mplus savedata.")
           }
-        raw.data <-
-          lapply(modelList, function(x) {
-            subset(x$savedata,
-                   select = c(
-                     names(x$savedata)[which(tolower(names(x$savedata)) %in% tolower(levels(plotdat$Variable)))],
-                     grep("^CPROB", names(x$savedata), value = TRUE)
-                   ))
-          })
-        
-        raw.data <- lapply(raw.data, function(x) {
+
+        rawdata <- lapply(rawdata, function(x) {
           names(x) <- gsub("^CPROB", "Probability.", names(x))
           reshape(
             x,
@@ -438,41 +440,26 @@ plotMixtures <- function(modelList,
           )[ , 1:(length(names(x)[-grep("^Probability", names(x))])+2)]
         })
         
-        raw.data <-
+        rawdata <-
           do.call(rbind, lapply(names(modelList), function(x) {
-            data.frame(Title = modelList[[x]]$input$title, raw.data[[x]])
+            data.frame(Title = modelList[[x]]$input$title, rawdata[[x]])
           }))
         
-        names(raw.data)[which(!names(raw.data) %in% c("Title", "Class", "Probability"))] <-
-          paste0("Value.", names(raw.data)[which(!names(raw.data) %in% c("Title", "Class", "Probability"))])
-        raw.data <- reshape(
-          raw.data,
+        names(rawdata)[which(!names(rawdata) %in% c("Title", "Class", "Probability"))] <-
+          paste0("Value.", names(rawdata)[which(!names(rawdata) %in% c("Title", "Class", "Probability"))])
+        rawdata <- reshape(
+          rawdata,
           direction = "long",
-          varying = grep("^Value", names(raw.data)),
+          varying = grep("^Value", names(rawdata)),
           timevar = "Variable"
         )[, c("Title", "Class", "Probability", "Variable", "Value")]
         
-        raw.data$Variable <- factor(raw.data$Variable)
-        levels(raw.data$Variable) <- paste0(toupper(substring(levels(raw.data$Variable), 1, 1)), tolower(substring(levels(raw.data$Variable), 2)))
-        if (!all(levels(raw.data$Variable) %in% levels(plotdat$Variable))) {
-          try_to_order <-
-            pmatch(levels(raw.data$Variable),
-                   levels(plotdat$Variable))
-          if (any(is.na(try_to_order)))
-            stop(
-              "Could not match Mplus parameter names to savedata variable names. This typically happens when variable names exceed 8 characters."
-            )
-          warning(
-            "Mplus parameter names were not identical to savedata variable names. This typically happens when variable names exceed 8 characters. Tried to match savedata names to Mplus parameter names."
-          )
-          levels(raw.data$Variable) <-
-            levels(plotdat$Variable)[try_to_order]
-        }
-        raw.data$Class <- ordered(raw.data$Class)
-        
+        rawdata$Variable <- factor(rawdata$Variable)
+        levels(rawdata$Variable) <- paste0(toupper(substring(levels(rawdata$Variable), 1, 1)), tolower(substring(levels(rawdata$Variable), 2)))
+        rawdata$Class <- ordered(rawdata$Class)
         classplot <- classplot +
           geom_jitter(
-            data = raw.data,
+            data = rawdata,
             width = .2,
             aes_string(
               x = "Variable",
@@ -562,7 +549,7 @@ plotMixtures <- function(modelList,
 #'                                                            "V4", "V5"))
 #' runModels(replaceOutfile = "modifiedDate")
 #' mplus_output <- readModels(filefilter = "ex8.2")
-#' plotGrowthMixtures(mplus_output, estimated = TRUE, rawdata = TRUE)
+#' plotGrowthMixtures(mplus_output, estimated = TRUE, rawdata = TRUE, time_scale = c(0, 1, 2, 3))
 #' plotGrowthMixtures(mplus_output, estimated = FALSE, rawdata = TRUE,
 #'                   poly = TRUE)
 #'
@@ -789,10 +776,20 @@ plotGrowthMixtures <-
           call. = FALSE
         )
       } else {
+        rawdata <-
+          lapply(modelList, function(x) {
+            replacethese <- pmatch(tolower(names(x$savedata)), tolower(substring(names(observed_variables), first = 1, last = 8)))
+            names(x$savedata)[which(!is.na(replacethese))] <- names(observed_variables)[na.omit(replacethese)]
+            subset(x$savedata,
+                   select = c(
+                     names(x$savedata)[which(names(x$savedata) %in% names(observed_variables))],
+                     grep("^CPROB", names(x$savedata), value = TRUE)
+                   ))
+          })
         # Check if all variables (except CPROBs) are identical across models
         var_names <-
-          sapply(modelList, function(x) {
-            names(x$savedata)[-c(which(names(x$savedata) == "C"), grep("^CPROB", names(x$savedata)))]
+          sapply(rawdata, function(x) {
+            names(x)[-c(which(names(x) == "C"), grep("^CPROB", names(x)))]
           })
         if (!is.matrix(var_names)) {
           var_names <- table(unlist(var_names))
@@ -804,17 +801,8 @@ plotGrowthMixtures <-
             matrix(names(var_names)[which(var_names == max(var_names))], ncol = 1)
         }
         
-        raw.data <-
-          lapply(modelList, function(x) {
-            subset(x$savedata,
-                   select = c(
-                     names(observed_variables),
-                     grep("^CPROB", names(x$savedata), value = TRUE)
-                   ))
-          })
-        
-        raw.data <-
-          lapply(raw.data, function(x) {
+        rawdata <-
+          lapply(rawdata, function(x) {
             names(x) <- gsub("^CPROB", "Probability.", names(x))
             reshape(
               x,
@@ -826,8 +814,7 @@ plotGrowthMixtures <-
             )
           })
         
-        
-        raw.data <- lapply(raw.data, function(x) {
+        rawdata <- lapply(rawdata, function(x) {
           names(x)[-which(names(x) %in% c("Class", "Probability", "ID"))] <-
             paste0("Value.", names(x)[-which(names(x) %in% c("Class", "Probability", "ID"))])
           reshape(
@@ -838,25 +825,25 @@ plotGrowthMixtures <-
             timevar = "Time"
           )[, c("ID", "Time", "Value", "Class", "Probability")]
         })
-        raw.data <-
+        rawdata <-
           do.call(rbind, lapply(names(modelList), function(x) {
-            data.frame(Title = trimws(modelList[[x]]$input$title), raw.data[[x]])
+            data.frame(Title = trimws(modelList[[x]]$input$title), rawdata[[x]])
           }))
         
-        raw.data$Time <- factor(raw.data$Time)
-        levels(raw.data$Time) <- time_scale
+        rawdata$Time <- factor(rawdata$Time)
+        levels(rawdata$Time) <- time_scale
         
-        raw.data$Time <-
-          as.numeric(levels(raw.data$Time))[raw.data$Time]
-        raw.data$Class <- ordered(raw.data$Class)
-        raw.data$ID <-
-          paste(raw.data$Title, raw.data$Class, raw.data$ID, sep = "")
+        rawdata$Time <-
+          as.numeric(levels(rawdata$Time))[rawdata$Time]
+        rawdata$Class <- ordered(rawdata$Class)
+        rawdata$ID <-
+          paste(rawdata$Title, rawdata$Class, rawdata$ID, sep = "")
         if (!is.null(jitter_lines)) {
-          raw.data$Value <- raw.data$Value + stats::rnorm(nrow(raw.data), sd = (jitter_lines * stats::sd(raw.data$Value, na.rm = TRUE)))
+          rawdata$Value <- rawdata$Value + stats::rnorm(nrow(rawdata), sd = (jitter_lines * stats::sd(rawdata$Value, na.rm = TRUE)))
         }
         if (bw) {
           line_plot <- line_plot + geom_path(
-            data = raw.data,
+            data = rawdata,
             aes_string(
               x = "Time",
               y = "Value",
@@ -868,7 +855,7 @@ plotGrowthMixtures <-
             scale_alpha_continuous(range = alpha_range, guide = FALSE)
         } else {
           line_plot <- line_plot + geom_path(
-            data = raw.data,
+            data = rawdata,
             aes_string(
               x = "Time",
               y = "Value",
@@ -884,7 +871,7 @@ plotGrowthMixtures <-
           if (bw) {
             line_plot <- line_plot +
               stat_smooth(
-                data = raw.data,
+                data = rawdata,
                 aes_string(
                   x = "Time",
                   y = "Value",
@@ -901,7 +888,7 @@ plotGrowthMixtures <-
           } else {
             line_plot <- line_plot +
               stat_smooth(
-                data = raw.data,
+                data = rawdata,
                 aes_string(
                   x = "Time",
                   y = "Value",
@@ -973,8 +960,9 @@ plotGrowthMixtures <-
     }
     if (length(modelList) > 1)
       line_plot <- line_plot + facet_wrap(~ Title)
+    
     line_plot <- line_plot + theme_bw() +
-      scale_x_continuous(expand = c(0, 0)) +
+      scale_x_continuous(expand = c(0, 0), breaks = time_scale, labels = time_scale) +
       scale_y_continuous(expand = c(0, 0))
     return(line_plot)
   }
@@ -1095,7 +1083,7 @@ plotMixtureDensities <-
       stop("Models were not all run on the same data file.")
     }
     # Check if all variables (except CPROBs) are identical across models
-    raw.data <- lapply(modelList, function(x) {
+    rawdata <- lapply(modelList, function(x) {
       x$savedata
     })
     var_names <-
@@ -1118,11 +1106,11 @@ plotMixtureDensities <-
     } else {
       variables <- variables[which(toupper(variables) %in% var_names[, 1])]
     }
-    raw.data <-
+    rawdata <-
       lapply(modelList, function(x) {
         x$savedata[, which(names(x$savedata) %in% c(grep("^CPROB", names(x$savedata), value = TRUE), toupper(variables)))]
       })
-    raw.data <- lapply(raw.data, function(x) {
+    rawdata <- lapply(rawdata, function(x) {
       if (length(grep("^CPROB", names(x))) == 1) {
         names(x) <- gsub("^CPROB1", "Probability.Total", names(x))
         x
@@ -1133,15 +1121,15 @@ plotMixtureDensities <-
       
     })
     
-    for (i in names(raw.data)) {
-      raw.data[[i]][, grep("^Probability", names(raw.data[[i]]))] <-
-        lapply(raw.data[[i]][grep("^Probability", names(raw.data[[i]]))], function(x) {
+    for (i in names(rawdata)) {
+      rawdata[[i]][, grep("^Probability", names(rawdata[[i]]))] <-
+        lapply(rawdata[[i]][grep("^Probability", names(rawdata[[i]]))], function(x) {
           x / length(x)
         })
     }
     
     
-    raw.data <- lapply(raw.data, function(x) {
+    rawdata <- lapply(rawdata, function(x) {
       reshape(
         x,
         direction = "long",
@@ -1152,53 +1140,53 @@ plotMixtureDensities <-
       )
     })
     
-    raw.data <-
+    rawdata <-
       do.call(rbind, lapply(names(modelList), function(x) {
-        data.frame(Title = trimws(modelList[[x]]$input$title), raw.data[[x]])
+        data.frame(Title = trimws(modelList[[x]]$input$title), rawdata[[x]])
       }))
     
-    variable_names <- which(!(names(raw.data) %in% c("Title", "Class", "Probability", "ID")))
+    variable_names <- which(!(names(rawdata) %in% c("Title", "Class", "Probability", "ID")))
     
-    names(raw.data)[variable_names] <- sapply(names(raw.data)[variable_names], function(x){
+    names(rawdata)[variable_names] <- sapply(names(rawdata)[variable_names], function(x){
       paste(c("Value.", toupper(substring(x, 1, 1)), tolower(substring(x, 2))), collapse = "")})
     
-    raw.data <- reshape(
-      raw.data,
+    rawdata <- reshape(
+      rawdata,
       direction = "long",
       varying =
-        grep("^Value", names(raw.data), value = TRUE),
+        grep("^Value", names(rawdata), value = TRUE),
       timevar = "Variable"
     )[, c("Title", "Variable", "Value", "Class", "Probability")]
     
-    raw.data$Variable <- factor(raw.data$Variable)
-    raw.data$Class <- factor(raw.data$Class)
-    raw.data$Class <-
-      ordered(raw.data$Class, levels = c("Total", levels(raw.data$Class)[-length(levels(raw.data$Class))]))
+    rawdata$Variable <- factor(rawdata$Variable)
+    rawdata$Class <- factor(rawdata$Class)
+    rawdata$Class <-
+      ordered(rawdata$Class, levels = c("Total", levels(rawdata$Class)[-length(levels(rawdata$Class))]))
 
     # Plot figure
     if (bw) {
       if (conditional) {
-        raw.data <- raw.data[-which(raw.data$Class == "Total"),]
+        rawdata <- rawdata[-which(rawdata$Class == "Total"),]
         density_plot <-
-          ggplot(raw.data,
+          ggplot(rawdata,
                  aes_string(x = "Value", y = "..count..", fill = "Class", weight = "Probability")) +
           geom_density(position = "fill") + scale_fill_grey(start = 0.2, end = 0.8)
       } else{
         density_plot <-
-          ggplot(raw.data,
+          ggplot(rawdata,
                  aes_string(x = "Value", linetype = "Class", weight = "Probability")) +
           geom_density()
       }
     } else{
       if (conditional) {
-        raw.data <- raw.data[-which(raw.data$Class == "Total"),]
+        rawdata <- rawdata[-which(rawdata$Class == "Total"),]
         density_plot <-
-          ggplot(raw.data,
+          ggplot(rawdata,
                  aes_string(x = "Value", y = "..count..", fill = "Class", weight = "Probability")) +
           geom_density(position = "fill")
       } else{
         density_plot <-
-          ggplot(raw.data,
+          ggplot(rawdata,
                  aes_string(x = "Value",
                    fill = "Class",
                    colour = "Class",
@@ -1208,7 +1196,7 @@ plotMixtureDensities <-
       }
     }
     # Relabel facets
-    label_facets <- c(levels(raw.data$Variable), levels(raw.data$Title))
+    label_facets <- c(levels(rawdata$Variable), levels(rawdata$Title))
     names(label_facets) <- label_facets
     if(!is.null(facet_labels)){
       label_facets[which(tolower(names(label_facets)) %in% tolower(names(facet_labels)))] <- facet_labels[which(tolower(names(facet_labels)) %in% tolower(names(label_facets)))]
@@ -1456,7 +1444,7 @@ plotLTA <-
     nodes <- nodes[!duplicated(nodes),]
     names(nodes)[1] <- "nodeID"
     
-    n_prop <- mplusModel$class_counts$mostLikely
+    n_prop <- mplusModel$class_counts$modelEstimated
     if (!is.null(node_stroke)) {
       n_prop$proportion <-
         node_stroke * n_prop$proportion * inverse.rle(list(
