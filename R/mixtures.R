@@ -23,11 +23,11 @@
 #' @export
 #' @keywords mixture mplus
 #' @examples
-#' createMixtures(classes = 1:4, filename_stem = "iris", rdata = iris)
+#' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
 #' runModels(filefilter = "iris")
 #' results <- readModels(filefilter = "iris")
 #' mixtureSummaryTable(results)
-#' createMixtures(classes = 1:2, filename_stem = "iris", rdata = iris,
+#' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris,
 #'                OUTPUT = "tech11 tech14;")
 #' runModels(filefilter = "iris", replaceOutfile = "modifiedDate")
 #' results <- readModels(filefilter = "iris")[c(1:2)]
@@ -538,10 +538,7 @@ plotMixtures <- function(modelList,
 #' @keywords internal
 #' @examples
 #' \dontrun{
-#' library(RCurl)
-#' myfile <- getURL('http://statmodel.com/usersguide/chap8/ex8.2.dat',
-#'                  ssl.verifyhost=FALSE, ssl.verifypeer=FALSE)
-#' mydat <- read.table(textConnection(myfile), header = FALSE)[,-6]
+#' mydat <- read.table("http://statmodel.com/usersguide/chap8/ex8.2.dat", header = FALSE)[,-6]
 #' createMixtures(classes = 1:3, filename_stem = "ex8.2",
 #'                model_overall = "i s | V1@0 V2@1 V3@2 V4@3;  i s on V5;",
 #'                rdata = mydat,
@@ -1004,7 +1001,7 @@ plotGrowthMixtures <-
 #' @import ggplot2
 #' @keywords mixture models mplus
 #' @examples
-#' createMixtures(classes = 1:4, filename_stem = "iris", rdata = iris)
+#' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
 #' runModels(filefilter = "iris")
 #' results <- readModels(filefilter = "iris")
 #' plotMixtureDensities(results)
@@ -1248,12 +1245,20 @@ plotMixtureDensities <-
 #' the syntax and data files.
 #' @param model_overall Character. Mplus syntax for the overall model (across
 #' classes).
-#' @param model_class_specific Character. Mplus syntax for the class-specific
-#' model. The character string \dQuote{\{C\}} is substituted with the correct
-#' class number, for example to make unique parameter labels for each class.
+#' @param model_class_specific Character vector. Mplus syntax for the 
+#' class-specific model(s) of one or more categorical latent variables. Each 
+#' element of \code{model_class_specific} is used as the class-specific syntax
+#' of a different categorical latent variable. This allows one to easily specify
+#' latent transition analyses (see second example). The character string
+#' \dQuote{\{C\}} is substituted with the correct class number, for example to
+#' set unique parameter labels for each class, or to specify equality
+#' constraints.
 #' @param rdata Data.frame. An R dataset to be used for the model.
 #' @param usevariables Character vector, specifying the names of variables in 
 #' the rdata object which should be included in the Mplus data file and model.
+#' @param OUTPUT Character. Syntax for Mplus' OUTPUT option. Highly
+#' recommended when determining the appropriate number of latent classes. TECH11
+#' is required to obtain the VLMR-test; TECH14 is required for the BLR-test.
 #' @param SAVEDATA Character. Syntax for Mplus' savedata option. Highly
 #' recommended when conducting mixture models. The default option will often be
 #' adequate.
@@ -1265,75 +1270,140 @@ plotMixtureDensities <-
 #' @export
 #' @keywords mixture models mplus
 #' @examples
-#' createMixtures(classes = 1:4, filename_stem = "iris", rdata = iris)
+#' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
+#' \dontrun{
+#' data <- read.table("http://statmodel.com/usersguide/chap8/ex8.13.dat")[,c(1:10)]
+#' names(data) <- c("u11", "u12", "u13", "u14", "u15", "u21", "u22", "u23", "u24", "u25")
+#' createMixtures(
+#' classes = 2,
+#' filename_stem = "dating",
+#' model_overall = "c2 ON c1;",
+#' model_class_specific = c(
+#' "[u11$1] (a{C});  [u12$1] (b{C});  [u13$1] (c{C});  [u14$1] (d{C});  [u15$1] (e{C});",
+#' "[u21$1] (a{C});  [u22$1] (b{C});  [u23$1] (c{C});  [u24$1] (d{C});  [u25$1] (e{C});"
+#' ),
+#' rdata = data,
+#' ANALYSIS = "PROCESSORS IS 2;  LRTSTARTS (0 0 40 20);  PARAMETERIZATION = PROBABILITY;",
+#' VARIABLE = "CATEGORICAL = u11-u15 u21-u25;"
+#' )
+#' }
 createMixtures <- function(classes = 1L,
                            filename_stem = NULL,
                            model_overall = NULL,
                            model_class_specific = NULL,
                            rdata = NULL,
                            usevariables = NULL,
+                           OUTPUT = "TECH11 TECH14;",
                            SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;",
                            ...) {
-  if (hasArg("MODEL"))
+  Args <- c(
+    list(
+      rdata = rdata,
+      usevariables = usevariables,
+      OUTPUT = OUTPUT
+    ),
+    list(...)
+  )
+  if (hasArg("MODEL")) {
     warning(
       "MODEL argument was dropped: createMixtures constructs its own MODEL argument from model_overall and model_class_specific."
     )
-  Args <- match.call()
+    Args$MODEL <- NULL
+  }
+  if (!is.null(SAVEDATA)) {
+    Args$SAVEDATA <- gsub("\\{filename_stem\\}",
+                         filename_stem, SAVEDATA)
+  } else {
+    Args$SAVEDATA <- NULL
+  }
   if (!hasArg(usevariables) & !hasArg("DEFINE")) {
-    message(
-      "No usevariables provided, or variables defined. All variables in rdata were used.")
+    message("No usevariables provided, or variables defined. All variables in rdata were used.")
     Args[["usevariables"]] <- names(rdata)
   }
-  if(any(sapply(Args[["usevariables"]], nchar) > 8)){
-    warning("Some variable names exceed 8 characters and will be truncated by Mplus. This can cause problems when plotting mixture models. Please rename variables.")
+  if (any(sapply(Args[["usevariables"]], nchar) > 8)) {
+    warning(
+      "Some variable names exceed 8 characters and will be truncated by Mplus. This can cause problems when plotting mixture models. Please rename variables."
+    )
   }
-  if(any(sapply(Args[["usevariables"]], grepl, "\\."))){
+  if (any(sapply(Args[["usevariables"]], grepl, "\\."))) {
     Args[["usevariables"]] <- gsub("\\.", "_", Args[["usevariables"]])
     warning("Some variable names contain periods ('.'). These were replaced with underscores.")
   }
+  
   Args[["MODEL"]] <-
-    paste(c("%OVERALL%\n", model_overall, "\n"), collapse = "")
+    paste(c("%OVERALL%\n", model_overall, "\n\n"), collapse = "")
   if (hasArg("ANALYSIS")) {
     Args[["ANALYSIS"]] <-
       paste0("TYPE = mixture;\n", Args[["ANALYSIS"]])
   } else {
     Args[["ANALYSIS"]] <- "TYPE = mixture;\n"
   }
-  Args[["SAVEDATA"]] <- SAVEDATA
+  
   char_args <- which(sapply(Args, is.character))
   Args[char_args] <-
     lapply(Args[char_args], function(x) {
       gsub("  ", "\n", x)
     })
   
+  if(!is.null(model_class_specific)){
+    model_class_specific <- gsub("  ", "\n", model_class_specific)
+    n_latentvars <- length(model_class_specific)
+  } else {
+    n_latentvars <- 1
+  }
   n_classes <- length(classes)
-  mplusObject_Args <- as.list(Args[-c(1, which(
-    names(Args) %in% c(
-      "classes",
-      "filename_stem",
-      "model_overall",
-      "model_class_specific"
-    )
-  ))])
   
   # Create mplusObject template
-  base_object <- do.call(mplusObject, mplusObject_Args)
-  base_object$SAVEDATA <-
-    gsub("\\{filename_stem\\}", filename_stem, base_object$SAVEDATA)
+  base_object <- do.call(mplusObject, Args)
+  
   # Expand template for requested classes
   input_list <- lapply(classes, function(num_classes) {
     base_object$VARIABLE <-
-      paste0(base_object$VARIABLE, paste(c("CLASSES = c(", num_classes, ");\n"), collapse = ""))
+      paste0(base_object$VARIABLE, paste(c(
+        "CLASSES = ",
+        paste(
+          "c",
+          1:n_latentvars,
+          "(",
+          num_classes,
+          ")",
+          sep = "",
+          collapse = " "
+        ),
+        ";\n"
+      ), collapse = ""))
     if (!is.null(model_class_specific)) {
-      base_object$MODEL <- paste0(base_object$MODEL,
-                                  do.call(paste0, lapply(1:num_classes, function(this_class) {
-                                    gsub("\\{C\\}", this_class, paste(c(
-                                      "%c#", this_class, "%\n", Args[["model_class_specific"]], "\n\n"
-                                    ),
-                                    collapse = ""))
-                                  })))
+      expand_class_specific <- ""
+      for (var_num in 1:n_latentvars) {
+        if(!is.null(model_class_specific[var_num])){
+          if(n_latentvars > 1){
+            expand_class_specific <-
+              paste0(expand_class_specific,
+                     paste0("MODEL c", var_num, ":\n"))
+          }
+          for (this_class in 1:num_classes) {
+            expand_class_specific <-
+              paste0(expand_class_specific,
+                     gsub("\\{C\\}", this_class, paste(
+                       c(
+                         "%c",
+                         var_num,
+                         "#",
+                         this_class,
+                         "%\n",
+                         model_class_specific[var_num],
+                         "\n\n"
+                       ),
+                       collapse = ""
+                     )))
+          }
+        }
+      }
+      base_object$MODEL <-
+        paste0(base_object$MODEL,
+               expand_class_specific)
     }
-    if (!is.null(SAVEDATA)) {
+    if (!is.null(base_object[["SAVEDATA"]])) {
       base_object$SAVEDATA <-
         gsub("\\{C\\}", num_classes, base_object$SAVEDATA)
     }
@@ -1343,6 +1413,7 @@ createMixtures <- function(classes = 1L,
     base_object
   })
   
+  # Write files
   invisible(suppressMessages(lapply(1:n_classes, function(class) {
     mplusModeler(
       object = input_list[[class]],
@@ -1362,7 +1433,6 @@ createMixtures <- function(classes = 1L,
       hashfilename = TRUE
     )
   })))
-  
 }
 
 #' Plot latent transition model
@@ -1397,7 +1467,25 @@ createMixtures <- function(classes = 1L,
 #' @importFrom stats complete.cases setNames
 #' @keywords internal
 #' @examples
-#' #Make me!!!
+#' \dontrun{
+#' data <- read.table("http://statmodel.com/usersguide/chap8/ex8.13.dat")[,c(1:10)]
+#' names(data) <- c("u11", "u12", "u13", "u14", "u15", "u21", "u22", "u23", "u24", "u25")
+#' createMixtures(
+#' classes = 2,
+#' filename_stem = "dating",
+#' model_overall = "c2 ON c1;",
+#' model_class_specific = c(
+#' "[u11$1] (a{C});  [u12$1] (b{C});  [u13$1] (c{C});  [u14$1] (d{C});  [u15$1] (e{C});",
+#' "[u21$1] (a{C});  [u22$1] (b{C});  [u23$1] (c{C});  [u24$1] (d{C});  [u25$1] (e{C});"
+#' ),
+#' rdata = data,
+#' ANALYSIS = "PROCESSORS IS 2;  LRTSTARTS (0 0 40 20);  PARAMETERIZATION = PROBABILITY;",
+#' VARIABLE = "CATEGORICAL = u11-u15 u21-u25;"
+#' )
+#' runModels(filefilter = "dating")
+#' results <- readModels(filefilter = "dating")
+#' plotLTA(results)
+#' }
 plotLTA <-
   function(mplusModel,
            node_stroke = 2,

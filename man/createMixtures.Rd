@@ -6,6 +6,7 @@
 \usage{
 createMixtures(classes = 1L, filename_stem = NULL, model_overall = NULL,
   model_class_specific = NULL, rdata = NULL, usevariables = NULL,
+  OUTPUT = "TECH11 TECH14;",
   SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;", ...)
 }
 \arguments{
@@ -19,14 +20,23 @@ the syntax and data files.}
 \item{model_overall}{Character. Mplus syntax for the overall model (across
 classes).}
 
-\item{model_class_specific}{Character. Mplus syntax for the class-specific
-model. The character string \dQuote{\{C\}} is substituted with the correct
-class number, for example to make unique parameter labels for each class.}
+\item{model_class_specific}{Character vector. Mplus syntax for the 
+class-specific model(s) of one or more categorical latent variables. Each 
+element of \code{model_class_specific} is used as the class-specific syntax
+of a different categorical latent variable. This allows one to easily specify
+latent transition analyses (see second example). The character string
+\dQuote{\{C\}} is substituted with the correct class number, for example to
+set unique parameter labels for each class, or to specify equality
+constraints.}
 
 \item{rdata}{Data.frame. An R dataset to be used for the model.}
 
 \item{usevariables}{Character vector, specifying the names of variables in 
 the rdata object which should be included in the Mplus data file and model.}
+
+\item{OUTPUT}{Character. Syntax for Mplus' OUTPUT option. Highly
+recommended when determining the appropriate number of latent classes. TECH11
+is required to obtain the VLMR-test; TECH14 is required for the BLR-test.}
 
 \item{SAVEDATA}{Character. Syntax for Mplus' savedata option. Highly
 recommended when conducting mixture models. The default option will often be
@@ -51,7 +61,23 @@ The character string \dQuote{\{filename_stem\}} is substituted with the
 filename stem, for example, to name savedata in line with the input files.
 }
 \examples{
-createMixtures(classes = 1:4, filename_stem = "iris", rdata = iris)
+createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
+\dontrun{
+data <- read.table("http://statmodel.com/usersguide/chap8/ex8.13.dat")[,c(1:10)]
+names(data) <- c("u11", "u12", "u13", "u14", "u15", "u21", "u22", "u23", "u24", "u25")
+createMixtures(
+classes = 2,
+filename_stem = "dating",
+model_overall = "c2 ON c1;",
+model_class_specific = c(
+"[u11$1] (a{C});  [u12$1] (b{C});  [u13$1] (c{C});  [u14$1] (d{C});  [u15$1] (e{C});",
+"[u21$1] (a{C});  [u22$1] (b{C});  [u23$1] (c{C});  [u24$1] (d{C});  [u25$1] (e{C});"
+),
+rdata = data,
+ANALYSIS = "PROCESSORS IS 2;  LRTSTARTS (0 0 40 20);  PARAMETERIZATION = PROBABILITY;",
+VARIABLE = "CATEGORICAL = u11-u15 u21-u25;"
+)
+}
 }
 \seealso{
 \code{\link{mplusObject}}, \code{\link{mplusModeler}}

@@ -36,11 +36,11 @@ This function is partially a wrapper around SummaryTable, with
 enhancements for summarizing mixture models.
 }
 \examples{
-createMixtures(classes = 1:4, filename_stem = "iris", rdata = iris)
+createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
 runModels(filefilter = "iris")
 results <- readModels(filefilter = "iris")
 mixtureSummaryTable(results)
-createMixtures(classes = 1:2, filename_stem = "iris", rdata = iris,
+createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris,
                OUTPUT = "tech11 tech14;")
 runModels(filefilter = "iris", replaceOutfile = "modifiedDate")
 results <- readModels(filefilter = "iris")[c(1:2)]

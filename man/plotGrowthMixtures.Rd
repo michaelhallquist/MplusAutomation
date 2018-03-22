@@ -57,10 +57,7 @@ specified using Mplus' '|' notation (e.g., i s | ).
 }
 \examples{
 \dontrun{
-library(RCurl)
-myfile <- getURL('http://statmodel.com/usersguide/chap8/ex8.2.dat',
-                 ssl.verifyhost=FALSE, ssl.verifypeer=FALSE)
-mydat <- read.table(textConnection(myfile), header = FALSE)[,-6]
+mydat <- read.table("http://statmodel.com/usersguide/chap8/ex8.2.dat", header = FALSE)[,-6]
 createMixtures(classes = 1:3, filename_stem = "ex8.2",
                model_overall = "i s | V1@0 V2@1 V3@2 V4@3;  i s on V5;",
                rdata = mydat,

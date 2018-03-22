@@ -51,7 +51,7 @@ by the latent classes, in proportion to the posterior probabilities of
 participants being assigned to those clases.
 }
 \examples{
-createMixtures(classes = 1:4, filename_stem = "iris", rdata = iris)
+createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
 runModels(filefilter = "iris")
 results <- readModels(filefilter = "iris")
 plotMixtureDensities(results)
