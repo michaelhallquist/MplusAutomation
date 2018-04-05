@@ -29,7 +29,8 @@ Imports:
     texreg,
     pander,
     digest,
-    parallel
+    parallel,
+	ggplot2
 Suggests:
     rhdf5,
     tcltk,

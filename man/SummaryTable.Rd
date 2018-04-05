@@ -5,15 +5,15 @@
 \title{Create a summary table of Mplus model statistics}
 \usage{
 SummaryTable(modelList, type = c("screen", "popup", "html", "latex",
-  "markdown"), filename = "", keepCols, dropCols, sortBy, caption = "",
-  display = FALSE, ..., include.rownames = FALSE)
+  "markdown", "none"), filename = "", keepCols, dropCols, sortBy,
+  caption = "", display = FALSE, ..., include.rownames = FALSE)
 }
 \arguments{
 \item{modelList}{A list of models returned from the \code{extractModelSummaries} function.}
 
 \item{type}{A character vector indicating the type of output format to be generated.  One of:
-\dQuote{screen}, \dQuote{popup}, \dQuote{html}, \dQuote{latex}, or \dQuote{markdown}. Screen results in a simple
-summary table being sent to the R console.}
+\dQuote{none}, \dQuote{screen}, \dQuote{popup}, \dQuote{html}, \dQuote{latex}, or \dQuote{markdown}. 
+Screen results in a simple summary table being sent to the R console.}
 
 \item{filename}{The name of the file to be created. Can be an absolute or relative path. If \code{filename}
 is a relative path or just the filename, then it is assumed that the file resides in the working
