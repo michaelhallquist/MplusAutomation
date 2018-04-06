@@ -1,17 +1,78 @@
 #' Extract Indirect Effects output
 #'
-#' This function parses the section titles TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS
-#' It returns a list composed of $overall and $specific effects
+#' This function parses both unstandardized and standardized indirect effects
+#' It returns a list composed of $unstandardized and $standardized.
+#' The base structure of each is a list containing $overall and $specific effects (as data.frames)
 #'
 #' @param outfiletext a character vector containing the indirect effects output section returned by getSection 
 #' @param curFile the name of the current output file being parsed
 #' @return An mplus.indirect object (inherits list) containing $overall and $specific 
 #' @keywords internal
 extractIndirect <- function(outfiletext, curfile) {
-  indirectSection <- getSection("^TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS( FOR LATENT RESPONSE VARIABLES)*$", outfiletext)
-  if (is.null(indirectSection)) return(list()) #no indirect output
+  indirect_results <- list()
   
-  columnNames <- detectColumnNames(curfile, trimSpace(indirectSection[1:50]), "model_results") #assume that column headers are somewhere in the first 50 lines
+  indirectSection <- getSection("^TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS( FOR LATENT RESPONSE VARIABLES)*$", outfiletext)
+  if (!is.null(indirectSection)) { indirect_results[["unstandardized"]] <- extractIndirect_section(indirectSection, curfile, sectionType="model_results") }
+ 
+  ciSection <- getSection("^CONFIDENCE INTERVALS OF TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS*$", outfiletext)
+  if (!is.null(ciSection)) { indirect_results[["ci.unstandardized"]] <- extractIndirect_section(ciSection, curfile, sectionType="confidence_intervals") }
+  
+  stdindirectSection <- getSection("^STANDARDIZED TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS$", outfiletext)
+  if (!is.null(stdindirectSection)) {
+    #check for each subsection
+    
+    stdheaders <- grep("STDY?X? Standardization", stdindirectSection, perl=TRUE) 
+    if (length(stdheaders) > 0L) {
+      for (ix in 1:length(stdheaders)) {
+        endsection <- ifelse(ix == length(stdheaders), length(stdindirectSection), stdheaders[ix+1])
+        thissection <- stdindirectSection[(stdheaders[ix]+1):(endsection-1)]
+        secname <- tolower(sub("(STDY?X?)\\s+Standardization", "\\1", stdindirectSection[stdheaders[ix]], perl=TRUE))
+        indirect_results[[paste0(secname, ".standardized")]] <- extractIndirect_section(thissection, curfile, sectionType="model_results")    
+      }
+    }
+  }
+  
+  cistdindirectSection <- getSection("^CONFIDENCE INTERVALS OF STANDARDIZED TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT,( AND DIRECT EFFECTS)*$", outfiletext) #last part is omitted before Mplus v8
+  if (!is.null(cistdindirectSection)) {
+    #check for each subsection
+    
+    stdheaders <- grep("STDY?X? Standardization", cistdindirectSection, perl=TRUE) 
+    if (length(stdheaders) > 0L) {
+      for (ix in 1:length(stdheaders)) {
+        endsection <- ifelse(ix == length(stdheaders), length(cistdindirectSection), stdheaders[ix+1])
+        thissection <- cistdindirectSection[(stdheaders[ix]+1):(endsection-1)]
+        secname <- tolower(sub("(STDY?X?)\\s+Standardization", "\\1", cistdindirectSection[stdheaders[ix]], perl=TRUE))
+        indirect_results[[paste0("ci.", secname, ".standardized")]] <- extractIndirect_section(thissection, curfile, sectionType="confidence_intervals")    
+      }
+    }
+  }
+  
+  #mirror parameters
+  listOrder <- c("unstandardized", "ci.unstandardized",
+    "stdyx.standardized", "ci.stdyx.standardized",
+    "stdy.standardized", "ci.stdy.standardized",
+    "std.standardized", "ci.std.standardized")
+  listOrder <- listOrder[listOrder %in% names(indirect_results)]
+  
+  #only re-order if out of order
+  if(!identical(names(indirect_results), listOrder)) indirect_results <- indirect_results[listOrder]
+  
+  return(indirect_results)
+  
+}
+
+#' Extract Indirect Effects output
+#'
+#' This function parses a given indirect section
+#' It returns a list composed of $overall and $specific effects
+#'
+#' @param indirectSection a character vector containing the indirect effects for a specific section (e.g., stdyx)  
+#' @param curFile the name of the current output file being parsed
+#' @return An mplus.indirect object (inherits list) containing $overall and $specific 
+#' @keywords internal
+extractIndirect_section <- function(indirectSection, curfile, sectionType) {
+  
+  columnNames <- detectColumnNames(curfile, trimSpace(indirectSection[1:50]), sectionType) #assume that column headers are somewhere in the first 50 lines
   columnNames[1] <- "outcome" #rename param -> outcome for clarity
   
   multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", indirectSection, ignore.case=TRUE, perl=TRUE) #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
@@ -85,7 +146,8 @@ extractIndirect <- function(outfiletext, curfile) {
         }
       }
       
-      elist$summaries <- data.frame(pred=elist$pred, outcome=elist$outcome, rbind(totalLine, totalIndirectLine, direct), row.names=NULL)
+      elist$summaries <- data.frame(pred=elist$pred, outcome=elist$outcome, 
+        rbind(unlist(totalLine), unlist(totalIndirectLine), unlist(direct)), row.names=NULL, stringsAsFactors=FALSE)
       
       #reorder columns to put pred, outcome, summary first. Use columnNames vector without "outcome" to place remainder in order
       elist$summaries <- elist$summaries[,c("pred", "outcome", "summary", columnNames[-1])]

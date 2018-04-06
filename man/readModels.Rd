@@ -42,7 +42,7 @@ a single mplus.model object, not a list of files. Specific elements are:
   \item{summaries}{Summary statistics from \code{extractModelSummaries}, having structure as specified by that function}
   \item{parameters}{Model parameters from \code{extractModelParameters}, having structure as specified by that function}
   \item{class_counts}{Latent class counts and proportions for models that include a categorical latent variable}
-  \item{indirect}{Output of MODEL INDIRECT if available in output. Contains \code{$overall} and \code{$specific} data.frames for indirect effects}
+  \item{indirect}{Output of MODEL INDIRECT if available in output. Contains \code{$overall} and \code{$specific} data.frames for each indirect effect section}
   \item{mod_indices}{Model modification indices from \code{extractModIndices}, having structure as specified by that function}
   \item{residuals}{a list containing relevant information from OUTPUT: RESIDUALS}
   \item{savedata_info}{File information about SAVEDATA files related to this output}

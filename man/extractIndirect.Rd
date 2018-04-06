@@ -15,7 +15,8 @@ extractIndirect(outfiletext, curfile)
 An mplus.indirect object (inherits list) containing $overall and $specific
 }
 \description{
-This function parses the section titles TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS
-It returns a list composed of $overall and $specific effects
+This function parses both unstandardized and standardized indirect effects
+It returns a list composed of $unstandardized and $standardized.
+The base structure of each is a list containing $overall and $specific effects (as data.frames)
 }
 \keyword{internal}
