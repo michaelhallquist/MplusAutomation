@@ -36,6 +36,7 @@ This function is partially a wrapper around SummaryTable, with
 enhancements for summarizing mixture models.
 }
 \examples{
+\dontrun{
 createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
 runModels(filefilter = "iris")
 results <- readModels(filefilter = "iris")
@@ -45,6 +46,7 @@ createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris,
 runModels(filefilter = "iris", replaceOutfile = "modifiedDate")
 results <- readModels(filefilter = "iris")[c(1:2)]
 mixtureSummaryTable(results)
+}
 }
 \seealso{
 \code{\link{SummaryTable}}

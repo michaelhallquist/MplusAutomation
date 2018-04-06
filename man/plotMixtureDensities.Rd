@@ -51,10 +51,12 @@ by the latent classes, in proportion to the posterior probabilities of
 participants being assigned to those clases.
 }
 \examples{
+\dontrun{
 createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
 runModels(filefilter = "iris")
 results <- readModels(filefilter = "iris")
 plotMixtureDensities(results)
+}
 \dontrun{
 plotMixtureDensities(results, variables = "PETAL_LE")
 }

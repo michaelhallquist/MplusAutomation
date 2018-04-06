@@ -23,6 +23,7 @@
 #' @export
 #' @keywords mixture mplus
 #' @examples
+#' \dontrun{
 #' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
 #' runModels(filefilter = "iris")
 #' results <- readModels(filefilter = "iris")
@@ -32,6 +33,7 @@
 #' runModels(filefilter = "iris", replaceOutfile = "modifiedDate")
 #' results <- readModels(filefilter = "iris")[c(1:2)]
 #' mixtureSummaryTable(results)
+#' }
 mixtureSummaryTable <- function(modelList,
                                 keepCols = c(
                                   "Title",
@@ -223,6 +225,7 @@ mixtureSummaryTable <- function(modelList,
 #' @import ggplot2
 #' @keywords plot mixture mplus
 #' @examples
+#' \dontrun{
 #' createMixtures(classes = 1:4, filename_stem = "cars",
 #'                model_overall = "wt ON drat;",
 #'                model_class_specific = "wt;  qsec;",
@@ -232,6 +235,7 @@ mixtureSummaryTable <- function(modelList,
 #' runModels(replaceOutfile = "modifiedDate")
 #' cars_results <- readModels(filefilter = "cars")
 #' plotMixtures(cars_results, rawdata = TRUE)
+#' }
 #' \dontrun{
 #' plotMixtures(cars_results, variables = "wt")
 #' }
@@ -1001,10 +1005,12 @@ plotGrowthMixtures <-
 #' @import ggplot2
 #' @keywords mixture models mplus
 #' @examples
+#' \dontrun{
 #' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
 #' runModels(filefilter = "iris")
 #' results <- readModels(filefilter = "iris")
 #' plotMixtureDensities(results)
+#' }
 #' \dontrun{
 #' plotMixtureDensities(results, variables = "PETAL_LE")
 #' }
@@ -1270,7 +1276,9 @@ plotMixtureDensities <-
 #' @export
 #' @keywords mixture models mplus
 #' @examples
+#' \dontrun{
 #' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
+#' }
 #' \dontrun{
 #' data <- read.table("http://statmodel.com/usersguide/chap8/ex8.13.dat")[,c(1:10)]
 #' names(data) <- c("u11", "u12", "u13", "u14", "u15", "u21", "u22", "u23", "u24", "u25")
