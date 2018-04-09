@@ -1,12 +1,14 @@
 Package: MplusAutomation
 Type: Package
 Title: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus
-Version: 0.7-1
-Date: 2018-01-31
+Version: 0.7-2
+Date: 2018-04-05
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "michael.hallquist@gmail.com"),
     person("Joshua", "Wiley", role = "aut",
-    email = "jwiley.psych@gmail.com"))
+    email = "jwiley.psych@gmail.com"),
+    person(given = "Caspar", family ="van Lissa", role = "ctb",
+    email = "vanlissa@essb.eur.nl"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
 Description: Leverages the R language to automate latent variable model estimation
 	and interpretation using 'Mplus', a powerful latent variable modeling program

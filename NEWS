@@ -1,3 +1,10 @@
+Version 0.7-2
+ - feature:     A host of new features for mixture modeling (thanks to Caspar van Lissa!). See createMixtures, mixtureSummaryTable, plotMixtures, plotGrowthMixtures, plotLTA.
+ - feature:     Extract standardized indirect effects using readModels(). $indirect now has the same basic section structure as $parameters.
+ - feature:     Extract indirect effect confidence intervals (unstandardized and standardized) using readModels(). Look at $indirect$ci.unstandardized etc.
+ - notice:      getSavedata_Data is now deprecated. Use readModels(what="savedata")$savedata for comparable results 
+ - bugfix:      small fix to structure of indirect summaries to avoid lists nested within data.frames.
+
 Version 0.7-1
 - notice:       For consistency, covariance.coverage has been renamed covariance_coverage in the list returned from readModels
 - notice:       extractModelSummaries and extractModelParameters have been removed in favor of readModels.

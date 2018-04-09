@@ -59,8 +59,8 @@
 #' \tabular{ll}{
 #' Package: \tab MplusAutomation\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.7-1\cr
-#' Date: \tab 2018-01-31\cr
+#' Version: \tab 0.7-2\cr
+#' Date: \tab 2018-04-05\cr
 #' License: \tab LGPL-3\cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -90,7 +90,7 @@ NULL
     'We work hard to write this free software. Please help us get credit by citing: \n\n',
 
     paste("Hallquist, M. N. & Wiley, J. F. (2018).",
-      "MplusAutomation: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus",
+      "MplusAutomation: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus.",
       "Structural Equation Modeling, 1-18.",
       "doi: 10.1080/10705511.2017.1402334.\n\n"),
 

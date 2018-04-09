@@ -44,6 +44,7 @@ Creates a profile plot for a single object of class 'mplus.model', or a
 faceted plot of profile plots for an object of class 'mplus.model.list'.
 }
 \examples{
+\dontrun{
 createMixtures(classes = 1:4, filename_stem = "cars",
                model_overall = "wt ON drat;",
                model_class_specific = "wt;  qsec;",
@@ -53,6 +54,7 @@ createMixtures(classes = 1:4, filename_stem = "cars",
 runModels(replaceOutfile = "modifiedDate")
 cars_results <- readModels(filefilter = "cars")
 plotMixtures(cars_results, rawdata = TRUE)
+}
 \dontrun{
 plotMixtures(cars_results, variables = "wt")
 }

@@ -309,24 +309,28 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
 #' @keywords interface
 getSavedata_Data <- function(outfile) {
   #exposed wrapper for l_getSavedata_Data, which pulls saveData data into data.frame
-  if(!file.exists(outfile)) {
-    stop("Cannot locate outfile: ", outfile)
-  }
-
-  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
-
-  if (length(outfiletext) == 0) {
-    warning("Empty outfile")
-    return(NULL)
-  }
-
-  fileInfo <- l_getSavedata_Fileinfo(outfile, outfiletext)
-
-  if (is.null(fileInfo) || all(is.na(fileInfo))) return(NULL)
-  else if (is.na(fileInfo[["fileVarWidths"]][1])) return(l_getSavedata_readRawFile(outfile, outfiletext, format="free", fileName=fileInfo[["fileName"]],
-            varNames=fileInfo[["fileVarNames"]]))
-  else return(l_getSavedata_readRawFile(outfile, outfiletext, format="fixed", fileName=fileInfo[["fileName"]],
-            varNames=fileInfo[["fileVarNames"]], varWidths=fileInfo[["fileVarWidths"]]))
+  
+  message("getSavedata_Data has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"savedata\")$savedata to replicate the old functionality.")
+  
+#  
+#  if(!file.exists(outfile)) {
+#    stop("Cannot locate outfile: ", outfile)
+#  }
+#
+#  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
+#
+#  if (length(outfiletext) == 0) {
+#    warning("Empty outfile")
+#    return(NULL)
+#  }
+#
+#  fileInfo <- l_getSavedata_Fileinfo(outfile, outfiletext)
+#
+#  if (is.null(fileInfo) || all(is.na(fileInfo))) return(NULL)
+#  else if (is.na(fileInfo[["fileVarWidths"]][1])) return(l_getSavedata_readRawFile(outfile, outfiletext, format="free", fileName=fileInfo[["fileName"]],
+#            varNames=fileInfo[["fileVarNames"]]))
+#  else return(l_getSavedata_readRawFile(outfile, outfiletext, format="fixed", fileName=fileInfo[["fileName"]],
+#            varNames=fileInfo[["fileVarNames"]], varWidths=fileInfo[["fileVarWidths"]]))
 }
 
 #' Load the draws from the Bayesian model posterior distribution (SAVEDATA BPARAMETERS) command into an R data.frame

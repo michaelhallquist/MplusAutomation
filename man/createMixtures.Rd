@@ -61,7 +61,9 @@ The character string \dQuote{\{filename_stem\}} is substituted with the
 filename stem, for example, to name savedata in line with the input files.
 }
 \examples{
+\dontrun{
 createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
+}
 \dontrun{
 data <- read.table("http://statmodel.com/usersguide/chap8/ex8.13.dat")[,c(1:10)]
 names(data) <- c("u11", "u12", "u13", "u14", "u15", "u21", "u22", "u23", "u24", "u25")
