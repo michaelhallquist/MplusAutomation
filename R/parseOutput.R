@@ -1894,7 +1894,7 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
 
   countlist[["logitProbs.mostLikely"]] <- unlabeledMatrixExtract(classificationLogitProbs, filename)
   } else {
-    # Exctract class_counts for multiple categorical latent variables.
+    # Extract class_counts for multiple categorical latent variables.
     getClassCols_lta <- function(sectiontext) {
       numberLines <- grep("^\\s*([a-zA-Z0-9]+)?(\\s+[0-9\\.-]{1,}){1,}$", sectiontext, perl=TRUE)
       if (length(numberLines) > 0) {
@@ -1918,7 +1918,7 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
         return(NULL)
       }
     }
-    
+
     if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
       posteriorProb.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
       mostLikely.patterns <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
@@ -1945,9 +1945,11 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
     countlist[["mostLikely"]] <- getClassCols_lta(mostLikelyCounts)
 
     countlist[c("modelEstimated", "posteriorProb", "mostLikely")] <-
-      lapply(countlist[c("modelEstimated", "posteriorProb", "mostLikely")],
-             setNames,
-             c("variable", "class", "count", "proportion"))
+      lapply(countlist[c("modelEstimated", "posteriorProb", "mostLikely")], function(el) {
+          if(!is.null(el)) {
+            setNames(el, c("variable", "class", "count", "proportion"))
+          } else { NULL }
+        })
     
     # Patterns
     countlist[["modelEstimated.patterns"]] <-
@@ -1962,16 +1964,12 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
     countlist[["mostLikely.patterns"]] <-
       getClassCols_lta(mostLikely.patterns)
     
-    countlist[c("modelEstimated.patterns",
-                "posteriorProb.patterns",
-                "mostLikely.patterns")] <-
-      lapply(countlist[c("modelEstimated.patterns",
-                         "posteriorProb.patterns",
-                         "mostLikely.patterns")],
-             setNames,
-             c(paste0("class.", unique(
-               countlist[["modelEstimated"]]$variable
-             )), "count", "proportion"))
+    countlist[c("modelEstimated.patterns", "posteriorProb.patterns", "mostLikely.patterns")] <-
+      lapply(countlist[c("modelEstimated.patterns", "posteriorProb.patterns", "mostLikely.patterns")], function(el) {
+          if(!is.null(el)) {
+            setNames(el, c(paste0("class.", unique(countlist[["modelEstimated"]]$variable)), "count", "proportion"))
+          } else { NULL }
+        })
     
     #Average latent class probabilities
     avgProbs <- getSection(
