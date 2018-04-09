@@ -8,7 +8,7 @@ Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     person("Joshua", "Wiley", role = "aut",
     email = "jwiley.psych@gmail.com"),
     person(given = "Caspar", family ="van Lissa", role = "ctb",
-    email = "vanlissa@essb.eur.nl"))
+    email = "c.j.vanlissa@uu.nl"))
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
 Description: Leverages the R language to automate latent variable model estimation
 	and interpretation using 'Mplus', a powerful latent variable modeling program

@@ -1918,11 +1918,17 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
         return(NULL)
       }
     }
-
-    if (is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
-      warning("MplusAutomation currently only reads output with multiple categorical latent variables for Mplus version 8 and up.")
-    }
     
+    if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
+      posteriorProb.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
+      mostLikely.patterns <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
+      mostLikelyCounts <- getSection("CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN", outfiletext)
+    } else {
+      posteriorProb.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
+      mostLikely.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
+      mostLikelyCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE$::^BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
+    }
+
     # Class counts
     countlist[["modelEstimated"]] <- getClassCols_lta(
       getSection(
@@ -1936,12 +1942,7 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
         outfiletext
       )
     )
-    countlist[["mostLikely"]] <- getClassCols_lta(
-      getSection(
-        "^FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE$::^BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$",
-        outfiletext
-      )
-    )
+    countlist[["mostLikely"]] <- getClassCols_lta(mostLikelyCounts)
 
     countlist[c("modelEstimated", "posteriorProb", "mostLikely")] <-
       lapply(countlist[c("modelEstimated", "posteriorProb", "mostLikely")],
@@ -1957,19 +1958,9 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
         )
       )
     countlist[["posteriorProb.patterns"]] <-
-      getClassCols_lta(
-        getSection(
-          "^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$",
-          outfiletext
-        )
-      )
+      getClassCols_lta(posteriorProb.patterns)
     countlist[["mostLikely.patterns"]] <-
-      getClassCols_lta(
-        getSection(
-          "^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$",
-          outfiletext
-        )
-      )
+      getClassCols_lta(mostLikely.patterns)
     
     countlist[c("modelEstimated.patterns",
                 "posteriorProb.patterns",
@@ -1983,9 +1974,10 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
              )), "count", "proportion"))
     
     #Average latent class probabilities
-    avgProbs <- 
-      outfiletext[(grep("^Average Latent Class Probabilities for Most Likely Latent Class Pattern \\((Row|Column)\\)$", outfiletext)+2):grep("^MODEL RESULTS$", outfiletext)-1]
-    
+    avgProbs <- getSection(
+      "^Average Latent Class Probabilities for Most Likely Latent Class Pattern \\((Row|Column)\\)$::^by Latent Class Pattern \\((Row|Column)\\)$",
+      outfiletext)
+
     column_headers <- strsplit(trimws(grep("\\s*Latent Class\\s{2,}", avgProbs, value = TRUE)), "\\s+", perl=TRUE)[[1]][-1]
     variable_pattern_rows <- grep(paste(c("^(\\s{2,}\\d+){", length(column_headers), "}$"), collapse = ""), avgProbs, perl=TRUE)
     variable_pattern_rows <- variable_pattern_rows[!c(FALSE, diff(variable_pattern_rows) != 1)]
