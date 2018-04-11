@@ -1944,8 +1944,8 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
     )
     countlist[["mostLikely"]] <- getClassCols_lta(mostLikelyCounts)
 
-    countlist[c("modelEstimated", "posteriorProb", "mostLikely")] <-
-      lapply(countlist[c("modelEstimated", "posteriorProb", "mostLikely")],
+    countlist[which(names(countlist) %in% c("modelEstimated", "posteriorProb", "mostLikely"))] <-
+      lapply(countlist[which(names(countlist) %in% c("modelEstimated", "posteriorProb", "mostLikely"))],
              setNames,
              c("variable", "class", "count", "proportion"))
     
@@ -1961,16 +1961,16 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
       getClassCols_lta(posteriorProb.patterns)
     countlist[["mostLikely.patterns"]] <-
       getClassCols_lta(mostLikely.patterns)
-    
-    countlist[c("modelEstimated.patterns",
-                "posteriorProb.patterns",
-                "mostLikely.patterns")] <-
-      lapply(countlist[c("modelEstimated.patterns",
+
+    countlist[which(names(countlist) %in% c("modelEstimated.patterns",
+                                             "posteriorProb.patterns",
+                                             "mostLikely.patterns"))] <-
+      lapply(countlist[which(names(countlist) %in% c("modelEstimated.patterns",
                          "posteriorProb.patterns",
-                         "mostLikely.patterns")],
+                         "mostLikely.patterns"))],
              setNames,
              c(paste0("class.", unique(
-               countlist[["modelEstimated"]]$variable
+               c(countlist[["mostLikely"]]$variable, countlist[["modelEstimated"]]$variable, countlist[["posteriorProb"]]$variable)
              )), "count", "proportion"))
     
     #Average latent class probabilities
@@ -2007,23 +2007,25 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
     countlist[["logitProbs.mostLikely"]] <- NULL
     
     transitionProbs <- getSection("^LATENT TRANSITION PROBABILITIES BASED ON THE ESTIMATED MODEL$", outfiletext)
-    section_starts <- grep("\\(Columns\\)$", transitionProbs)
-    transitionProbs <- mapply(FUN = function(begin, end){
-      probs <- grep("^\\s+\\d{1,}(\\s{2,}[0-9\\.-]{2,}){1,}$", transitionProbs[begin:end], perl=TRUE, value = TRUE)
-      probs <- do.call(rbind, strsplit(trimws(probs), "\\s+", perl=TRUE))[,-1]
-      cbind(paste(gsub("\\s+(\\w+) Classes.*$", "\\1", transitionProbs[begin]) , ".", rep(c(1:nrow(probs)), ncol(probs)), sep = ""),
-            paste(gsub(".+?by (\\w+) Classes.*$", "\\1", transitionProbs[begin]) , ".", as.vector(sapply(1:ncol(probs), rep, nrow(probs))), sep = ""),
-            as.vector(probs))
-    },
-    begin = section_starts, end = c(section_starts[-1], length(transitionProbs)), SIMPLIFY = FALSE)
-    if(length(transitionProbs) > 1){
-      transitionProbs <- do.call(rbind, transitionProbs)
-    } else {
-      transitionProbs <- transitionProbs[[1]]
+    if(!is.null(transitionProbs)){
+      section_starts <- grep("\\(Columns\\)$", transitionProbs)
+      transitionProbs <- mapply(FUN = function(begin, end){
+        probs <- grep("^\\s+\\d{1,}(\\s{2,}[0-9\\.-]{2,}){1,}$", transitionProbs[begin:end], perl=TRUE, value = TRUE)
+        probs <- do.call(rbind, strsplit(trimws(probs), "\\s+", perl=TRUE))[,-1]
+        cbind(paste(gsub("\\s+(\\w+) Classes.*$", "\\1", transitionProbs[begin]) , ".", rep(c(1:nrow(probs)), ncol(probs)), sep = ""),
+              paste(gsub(".+?by (\\w+) Classes.*$", "\\1", transitionProbs[begin]) , ".", as.vector(sapply(1:ncol(probs), rep, nrow(probs))), sep = ""),
+              as.vector(probs))
+      },
+      begin = section_starts, end = c(section_starts[-1], length(transitionProbs)), SIMPLIFY = FALSE)
+      if(length(transitionProbs) > 1){
+        transitionProbs <- do.call(rbind, transitionProbs)
+      } else {
+        transitionProbs <- transitionProbs[[1]]
+      }
+      transitionProbs <- data.frame(transitionProbs, stringsAsFactors = FALSE)
+      names(transitionProbs) <- c("from", "to", "probability")
+      transitionProbs$probability <- as.numeric(transitionProbs$probability)
     }
-    transitionProbs <- data.frame(transitionProbs, stringsAsFactors = FALSE)
-    names(transitionProbs) <- c("from", "to", "probability")
-    transitionProbs$probability <- as.numeric(transitionProbs$probability)
     countlist[["transitionProbs"]] <- transitionProbs
   }
   return(countlist)
