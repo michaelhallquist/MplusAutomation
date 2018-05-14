@@ -276,7 +276,7 @@ plotMixtures <- function(modelList,
   })
   mixtures[which(mixtures)] <-
     sapply(modelList[which(mixtures)], function(x) {
-      x$input$analysis$type == "mixture"
+      tolower(x$input$analysis$type) == "mixture"
     })
   if (!any(mixtures))
     stop(
@@ -1048,7 +1048,7 @@ plotMixtureDensities <-
       !is.null(x$input$analysis[["type"]])
     })
     mixtures[mixtures] <- sapply(modelList[mixtures], function(x) {
-      x$input$analysis$type == "mixture"
+      tolower(x$input$analysis$type) == "mixture"
     })
     if (!any(mixtures))
       stop(
