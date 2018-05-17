@@ -276,7 +276,7 @@ plotMixtures <- function(modelList,
   })
   mixtures[which(mixtures)] <-
     sapply(modelList[which(mixtures)], function(x) {
-      x$input$analysis$type == "mixture"
+      tolower(x$input$analysis$type) == "mixture"
     })
   if (!any(mixtures))
     stop(
@@ -415,7 +415,7 @@ plotMixtures <- function(modelList,
         # Check if all variables (except CPROBs) are identical across models
         var_names <-
           sapply(rawdata, function(x) {
-            names(x)[-c(which(names(x) == "C"), grep("^CPROB", names(x)))]
+            names(x)[-grep("^CPROB", names(x))]
           })
         if (!is.matrix(var_names)) {
           var_names <- table(unlist(var_names))
@@ -790,7 +790,7 @@ plotGrowthMixtures <-
         # Check if all variables (except CPROBs) are identical across models
         var_names <-
           sapply(rawdata, function(x) {
-            names(x)[-c(which(names(x) == "C"), grep("^CPROB", names(x)))]
+            names(x)[-grep("^CPROB", names(x))]
           })
         if (!is.matrix(var_names)) {
           var_names <- table(unlist(var_names))
@@ -1048,7 +1048,7 @@ plotMixtureDensities <-
       !is.null(x$input$analysis[["type"]])
     })
     mixtures[mixtures] <- sapply(modelList[mixtures], function(x) {
-      x$input$analysis$type == "mixture"
+      tolower(x$input$analysis$type) == "mixture"
     })
     if (!any(mixtures))
       stop(
@@ -1091,7 +1091,7 @@ plotMixtureDensities <-
     })
     var_names <-
       sapply(modelList, function(x) {
-        names(x$savedata)[-c(which(names(x$savedata) == "C"), grep("^CPROB", names(x$savedata)))]
+        names(x$savedata)[-grep("^CPROB", names(x$savedata))]
       })
     if (!class(var_names) == "matrix") {
       var_names <- table(unlist(var_names))
@@ -1105,9 +1105,12 @@ plotMixtureDensities <-
     # If no variables have been specified, use all variables
     if (is.null(variables)) {
       variables <- var_names[, 1]
-      variables <- variables[!variables %in% "C"]
+      class_names <- unique(sapply(modelList, function(x){
+        sapply(unlist(strsplit(x$input$variable$classes, " ")), gsub, pattern = "\\(\\d+\\)", replacement = "")
+        }))
+      variables <- variables[!toupper(variables) %in% toupper(class_names)]
     } else {
-      variables <- variables[which(toupper(variables) %in% var_names[, 1])]
+      variables <- variables[which(toupper(variables) %in% toupper(var_names[, 1]))]
     }
     rawdata <-
       lapply(modelList, function(x) {
