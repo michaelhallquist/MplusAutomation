@@ -1,3 +1,6 @@
+Version 0.7-3
+ - feature:     Allow input files to have .in or .inp extension to increase compatibility with lavaan lavExport.
+
 Version 0.7-2
  - feature:     A host of new features for mixture modeling (thanks to Caspar van Lissa!). See createMixtures, mixtureSummaryTable, plotMixtures, plotGrowthMixtures, plotLTA.
  - feature:     Extract standardized indirect effects using readModels(). $indirect now has the same basic section structure as $parameters.
