@@ -444,7 +444,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     for (s in 1:length(sectionNames)) {
       unstandardizedSection <- getSection(multisectionMatches[s], outfiletext)
       if (!is.null(unstandardizedSection)) {
-        unstandardizedList[[ sectionNames[s] ]] <- extractParameters_1section(filename, unstandardizedSection, "unstandardized")
+        unstandardizedList[[ sectionNames[s] ]] <- extractParameters_1section(filename, unstandardizedSection, "unstandardized")[[1]]
       }      
     }
     allSections$unstandardized <- unstandardizedList
