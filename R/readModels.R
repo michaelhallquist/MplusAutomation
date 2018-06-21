@@ -27,7 +27,7 @@
 #' reduced set of output sections (especially to speed up the function when reading many files), specify the sections
 #' as a character vector from the following options:
 #'
-#' c("input", "warn_err", "sampstat", "covariance_coverage", "summaries",
+#' c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
 #'      "parameters", "class_counts", "indirect", "mod_indices", "residuals",
 #'      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 #'      "tech9", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
@@ -40,6 +40,7 @@
 #'   \item{input}{Mplus input syntax parsed into a list by major section}
 #'   \item{warnings}{Syntax and estimation warnings as a list}
 #'   \item{errors}{Syntax and estimation errors as a list}
+#'   \item{data_summary}{Output of SUMMARY OF DATA section, including cluster sizes and ICCs}
 #'   \item{sampstat}{Sample statistics provided by OUTPUT: SAMPSTAT, if specified}
 #'   \item{covariance_coverage}{Covariance coverage matrix for checking missingness patterns}
 #'   \item{summaries}{Summary statistics from \code{extractModelSummaries}, having structure as specified by that function}
@@ -73,7 +74,7 @@
 readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", quiet=FALSE) {
   #large wrapper function to read summaries, parameters, and savedata from one or more output files.
 
-  allsections <- c("input", "warn_err", "sampstat", "covariance_coverage", "summaries",
+  allsections <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
       "parameters", "class_counts", "indirect", "mod_indices", "residuals",
       "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
       "tech9", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
@@ -125,6 +126,14 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
       allFiles[[listID]]$errors <- warn_err$errors
     }
 
+    if ("data_summary" %in% what) {
+      #SUMMARY OF DATA output
+      allFiles[[listID]]$data_summary <- tryCatch(extractDataSummary(outfiletext, curfile), error=function(e) {
+          message("Error extracting SUMMARY OF DATA in output file: ", curfile); print(e)
+          return(list())
+        })
+    }
+    
     if ("sampstat" %in% what) {
       #SAMPSTAT output
       allFiles[[listID]]$sampstat <- tryCatch(extractSampstat(outfiletext, curfile), error=function(e) {
@@ -132,7 +141,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
             return(list())
           })
     }
-
+    
     if ("covariance_coverage" %in% what) {
       #COVARIANCE COVERAGE OF DATA output
       allFiles[[listID]]$covariance_coverage <- tryCatch(extractCovarianceCoverage(outfiletext, curfile), error=function(e) {
@@ -147,26 +156,6 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
             message("Error extracting model summaries in output file: ", curfile); print(e)
             return(list())
           })
-      if(dim(allFiles[[listID]]$summaries)[1] > 1){
-        inv_test_firstline <- grep("^Invariance Testing$", outfiletext)
-        inv_test_endline <- grep("^MODEL FIT INFORMATION", outfiletext)
-        inv_test_endline <- inv_test_endline[inv_test_endline > inv_test_firstline][1]
-        inv_test <- outfiletext[(inv_test_firstline+2):(inv_test_endline-3)]
-        model_rows <- grep("^\\s+?\\w+(\\s{2,}[0-9.]+){4}$", inv_test, value = TRUE)
-        model_rows <- t(sapply(model_rows, function(x){strsplit(trimws(x), "\\s+")[[1]]}, USE.NAMES = FALSE))
-        model_rownames <- model_rows[, 1]
-        model_rows <- apply(model_rows[, -1], 2, as.numeric)
-        row.names(model_rows) <- model_rownames
-        colnames(model_rows) <- c("Parameters", "Chi-Square", "DF", "Pvalue")
-        allFiles[[listID]]$invariance.testing$models <- model_rows[, -1]
-        test_rows <- grep("^\\s+?(\\w+\\s){3}(\\s{2,}[0-9.]+){3}$", inv_test, value = TRUE)
-        test_rows <- t(sapply(test_rows, function(x){strsplit(trimws(x), "\\s{2,}")[[1]]}, USE.NAMES = FALSE))
-        model_rownames <- test_rows[, 1]
-        test_rows <- apply(test_rows[, -1], 2, as.numeric)
-        row.names(test_rows) <- model_rownames
-        colnames(test_rows) <- c("Chi-Square", "DF", "Pvalue")
-        allFiles[[listID]]$invariance.testing$compared <- test_rows
-      }
     }
 
     if ("parameters" %in% what) {

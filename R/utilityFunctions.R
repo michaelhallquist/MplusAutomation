@@ -346,10 +346,12 @@ getSection <- function(sectionHeader, outfiletext, headers="standard") {
 
 #master function to parse text into sections
 parse_into_sections <- function(outfiletext) {
-  headers <- c("INPUT INSTRUCTIONS", "SUMMARY OF ANALYSIS",
+  headers <- c("INPUT INSTRUCTIONS", "SUMMARY OF ANALYSIS", "SUMMARY OF DATA",
       "SUMMARY OF DATA FOR THE FIRST DATA SET", "SUMMARY OF DATA FOR THE FIRST REPLICATION",
       "SUMMARY OF MISSING DATA PATTERNS FOR THE FIRST REPLICATION",
+      "SUMMARY OF MISSING DATA PATTERNS FOR THE FIRST DATA SET",
       "SUMMARY OF MISSING DATA PATTERNS",
+      "SUMMARY OF CATEGORICAL DATA PROPORTIONS",
       "COVARIANCE COVERAGE OF DATA FOR THE FIRST REPLICATION",
       "COVARIANCE COVERAGE OF DATA", "UNIVARIATE SAMPLE STATISTICS",
       "THE MODEL ESTIMATION TERMINATED NORMALLY",
@@ -938,3 +940,4 @@ separateHyphens <- function(cmd) {
     return(cmd) ## no hyphens to expand
   }
 }
+

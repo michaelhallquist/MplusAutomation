@@ -766,7 +766,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   arglist$InformationMatrix <- extractValue(pattern="^\\s*Information matrix\\s*", analysisSummarySection, filename, type="int")
 
   #END ANALYSIS SUMMARY PROCESSING
-
+ 
   #BEGIN MODEL FIT STATISTICS PROCESSING
   #handle EFA output, which has separate model fit sections within each file
   #do this by extracting model fit sections for each and using an rbind call
@@ -928,6 +928,29 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   arglist <- as.data.frame(arglist, stringsAsFactors=FALSE)
   class(arglist) <- c("data.frame", "mplus.summaries")
   attr(arglist, "filename") <- arglist$Filename
+  
+  #Caspar van Lissa cleanup for invariance testing... Not sure of the details here.
+  if(dim(arglist)[1] > 1){
+    inv_test_firstline <- grep("^Invariance Testing$", outfiletext)
+    inv_test_endline <- grep("^MODEL FIT INFORMATION", outfiletext)
+    inv_test_endline <- inv_test_endline[inv_test_endline > inv_test_firstline][1]
+    inv_test <- outfiletext[(inv_test_firstline+2):(inv_test_endline-3)]
+    model_rows <- grep("^\\s+?\\w+(\\s{2,}[0-9.]+){4}$", inv_test, value = TRUE)
+    model_rows <- t(sapply(model_rows, function(x){strsplit(trimws(x), "\\s+")[[1]]}, USE.NAMES = FALSE))
+    model_rownames <- model_rows[, 1]
+    model_rows <- apply(model_rows[, -1], 2, as.numeric)
+    row.names(model_rows) <- model_rownames
+    colnames(model_rows) <- c("Parameters", "Chi-Square", "DF", "Pvalue")
+    allFiles[[listID]]$invariance.testing$models <- model_rows[, -1]
+    test_rows <- grep("^\\s+?(\\w+\\s){3}(\\s{2,}[0-9.]+){3}$", inv_test, value = TRUE)
+    test_rows <- t(sapply(test_rows, function(x){strsplit(trimws(x), "\\s{2,}")[[1]]}, USE.NAMES = FALSE))
+    model_rownames <- test_rows[, 1]
+    test_rows <- apply(test_rows[, -1], 2, as.numeric)
+    row.names(test_rows) <- model_rownames
+    colnames(test_rows) <- c("Chi-Square", "DF", "Pvalue")
+    allFiles[[listID]]$invariance.testing$compared <- test_rows
+  }
+  
   return(arglist)
 }
 
@@ -2216,4 +2239,88 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE) 
 
   return(aggMat)
 
+}
+
+#EXTRACT DATA SUMMARY SECTION
+#NB. This does not support three-level output yet!
+extractDataSummary <- function(outfiletext, curfile) {
+  dataSummarySection <- getSection("^\\s*SUMMARY OF DATA( FOR THE FIRST DATA SET)*\\s*$", outfiletext)
+  if (is.null(dataSummarySection)) {
+    empty <- list()
+    class(empty) <- c("list", "mplus.data_summary")
+    return(empty)
+  }
+  
+  #detect groups
+  multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", dataSummarySection, ignore.case=TRUE, perl=TRUE) #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
+  if (length(multipleGroupMatches) > 0L) {
+    groupNames <- sub("^\\s*Group (\\w+)(?:\\s+\\(\\d+\\))*\\s*$", "\\1", dataSummarySection[multipleGroupMatches], perl=TRUE)
+    toparse <- list() #divide into a list by group
+    for (i in 1:length(multipleGroupMatches)) {
+      if (i < length(multipleGroupMatches)) {
+        end <- multipleGroupMatches[i+1] - 1
+      } else { end <- length(dataSummarySection) }
+      section <- dataSummarySection[(multipleGroupMatches[i]+1):end]
+      attr(section, "group.name") <- groupNames[i]
+      toparse[[groupNames[i]]] <- section
+    }    
+  } else {
+    attr(dataSummarySection, "group.name") <- "all"
+    toparse <- list(all=dataSummarySection)
+  }
+  
+  summaries <- c()
+  iccs <- c()
+  for (section in toparse) {
+    summaries <- rbind(summaries, data.frame(
+        NClusters = extractValue(pattern="^\\s*Number of clusters\\s*", section, filename, type="int"),
+        NMissPatterns = extractValue(pattern="^\\s*Number of missing data patterns\\s*", section, filename, type="int"),
+        AvgClusterSize = extractValue(pattern="^\\s*Average cluster size\\s*", section, filename, type="dec"),
+        Group=attr(section, "group.name")
+      ))
+    
+    #parse icc
+    icc_start <- grep("^\\s*Estimated Intraclass Correlations for the Y Variables( for [\\w\\._]+ level)*\\s*$", section, perl=TRUE)
+    
+    iccout <- c()
+    if (length(icc_start) > 0L) {
+      to_parse <- trimSpace(section[(icc_start+1):length(section)]) #this assumes nothing comes afterwards in the section
+      #problem: there is an unknown number of columns in this output. Example:
+      #
+      #           Intraclass              Intraclass              Intraclass
+      #Variable  Correlation   Variable  Correlation   Variable  Correlation
+      #Q22          0.173      Q38          0.320      Q39          0.127
+      #Q40          0.270
+      
+      #solution: variables are always odd positions, correlations are always even
+      
+      repeat_line <- grep("(\\s*Variable\\s+Correlation\\s*)+", to_parse)
+      if (length(repeat_line) == 1L) {
+        #x <- to_parse[repeat_line] #not needed with odd/even solution
+        #nrepeats <- length(regmatches(x, gregexpr("g", x)))
+        
+        icc_values <- strsplit(to_parse[(repeat_line+1):length(to_parse)], "\\s+")
+        for (ss in icc_values) {
+          if (length(ss) > 0L) {
+            positions <- 1:length(ss)
+            vars <- ss[positions[positions %% 2 != 0]]
+            vals <- ss[positions[positions %% 2 == 0]]
+            iccout <- rbind(iccout, data.frame(variable=vars, ICC=as.numeric(vals), stringsAsFactors=FALSE))
+          }          
+        }
+        
+        iccout$Group <- attr(section, "group.name")
+        iccs <- rbind(iccs, iccout)
+      }      
+    }        
+  }
+  
+  #trim out "all" in single group case
+  if (length(multipleGroupMatches) == 0L) {
+    summaries$Group <- NULL
+    iccs$Group <- NULL    
+  }
+  retlist <- list(overall=summaries, ICCs=iccs) 
+  class(retlist) <- c("list", "mplus.data_summary")
+  return(retlist)   
 }

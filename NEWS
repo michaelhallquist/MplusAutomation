@@ -1,5 +1,6 @@
 Version 0.7-3
- - feature:     Allow input files to have .in or .inp extension to increase compatibility with lavaan lavExport.
+ - feature:     readModels provides initial support for extraction of SUMMARY OF DATA section, including ICCs in 2-level models. See $data_summary.
+ - feature:     Allow input files to have .in or .inp extension to increase compatibility with lavaan lavExport. 
 
 Version 0.7-2
  - feature:     A host of new features for mixture modeling (thanks to Caspar van Lissa!). See createMixtures, mixtureSummaryTable, plotMixtures, plotGrowthMixtures, plotLTA.
