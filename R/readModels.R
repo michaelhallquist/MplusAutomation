@@ -147,6 +147,26 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
             message("Error extracting model summaries in output file: ", curfile); print(e)
             return(list())
           })
+      if(dim(allFiles[[listID]]$summaries)[1] > 1){
+        inv_test_firstline <- grep("^Invariance Testing$", outfiletext)
+        inv_test_endline <- grep("^MODEL FIT INFORMATION", outfiletext)
+        inv_test_endline <- inv_test_endline[inv_test_endline > inv_test_firstline][1]
+        inv_test <- outfiletext[(inv_test_firstline+2):(inv_test_endline-3)]
+        model_rows <- grep("^\\s+?\\w+(\\s{2,}[0-9.]+){4}$", inv_test, value = TRUE)
+        model_rows <- t(sapply(model_rows, function(x){strsplit(trimws(x), "\\s+")[[1]]}, USE.NAMES = FALSE))
+        model_rownames <- model_rows[, 1]
+        model_rows <- apply(model_rows[, -1], 2, as.numeric)
+        row.names(model_rows) <- model_rownames
+        colnames(model_rows) <- c("Parameters", "Chi-Square", "DF", "Pvalue")
+        allFiles[[listID]]$invariance.testing$models <- model_rows[, -1]
+        test_rows <- grep("^\\s+?(\\w+\\s){3}(\\s{2,}[0-9.]+){3}$", inv_test, value = TRUE)
+        test_rows <- t(sapply(test_rows, function(x){strsplit(trimws(x), "\\s{2,}")[[1]]}, USE.NAMES = FALSE))
+        model_rownames <- test_rows[, 1]
+        test_rows <- apply(test_rows[, -1], 2, as.numeric)
+        row.names(test_rows) <- model_rownames
+        colnames(test_rows) <- c("Chi-Square", "DF", "Pvalue")
+        allFiles[[listID]]$invariance.testing$compared <- test_rows
+      }
     }
 
     if ("parameters" %in% what) {

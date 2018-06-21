@@ -1520,8 +1520,8 @@ plotLTA <-
       )
     if(!mplusModel$summaries$NCategoricalLatentVars > 1)
       stop(
-      "plotLTA requires a mixture model with multiple categorical latent variables as its first argument."
-    )
+        "plotLTA requires a mixture model with multiple categorical latent variables as its first argument."
+      )
     
     # Remove models which are not type "mixture"
     edges <- mplusModel$class_counts$transitionProbs
@@ -1557,9 +1557,9 @@ plotLTA <-
     n_prop$nodeID <- paste(n_prop$variable, n_prop$class, sep = ".")
     nodes <- merge(nodes, n_prop, by = "nodeID")
     
-    if (!node_labels %in% c("variable.class", "class")) {
-      nodes$nodeID[which(nodes$nodeID %in% names(node_labels))] <-
-        node_labels
+    if (length(node_labels) > 1 | !(node_labels[1] %in% c("variable.class", "class"))) {
+      nodes$nodeID[na.omit(match(names(node_labels), nodes$nodeID))] <-
+        node_labels[which(names(node_labels) %in% nodes$nodeID)]
     } else {
       if(node_labels == "class")
         nodes$nodeID <- gsub(".+?\\.", "", nodes$nodeID)
@@ -1606,7 +1606,7 @@ plotLTA <-
       ) + scale_size_continuous(range = c(1, max_edge_width))
     if (!is.null(x_labels)) {
       uselabels <- unique(nodes$variable)
-      if (!x_labels == "variable") {
+      if (length(x_labels) > 1 | !x_labels[1] == "variable") {
         uselabels[which(uselabels %in% names(x_labels))] <- x_labels
       }
       p <-
