@@ -48,7 +48,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     convertMatches <- data.frame(startline=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
   } else {
     #okay to match beginning and end of line because strip.white used in scan
-    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Item Locations|Item Categories|Item Guessing|Upper Asymptote|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion|Steps)|([\\w_\\d+\\.#\\&]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&]+\\s*\\|\\s*[\\w_\\d+\\.#\\&]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
+    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Item Locations|Item Categories|Item Guessing|Upper Asymptote|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion|Steps)|([\\w_\\d+\\.#\\&\\^]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&\\^]+\\s*\\|\\s*[\\w_\\d+\\.#\\&\\^]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
 
     #more readable (than above) using ldply from plyr
     convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
@@ -74,9 +74,9 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
           if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", 
               "Scales", "Item Difficulties", "Item Locations", "Item Categories", "Item Guessing", "Upper Asymptote", "Dispersion", "Steps")) {
             return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_, stringsAsFactors=FALSE))
-          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
+          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
             return(data.frame(startline=row$startline, keyword=NA_character_, varname=variable[1], operator=variable[2], stringsAsFactors=FALSE))
-          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&]+)\\s*\\|\\s*([\\w_\\d+\\.#\\&]+)\\s*(BY|WITH|ON)\\s*$", c, perl=TRUE)[[1]]) > 0) {
+          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*\\|\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*(BY|WITH|ON)\\s*$", c, perl=TRUE)[[1]]) > 0) {
             return(data.frame(startline=row$startline, keyword=NA_character_, slope=variable[1], varname=variable[2], operator=variable[3], stringsAsFactors=FALSE))
           } else stop("failure to match keyword: ", match, "\n  ", filename)
         })
