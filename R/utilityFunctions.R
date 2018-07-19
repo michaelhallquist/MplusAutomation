@@ -596,7 +596,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
 #'    Category 5         0.291      0.052      5.551      0.000
 #' "
 parseCatOutput <- function(text) {
-  hlines <- grep("^\\s*([\\w_\\d+\\.#\\&]+)\\s*$", text, perl=TRUE)
+  hlines <- grep("^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*$", text, perl=TRUE)
   if (any(grepl("Category", text[hlines]))) {
     stop("Failed to parse categorical output")
   }
