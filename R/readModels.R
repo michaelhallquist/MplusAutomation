@@ -75,7 +75,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
   #large wrapper function to read summaries, parameters, and savedata from one or more output files.
 
   allsections <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-      "parameters", "class_counts", "indirect", "mod_indices", "residuals",
+      "invariance_testing", "parameters", "class_counts", "indirect", "mod_indices", "residuals",
       "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
       "tech9", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
 
@@ -158,6 +158,14 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
           })
     }
 
+    if ("invariance_testing" %in% what) {
+      #Invariance Testing output (v8)
+      allFiles[[listID]]$invariance_testing <- tryCatch(extractInvarianceTesting(outfiletext, curfile), error=function(e) {
+          message("Error extracting invarinace testing in output file: ", curfile); print(e)
+          return(list())
+        })
+    }
+    
     if ("parameters" %in% what) {
       #Model parameters (MODEL RESULTS section)
       allFiles[[listID]]$parameters <- tryCatch(extractParameters_1file(outfiletext, curfile), error=function(e) {
