@@ -1738,9 +1738,7 @@ extractTech10 <- function(outfiletext, filename) {
   names(bivarFitData) <- c("var1", "var2", "cat1", "cat2", "h0", "h1", "z")
   
   # Fix data types
-  for (col in c("h0", "h1", "z")) {
-    bivarFitData[[col]] <- as.numeric(bivarFitData[[col]])
-  }
+  bivarFitData[,c("h0", "h1", "z")] <- as.numeric(unlist(bivarFitData[,c("h0", "h1", "z")]))
   
   tech10List$bivar_fit_data <- bivarFitData
   
