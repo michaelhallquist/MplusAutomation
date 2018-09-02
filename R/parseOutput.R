@@ -1704,6 +1704,48 @@ extractTech10 <- function(outfiletext, filename) {
   
   tech10List <- list()
   
+  bivarFit <- getSection("^\\s*BIVARIATE MODEL FIT INFORMATION\\s*$", outfiletext)
+  
+  if (is.null(bivarFit)) return(tech10List) 
+  
+  # Build data structure
+  bivarFitData <- matrix(nrow=length(bivarFit), ncol=7)
+  
+  # Skip header lines
+  bivarFit <- bivarFit[6:length(bivarFit)]
+
+  vars <- NULL
+
+  mPos <- 1
+    
+  for (l in 1:length(bivarFit)) {
+    if (grepl("^\\s{5}\\S", bivarFit[l], perl = TRUE)) {
+      # Parse new vars line
+      vars <- unlist(strsplit(trimSpace(bivarFit[l]), "\\s+", perl = TRUE))
+    }
+    else {
+      values <- unlist(strsplit(trimSpace(bivarFit[l]), "\\s{2,}", perl = TRUE))
+      if (length(values) == 5) {
+        bivarFitData[mPos,] <-c(vars,values)
+        mPos <- mPos + 1
+      }
+    }
+  }
+  
+  # Remove empty rows, and convert to data.frame
+  bivarFitData <- bivarFitData[rowSums(is.na(bivarFitData)) != ncol(bivarFitData),]
+  bivarFitData <- as.data.frame( bivarFitData, stringsAsFactors = FALSE )
+  names(bivarFitData) <- c("var1", "var2", "cat1", "cat2", "h0", "h1", "z")
+  
+  # Fix data types
+  for (col in c("h0", "h1", "z")) {
+    bivarFitData[[col]] <- as.numeric(bivarFitData[[col]])
+  }
+  
+  tech10List$bivar_fit_data <- bivarFitData
+  
+  return(tech10List)
+  
 }
 
 #' Extract Technical 12 from Mplus
