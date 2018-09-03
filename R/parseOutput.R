@@ -1708,27 +1708,41 @@ extractTech10 <- function(outfiletext, filename) {
   
   if (is.null(bivarFit)) return(tech10List) 
   
-  # Build data structure
+  # Build data structures
   bivarFitData <- matrix(nrow=length(bivarFit), ncol=7)
+  bivarFitStats <- matrix(nrow=0, ncol=4)
   
   # Skip header lines
   bivarFit <- bivarFit[6:length(bivarFit)]
 
   vars <- NULL
-
+  lastPearson <- NULL
   mPos <- 1
     
   for (l in 1:length(bivarFit)) {
+    if (grepl("^\\s*$", bivarFit[l], perl = TRUE)) { next }
+    
     if (grepl("^\\s{5}\\S", bivarFit[l], perl = TRUE)) {
       # Parse new vars line
       vars <- unlist(strsplit(trimSpace(bivarFit[l]), "\\s+", perl = TRUE))
     }
+    else if (grepl("Bivariate (Pearson|Log-Likelihood) Chi-Square", bivarFit[l], perl = TRUE)) {
+      if (grepl("Overall", bivarFit[l], perl = TRUE)) { next } # Skip 'overall' values
+      
+      m <- unlist(regmatches(bivarFit[l], regexec("Bivariate (Pearson|Log-Likelihood) Chi-Square\\s+(\\S+)", bivarFit[l], perl = TRUE)))
+      
+      if (m[2] == 'Pearson') {
+        lastPearson <- m[3]
+      }
+      else {
+        bivarFitStats <- rbind(bivarFitStats, c(vars, lastPearson, m[3]))
+      }
+    }
     else {
       values <- unlist(strsplit(trimSpace(bivarFit[l]), "\\s{2,}", perl = TRUE))
-      if (length(values) == 5) {
-        bivarFitData[mPos,] <-c(vars,values)
-        mPos <- mPos + 1
-      }
+      
+      bivarFitData[mPos,] <-c(vars,values)
+      mPos <- mPos + 1
     }
   }
   
@@ -1740,7 +1754,10 @@ extractTech10 <- function(outfiletext, filename) {
   # Fix data types
   bivarFitData[,c("h0", "h1", "z")] <- as.numeric(unlist(bivarFitData[,c("h0", "h1", "z")]))
   
-  tech10List$bivar_fit_data <- bivarFitData
+  tech10List$bivar_chi_square <- setNames(data.frame(bivarFitStats), c("var1","var2","Bivariate Pearson Chi-Square","Bivariate Log-Likelihood Chi-Square"))
+  
+  tech10List$bivar_model_fit_info <- bivarFitData
+  
   
   return(tech10List)
   
