@@ -1754,9 +1754,11 @@ extractTech10 <- function(outfiletext, filename) {
   # Fix data types
   bivarFitData[,c("h0", "h1", "z")] <- as.numeric(unlist(bivarFitData[,c("h0", "h1", "z")]))
   
-  tech10List$bivar_chi_square <- setNames(data.frame(bivarFitStats), c("var1","var2","Bivariate Pearson Chi-Square","Bivariate Log-Likelihood Chi-Square"))
+  bivarFitStats <- setNames(data.frame(bivarFitStats, stringsAsFactors = FALSE), c("var1","var2","pearson","log-likelihood"))
+  bivarFitStats[,c("pearson","log-likelihood")] <- as.numeric(unlist(bivarFitStats[,c("pearson","log-likelihood")]))
   
   tech10List$bivar_model_fit_info <- bivarFitData
+  tech10List$bivar_chi_square <- bivarFitStats
   
   
   return(tech10List)
