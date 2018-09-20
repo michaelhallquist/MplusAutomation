@@ -32,7 +32,8 @@ Imports:
     pander,
     digest,
     parallel,
-	ggplot2
+    ggplot2,
+    data.table
 Suggests:
     rhdf5,
     tcltk,
@@ -40,4 +41,4 @@ Suggests:
     testthat
 LazyLoad: yes
 LazyData: yes
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

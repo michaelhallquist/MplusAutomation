@@ -5,8 +5,9 @@
 \title{Create, run, and read Mplus models.}
 \usage{
 mplusModeler(object, dataout, modelout, run = 0L, check = FALSE,
-  varwarnings = TRUE, Mplus_command = "Mplus", writeData = c("ifmissing",
-  "always", "never"), hashfilename = TRUE, ...)
+  varwarnings = TRUE, Mplus_command = "Mplus",
+  writeData = c("ifmissing", "always", "never"), hashfilename = TRUE,
+  ...)
 }
 \arguments{
 \item{object}{An object of class mplusObject}

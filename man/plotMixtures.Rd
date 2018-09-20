@@ -4,10 +4,11 @@
 \alias{plotMixtures}
 \title{Create latent profile plots}
 \usage{
-plotMixtures(modelList, variables = NULL, coefficients = c("unstandardized",
-  "stdyx.standardized", "stdy.standardized", "stdy.standardized"),
-  parameter = c("Means", "Intercepts"), ci = 0.95, bw = FALSE,
-  rawdata = FALSE, alpha_range = c(0, 0.1))
+plotMixtures(modelList, variables = NULL,
+  coefficients = c("unstandardized", "stdyx.standardized",
+  "stdy.standardized", "stdy.standardized"), parameter = c("Means",
+  "Intercepts"), ci = 0.95, bw = FALSE, rawdata = FALSE,
+  alpha_range = c(0, 0.1))
 }
 \arguments{
 \item{modelList}{A list of Mplus mixture models, or a single mixture model}

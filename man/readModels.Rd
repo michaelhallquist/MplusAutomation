@@ -4,8 +4,8 @@
 \alias{readModels}
 \title{Read Parameters, Summary Statistics, and Savedata from Mplus Output}
 \usage{
-readModels(target = getwd(), recursive = FALSE, filefilter, what = "all",
-  quiet = FALSE)
+readModels(target = getwd(), recursive = FALSE, filefilter,
+  what = "all", quiet = FALSE)
 }
 \arguments{
 \item{target}{the directory containing Mplus output files (.out) to
@@ -37,6 +37,7 @@ a single mplus.model object, not a list of files. Specific elements are:
   \item{input}{Mplus input syntax parsed into a list by major section}
   \item{warnings}{Syntax and estimation warnings as a list}
   \item{errors}{Syntax and estimation errors as a list}
+  \item{data_summary}{Output of SUMMARY OF DATA section, including cluster sizes and ICCs}
   \item{sampstat}{Sample statistics provided by OUTPUT: SAMPSTAT, if specified}
   \item{covariance_coverage}{Covariance coverage matrix for checking missingness patterns}
   \item{summaries}{Summary statistics from \code{extractModelSummaries}, having structure as specified by that function}
@@ -70,7 +71,7 @@ The \code{what} parameter defaults to "all", which extracts all supported output
 reduced set of output sections (especially to speed up the function when reading many files), specify the sections
 as a character vector from the following options:
 
-c("input", "warn_err", "sampstat", "covariance_coverage", "summaries",
+c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
      "parameters", "class_counts", "indirect", "mod_indices", "residuals",
      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
      "tech9", "tech12", "fac_score_stats", "lcCondMeans", "gh5")

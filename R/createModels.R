@@ -1152,7 +1152,7 @@ processInit <- function(initsection) {
 #' MplusAutomation:::createVarSyntax(mtcars)
 createVarSyntax <- function(data) {
   #variable created for readability
-  variableNames <- paste(gsub("\\.", "_", names(data)), collapse=" ")
+  variableNames <- paste(gsub("\\.", "_", colnames(data)), collapse=" ")
 
   #short names?
   #shortNames <- paste(substr(names(df), 1, 8), collapse=" ")
@@ -1300,10 +1300,127 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
   list(filename = filename, fileexists = fileexists)
 }
 
+
+
+
+#' Convert a matrix or data frame to numeric or integer for Mplus
+#'
+#' Primarily an internal utility function, for \code{prepareMplusData}.
+#'
+#' @param df A matrix or data frame
+#' @return An error if it cannot be converted or
+#'   a matrix or data frame with all variables converted to
+#'   numeric or integer classes
+#' @importFrom data.table is.data.table
+#' @keywords internal
+#' @examples
+#'
+#' \dontrun{
+#' df1 <- df2 <- df3 <- df4 <- mtcars
+#'
+#' df2$cyl <- factor(df2$cyl)
+#' df2$am <- as.logical(df2$am)
+#'
+#' df3$mpg <- as.character(df3$mpg)
+#'
+#' df4$vs <- as.Date(df4$vs, origin = "1989-01-01")
+#'
+#' df5 <- as.matrix(cars)
+#'
+#' df6 <- matrix(c(TRUE, TRUE, FALSE, FALSE), ncol = 2)
+#'
+#' df7 <- as.list(mtcars)
+#'
+#'
+#' MplusAutomation:::.convertData(df1)
+#'
+#' MplusAutomation:::.convertData(df2)
+#'
+#' MplusAutomation:::.convertData(df3)
+#'
+#' MplusAutomation:::.convertData(df4)
+#'
+#' MplusAutomation:::.convertData(df5)
+#'
+#' MplusAutomation:::.convertData(df6)
+#'
+#' MplusAutomation:::.convertData(df7)
+#'
+#' rm(df1, df2, df3, df4, df5, df6, df7)
+#' }
+.convertData <- function(df) {
+  if (isTRUE(is.matrix(df))) {
+    if (isTRUE(is.numeric(df)) || isTRUE(is.integer(df))) {
+    NULL ## do nothing
+    } else if (isTRUE(is.logical(df))) {
+      message("Logical matrix converted to integer")
+      storage.mode(df) <- "integer"
+    } else {
+      stop(paste(
+        "\nIf data are passed as a matrix, must be of class",
+        "numeric, integer, or logical, but data was of class",
+        class(df[,1]),
+        sep = "\n"))
+    }
+
+    if (isTRUE(is.null(colnames(df)[1]))) {
+      message("no variable names, setting to V1, V2, etc")
+      colnames(df) <- paste0("V", 1:ncol(df))
+    }
+  } else if (isTRUE(is.data.frame(df))) {
+    if (isTRUE(is.data.table(df))) {
+      df <- as.data.frame(df)
+    }
+    col_class <- vapply(df, class, FUN.VALUE = NA_character_)
+
+    ok_cols <- col_class %in% c("numeric", "integer", "logical", "factor")
+
+    if (!all(ok_cols)) {
+      stop(paste("\nCurrently only variables of class: ",
+                 "numeric, integer, logical, or factor",
+                 "but found additional class types including: ",
+                 paste(unique(col_class[!ok_cols]), collapse = ", "),
+                 "\nto see which variables are problematic, try:",
+                 "str(yourdata)",
+                 sep = "\n"))
+    }
+
+    factor_cols <- which(col_class == "factor")
+    if (length(factor_cols)) {
+      for (i in factor_cols) {
+        message("Factor variable: ", names(df)[i], "; factor levels:",
+                paste(levels(df[,i]), collapse=", "), "\nconverted to numbers: ",
+                paste(seq_along(levels(df[,i])), collapse=", "), "\n")
+        df[[i]] <- as.numeric(df[[i]])
+      }
+    }
+
+    logical_cols <- which(col_class == "logical")
+    if (length(logical_cols)) {
+      for (i in logical_cols) {
+        message("Logical variable: ", names(df)[i], " converted to integer")
+        df[[i]] <- as.integer(df[[i]])
+      }
+    }
+  } else {
+    stop (paste(
+      "\nCan only convert matrix or data frame class ",
+      "data but found data of class:",
+      class(df),
+      sep = "\n"))
+  }
+  return(df)
+}
+
+
+
+
+
 #' Create tab-delimited file and Mplus input syntax from R data.frame
 #'
-#' The \code{prepareMplusData} function converts an R data.frame object
-#' into a tab-delimited file (without header) to be used in an Mplus
+#' The \code{prepareMplusData} function converts an R data.frame
+#' (or a list of data frames), into a tab-delimited
+#' file (without header) to be used in an Mplus
 #' input file. The corresponding Mplus syntax, including the
 #' data file definition and variable names,
 #' is printed to the console or optionally to an input file.
@@ -1366,6 +1483,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'   data files and optionally input files.
 #' @keywords interface
 #' @importFrom utils write.table
+#' @importFrom data.table fwrite
 #' @author Michael Hallquist
 #' @export
 #' @examples
@@ -1384,6 +1502,13 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' # see that syntax was stored
 #' test01
 #'
+#' # example when there is a factor and logical
+#' tmpd <- mtcars
+#' tmpd$cyl <- factor(tmpd$cyl)
+#' tmpd$am <- as.logical(tmpd$am)
+#' prepareMplusData(tmpd, "test_type.dat")
+#' rm(tmpd)
+#'
 #' # by default, if re-run, data is re-written, with a note
 #' test01b <- prepareMplusData(mtcars, "test01.dat")
 #'
@@ -1393,10 +1518,12 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'
 #' # now that the filename was hashed in test01c, future calls do not re-write data
 #' # as long as the hash matches
-#' test01d <- prepareMplusData(mtcars, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
+#' test01d <- prepareMplusData(mtcars, "test01c.dat",
+#'   writeData = "ifmissing", hashfilename=TRUE)
 #'
 #' # however, if the data change, then the file is re-written
-#' test01e <- prepareMplusData(iris, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
+#' test01e <- prepareMplusData(iris, "test01c.dat",
+#'   writeData = "ifmissing", hashfilename=TRUE)
 #'
 #' # tests for keeping and dropping variables
 #' prepareMplusData(mtcars, "test02.dat", keepCols = c("mpg", "hp"))
@@ -1474,7 +1601,8 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
     if (missing(dropCols)) {
       cleand <- .cleanHashData(df = df, keepCols = keepCols, imputed = imputed)
     } else {
-      cleand <- .cleanHashData(df = df, keepCols = keepCols, dropCols = dropCols, imputed = imputed)
+      cleand <- .cleanHashData(df = df, keepCols = keepCols,
+                               dropCols = dropCols, imputed = imputed)
     }
   }
 
@@ -1508,50 +1636,15 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
   if (identical(writeData, "always")) {
     ## convert factors to numbers
     if (imputed) {
-    df <- lapply(1:length(df), function(i) {
-       as.data.frame(qv <- lapply(1:ncol(df[[i]]), function(col) {
-              if (is.factor(df[[i]][, col])) {
-                ## numeric storage of the levels corresponds to the order of the levels
-                if (i == 1) {
-                  cat("Factor variable:", names(df[[i]])[col], "; factor levels:", paste(levels(df[[i]][, col]), collapse=", "), "converted to numbers:",
-                      paste(seq_along(levels(df[[i]][, col])), collapse=", "), "\n\n")
-                }
-                col_value <- as.numeric(df[[i]][, col])
-              } else {
-                col_value <- df[[i]][, col]
-              }
-
-              if (is.character(df[[i]][, col])) {
-                if (i == 1) warning("Character data requested for output using prepareMplusData.\n  Mplus does not support character data.")
-              }
-
-              col_value <- list(col_value)
-              names(col_value) <- names(df[[i]])[col]
-              return(col_value)
-            }))
-     })
+      df <- lapply(1:length(df), function(i) {
+        if (i == 1) {
+          .convertData(df[[i]])
+        } else {
+          suppressMessages(.convertData(df[[i]]))
+        }
+      })
     } else {
-
-    df <- as.data.frame(qv <- lapply(1:ncol(df), function(col) {
-              #can't use ifelse because is.factor returns only one element,
-              #and ifelse enforces identical length
-              if (is.factor(df[, col])) {
-                # numeric storage of the levels corresponds to the order of the levels
-                message("Factor variable:", names(df)[col], "; factor levels:", paste(levels(df[,col]), collapse=", "), "converted to numbers:",
-                    paste(seq_along(levels(df[,col])), collapse=", "), "\n\n")
-                col_value <- as.numeric(df[,col])
-              } else {
-                col_value <- df[,col]
-              }
-
-              if (is.character(df[,col])) {
-                warning("Character data requested for output using prepareMplusData.\n  Mplus does not support character data.")
-              }
-
-              col_value <- list(col_value)
-              names(col_value) <- names(df)[col]
-              return(col_value)
-            }))
+      df <- .convertData(df)
     }
 
     if (file.exists(filename)) {
@@ -1567,12 +1660,12 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
     if (imputed) {
       filename.base <- gsub("\\.dat", "", filename)
       junk <- lapply(1:length(df), function(i) {
-        write.table(df[[i]], paste0(filename.base, "_imp_", i, ".dat"), sep = "\t",
+        fwrite(df[[i]], paste0(filename.base, "_imp_", i, ".dat"), sep = "\t",
           col.names = FALSE, row.names = FALSE, na=".")
       })
-      cat(paste0(filename.base, "_imp_", 1:length(df), ".dat"), file = filename, sep = "\n")
+      message(paste0(filename.base, "_imp_", 1:length(df), ".dat"), file = filename, sep = "\n")
     } else {
-      write.table(df, filename, sep = "\t", col.names = FALSE, row.names = FALSE, na=".")
+      fwrite(df, filename, sep = "\t", col.names = FALSE, row.names = FALSE, na=".")
     }
   }
 

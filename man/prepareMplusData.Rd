@@ -62,8 +62,9 @@ Invisibly returns a character vector of the Mplus input
   data files and optionally input files.
 }
 \description{
-The \code{prepareMplusData} function converts an R data.frame object
-into a tab-delimited file (without header) to be used in an Mplus
+The \code{prepareMplusData} function converts an R data.frame
+(or a list of data frames), into a tab-delimited
+file (without header) to be used in an Mplus
 input file. The corresponding Mplus syntax, including the
 data file definition and variable names,
 is printed to the console or optionally to an input file.
@@ -101,6 +102,13 @@ test01 <- prepareMplusData(mtcars, "test01.dat")
 # see that syntax was stored
 test01
 
+# example when there is a factor and logical
+tmpd <- mtcars
+tmpd$cyl <- factor(tmpd$cyl)
+tmpd$am <- as.logical(tmpd$am)
+prepareMplusData(tmpd, "test_type.dat")
+rm(tmpd)
+
 # by default, if re-run, data is re-written, with a note
 test01b <- prepareMplusData(mtcars, "test01.dat")
 
@@ -110,10 +118,12 @@ test01c <- prepareMplusData(mtcars, "test01c.dat", hashfilename=TRUE)
 
 # now that the filename was hashed in test01c, future calls do not re-write data
 # as long as the hash matches
-test01d <- prepareMplusData(mtcars, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
+test01d <- prepareMplusData(mtcars, "test01c.dat",
+  writeData = "ifmissing", hashfilename=TRUE)
 
 # however, if the data change, then the file is re-written
-test01e <- prepareMplusData(iris, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
+test01e <- prepareMplusData(iris, "test01c.dat",
+  writeData = "ifmissing", hashfilename=TRUE)
 
 # tests for keeping and dropping variables
 prepareMplusData(mtcars, "test02.dat", keepCols = c("mpg", "hp"))
