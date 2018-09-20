@@ -47,7 +47,21 @@ Internal utility function, primarily for \code{prepareMplusData}.
 }
 \examples{
 \dontrun{
-  MplusAutomation:::.cleanHashData(mtcars)
+
+## basic example
+MplusAutomation:::.cleanHashData(mtcars)
+
+## has changes when data changes
+MplusAutomation:::.cleanHashData(mtcars[-15,])
+
+## example on a list (e.g., for multiply imputed data)
+
+MplusAutomation:::.cleanHashData(
+ list(
+   data.frame(a = 1:4),
+   data.frame(a = c(2, 2, 3, 4))),
+  imputed = TRUE)
+
 }
 MplusAutomation:::.hashifyFile("testit.dat", "abc")
 }

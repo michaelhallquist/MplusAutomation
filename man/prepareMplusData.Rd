@@ -99,6 +99,8 @@ prepareMplusData(ASData5, "study5.dat")
 # basic example
 test01 <- prepareMplusData(mtcars, "test01.dat")
 
+
+
 # see that syntax was stored
 test01
 
@@ -119,6 +121,11 @@ test01c <- prepareMplusData(mtcars, "test01c.dat", hashfilename=TRUE)
 # now that the filename was hashed in test01c, future calls do not re-write data
 # as long as the hash matches
 test01d <- prepareMplusData(mtcars, "test01c.dat",
+  writeData = "ifmissing", hashfilename=TRUE)
+
+# now that the filename was hashed in test01c, future calls do not re-write data
+# as long as the hash matches
+test01db <- prepareMplusData(mtcars, "test01d.dat",
   writeData = "ifmissing", hashfilename=TRUE)
 
 # however, if the data change, then the file is re-written
@@ -162,6 +169,46 @@ prepareMplusData(mtcars, "test11.dat", inpfile="test10alt.inp")
 # new errors if files exist and overwrite=FALSE
 prepareMplusData(mtcars, "test10.dat",
   inpfile="test10alt.inp", overwrite=FALSE)
+
+
+# can write multiply imputed data too
+# here are three "imputed" datasets
+idat <- list(
+  data.frame(mpg = mtcars$mpg, hp = c(100, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(110, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(120, mtcars$hp[-1])))
+
+# if we turn on hashing in the filename the first time,
+# we can avoid overwriting notes the second time
+testimp1 <- prepareMplusData(idat, "testi1.dat",
+  writeData = "ifmissing", hashfilename=TRUE,
+  imputed = TRUE)
+
+# now that the filename was hashed, future calls do not re-write data
+# as long as all the hashes match
+testimp2 <- prepareMplusData(idat, "testi2.dat",
+  writeData = "ifmissing", hashfilename=TRUE,
+  imputed = TRUE)
+
+# in fact, the number of imputations can decrease
+# and they still will not be re-written
+testimp3 <- prepareMplusData(idat[-3], "testi3.dat",
+  writeData = "ifmissing", hashfilename=TRUE,
+  imputed = TRUE)
+
+# however, if the data changes, then all are re-written
+# note that it warns for the two files that already exist
+# as these two are overwritten
+
+idat2 <- list(
+  data.frame(mpg = mtcars$mpg, hp = c(100, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(109, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(120, mtcars$hp[-1])))
+testimp4 <- prepareMplusData(idat2, "testi4.dat",
+  writeData = "ifmissing", hashfilename=TRUE,
+  imputed = TRUE)
+
+
 }
 }
 \author{

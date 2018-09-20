@@ -3,6 +3,7 @@ Version 0.7-3
  - feature:     Allow input files to have .in or .inp extension to increase compatibility with lavaan lavExport.
  - feature:     Extract residual DSEM outputs containing ^
  - feature:     Initial support for extraction of RESULTS IN PROBABILITY SCALE output. See $parameters$probability.scale from readModels().
+ - feature:     prepareMplusData can now hash filenames for multiply imputed data. Hashing is done for individual files, so that as long as all files exist, the order can be re-arranged or imputations can be dropped and still no new data needs to be written (closes issue #53).
  - feature:     prepareMplusData now is more efficient at converting datasets to numeric and  utilizes fwrite to increase speed of writing out datasets (closes issue #54).
  - bugfix:      Extract modification indices for thresholds 
  - bugfix:      Abstract invariance testing summary extraction from Caspar van Lissa into a separate function.
