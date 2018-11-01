@@ -46,9 +46,12 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     thisChunk <- thisChunk[!headerRows]
       
     convertMatches <- data.frame(startline=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
+  } else if (sectionName=="probability.scale") {
+    #Probability scale output tends to fall in one uniform chunk. If it has header (e.g., Latent Class 1), these are handled upstream before parsing into chunks processed here.
+    convertMatches <- data.frame(startline=1, keyword="Probability.Scale", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
   } else {
     #okay to match beginning and end of line because strip.white used in scan
-    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Item Locations|Item Categories|Item Guessing|Upper Asymptote|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion|Steps)|([\\w_\\d+\\.#\\&]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&]+\\s*\\|\\s*[\\w_\\d+\\.#\\&]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
+    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Item Locations|Item Categories|Item Guessing|Upper Asymptote|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion|Steps)|([\\w_\\d+\\.#\\&\\^]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&\\^]+\\s*\\|\\s*[\\w_\\d+\\.#\\&\\^]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
 
     #more readable (than above) using ldply from plyr
     convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
@@ -63,7 +66,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     
     #sometimes chunks have no parameters because they are empty. e.g., stdyx for ex7.30
     #in this case, return null
-    if (nrow(convertMatches)==0) return(NULL)
+    if (nrow(convertMatches)==0) { return(NULL) }
     
     #develop a dataframe that divides into keyword matches versus variable matches
     convertMatches <- ddply(convertMatches, "startline", function(row) {
@@ -74,9 +77,9 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
           if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", 
               "Scales", "Item Difficulties", "Item Locations", "Item Categories", "Item Guessing", "Upper Asymptote", "Dispersion", "Steps")) {
             return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_, stringsAsFactors=FALSE))
-          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) {
+          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) { #typical "factor BY" heading  
             return(data.frame(startline=row$startline, keyword=NA_character_, varname=variable[1], operator=variable[2], stringsAsFactors=FALSE))
-          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&]+)\\s*\\|\\s*([\\w_\\d+\\.#\\&]+)\\s*(BY|WITH|ON)\\s*$", c, perl=TRUE)[[1]]) > 0) {
+          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*\\|\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*(BY|WITH|ON)\\s*$", c, perl=TRUE)[[1]]) > 0) { #random slope syntax
             return(data.frame(startline=row$startline, keyword=NA_character_, slope=variable[1], varname=variable[2], operator=variable[3], stringsAsFactors=FALSE))
           } else stop("failure to match keyword: ", match, "\n  ", filename)
         })
@@ -111,7 +114,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #"U3                 0.660      0.038     17.473      0.000"
     #"U4                 0.656      0.037     17.585      0.000"
 
-    if (!is.na(convertMatches[i,"keyword"]) && convertMatches[i,"keyword"] == "Item.Categories") {      
+    if ((!is.na(convertMatches[i,"keyword"]) && (convertMatches[i,"keyword"] %in% c("Item.Categories", "Probability.Scale")))) { 
       #handle item categories output from IRT (e.g. ex5.5pcm.out), where the output section looks like this:
       # Item Categories
       #  U1
@@ -119,7 +122,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
       #    Category 2        -0.247      0.045     -5.534      0.000
       #    Category 3         0.699      0.052     13.325      0.000
       #    Category 4        -0.743      0.057    -12.938      0.000
-      #    Category 5         0.291      0.052      5.551      0.000    
+      #    Category 5         0.291      0.052      5.551      0.000
       paramsToParse <- parseCatOutput(paramsToParse) #reformat into U1.Cat.1 etc.
     }
   
@@ -322,7 +325,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
       if (chunkToParse == TRUE && !all(thisChunk=="")) { #omit completely blank chunks (v8 ex9.32.out)
         parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
-
+        
         #WORKAROUND: For confidence intervals in multilevel mixtures, the Categorical Latent Variables section does not
         #follow the same formatting guidelines. Specifically, it does not print "Within Level" after "Categorical Latent Variables".
         #As a result, the CI parser blows up because bwWi will be NULL. The inconsistent section is in my assessment always the within level
@@ -548,11 +551,16 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     allSections <- appendListElements(allSections, irtParsed)
   }
 
-#  probSection <- getSection("^RESULTS IN PROBABILITY SCALE$", outfiletext)
-#  if (!is.null(probSection)) {
-#    probParsed <- extractParameters_1section(filename, probSection, "probability.scale")
-#    allSections <- appendListElements(allSections, probParsed)
-#  }
+  probSection <- getSection("^RESULTS IN PROBABILITY SCALE$", outfiletext)
+  if (!is.null(probSection)) {
+    probParsed <- extractParameters_1section(filename, probSection, "probability.scale")
+    #slight modification of typical output for $parameters to put category in separate column
+    probParsed[[1]]$paramHeader <- NULL
+    probParsed[[1]]$category <- sub("^.*\\.Cat\\.(\\d+)$", "\\1", probParsed[[1]]$param, perl=TRUE)
+    probParsed[[1]]$param <- sub("^(.*)\\.Cat\\.\\d+$", "\\1", probParsed[[1]]$param, perl=TRUE)
+    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", "se", "est_se", "pval")] #reorder columns
+    allSections <- appendListElements(allSections, probParsed)
+  }
 
   #confidence intervals for usual output, credibility intervals for bayesian output
   ciSection <- getSection("^(CONFIDENCE INTERVALS OF MODEL RESULTS|CREDIBILITY INTERVALS OF MODEL RESULTS)$", outfiletext)

@@ -23,7 +23,7 @@ lookupTech1Parameter <- function(tech1Output, paramNumber) {
   if (inherits(tech1Output, c("mplus.model"))) {
     tech1Output <- tech1Output$tech1
   }
-  
+
   #or accept $tech1
   if (!inherits(tech1Output, c("mplus.parameterSpecification", "mplus.tech1"))) {
     warning("tech1Output passed into lookupTech1Parameter does not appear to be the right data type.")
@@ -301,7 +301,7 @@ getSection_Blanklines <- function(sectionHeader, outfiletext) {
 #' # make me!!!
 getSection <- function(sectionHeader, outfiletext, headers="standard") {
   #encode the top-level major headers here, but allow for custom headers to be passed in
-  
+
   #use cached headers from initial parsing to speed up search for the appropriate section
   h <- attr(outfiletext, "headerlines")
   if (!headers[1L] == "standard") {
@@ -311,11 +311,11 @@ getSection <- function(sectionHeader, outfiletext, headers="standard") {
   } else if (is.null(h)) {
     stop("Standard headers not parsed")
   }
-  
+
   #allow for syntax to include :: to specify a header that spans 2 rows. Example:
   #FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
   #BASED ON THE ESTIMATED MODEL
-  
+
   #note that this will identify a unique match for the target sectionHeader, but the search for
   #subsequent headers just uses the one-row list above. For now, this works in all cases I know of.
   if (grepl("::", sectionHeader, fixed=TRUE)) {
@@ -328,28 +328,30 @@ getSection <- function(sectionHeader, outfiletext, headers="standard") {
   } else {
     beginSection <- h[ grep(sectionHeader, outfiletext[h], perl=TRUE)[1] ]
   }
-  
+
   #if section header cannot be found, then bail out
   if (is.na(beginSection)) return(NULL)
-  
+
   #identify headers after this section to find end of section
   subsequentHeaders <- which(h > beginSection)
 
   if (length(subsequentHeaders) == 0) { nextHeader <- length(outfiletext) #just return the whole enchilada
   } else { nextHeader <- h[subsequentHeaders[1]] - 1 }
-  
+
   section.found <- outfiletext[(beginSection+1):nextHeader]
   attr(section.found, "lines") <- beginSection:nextHeader
-  
-  return(section.found)  
+
+  return(section.found)
 }
 
 #master function to parse text into sections
 parse_into_sections <- function(outfiletext) {
-  headers <- c("INPUT INSTRUCTIONS", "SUMMARY OF ANALYSIS",
+  headers <- c("INPUT INSTRUCTIONS", "SUMMARY OF ANALYSIS", "SUMMARY OF DATA",
       "SUMMARY OF DATA FOR THE FIRST DATA SET", "SUMMARY OF DATA FOR THE FIRST REPLICATION",
       "SUMMARY OF MISSING DATA PATTERNS FOR THE FIRST REPLICATION",
+      "SUMMARY OF MISSING DATA PATTERNS FOR THE FIRST DATA SET",
       "SUMMARY OF MISSING DATA PATTERNS",
+      "SUMMARY OF CATEGORICAL DATA PROPORTIONS",
       "COVARIANCE COVERAGE OF DATA FOR THE FIRST REPLICATION",
       "COVARIANCE COVERAGE OF DATA", "UNIVARIATE SAMPLE STATISTICS",
       "THE MODEL ESTIMATION TERMINATED NORMALLY",
@@ -408,11 +410,11 @@ parse_into_sections <- function(outfiletext) {
       "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
       "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
   )
-  
+
   #form alternation pattern for regular expression (currently adds leading and trailing spaces permission to each header)
   headerRegexpr <- paste("(", paste(gsub("(.*)", "^\\\\s*\\1\\\\s*$", headers, perl=TRUE), sep="", collapse="|"), ")", sep="")
   headerLines <- grep(headerRegexpr, outfiletext, perl=TRUE)
-  
+
   attr(outfiletext, "headerlines") <- headerLines
   return(outfiletext)
 }
@@ -463,7 +465,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
   #allow for multiple depths (subsections) separated by ::
   #will just extract from deepest depth
   header <- strsplit(header, "::", fixed=TRUE)[[1]]
-  
+
   sectionList <- list()
   targetText <- outfiletext
   for (level in 1:length(header)) {
@@ -594,7 +596,7 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
 #'    Category 5         0.291      0.052      5.551      0.000
 #' "
 parseCatOutput <- function(text) {
-  hlines <- grep("^\\s*([\\w_\\d+\\.#\\&]+)\\s*$", text, perl=TRUE)
+  hlines <- grep("^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*$", text, perl=TRUE)
   if (any(grepl("Category", text[hlines]))) {
     stop("Failed to parse categorical output")
   }
@@ -764,7 +766,7 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       else if (identical(thisLine, c("Observed", "Two-Tailed", "Rate", "of")) &&
           identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Missing")))
         varNames <- c("param", "est", "se", "est_se", "pval", "rate_missing")
-            
+
       #Usual five-column output that applies to most unstandardized and standardized sections in Mplus 5 and later
       else if (identical(thisLine, c("Two-Tailed")) &&
           identical(nextLine, c("Estimate", "S.E.", "Est./S.E.", "P-Value")))
@@ -937,4 +939,61 @@ separateHyphens <- function(cmd) {
   } else {
     return(cmd) ## no hyphens to expand
   }
+}
+
+
+#' Check whether Mplus can be found
+#'
+#' This is a simple utility to check whether Mplus can be found.
+#' Returns 0 if Mplus command can be found by the system.
+#' If \code{silent = FALSE}, prints a message to the user
+#' to help suggest what to do.
+#'
+#' @param silent A logical whether to print a message or not.
+#'   Defaults to \code{TRUE} for silent operation.
+#' @return The status of finding Mplus. Per unix conventions,
+#' status 0 indicates Mplus was found (0 problems) and
+#' status 1 indicates that Mplus was not found.
+#' @author Joshua Wiley
+#' @keywords interface
+#' @export
+#' @examples
+#'
+#' mplusAvailable(silent = TRUE)
+#' mplusAvailable(silent = FALSE)
+mplusAvailable <- function(silent = TRUE) {
+  os <- .Platform$OS.type
+  if (identical(os, "windows")) {
+    res <- system2("where", args = "mplus.exe",
+                   stdout = FALSE, stderr = FALSE)
+    note <- paste0(
+      "Mplus is either not installed or could not be found\n",
+      "Try installing Mplus or if Mplus is already installed, \n",
+      "make sure it can be found on your PATH, try\n\n",
+      "Windows 10 and Windows 8:\n",
+      " (1) In Search, search for and then select: System (Control Panel)\n",
+      " (2) Click the Advanced system settings link.\n",
+      " (3) Click Environment Variables ...\n",
+      " (4) In the Edit System Variable (or New System Variable ) window,\n",
+      " (5) specify the value of the PATH environment variable...\n",
+      " (6) Close and reopen R and run:\n\n",
+      "mplusAvailable(silent=FALSE)",
+      "\n")
+  }
+  if (identical(os, "unix")) {
+    res <- system2("type", args = "mplus",
+                   stdout = FALSE, stderr = FALSE)
+    note <-     paste0(
+      "Mplus is either not installed or could not be found\n",
+      "Try installing Mplus or if it already is installed,\n",
+      "making sure it can be found by adding it to your PATH or adding a symlink\n\n",
+      "To see directories on your PATH, From a terminal, run:\n\n",
+      "echo $PATH",
+      "\n\nthen try something along these lines:\n\n",
+      "sudo ln -s /path/to/mplus/on/your/system /directory/on/your/PATH",
+      "\n")
+  }
+
+  if (!silent) message(c("Mplus is installed and can be found", note)[res+1])
+  return(invisible(res))
 }

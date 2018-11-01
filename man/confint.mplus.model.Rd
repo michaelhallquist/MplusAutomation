@@ -5,9 +5,9 @@
 \alias{confint.mplusObject}
 \title{Return confidence intervals for an mplus.model object}
 \usage{
-\method{confint}{mplus.model}(object, parm, level = 0.95, type = c("un",
-  "std", "stdy", "stdyx"), params = c("regression", "loading", "undirected",
-  "expectation", "variability", "new"), ...)
+\method{confint}{mplus.model}(object, parm, level = 0.95,
+  type = c("un", "std", "stdy", "stdyx"), params = c("regression",
+  "loading", "undirected", "expectation", "variability", "new"), ...)
 
 \method{confint}{mplusObject}(object, ...)
 }
@@ -88,4 +88,5 @@ Other Mplus-Formatting: \code{\link{coef.mplus.model}},
 \author{
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
+\concept{Mplus-Formatting}
 \keyword{interface}

@@ -35,4 +35,5 @@ Other Mplus-Formatting: \code{\link{coef.mplus.model}},
 \author{
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
+\concept{Mplus-Formatting}
 \keyword{interface}

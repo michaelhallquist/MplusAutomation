@@ -5,9 +5,9 @@
 \alias{coef.mplusObject}
 \title{Return coefficients for an mplus.model object}
 \usage{
-\method{coef}{mplus.model}(object, type = c("un", "std", "stdy", "stdyx"),
-  params = c("regression", "loading", "undirected", "expectation",
-  "variability", "new"), ..., raw = FALSE)
+\method{coef}{mplus.model}(object, type = c("un", "std", "stdy",
+  "stdyx"), params = c("regression", "loading", "undirected",
+  "expectation", "variability", "new"), ..., raw = FALSE)
 
 \method{coef}{mplusObject}(object, ...)
 }
@@ -88,4 +88,5 @@ Other Mplus-Formatting: \code{\link{confint.mplus.model}},
 \author{
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
+\concept{Mplus-Formatting}
 \keyword{interface}

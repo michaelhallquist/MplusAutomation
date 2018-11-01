@@ -4,9 +4,10 @@
 \alias{mixtureSummaryTable}
 \title{Create a summary table of Mplus mixture models}
 \usage{
-mixtureSummaryTable(modelList, keepCols = c("Title", "Classes", "Warnings",
-  "AIC", "BIC", "aBIC", "Entropy", "T11_VLMR_PValue", "T11_LMR_PValue",
-  "BLRT_PValue", "min_N", "max_N", "min_prob", "max_prob"))
+mixtureSummaryTable(modelList, keepCols = c("Title", "Classes",
+  "Warnings", "AIC", "BIC", "aBIC", "Entropy", "T11_VLMR_PValue",
+  "T11_LMR_PValue", "BLRT_PValue", "min_N", "max_N", "min_prob",
+  "max_prob"))
 }
 \arguments{
 \item{modelList}{A list of models returned from the

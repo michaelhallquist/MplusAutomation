@@ -12,7 +12,7 @@ extractModIndices_1chunk <- function(chunk, columnNames, filename) {
   #remove spaces within mean/intercept brackets so that regexp works properly (treats the [I1] as a single var)
   chunk <- gsub("\\[\\s*([^\\s]+)\\s*\\]", "[\\1]", chunk, perl=TRUE)
   matches <- friendlyGregexpr("^\\s*([\\w_\\d+\\.#]+\\s+(BY|WITH|ON)\\s+[\\w_\\d+\\.#]+).*$", chunk)
-  matches <- rbind(matches, friendlyGregexpr("^\\s*\\[[\\s\\w\\d\\.#]+\\].*$", chunk)) #separate regexp for means/ints (just for ease of reading)
+  matches <- rbind(matches, friendlyGregexpr("^\\s*\\[[\\s\\w\\d\\.#\\$]+\\].*$", chunk)) #separate regexp for means/ints (just for ease of reading)
   
   if (is.null(matches)) return(NULL) #model contains the MI section, but no values. Occurs when no MI reaches above min threshold (e.g., 5)
   

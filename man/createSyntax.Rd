@@ -4,7 +4,8 @@
 \alias{createSyntax}
 \title{Create the Mplus input text for an mplusObject}
 \usage{
-createSyntax(object, filename, check = TRUE, add = FALSE, imputed = FALSE)
+createSyntax(object, filename, check = TRUE, add = FALSE,
+  imputed = FALSE)
 }
 \arguments{
 \item{object}{An object of class mplusObject}

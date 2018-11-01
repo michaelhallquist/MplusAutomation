@@ -250,6 +250,8 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOutput=FALSE,
     replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus", killOnFail=TRUE, local_tmpdir=FALSE) {
   
+  stopifnot(replaceOutfile %in% c("always", "never", "modifiedDate"))
+    
   #TODO: would be good to come back and make this more versatile, supporting a vector target
   if (length(target) > 1L) { stop("target for runModels must be a single file or single directory")}
   
@@ -258,7 +260,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
   curdir <- getwd()
   
   #check whether target is a directory or a single file
-  if (grepl(".*\\.inp$", target, perl=TRUE)) {
+  if (grepl(".*\\.inp?$", target, perl=TRUE)) { #tolerate .in and .inp files
     directory <- dirname(target)
     filelist <- basename(target)
     
@@ -267,7 +269,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
     setwd(directory)
     
     #look for .out file of the same name to handle skipping existing files downstream.
-    if (file.exists(outtest <- sub("\\.inp$", ".out", filelist, perl=TRUE))) { filelist <- c(filelist, outtest)}
+    if (file.exists(outtest <- sub("\\.inp?$", ".out", filelist, perl=TRUE))) { filelist <- c(filelist, outtest)}
     
   } else {
     ## remove trailing slash, which generates file.exists error on windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
@@ -369,7 +371,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
   on.exit(exitRun())
     
   #select only .inp files using grep
-  inpfiles <- filelist[grep(".*\\.inp$", filelist, ignore.case=TRUE)]
+  inpfiles <- filelist[grep(".*\\.inp?$", filelist, ignore.case=TRUE)] #tolerate .in and .inp files
   outfiles <- filelist[grep(".*\\.out$", filelist, ignore.case=TRUE)]
   
   if(length(inpfiles) < 1) stop("No Mplus input files detected in the target directory: ", directory)
@@ -382,7 +384,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
     
     if (!replaceOutfile == "always") {
       #if there is a match in the outfiles for this input file, then decide whether to skip
-      if (tolower(substr(inpfiles[i], 1, (nchar(inpfiles[i]) - 4))) %in% dropOutExtensions) {
+      if (tolower(sub("\\.inp?$", "", inpfiles[i], perl=TRUE)) %in% dropOutExtensions) {
         
         if (replaceOutfile == "modifiedDate") {
           #if check date is true, then the output file must exist and it must be
@@ -404,7 +406,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
         }
         else if (replaceOutfile == "never"){
           if (isLogOpen()) {
-            writeLines(paste("Skipping model because output file already exists:", inpfiles[i]), logTarget)
+            writeLines(paste("Skipping model because output file already exists for:", inpfiles[i]), logTarget)
             flush(logTarget)
           }
           next

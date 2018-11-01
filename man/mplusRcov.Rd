@@ -4,8 +4,8 @@
 \alias{mplusRcov}
 \title{Create Mplus code for various residual covariance structures.}
 \usage{
-mplusRcov(x, type = c("homogenous", "heterogenous", "cs", "toeplitz", "ar",
-  "un"), r = "rho", e = "e", collapse = FALSE)
+mplusRcov(x, type = c("homogenous", "heterogenous", "cs", "toeplitz",
+  "ar", "un"), r = "rho", e = "e", collapse = FALSE)
 }
 \arguments{
 \item{x}{input character vector of variable names, ordered by time}

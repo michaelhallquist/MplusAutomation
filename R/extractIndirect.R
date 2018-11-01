@@ -170,12 +170,13 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
             } else { next } #nothing to parse, just a trailing blank
           }
           #if (length(toparse) < 2L) { next } #double blank line problem
-          source <- toparse[1] #first variable is the "source" (i.e., the variable furthest upstream) (X IND Y)
-          outcome <- strsplit(toparse[length(toparse)], "\\s+")[[1]] #this should always be the outcome and should have the statistics on it
-          names(outcome) <- columnNames
-          outcome <- data.frame(as.list(outcome))
+          outcome <- toparse[1] #first variable is the "outcome" (i.e., the variable furthest downstream) (X IND Y)
+          source <- strsplit(toparse[length(toparse)], "\\s+")[[1]] #this should always be the earliest variable in the chain; it should have the statistics on it
+          names(source) <- columnNames
+          names(source)[1] <- "pred" #for specific effects, the first column of source is actually the predictor, not outcome (bit of a kludge here)
+          source <- data.frame(as.list(source), stringAsFactors=FALSE)
           intervening <- toparse[2:(length(toparse)-1)]
-          thisEffect <- rbind(thisEffect, data.frame(pred=source, intervening = paste(intervening, collapse="."), outcome))
+          thisEffect <- rbind(thisEffect, data.frame(source[,"pred", drop=F], intervening = paste(intervening, collapse="."), outcome=outcome, source[,-1*which(names(source)=="pred")]))
         }
         elist$specific <- thisEffect
       }
