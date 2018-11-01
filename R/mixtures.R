@@ -179,7 +179,6 @@ mixtureSummaryTable <- function(modelList,
       call. = FALSE
     )
   }
-  modelList$iris_4_class.out$errors
   not_terminated <- which(sapply(modelList, function(x) {
     length(grep(
       "THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY",
