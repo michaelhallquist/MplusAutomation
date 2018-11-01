@@ -67,7 +67,7 @@ mixtureSummaryTable <- function(modelList,
     !is.null(x$input$analysis[["type"]])
   })
   mixtures[mixtures] <- sapply(modelList[mixtures], function(x) {
-    tolower(x$input$analysis$type) == "mixture"
+    grepl("mixture", tolower(x$input$analysis$type))
   })
   if (!any(mixtures))
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
@@ -276,7 +276,7 @@ plotMixtures <- function(modelList,
   })
   mixtures[which(mixtures)] <-
     sapply(modelList[which(mixtures)], function(x) {
-      tolower(x$input$analysis$type) == "mixture"
+      grepl("mixture", tolower(x$input$analysis$type))
     })
   if (!any(mixtures))
     stop(
@@ -599,7 +599,7 @@ plotGrowthMixtures <-
     })
     mixtures[which(mixtures)] <-
       sapply(modelList[which(mixtures)], function(x) {
-        tolower(x$input$analysis$type) == "mixture"
+        grepl("mixture", tolower(x$input$analysis$type))
       })
     
     if (any(!mixtures)){
@@ -638,7 +638,8 @@ plotGrowthMixtures <-
     
     # Check if all models are growth models
     is_growth_model <- sapply(modelList, function(x){
-      any(grepl("\\|$", x$parameters[[coefficients]]$paramHeader))
+      any(grepl("\\|$", x$parameters[[coefficients]]$paramHeader))|
+      any(grepl("\\w+\\|(\\s?\\b\\w+\\b\\s?){2,}", x$input$model))
     })
     if (any(!is_growth_model)){
       if (!any(is_growth_model))
@@ -1048,7 +1049,7 @@ plotMixtureDensities <-
       !is.null(x$input$analysis[["type"]])
     })
     mixtures[mixtures] <- sapply(modelList[mixtures], function(x) {
-      tolower(x$input$analysis$type) == "mixture"
+      grepl("mixture", tolower(x$input$analysis$type))
     })
     if (!any(mixtures))
       stop(
