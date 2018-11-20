@@ -1,4 +1,5 @@
 Version 0.7-3
+ - feature:     Support use of plausible values for factors in BAYES output using SAVE=FSCORES(NIMP) approach
  - feature:     readModels provides initial support for extraction of SUMMARY OF DATA section, including ICCs in 2-level models. See $data_summary.
  - feature:     Allow input files to have .in or .inp extension to increase compatibility with lavaan lavExport.
  - feature:     Extract residual DSEM outputs containing ^
@@ -9,6 +10,7 @@ Version 0.7-3
  - bugfix:      Extract modification indices for thresholds 
  - bugfix:      Abstract invariance testing summary extraction from Caspar van Lissa into a separate function.
  - bugfix:      Fix pred/outcome swap in specific indirect sections
+ - bugfix:      Handle spaces in SAVEDATA variable information section in Mplus v8+ (e.g., SAVE=FSCORES in BSEM). 
 
 Version 0.7-2
  - feature:     A host of new features for mixture modeling (thanks to Caspar van Lissa!). See createMixtures, mixtureSummaryTable, plotMixtures, plotGrowthMixtures, plotLTA.

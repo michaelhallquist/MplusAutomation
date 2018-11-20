@@ -4,7 +4,6 @@
 #' the SAVEDATA command, and it returns a list with the filename, variable names, variable formats,
 #' and variable widths of the SAVEDATA file. If present, the function also parses information about the
 #' Bayesian Parameters (BPARAMETERS) file.
-
 #'
 #' @param outfile required. The name of the Mplus output file to read. Can be an absolute or relative path.
 #'   If \code{outfile} is a relative path or just the filename, then it is assumed that the file resides in
@@ -70,6 +69,7 @@ getSavedata_Fileinfo <- function(outfile) {
 #' \item{tech3File}{A character vector of the tech 3 output.}
 #' \item{tech4File}{A character vector of the tech 4 output.}
 #' @importFrom gsubfn strapply
+#' @importFrom rlang flatten
 #' @seealso \code{\link{getSavedata_Data}}
 #' @examples
 #' # make me!
@@ -254,9 +254,31 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
 
   if (!is.na(orderFormat.text[1L])) {
     variablesToParse <- orderFormat.text[orderFormat.text != ""]
-
-    fileVarNames <- sub("^\\s*([\\w\\d\\.]+)\\s+[\\w\\d\\.]+\\s*$", "\\1", variablesToParse, perl=TRUE)
-    fileVarFormats <- sub("^\\s*[\\w\\d\\.]+\\s+([\\w\\d\\.]+)\\s*$", "\\1", variablesToParse, perl=TRUE)
+    
+    #Mplus v8: remove + sign in front of variables that plausible values from SAVE=FSCORES (XX) in BSEM.
+    if (length(nimp_line <- grep("\\+ variables that have a value for each of the \\d+ imputations", savedataSection)) > 0L) {
+      nimp <- as.numeric(sub(".*\\+ variables that have a value for each of the (\\d+) imputations.*", "\\1", savedataSection[nimp_line]))
+      which_imp <- grep("^\\s*\\+.*", variablesToParse)
+      variablesToParse <- sub("+", "", variablesToParse, fixed=TRUE)
+    }
+    
+    #Mplus v8: because variables are now allowed to have spaces in the output, switch to a string split on spaces.
+    #In this approach, the last element will be the format.
+    varsSplit <- strsplit(trimSpace(variablesToParse), "\\s+")
+    
+    #use flatten to remove the nested lists that result from the inner lapply over imputations
+    varsSplit <- rlang::flatten(lapply(1:length(varsSplit), function(x) {
+        vname <- varsSplit[[x]]
+        if (x %in% which_imp) {
+          #replicate the variable for each imputation
+          return(lapply(1:nimp, function(i) { c(vname[1:(length(vname)-1)], sprintf("I_%03d", i), vname[length(vname)]) }))
+        } else {
+          return(vname)
+        }
+      }))
+    
+    fileVarNames <- sapply(varsSplit, function(x) { paste(x[1:(length(x) - 1)], collapse=".") })
+    fileVarFormats <- sapply(varsSplit, function(x) { x[length(x)] }) #last element
     fileVarWidths <- strapply(fileVarFormats, "[IEFG]+(\\d+)(\\.\\d+)*", as.numeric, perl=TRUE, simplify=TRUE)
 
   }
@@ -400,7 +422,7 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
   if (is.null(fileInfo)) return(NULL)
 
   bp <- l_getSavedata_readRawFile(outfile, outfiletext, format="free", fileName=fileInfo[["bayesFile"]], varNames=fileInfo[["bayesVarNames"]])
-
+  
   if (is.null(bp)) return(NULL)
 
   #for(i in 1:nrow(bp)) {
@@ -560,9 +582,15 @@ l_getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", file
         }
       }
 
+    } else {
+      dataset <- read.table(file=savedataFile, header=FALSE, na.strings="*", strip.white=TRUE)
+      if (length(varNames) > ncol(dataset)) {
+        warning("Number of variable names for Bayesian Parameters section exceeds number of columns in: ", savedataFile)
+        varNames <- varNames[1:ncol(dataset)] #heuristically, just using columns names up to the last column in the data
+      } 
+      
+      names(dataset) <- varNames
     }
-    else
-      dataset <- read.table(file=savedataFile, header=FALSE, na.strings="*", col.names=varNames, strip.white=TRUE)
   }
   else if (format == "fixed") {
     if (!length(varWidths) > 0) stop("Fixed width file specified, but no widths obtained.")
