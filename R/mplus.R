@@ -1209,15 +1209,17 @@ paramExtract <- function(x, params = c("regression", "loading", "undirected", "e
 #' cat(parseMplus(test), file=stdout(), fill=TRUE)
 #' # add missing semicolons and return
 #' cat(parseMplus(test, TRUE), file=stdout(), fill=TRUE)
-# line that is too long for Mplus
+#' # line that is too long for Mplus
 #' test <- "
 #' MODEL:
 #'   mpg cyl disp hp drat wt qsec vs am gear PWITH cyl disp hp drat wt qsec vs am gear carb;
 #' "
 #' cat(parseMplus(test), file=stdout())
 parseMplus <- function(x, add = FALSE) {
-  init <- readLines(textConnection(x))
-
+  cc <- textConnection(x)
+  init <- readLines(cc) #need to close the connection explicitly
+  close(cc)
+  
   nospace <- gsub("[[:space:]]", "", init)
   empty <- nchar(nospace) < 1
   end <- grepl(".*[:;]$", nospace)
