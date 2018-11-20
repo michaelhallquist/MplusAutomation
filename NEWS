@@ -10,7 +10,8 @@ Version 0.7-3
  - bugfix:      Extract modification indices for thresholds 
  - bugfix:      Abstract invariance testing summary extraction from Caspar van Lissa into a separate function.
  - bugfix:      Fix pred/outcome swap in specific indirect sections
- - bugfix:      Handle spaces in SAVEDATA variable information section in Mplus v8+ (e.g., SAVE=FSCORES in BSEM). 
+ - bugfix:      Handle spaces in SAVEDATA variable information section in Mplus v8+ (e.g., SAVE=FSCORES in BSEM).
+ - bugfix:      Improve parsing of mixture outputs in mixtureSummaryTable.
 
 Version 0.7-2
  - feature:     A host of new features for mixture modeling (thanks to Caspar van Lissa!). See createMixtures, mixtureSummaryTable, plotMixtures, plotGrowthMixtures, plotLTA.
