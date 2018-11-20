@@ -64,8 +64,8 @@ In addition to the major functions above, a function for converting an R data.fr
 \tabular{ll}{
 Package: \tab MplusAutomation\cr
 Type: \tab Package\cr
-Version: \tab 0.7-2\cr
-Date: \tab 2018-04-05\cr
+Version: \tab 0.7-3\cr
+Date: \tab 2018-11-19\cr
 License: \tab LGPL-3\cr
 LazyLoad: \tab yes\cr
 }

@@ -2221,7 +2221,13 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE) 
 
 #EXTRACT DATA SUMMARY SECTION
 #NB. This does not support three-level output yet!
-extractDataSummary <- function(outfiletext, curfile) {
+
+#' Function to extract the SUMMARY OF DATA section from Mplus outputs
+#'
+#' @param outfiletext The text of the output file 
+#' @param filename the name of the file containing textToScan. Used to make more intelligible warning messages.
+#' @keywords internal
+extractDataSummary <- function(outfiletext, filename) {
   dataSummarySection <- getSection("^\\s*SUMMARY OF DATA( FOR THE FIRST DATA SET)*\\s*$", outfiletext)
   if (is.null(dataSummarySection)) {
     empty <- list()
@@ -2304,7 +2310,7 @@ extractDataSummary <- function(outfiletext, curfile) {
 }
 
 #Caspar van Lissa code for extract invariance testing section
-extractInvarianceTesting <- function(outfiletext, curfile) {
+extractInvarianceTesting <- function(outfiletext, filename) {
   inv_test_firstline <- grep("^Invariance Testing$", outfiletext)
   if (length(inv_test_firstline) == 0L) { return(list()) } #section not found
   

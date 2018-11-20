@@ -364,13 +364,14 @@ update.mplusObject <- function(object, ...) {
 #'   usevariables = c("mpg", "hp"), rdata = mtcars)
 #'
 #' # create the Mplus input text
-#' cat(createSyntax(example1, "example1.dat"), fill=TRUE)
+#' cat(createSyntax(example1, "example1.dat"), file=stdout(), fill=TRUE)
 #'
 #' # update the object, then create input text
 #' cat(createSyntax(update(example1,
 #'   TITLE = ~ "This is my title;",
 #'   MODEL = ~ . + "\nmpg ON hp;",
 #'   usevariables = c("mpg", "hp", "wt")), "example1.dat"),
+#'   file=stdout(),
 #'   fill=TRUE)
 #' rm(example1)
 createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE) {
@@ -795,7 +796,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   }
 
   body <- createSyntax(object, dataout2, check=check, imputed = object$imputed)
-  cat(body, file = modelout, sep = "\n")
+  writeLines(body, con = modelout, sep = "\n")
   message("Wrote model to: ", modelout)
 
   if (!simulation) {
@@ -1205,15 +1206,15 @@ paramExtract <- function(x, params = c("regression", "loading", "undirected", "e
 #'   wt WITH hp
 #' "
 #' # check and return
-#' cat(parseMplus(test), fill=TRUE)
+#' cat(parseMplus(test), file=stdout(), fill=TRUE)
 #' # add missing semicolons and return
-#' cat(parseMplus(test, TRUE), fill=TRUE)
+#' cat(parseMplus(test, TRUE), file=stdout(), fill=TRUE)
 # line that is too long for Mplus
 #' test <- "
 #' MODEL:
 #'   mpg cyl disp hp drat wt qsec vs am gear PWITH cyl disp hp drat wt qsec vs am gear carb;
 #' "
-#' cat(parseMplus(test))
+#' cat(parseMplus(test), file=stdout())
 parseMplus <- function(x, add = FALSE) {
   init <- readLines(textConnection(x))
 
