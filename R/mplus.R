@@ -374,6 +374,7 @@ update.mplusObject <- function(object, ...) {
 #'   file=stdout(),
 #'   fill=TRUE)
 #' rm(example1)
+#' closeAllConnections()
 createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE) {
   stopifnot(inherits(object, "mplusObject"))
 
@@ -1215,6 +1216,7 @@ paramExtract <- function(x, params = c("regression", "loading", "undirected", "e
 #'   mpg cyl disp hp drat wt qsec vs am gear PWITH cyl disp hp drat wt qsec vs am gear carb;
 #' "
 #' cat(parseMplus(test), file=stdout())
+#' closeAllConnections()
 parseMplus <- function(x, add = FALSE) {
   cc <- textConnection(x)
   init <- readLines(cc) #need to close the connection explicitly
