@@ -260,7 +260,7 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
       nimp <- as.numeric(sub(".*\\+ variables that have a value for each of the (\\d+) imputations.*", "\\1", savedataSection[nimp_line]))
       which_imp <- grep("^\\s*\\+.*", variablesToParse)
       variablesToParse <- sub("+", "", variablesToParse, fixed=TRUE)
-    }
+    } else { which_imp <- integer(0) } #no imputations to unpack
     
     #Mplus v8: because variables are now allowed to have spaces in the output, switch to a string split on spaces.
     #In this approach, the last element will be the format.
