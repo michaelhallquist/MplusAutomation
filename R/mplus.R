@@ -404,7 +404,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
     if (object$imputed) {
       vNames <- createVarSyntax(object$rdata[[1]][, object$usevariables])
     } else {
-      vNames <- createVarSyntax(object$rdata[, object$usevariables])
+      vNames <- createVarSyntax(object$rdata[, object$usevariables, drop = FALSE])
     }
     object$VARIABLE <- paste(vNames, "MISSING=.;\n", object$VARIABLE, collapse = "\n")
   }
