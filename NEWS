@@ -1,3 +1,7 @@
+Version 0.7-4
+ - bugfix:      Extract standardized estimates from MONTE CARLO outputs
+ - bugfix:      Extract R-SQUARE information from multilevel analyses (where header order is reversed) 
+
 Version 0.7-3
  - feature:     Support use of plausible values for factors in BAYES output using SAVE=FSCORES(NIMP) approach
  - feature:     readModels provides initial support for extraction of SUMMARY OF DATA section, including ICCs in 2-level models. See $data_summary.
