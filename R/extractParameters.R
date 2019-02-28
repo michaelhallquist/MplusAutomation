@@ -228,9 +228,10 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   #first trim all leading and trailing spaces (new under strip.white=FALSE)
   modelSection <- gsub("(^\\s+|\\s+$)", "", modelSection, perl=TRUE)
 
-  #detectColumn names sub-divides (perhaps unnecessarily) the matches based on the putative section type of the output
+  #detectColumnNames sub-divides (perhaps unnecessarily) the matches based on the putative section type of the output
   #current distinctions include modification indices, confidence intervals, and model results.
-  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized")) { sectionType <- "confidence_intervals"
+  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized")) { 
+    sectionType <- "confidence_intervals"
   } else if (sectionName == "irt.parameterization" || sectionName == "probability.scale") {
     #the IRT section follows from the MODEL RESULTS section, and column headers are not reprinted.
     #Same applies for RESULTS IN PROBABILITY SCALE section
@@ -263,7 +264,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   classPropMatches <- grep("^\\s*Class Proportions\\s*$", modelSection, ignore.case=TRUE)
 
   topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches))
-
+  
   if (length(topLevelMatches) > 0) {
 
     lcNum <- NULL
@@ -322,8 +323,30 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         thisChunk <- modelSection[(match+1):length(modelSection)]
         chunkToParse <- TRUE
       }
-
+      
       if (chunkToParse == TRUE && !all(thisChunk=="")) { #omit completely blank chunks (v8 ex9.32.out)
+        # In R-SQUARE output for multilevel models, we violate the usual convention of column headers that
+        # are superordinate to the Within/Between distinction. This leads the chunk to contain the labels.
+        # Here's an example:
+        #
+        # R-SQUARE
+        #
+        # Within Level
+        #
+        # Observed                                        Two-Tailed   Rate of
+        # Variable        Estimate       S.E.  Est./S.E.    P-Value    Missing
+        #
+        # ASRREA             0.266      0.013     20.079      0.000      0.026
+  
+        #Thus, we need to delete these lines prior to parsing. Implement attr tagging in detectColumnNames
+        if (sectionName == "r2") {
+          #need to delete header lines from each chunk using the header_lines attribute
+          header_lines <- modelSection[attr(columnNames, "header_lines")]
+          thisChunk <- thisChunk[!thisChunk %in% header_lines]
+        }
+  
+  
+        #parse the chunk into a data.frame      
         parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
         
         #WORKAROUND: For confidence intervals in multilevel mixtures, the Categorical Latent Variables section does not
