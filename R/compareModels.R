@@ -75,7 +75,7 @@
 #'
 #' # make me!!!
 compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pvalue=0.0001), 
-    compare="unstandardized", sort="none", showFixed=FALSE, showNS=TRUE, diffTest=FALSE) {
+                          compare="unstandardized", sort="none", showFixed=FALSE, showNS=TRUE, diffTest=FALSE) {
   # TODO: Make work with standardized parameter estimates
   #options for show:
   # -all: print equal params, unequal params, and unique params
@@ -85,9 +85,9 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
   # -equal: print parameters that are equal
   # -summaries: print comparison of summaries
   # -allsummaries
-
+  
   # defaults to show equal and unequal params
-
+  
   # if a single scalar is passed in with no name, then use that value for param and pvalue diffs
   if (length(equalityMargin) == 1) {
     if (is.null(names(equalityMargin)))
@@ -99,44 +99,53 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
         equalityMargin["pvalue"] <- .0001
     }
   }
-
+  
   cat("\n==============\n\nMplus model comparison\n----------------------\n\n")
-
+  
   if (!is.null(fn <- attr(m1, "filename")))
     cat("------\nModel 1: ", fn, "\n")
-
+  
   if (!is.null(fn <- attr(m2, "filename")))
     cat("Model 2: ", fn, "\n------\n")
-
+  
   if (inherits(m1, c("mplus.summaries", "mplus.model")) &&
       inherits(m2, c("mplus.summaries", "mplus.model")) &&
       any(c("all", "allsummaries", "summaries") %in% show)) {
-
+    
     # compare summaries
     if (inherits(m1, "mplus.model")) m1Summaries <- m1$summaries
     else m1Summaries <- m1 #just copy summaries as is
-
+    
     if (inherits(m2, "mplus.model")) m2Summaries <- m2$summaries
     else m2Summaries <- m2 #just copy summaries as is
-
+    
     cat("\nModel Summary Comparison\n------------------------\n\n")
-
+    
     # compare basic stuff
     sumCombined <- rbind.fill(m1Summaries, m2Summaries)
-
-    if (!"allsummaries" %in% show) {
+    
+    bayes_outputs <- FALSE
+    if (sumCombined$Estimator[1L] == "BAYES" && sumCombined$Estimator[1L] == "BAYES") {
+      comparators <- c("Title", "Observations", "Estimator", "Parameters",
+                       "AIC", "BIC", "DIC", "PostPred_PValue", "ObsRepChiSqDiff_95CI_LB", "ObsRepChiSqDiff_95CI_UB")
+      bayes_outputs <- TRUE
+    } else if (any(sumCombined$Estimator == "BAYES")) {
+      stop("One model uses the BAYES estimator, the other uses something else. Can't compare these at the moment.")
+    } else {
       comparators <- c("Title", "Observations", "Estimator", "Parameters",
                        "LL", "AIC", "BIC", "ChiSqM_Value", "ChiSqM_DF",
                        "CFI", "TLI", "RMSEA_Estimate", "SRMR", "WRMR")
-
+    }
+    
+    if (!"allsummaries" %in% show) {
       sumCombined <- sumCombined[, intersect(comparators, names(sumCombined))]
     }
-
+    
     # manual loop seems easier here (tried apply, sapply combos... too painful)
     sumCombinedL <- as.list(sumCombined)
     nameList <- names(sumCombinedL)
     totalPad <- 0
-
+    
     for (var in 1:length(sumCombinedL)) {
       sumCombinedL[[var]] <- lapply(sumCombinedL[[var]], strwrap, width=40, exdent=2)
       len1 <- length(sumCombinedL[[var]][[1]])
@@ -149,18 +158,18 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
       } else {
         nameList <- c(nameList[1:(var+totalPad)], rep("", padLen))
       }
-
+      
       totalPad <- totalPad + padLen
     }
-
+    
     wrappedOutput <- cbind(m1=do.call("c", lapply(sumCombinedL, "[[", 1)),
-        m2=do.call("c", lapply(sumCombinedL, "[[", 2)))
-
+                           m2=do.call("c", lapply(sumCombinedL, "[[", 2)))
+    
     nameList <- encodeString(nameList, justify="left", width=NA)
     rownames(wrappedOutput) <- nameList
-
+    
     print(wrappedOutput, quote=FALSE)
-
+    
     #chi-square difference testing
     if (diffTest == TRUE) {
       if ("ChiSqDiffTest_Value" %in% unique(c(names(m1Summaries), names(m2Summaries)))) {
@@ -174,12 +183,12 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
           dfDiff <- m2Summaries$ChiSqDiffTest_DF
           pval <- m2Summaries$ChiSqDiffTest_PValue
         }
-
+        
         cat("\n  Chi-Square Difference Test for Nested Models using DIFFTEST in Mplus\n  -----------------------------------------------------------------------\n\n")
         cat("  Chi-square difference: ", round(val, 4), "\n")
         cat("  Diff degrees of freedom: ", dfDiff, "\n")
         cat("  P-value: ", round(pval, 4), "\n")
-
+        
       } else if (m1Summaries$Estimator %in% c("ML", "MLM", "MLR", "WLS", "WLSM") && m1Summaries$Parameters != m2Summaries$Parameters) {
         if (m1Summaries$Estimator == m2Summaries$Estimator ) {
           if (m1Summaries$Parameters < m2Summaries$Parameters) {
@@ -189,15 +198,15 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
             H0m <- m2Summaries
             H1m <- m1Summaries
           }
-
+          
           if (m1Summaries$Estimator == "MLR") {
             #Chi-square difference test for MLR models based on loglikelihood
             cd <- (H0m$Parameters*H0m$LLCorrectionFactor - H1m$Parameters*H1m$LLCorrectionFactor)/(H0m$Parameters - H1m$Parameters)
-
+            
             ChiSqDiff <- -2*(H0m$LL - H1m$LL)/cd
             #use difference in the number of parameters for dfDiff since for some models, only LL and Params are available.
             dfDiff <- (H1m$Parameters - H0m$Parameters)
-
+            
             cat("\n  MLR Chi-Square Difference Test for Nested Models Based on Loglikelihood\n  -----------------------------------------------------------------------\n\n")
             cat("  Difference Test Scaling Correction: ", cd, "\n")
             cat("  Chi-square difference: ", round(ChiSqDiff, 4), "\n")
@@ -213,9 +222,9 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
               cd <- (H0m$ChiSqM_DF*H0m$ChiSqM_ScalingCorrection - H1m$ChiSqM_DF*H1m$ChiSqM_ScalingCorrection)/(H0m$ChiSqM_DF - H1m$ChiSqM_DF)
               ChiSqDiff <- (H0m$ChiSqM_Value*H0m$ChiSqM_ScalingCorrection - H1m$ChiSqM_Value*H1m$ChiSqM_ScalingCorrection)/cd
             }
-
+            
             dfDiff <- (H0m$ChiSqM_DF - H1m$ChiSqM_DF)
-
+            
             cat("\n  ", m1Summaries$Estimator, " Chi-Square Difference test for nested models\n  --------------------------------------------\n\n", sep="")
             if (! m1Summaries$Estimator %in% c("WLS", "ML")) cat("  Difference Test Scaling Correction:", cd, "\n")
             cat("  Chi-square difference:", round(ChiSqDiff, 4), "\n")
@@ -228,95 +237,107 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
       }
     }
   }
-
-
+  
+  
   ###PARAMETER COMPARISON
   #will blow up in cases where std output with no est_se or pval
-
+  
   #fuzzy equality
   testEquality <- function(v1, v2, margin=0.0000) {
     if (length(v1) != length(v2)) stop ("v1 length != v2 length")
-
+    
     if (!is.numeric(v1) || !is.numeric(v2)) stop("Non-numeric arguments passed to testEquality.")
-
+    
     retVec <- aaply(cbind(v1, v2), 1, function(row) {
-          if(abs(row["v1"]-row["v2"]) <= margin) return(TRUE)
-          else return(FALSE)
-        })
-
+      if(abs(row["v1"]-row["v2"]) <= margin) return(TRUE)
+      else return(FALSE)
+    })
+    
     return(retVec)
   }
-
+  
   if (inherits(m1, c("mplus.model", "mplus.params")) &&
       inherits(m2, c("mplus.model", "mplus.params")) &&
       any(c("all", "equal", "diff", "pdiff", "unique") %in% show)) {
-
+    
     if (inherits(m1, "mplus.model")) {
       m1Params <- m1$parameters[[compare]]
       if (is.null(m1Params)) { stop("Unable to find model 1 parameters: ", compare) }
     } else { m1Params <- m1 }
-
+    
     if (inherits(m2, "mplus.model")) {
       m2Params <- m2$parameters[[compare]]
       if (is.null(m2Params)) { stop("Unable to find model 2 parameters: ", compare) }
     } else { m2Params <- m2 }
-
-	#check for multiple groups, latent classes, and multilevel output
-	uniqueParamCols <- c("paramHeader", "param")
-
-  if ("Group" %in% names(m1Params)) {
-    uniqueParamCols <- c(uniqueParamCols, "Group")
-    multipleGroups <- TRUE
-  } else multipleGroups <- FALSE
-
-  if ("LatentClass" %in% names(m1Params)) {
-    uniqueParamCols <- c(uniqueParamCols, "LatentClass")
-    latentClasses <- TRUE
-  } else latentClasses <- FALSE
-
-  if ("BetweenWithin" %in% names(m1Params)) {
-    uniqueParamCols <- c(uniqueParamCols, "BetweenWithin")
-    multilevel <- TRUE
-  } else multilevel <- FALSE
-
-  #match up paramheader and param combinations
-  m1Params$paramCombined <- apply(m1Params[,uniqueParamCols], 1, paste, collapse=".")
-  m2Params$paramCombined <- apply(m2Params[,uniqueParamCols], 1, paste, collapse=".")
-
-  #identify columns present in both data.frames
-  matchCols <- intersect(m1Params$paramCombined, m2Params$paramCombined)
-  m1Only <- setdiff(m1Params$paramCombined, m2Params$paramCombined)
-  m2Only <- setdiff(m2Params$paramCombined, m1Params$paramCombined)
-
-  #m1Params <- plyr::rename(m1Params, c(est="m1_est", se="m1_se", est_se="m1_est_se", pval="m1_pval"))
-  #m2Params <- plyr::rename(m2Params, c(est="m2_est", se="m2_se", est_se="m2_est_se", pval="m2_pval"))
-  m1Params <- rename(m1Params, c(est="m1_est", se="m1_se", est_se="m1_est_se", pval="m1_pval"))
-  m2Params <- rename(m2Params, c(est="m2_est", se="m2_se", est_se="m2_est_se", pval="m2_pval"))
-
-  #perhaps merge on uniqueParamCols (ensures that any group, bw/wi, and latent classes match)
-  #matchDF <- merge(m1Params[m1Params$paramCombined %in% matchCols,], m2Params[m2Params$paramCombined %in% matchCols,], by=c("paramHeader", "param"), all.x=TRUE, all.y=TRUE)
-  matchDF <- merge(m1Params[m1Params$paramCombined %in% matchCols, ],
-                   m2Params[m2Params$paramCombined %in% matchCols, ],
-                   by=uniqueParamCols, all.x=TRUE, all.y=TRUE)
-  matchDF <- matchDF[, !(names(matchDF) %in% c("paramCombined.x", "paramCombined.y"))] #don't retain the matching column
-
-  #remove fixed parameters (only if fixed in both models)
-  if (!showFixed) {
-    matchDF <- with(matchDF, matchDF[!(m1_est_se == 999.000 & m2_est_se == 999.000),])
-    #N.B. I'm dubious about removing fixed from m1/m2 params because then the "unique" output omits these
-    m1Params <- with(m1Params, m1Params[which(m1_est_se != 999.000),])
-    m2Params <- with(m2Params, m2Params[which(m2_est_se != 999.000),])
-  }
-
-  #remove non-significant effects, if requested
-  if (is.logical(showNS) && showNS==FALSE) showNS <- .05 #default alpha for filtering N.S. results
-  if (!showNS==TRUE) {
-    matchDF <- with(matchDF, matchDF[!(m1_pval > showNS & m2_pval > showNS),])
-    m1Params <- with(m1Params, m1Params[!(m1_pval > showNS),])
-    m2Params <- with(m2Params, m2Params[!(m2_pval > showNS),])
-  }
-
-  if (sort=="type") {
+    
+    #check for multiple groups, latent classes, and multilevel output
+    uniqueParamCols <- c("paramHeader", "param")
+    
+    if ("Group" %in% names(m1Params)) {
+      uniqueParamCols <- c(uniqueParamCols, "Group")
+      multipleGroups <- TRUE
+    } else multipleGroups <- FALSE
+    
+    if ("LatentClass" %in% names(m1Params)) {
+      uniqueParamCols <- c(uniqueParamCols, "LatentClass")
+      latentClasses <- TRUE
+    } else latentClasses <- FALSE
+    
+    if ("BetweenWithin" %in% names(m1Params)) {
+      uniqueParamCols <- c(uniqueParamCols, "BetweenWithin")
+      multilevel <- TRUE
+    } else multilevel <- FALSE
+    
+    #match up paramheader and param combinations
+    m1Params$paramCombined <- apply(m1Params[,uniqueParamCols], 1, paste, collapse=".")
+    m2Params$paramCombined <- apply(m2Params[,uniqueParamCols], 1, paste, collapse=".")
+    
+    #identify columns present in both data.frames
+    matchCols <- intersect(m1Params$paramCombined, m2Params$paramCombined)
+    m1Only <- setdiff(m1Params$paramCombined, m2Params$paramCombined)
+    m2Only <- setdiff(m2Params$paramCombined, m1Params$paramCombined)
+    
+    if (bayes_outputs) {
+      m1Params <- rename(m1Params, c(est="m1_est", posterior_sd="m1_post_sd", pval="m1_pval"))
+      m2Params <- rename(m2Params, c(est="m2_est", posterior_sd="m2_post_sd", pval="m2_pval"))
+    } else {
+      #m1Params <- plyr::rename(m1Params, c(est="m1_est", se="m1_se", est_se="m1_est_se", pval="m1_pval"))
+      #m2Params <- plyr::rename(m2Params, c(est="m2_est", se="m2_se", est_se="m2_est_se", pval="m2_pval"))
+      m1Params <- rename(m1Params, c(est="m1_est", se="m1_se", est_se="m1_est_se", pval="m1_pval"))
+      m2Params <- rename(m2Params, c(est="m2_est", se="m2_se", est_se="m2_est_se", pval="m2_pval"))
+    }
+    
+    #perhaps merge on uniqueParamCols (ensures that any group, bw/wi, and latent classes match)
+    #matchDF <- merge(m1Params[m1Params$paramCombined %in% matchCols,], m2Params[m2Params$paramCombined %in% matchCols,], by=c("paramHeader", "param"), all.x=TRUE, all.y=TRUE)
+    matchDF <- merge(m1Params[m1Params$paramCombined %in% matchCols, ],
+                     m2Params[m2Params$paramCombined %in% matchCols, ],
+                     by=uniqueParamCols, all.x=TRUE, all.y=TRUE)
+    matchDF <- matchDF[, !(names(matchDF) %in% c("paramCombined.x", "paramCombined.y"))] #don't retain the matching column
+    
+    #remove fixed parameters (only if fixed in both models)
+    if (!showFixed) {
+      if (bayes_outputs) {
+        matchDF <- with(matchDF, matchDF[!(m1_post_sd == 0.000 & m2_post_sd == 0.000),])
+        #N.B. I'm dubious about removing fixed from m1/m2 params because then the "unique" output omits these
+        m1Params <- with(m1Params, m1Params[which(m1_post_sd != 0.000),])
+        m2Params <- with(m2Params, m2Params[which(m2_post_sd != 0.000),])
+      } else {
+        matchDF <- with(matchDF, matchDF[!(m1_est_se == 999.000 & m2_est_se == 999.000),])
+        #N.B. I'm dubious about removing fixed from m1/m2 params because then the "unique" output omits these
+        m1Params <- with(m1Params, m1Params[which(m1_est_se != 999.000),])
+        m2Params <- with(m2Params, m2Params[which(m2_est_se != 999.000),])
+      }
+    }
+    
+    #remove non-significant effects, if requested
+    if (is.logical(showNS) && showNS==FALSE) showNS <- .05 #default alpha for filtering N.S. results
+    if (!showNS==TRUE) {
+      matchDF <- with(matchDF, matchDF[!(m1_pval > showNS & m2_pval > showNS),])
+      m1Params <- with(m1Params, m1Params[!(m1_pval > showNS),])
+      m2Params <- with(m2Params, m2Params[!(m2_pval > showNS),])
+    }
+    
+    if (sort=="type") {
       #add a leading . to the replacement to filter on, by, and with to the top of the results output
       paramType <- sapply(matchDF$paramHeader, sub, pattern=".*\\.(ON|WITH|BY)$", replacement=".\\1", ignore.case=TRUE, perl=TRUE)
       matchDF <- matchDF[order(paramType, matchDF$paramHeader, matchDF$param), ]
@@ -324,27 +345,35 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
     else if (sort=="alphabetical") {
       matchDF <- matchDF[order(matchDF$paramHeader, matchDF$param),]
     }
-
+    
     #order by each parameter match (could make optional)
-    matchDF <- matchDF[,c(uniqueParamCols, "m1_est", "m2_est", "m1_se", "m2_se", "m1_est_se", "m2_est_se", "m1_pval", "m2_pval")]
-    matchDF <- cbind(matchDF[,c(uniqueParamCols, "m1_est", "m2_est")], .=rep("|", nrow(matchDF)),
-        matchDF[,c("m1_se", "m2_se")], .=rep("|", nrow(matchDF)),
-        matchDF[,c("m1_est_se", "m2_est_se")], .=rep("|", nrow(matchDF)),
-        matchDF[,c("m1_pval", "m2_pval")])
-
+    if (bayes_outputs) {
+      matchDF <- matchDF[,c(uniqueParamCols, "m1_est", "m2_est", "m1_post_sd", "m2_post_sd", "m1_pval", "m2_pval")]
+      matchDF <- cbind(matchDF[,c(uniqueParamCols, "m1_est", "m2_est")], .=rep("|", nrow(matchDF)),
+                       matchDF[,c("m1_post_sd", "m2_post_sd")], .=rep("|", nrow(matchDF)),
+                       matchDF[,c("m1_pval", "m2_pval")])
+    } else {
+      matchDF <- matchDF[,c(uniqueParamCols, "m1_est", "m2_est", "m1_se", "m2_se", "m1_est_se", "m2_est_se", "m1_pval", "m2_pval")]
+      matchDF <- cbind(matchDF[,c(uniqueParamCols, "m1_est", "m2_est")], .=rep("|", nrow(matchDF)),
+                       matchDF[,c("m1_se", "m2_se")], .=rep("|", nrow(matchDF)),
+                       matchDF[,c("m1_est_se", "m2_est_se")], .=rep("|", nrow(matchDF)),
+                       matchDF[,c("m1_pval", "m2_pval")])
+      
+    }
+    
     cat("\n=========\n\nModel parameter comparison\n--------------------------\n")
     paramsEqual <- with(matchDF, testEquality(m1_est, m2_est, equalityMargin["param"]))
     pvalsEqual <- with(matchDF, testEquality(m1_pval, m2_pval, equalityMargin["pvalue"]))
-
+    
     if (any(c("all", "equal") %in% show)) {
       cat("  Parameters present in both models\n=========\n\n")
-      cat("  Equal in both models (param. est. diff <= ", equalityMargin["param"], ")\n  ----------------------------------------------\n", sep="")
+      cat("  Approximately equal in both models (param. est. diff <= ", equalityMargin["param"], ")\n  ----------------------------------------------\n", sep="")
       if (any(paramsEqual))
         print(matchDF[paramsEqual==TRUE, ], row.names=FALSE)
       else
         cat("None\n")
     }
-
+    
     if (any(c("all", "diff") %in% show)) {
       cat("\n\n  Parameter estimates that differ between models (param. est. diff > ", equalityMargin["param"], ")\n  ----------------------------------------------\n", sep="")
       if (any(!paramsEqual)) {
@@ -358,7 +387,7 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
       else
         cat("None\n")
     }
-
+    
     if (any(c("all", "pdiff") %in% show)) {
       cat("\n\n  P-values that differ between models (p-value diff > ", equalityMargin["pvalue"], ")\n  -----------------------------------\n", sep="")
       if (any(!pvalsEqual)) {
@@ -372,17 +401,17 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
       else
         cat("None\n")
     }
-
+    
     #sort doesn't affect this because it uses matchDF... sort earlier?
     if (any(c("unique", "all") %in% show)) {
       cat("\n\n  Parameters unique to model 1: ", length(m1Only), "\n  -----------------------------\n\n", sep="")
       if (length(m1Only) > 0) {
         m1Remaining <- sum(m1Params$paramCombined %in% m1Only)
         nFiltered <- length(m1Only) - m1Remaining
-
+        
         if (m1Remaining > 0)
           print(m1Params[m1Params$paramCombined %in% m1Only,!names(m1Params)=="paramCombined"], row.names=FALSE)
-
+        
         if (nFiltered > 0) {
           cat("\n\n  ", nFiltered, " filtered from output (fixed and/or n.s.)\n\n", sep="")
           filtered <- setdiff(m1Only, m1Params$paramCombined)
@@ -391,27 +420,27 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
       }
       else
         cat("  None\n\n")
-
+      
       cat("\n  Parameters unique to model 2: ", length(m2Only), "\n  -----------------------------\n\n", sep="")
       if (length(m2Only) > 0) {
         m2Remaining <- sum(m2Params$paramCombined %in% m2Only)
         nFiltered <- length(m2Only) - m2Remaining
-
+        
         if (m2Remaining > 0)
           print(m2Params[m2Params$paramCombined %in% m2Only,!names(m2Params)=="paramCombined"], row.names=FALSE)
-
+        
         if (nFiltered > 0) {
           cat("\n\n  ", nFiltered, " filtered from output (fixed and/or n.s.)\n\n", sep="")
           filtered <- setdiff(m2Only, m2Params$paramCombined)
           cat(paste(strwrap(paste(filtered, collapse=", "), width=80, indent=4, exdent=4), collapse="\n"), "\n\n")
         }
-
+        
       }
       else
         cat(" None\n\n")
     }
-
+    
   }
-
+  
   cat("\n==============\n")
 }

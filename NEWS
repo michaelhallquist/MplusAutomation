@@ -1,7 +1,8 @@
 Version 0.7-4
  - bugfix:      Extract standardized estimates from MONTE CARLO outputs
  - bugfix:      Extract R-SQUARE information from multilevel analyses (where header order is reversed)
- - bugfix:      Restore accidental section match for PSR subsection that led to TECH8 failure  
+ - bugfix:      Restore accidental section match for PSR subsection that led to TECH8 failure
+ - feature:     Support BAYES outputs in compareModels
 
 Version 0.7-3
  - feature:     Support use of plausible values for factors in BAYES output using SAVE=FSCORES(NIMP) approach
