@@ -758,6 +758,10 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   
   arglist$Estimator <- extractValue(pattern="^\\s*Estimator\\s*", analysisSummarySection, filename, type="str")
   arglist$Observations <- extractValue(pattern="^\\s*Number of observations\\s*", analysisSummarySection, filename, type="int")
+  # Fix for multigroup models, where Observations were not parsed correctly
+  if(is.na(arglist$Observations)){
+    arglist$Observations <- extractValue(pattern="^\\s*Total sample size\\s*", analysisSummarySection, filename, type="int")
+  }
   arglist$NGroups <- extractValue(pattern="^\\s*Number of groups\\s*", analysisSummarySection, filename, type="int")
   arglist$NDependentVars <- extractValue(pattern="^\\s*Number of dependent variables\\s*", analysisSummarySection, filename, type="int")
   arglist$NIndependentVars <- extractValue(pattern="^\\s*Number of independent variables\\s*", analysisSummarySection, filename, type="int")
