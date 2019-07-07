@@ -162,6 +162,7 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
       "Loglikelihood::H1 Value",
       "CFI/TLI::CFI",
       "CFI/TLI::TLI",
+      "Bayesian Posterior Predictive Checking using Chi-Square::Posterior Predictive P-Value",
       "Information Criteria( Including the Auxiliary Part)*::Akaike \\(AIC\\)",
       "Information Criteria( Including the Auxiliary Part)*::Bayesian \\(BIC\\)",
       "Information Criteria( Including the Auxiliary Part)*::Sample-Size Adjusted BIC \\(n\\* = \\(n \\+ 2\\) / 24\\)",
@@ -204,6 +205,11 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
       ),
       data.frame(
         varName=c("TLI_Mean", "TLI_SD", "TLI_NumComputations"),
+        regexPattern=c("Mean", "Std Dev", "Number of successful computations"),
+        varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
+      ),
+      data.frame(
+        varName=c("PostPred_PValue_Mean", "PostPred_PValue_SD", "PostPred_PValue_NumCom"),
         regexPattern=c("Mean", "Std Dev", "Number of successful computations"),
         varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
       ),
