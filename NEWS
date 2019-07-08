@@ -3,6 +3,7 @@ Version 0.7-4
  - bugfix:      Extract R-SQUARE information from multilevel analyses (where header order is reversed)
  - bugfix:      Restore accidental section match for PSR subsection that led to TECH8 failure
  - feature:     Support BAYES outputs in compareModels
+ - feature:     Add PPP values for Bayesian Monte Carlo outputs
 
 Version 0.7-3
  - feature:     Support use of plausible values for factors in BAYES output using SAVE=FSCORES(NIMP) approach
