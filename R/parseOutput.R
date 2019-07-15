@@ -1786,6 +1786,30 @@ extractTech12 <- function(outfiletext, filename) {
   return(tech12List)
 }
 
+
+
+#' Extract Technical 15 from Mplus
+#'
+#' The TECH15 option is used in conjunction with TYPE=MIXTURE to request conditional probabilities
+#' for the latent class variables.
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech15}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractTech15 <- function(outfiletext, filename) {
+  tech15Section <- getSection("^TECHNICAL 15 OUTPUT$", outfiletext)
+  tech15List <- list(conditional.probabilities = trimws(tech15Section[grepl("^\\s+?P\\(", tech15Section)]))
+  class(tech15List) <- c("list", "mplus.tech15")
+  
+  if (is.null(tech15Section)) return(tech15List) #no tech15 output
+  
+  return(tech15List)
+}
+
 #' Extract Factor Score Statistics
 #'
 #' Function for extracting matrices for factor scores
