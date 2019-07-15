@@ -157,11 +157,13 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
     modelFitSectionHeaders <- c(
       "", #section-nonspecific parameters
       "Chi-Square Test of Model Fit",
-#        "Chi-Square Test of Model Fit for the Baseline Model",
+#      "Chi-Square Test of Model Fit for the Baseline Model",
       "Loglikelihood::H0 Value",
       "Loglikelihood::H1 Value",
       "CFI/TLI::CFI",
       "CFI/TLI::TLI",
+      "Bayesian Posterior Predictive Checking using Chi-Square::Posterior Predictive P-Value",
+      "Bayesian Prior Posterior Predictive Checking using Chi-Square::Prior Posterior Predictive P-Value",
       "Information Criteria( Including the Auxiliary Part)*::Akaike \\(AIC\\)",
       "Information Criteria( Including the Auxiliary Part)*::Bayesian \\(BIC\\)",
       "Information Criteria( Including the Auxiliary Part)*::Sample-Size Adjusted BIC \\(n\\* = \\(n \\+ 2\\) / 24\\)",
@@ -204,6 +206,16 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
       ),
       data.frame(
         varName=c("TLI_Mean", "TLI_SD", "TLI_NumComputations"),
+        regexPattern=c("Mean", "Std Dev", "Number of successful computations"),
+        varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
+      ),
+      data.frame(
+        varName=c("PostPred_PValue_Mean", "PostPred_PValue_SD", "PostPred_PValue_NumComputations"),
+        regexPattern=c("Mean", "Std Dev", "Number of successful computations"),
+        varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
+      ),
+      data.frame(
+        varName=c("PriorPostPred_PValue_Mean", "PriorPostPred_PValue_SD", "PriorPostPred_PValue_NumComputations"),
         regexPattern=c("Mean", "Std Dev", "Number of successful computations"),
         varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
       ),
