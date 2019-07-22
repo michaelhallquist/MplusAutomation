@@ -1274,13 +1274,22 @@ extractSampstat <- function(outfiletext, filename) {
     #try output from TYPE=BASIC, which places these in a section of a different name
     sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
   }
+  if(all(sampstatSection == "")){
+    first_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][1]+1)
+    final_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][2]-1)
+    sampstatSection <- outfiletext[first_line:final_line]
+    
+  }
   sampstatList <- list()
-  
   sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
     sampstatSection, filename, allowMultiple=TRUE)
   
   matchlines <- attr(sampstatSubsections, "matchlines")
   
+  if(is.na(sampstatSubsections)){
+    sampstatSubsections <- list(sampstatSection)
+    matchlines <- attr(sampstatSubsections, "lines")
+  }
   if (length(sampstatSubsections) == 0)
     warning ("No sample statistics sections found within SAMPSTAT output.")
   else if (length(sampstatSubsections) > 1)
@@ -1319,9 +1328,10 @@ extractSampstat <- function(outfiletext, filename) {
     if (length(sampstatSubsections) > 1) {
       class(targetList) <- c("list", "mplus.sampstat")
       sampstatList[[groupNames[g]]] <- targetList
-    }
-    else
+    } else{
       sampstatList <- targetList
+    }
+    
   }
   
   ##Extract Univariate counts and proportions
