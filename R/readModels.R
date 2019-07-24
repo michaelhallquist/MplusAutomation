@@ -161,14 +161,21 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
       # including them as an attribute of the $summaries data.frame, so any 
       # downstream operations on $summaries don't break down due to different
       # column names / number of columns.
-      if(allFiles[[listID]]$summaries["NGroups"] > 1){
-        obs <- outfiletext[(grep("^\\s*Number of observations\\s*", outfiletext)+1):(grep("^\\s*Total sample size", outfiletext)-1)]
-        obs <- gsub("Group", "", obs)
-        obs <- unlist(strsplit(trimws(obs), "\\s+"))
-        if(length(obs) %% 2 == 0){
-          Observations <- as.numeric(obs[seq(2, to = length(obs), by = 2)])
-          names(Observations) <- obs[seq(1, to = length(obs), by = 2)]
-          attr(allFiles[[listID]]$summaries, "Observations") <- Observations
+      
+      if (!is.null(allFiles[[listID]][["summaries"]])) {
+        if (!is.na(allFiles[[listID]]$summaries[["NGroups"]]) & allFiles[[listID]]$summaries[["NGroups"]] > 1) {
+          obs <-
+            outfiletext[(grep("^\\s*Number of observations\\s*", outfiletext) + 1):(grep("^\\s*Total sample size", outfiletext) -
+                                                                                      1)]
+          obs <- gsub("Group", "", obs)
+          obs <- unlist(strsplit(trimws(obs), "\\s+"))
+          if (length(obs) %% 2 == 0) {
+            Observations <- as.numeric(obs[seq(2, to = length(obs), by = 2)])
+            names(Observations) <-
+              obs[seq(1, to = length(obs), by = 2)]
+            attr(allFiles[[listID]]$summaries, "Observations") <-
+              Observations
+          }
         }
       }
     }

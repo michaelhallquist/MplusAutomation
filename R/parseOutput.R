@@ -1274,11 +1274,10 @@ extractSampstat <- function(outfiletext, filename) {
     #try output from TYPE=BASIC, which places these in a section of a different name
     sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
   }
-  if(all(sampstatSection == "")){
+  if(!is.null(sampstatSection) & all(sampstatSection == "")){
     first_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][1]+1)
     final_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][2]-1)
     sampstatSection <- outfiletext[first_line:final_line]
-    
   }
   sampstatList <- list()
   sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
@@ -1867,7 +1866,6 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   #TODO: Implement class count extraction for multiple categorical latent variable models.
   #Example: UG7.21
   #Output is quite different because of latent class patterns, transition probabilities, etc.
-  
   #helper function for three-column class output
   getClassCols <- function(sectiontext) {
     #identify lines of the form class number, class count, class proportion: e.g., 1		136.38		.2728
@@ -1894,10 +1892,10 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   
   countlist <- list()
   
-  if(missing(summaries)||summaries$NCategoricalLatentVars==1||is.na(summaries$NCategoricalLatentVars)){
+  if(is.null(summaries)||missing(summaries)||summaries$NCategoricalLatentVars==1||is.na(summaries$NCategoricalLatentVars)){
     #Starting in Mplus v7.3 and above, formatting of the class counts appears to have changed...
     #Capture the alternatives here
-    if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
+    if (is.null(summaries)||missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
       modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$", outfiletext)
       ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$", outfiletext)
       mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
