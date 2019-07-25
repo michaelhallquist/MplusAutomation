@@ -1378,7 +1378,29 @@ extractSampstat <- function(outfiletext, filename) {
         sampstatList[["proportions.counts"]] <- targetList
     }
   }
-  
+
+# Extract univariate sample statistics ------------------------------------
+
+  univariate_sampstat <- getSection("^UNIVARIATE SAMPLE STATISTICS$", outfiletext)
+  if(!is.null(univariate_sampstat)){
+    stats <- lapply(univariate_sampstat[grepl("\\d$", univariate_sampstat)], function(x){strsplit(trimws(x), split = "\\s+")[[1]]})
+    if(length(stats) %% 2 == 0){
+      out <- cbind(do.call(rbind, stats[seq(1, length(stats), by = 2)]),
+            do.call(rbind, stats[seq(2, length(stats), by = 2)]))
+      #headers <- univariate_sampstat[grepl("\\/", univariate_sampstat)]
+      #headers <- gsub("%", " %", headers)
+      #headers <- lapply(trimws(headers), function(x){strsplit(x, "\\s{2,}")[[1]]})
+      #headers[[1]] <- c(gsub("\\/", "", headers[[1]][grepl("\\/", headers[[1]])]), gsub("\\/.*$", "", headers[[2]][grepl("\\/", headers[[2]])]))
+      #headers[[2]] <- gsub("^.+?\\/", "", headers[[2]])
+      #colnames(out) <- gsub(" %", "%", c(headers[[1]], headers[[2]]))
+      var_names <- out[, 1]
+      out <- gsub("%", "", out)
+      out <- apply(out[, -1], 2, as.numeric)
+      colnames(out) <- c("Mean", "Skewness", "Minimum", "%Min", "20%", "40%", "Median", "Sample Size", "Variance", "Kurtosis", "Maximum", "%Max", "60%", "80%")
+      rownames(out) <- var_names
+      sampstatList$univariate.sample.statistics <- out[, c("Sample Size", "Mean", "Variance", "Skewness", "Kurtosis", "Minimum", "Maximum", "%Min", "%Max", "20%", "40%", "Median", "60%", "80%")]
+    }
+  }
   class(sampstatList) <- c("list", "mplus.sampstat")
   if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
   
