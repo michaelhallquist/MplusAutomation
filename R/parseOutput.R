@@ -1274,13 +1274,21 @@ extractSampstat <- function(outfiletext, filename) {
     #try output from TYPE=BASIC, which places these in a section of a different name
     sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
   }
+  if(!is.null(sampstatSection) & all(sampstatSection == "")){
+    first_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][1]+1)
+    final_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][2]-1)
+    sampstatSection <- outfiletext[first_line:final_line]
+  }
   sampstatList <- list()
-  
   sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
     sampstatSection, filename, allowMultiple=TRUE)
   
   matchlines <- attr(sampstatSubsections, "matchlines")
   
+  if(is.na(sampstatSubsections)){
+    sampstatSubsections <- list(sampstatSection)
+    matchlines <- attr(sampstatSubsections, "lines")
+  }
   if (length(sampstatSubsections) == 0)
     warning ("No sample statistics sections found within SAMPSTAT output.")
   else if (length(sampstatSubsections) > 1)
@@ -1319,9 +1327,10 @@ extractSampstat <- function(outfiletext, filename) {
     if (length(sampstatSubsections) > 1) {
       class(targetList) <- c("list", "mplus.sampstat")
       sampstatList[[groupNames[g]]] <- targetList
-    }
-    else
+    } else{
       sampstatList <- targetList
+    }
+    
   }
   
   ##Extract Univariate counts and proportions
@@ -1369,7 +1378,29 @@ extractSampstat <- function(outfiletext, filename) {
         sampstatList[["proportions.counts"]] <- targetList
     }
   }
-  
+
+# Extract univariate sample statistics ------------------------------------
+
+  univariate_sampstat <- getSection("^UNIVARIATE SAMPLE STATISTICS$", outfiletext)
+  if(!is.null(univariate_sampstat)){
+    stats <- lapply(univariate_sampstat[grepl("\\d$", univariate_sampstat)], function(x){strsplit(trimws(x), split = "\\s+")[[1]]})
+    if(length(stats) %% 2 == 0){
+      out <- cbind(do.call(rbind, stats[seq(1, length(stats), by = 2)]),
+            do.call(rbind, stats[seq(2, length(stats), by = 2)]))
+      #headers <- univariate_sampstat[grepl("\\/", univariate_sampstat)]
+      #headers <- gsub("%", " %", headers)
+      #headers <- lapply(trimws(headers), function(x){strsplit(x, "\\s{2,}")[[1]]})
+      #headers[[1]] <- c(gsub("\\/", "", headers[[1]][grepl("\\/", headers[[1]])]), gsub("\\/.*$", "", headers[[2]][grepl("\\/", headers[[2]])]))
+      #headers[[2]] <- gsub("^.+?\\/", "", headers[[2]])
+      #colnames(out) <- gsub(" %", "%", c(headers[[1]], headers[[2]]))
+      var_names <- out[, 1]
+      out <- gsub("%", "", out)
+      out <- apply(out[, -1], 2, as.numeric)
+      colnames(out) <- c("Mean", "Skewness", "Minimum", "%Min", "20%", "40%", "Median", "Sample Size", "Variance", "Kurtosis", "Maximum", "%Max", "60%", "80%")
+      rownames(out) <- var_names
+      sampstatList$univariate.sample.statistics <- out[, c("Sample Size", "Mean", "Variance", "Skewness", "Kurtosis", "Minimum", "Maximum", "%Min", "%Max", "20%", "40%", "Median", "60%", "80%")]
+    }
+  }
   class(sampstatList) <- c("list", "mplus.sampstat")
   if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
   
@@ -1786,6 +1817,30 @@ extractTech12 <- function(outfiletext, filename) {
   return(tech12List)
 }
 
+
+
+#' Extract Technical 15 from Mplus
+#'
+#' The TECH15 option is used in conjunction with TYPE=MIXTURE to request conditional probabilities
+#' for the latent class variables.
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech15}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractTech15 <- function(outfiletext, filename) {
+  tech15Section <- getSection("^TECHNICAL 15 OUTPUT$", outfiletext)
+  tech15List <- list(conditional.probabilities = trimws(tech15Section[grepl("^\\s+?P\\(", tech15Section)]))
+  class(tech15List) <- c("list", "mplus.tech15")
+  
+  if (is.null(tech15Section)) return(tech15List) #no tech15 output
+  
+  return(tech15List)
+}
+
 #' Extract Factor Score Statistics
 #'
 #' Function for extracting matrices for factor scores
@@ -1833,7 +1888,6 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   #TODO: Implement class count extraction for multiple categorical latent variable models.
   #Example: UG7.21
   #Output is quite different because of latent class patterns, transition probabilities, etc.
-  
   #helper function for three-column class output
   getClassCols <- function(sectiontext) {
     #identify lines of the form class number, class count, class proportion: e.g., 1		136.38		.2728
@@ -1860,10 +1914,10 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   
   countlist <- list()
   
-  if(missing(summaries)||summaries$NCategoricalLatentVars==1||is.na(summaries$NCategoricalLatentVars)){
+  if(is.null(summaries)||missing(summaries)||summaries$NCategoricalLatentVars==1||is.na(summaries$NCategoricalLatentVars)){
     #Starting in Mplus v7.3 and above, formatting of the class counts appears to have changed...
     #Capture the alternatives here
-    if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
+    if (is.null(summaries)||missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
       modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$", outfiletext)
       ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$", outfiletext)
       mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)

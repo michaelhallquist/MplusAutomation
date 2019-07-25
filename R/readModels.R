@@ -77,7 +77,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
   allsections <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
       "invariance_testing", "parameters", "class_counts", "indirect", "mod_indices", "residuals",
       "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-      "tech9", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
+      "tech9", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "gh5")
 
   if (what[1L] == "all") {
     what <- allsections
@@ -161,14 +161,21 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
       # including them as an attribute of the $summaries data.frame, so any 
       # downstream operations on $summaries don't break down due to different
       # column names / number of columns.
-      if(allFiles[[listID]]$summaries["NGroups"] > 1){
-        obs <- outfiletext[(grep("^\\s*Number of observations\\s*", outfiletext)+1):(grep("^\\s*Total sample size", outfiletext)-1)]
-        obs <- gsub("Group", "", obs)
-        obs <- unlist(strsplit(trimws(obs), "\\s+"))
-        if(length(obs) %% 2 == 0){
-          Observations <- as.numeric(obs[seq(2, to = length(obs), by = 2)])
-          names(Observations) <- obs[seq(1, to = length(obs), by = 2)]
-          attr(allFiles[[listID]]$summaries, "Observations") <- Observations
+      
+      if (!is.null(allFiles[[listID]][["summaries"]])) {
+        if (!is.na(allFiles[[listID]]$summaries[["NGroups"]]) & allFiles[[listID]]$summaries[["NGroups"]] > 1) {
+          obs <-
+            outfiletext[(grep("^\\s*Number of observations\\s*", outfiletext) + 1):(grep("^\\s*Total sample size", outfiletext) -
+                                                                                      1)]
+          obs <- gsub("Group", "", obs)
+          obs <- unlist(strsplit(trimws(obs), "\\s+"))
+          if (length(obs) %% 2 == 0) {
+            Observations <- as.numeric(obs[seq(2, to = length(obs), by = 2)])
+            names(Observations) <-
+              obs[seq(1, to = length(obs), by = 2)]
+            attr(allFiles[[listID]]$summaries, "Observations") <-
+              Observations
+          }
         }
       }
     }
@@ -310,6 +317,13 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
           })
     }
 
+    #TECH15: CONDITIONAL PROBABILITIES FOR THE CLASS VARIABLES for TYPE=MIXTURE
+    if ("tech15" %in% what) {
+      allFiles[[listID]]$tech15 <- tryCatch(extractTech15(outfiletext, curfile), error=function(e) {
+        message("Error extracting TECH15 in output file: ", curfile); print(e)
+        return(list())
+      })
+    }
     if ("fac_score_stats" %in% what) {
       allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
     }
