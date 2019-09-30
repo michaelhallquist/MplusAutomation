@@ -1678,18 +1678,33 @@ extractTech8 <- function(outfiletext, filename) {
   psr <- data.frame(); class(psr) <- c("data.frame", "mplus.psr.data.frame"); tech8List[["psr"]] <- psr
   
   if (is.null(tech8Section)) return(tech8List) #no tech8 output
+
+  #psr extraction subfunction
+  extractPSR <- function(text) {
+    startline <- grep("ITERATION\\s+SCALE REDUCTION\\s+HIGHEST PSR", text, perl=TRUE)
+    if (length(startline) > 0L) {
+      firstBlank <- which(text == "")
+      firstBlank <- firstBlank[firstBlank > startline][1L] #first blank after starting line
+      toparse <- text[(startline+1):firstBlank]
+      psr <- data.frame(matrix(as.numeric(unlist(strsplit(trimSpace(toparse), "\\s+", perl=TRUE))), ncol=3, byrow=TRUE, dimnames=list(NULL, c("iteration", "psr", "param.highest.psr"))))
+      class(psr) <- c("data.frame", "mplus.psr.data.frame")
+      return(psr)
+    } else {
+      return(NULL)
+    }
+  }    
   
   bayesPSR <- getMultilineSection("TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION", tech8Section, filename, allowMultiple=FALSE)
   
   if (!is.na(bayesPSR[1L])) {
-    startline <- grep("ITERATION\\s+SCALE REDUCTION\\s+HIGHEST PSR", bayesPSR, perl=TRUE)
-    if (length(startline) > 0L) {
-      firstBlank <- which(bayesPSR == "")
-      firstBlank <- firstBlank[firstBlank > startline][1L] #first blank after starting line
-      toparse <- bayesPSR[(startline+1):firstBlank]
-      psr <- data.frame(matrix(as.numeric(unlist(strsplit(trimSpace(toparse), "\\s+", perl=TRUE))), ncol=3, byrow=TRUE, dimnames=list(NULL, c("iteration", "psr", "param.highest.psr"))))
-      class(psr) <- c("data.frame", "mplus.psr.data.frame")
-      tech8List[["psr"]] <- psr
+    #new outputs have "Iterations for model estimation" and "Iterations for computing PPPP"
+    if (any(grepl("Iterations for computing PPPP", bayesPSR))) {
+      pppp_text <- getSection("Iterations for computing PPPP", bayesPSR, headers = c("Iterations for computing PPPP", "Iterations for model estimation"))
+      model_text <- getSection("Iterations for model estimation", bayesPSR, headers = c("Iterations for computing PPPP", "Iterations for model estimation"))
+      tech8List[["psr"]] <- extractPSR(model_text)
+      tech8List[["psr_pppp"]] <- extractPSR(pppp_text)
+    } else {
+      tech8List[["psr"]] <- extractPSR(bayesPSR)
     }
   }
   

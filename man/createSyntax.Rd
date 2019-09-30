@@ -47,6 +47,7 @@ cat(createSyntax(update(example1,
   file=stdout(),
   fill=TRUE)
 rm(example1)
+closeAllConnections()
 }
 \seealso{
 \code{\link{prepareMplusData}}, \code{\link{mplusModeler}}

@@ -4,6 +4,7 @@ Version 0.7-4
  - bugfix:      Restore accidental section match for PSR subsection that led to TECH8 failure
  - feature:     Support BAYES outputs in compareModels
  - feature:     Add PPP values for Bayesian Monte Carlo outputs
+ - feature:     Support PSR PPPP section in tech8
 
 Version 0.7-3
  - feature:     Support use of plausible values for factors in BAYES output using SAVE=FSCORES(NIMP) approach
@@ -14,7 +15,7 @@ Version 0.7-3
  - feature:     prepareMplusData can now hash filenames for multiply imputed data. Hashing is done for individual files, so that as long as all files exist, the order can be re-arranged or imputations can be dropped and still no new data needs to be written (closes issue #53).
  - feature:     prepareMplusData now is more efficient at converting datasets to numeric and  utilizes fwrite to increase speed of writing out datasets (closes issue #54).
  - feature:     new utility function mplusAvailable() attempts to determine whether Mplus is installed and findable on the system.
- - bugfix:      Extract modification indices for thresholds 
+ - bugfix:      Extract modification indices for thresholds
  - bugfix:      Abstract invariance testing summary extraction from Caspar van Lissa into a separate function.
  - bugfix:      Fix pred/outcome swap in specific indirect sections
  - bugfix:      Handle spaces in SAVEDATA variable information section in Mplus v8+ (e.g., SAVE=FSCORES in BSEM).
@@ -24,7 +25,7 @@ Version 0.7-2
  - feature:     A host of new features for mixture modeling (thanks to Caspar van Lissa!). See createMixtures, mixtureSummaryTable, plotMixtures, plotGrowthMixtures, plotLTA.
  - feature:     Extract standardized indirect effects using readModels(). $indirect now has the same basic section structure as $parameters.
  - feature:     Extract indirect effect confidence intervals (unstandardized and standardized) using readModels(). Look at $indirect$ci.unstandardized etc.
- - notice:      getSavedata_Data is now deprecated. Use readModels(what="savedata")$savedata for comparable results 
+ - notice:      getSavedata_Data is now deprecated. Use readModels(what="savedata")$savedata for comparable results
  - bugfix:      small fix to structure of indirect summaries to avoid lists nested within data.frames.
 
 Version 0.7-1

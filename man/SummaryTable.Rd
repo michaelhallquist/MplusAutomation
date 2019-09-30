@@ -78,6 +78,7 @@ You must choose between \code{keepCols} and \code{dropCols} because it is not se
  unlink("mtcars.inp")
  unlink("mtcars.out")
  unlink("Mplus Run Models.log")
+ closeAllConnections()
 }
 }
 \seealso{
