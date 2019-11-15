@@ -69,7 +69,7 @@ extractModIndices_1chunk <- function(chunk, columnNames, filename) {
 #' @keywords internal
 extractModIndices_1file <- function(outfiletext, filename) {
 
-  if (missing(outfiletext) || is.na(outfiletext) || is.null(outfiletext)) stop("Missing mod indices to parse.\n  ", filename)
+  if (isEmpty(outfiletext)) stop("Missing mod indices to parse.\n  ", filename)
 
   MISection <- getSection("^MODEL MODIFICATION INDICES$", outfiletext)
 

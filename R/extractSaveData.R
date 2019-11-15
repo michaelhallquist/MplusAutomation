@@ -499,7 +499,7 @@ l_getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", file
   outfileDirectory <- splitFilePath(outfile)$directory
 
   #if file requested is missing, then abort data pull
-  if (is.null(fileName) || is.na(fileName) || is.null(varNames) || is.na(varNames)) return(NULL)
+  if (isEmpty(fileName) || isEmpty(varNames)) return(NULL)
 
   savedataSplit <- splitFilePath(fileName)
 
