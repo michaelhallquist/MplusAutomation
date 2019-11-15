@@ -1029,7 +1029,7 @@ mplusAvailable <- function(silent = TRUE) {
 #' @return Logical vector of lenght 1.
 #' @examples
 #' f1 <- function(x) {
-#'   if (hasArg(x)) return(mean(x, na.rm = TRUE))
+#'   if (!isEmpty(x)) return(mean(x, na.rm = TRUE))
 #'   return(NULL)
 #' }
 #' 
@@ -1038,5 +1038,5 @@ mplusAvailable <- function(silent = TRUE) {
 #' f1(x = NULL)         #> NULL
 #' f1(x = c(NA, 1:2))   #> 1.5
 isEmpty <- function(arg) {
-  missing(arg) || all(is.na(arg)) || is.null(arg)
+  missing(arg) || isTRUE(is.na(arg)) || is.null(arg)
 }
