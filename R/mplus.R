@@ -27,12 +27,12 @@
 #' example3$usevariables
 #' rm(example1, example2, example3)
 detectVariables <- function(object) {
-  if (!is.null(object$MONTECARLO)) {
+  if (isFALSE(is.null(object$MONTECARLO))) {
     stop("detectVariables() does not work with MONTECARLO models")
   }
 
-  if (!is.null(object$rdata) && !is.null(object$MODEL)) {
-    if (object$imputed) {
+  if (isFALSE(is.null(object$rdata)) && isFALSE(is.null(object$MODEL))) {
+    if (isTRUE(object$imputed)) {
       v <- colnames(object$rdata[[1]])
     } else {
       v <- colnames(object$rdata)
@@ -50,13 +50,13 @@ detectVariables <- function(object) {
       xalt <- unique(unlist(strsplit(x, split = "\\s")))
 
       y <- separateHyphens(x)
-      if (is.list(y)) {
+      if (isTRUE(is.list(y))) {
         lapply(y, function(z) {
-          if (all(sapply(z, function(var) any(grepl(var, x = v, ignore.case=TRUE))))) {
+          if (isTRUE(all(sapply(z, function(var) any(grepl(var, x = v, ignore.case=TRUE)))))) {
             i1 <- which(grepl(z[[1]], x = v, ignore.case = TRUE))
-            if (length(i1) > 1) {
+            if (isTRUE(length(i1) > 1)) {
               test <- tolower(z[[1]]) == tolower(v)
-              if (any(test)) {
+              if (isTRUE(any(test))) {
                 i1 <- which(test)[1]
               }
             }
@@ -67,7 +67,7 @@ detectVariables <- function(object) {
                 i2 <- which(test)[1]
               }
             }
-            if (length(i1) && length(i2)) {
+            if (isTRUE(length(i1) && length(i2))) {
               c(v[i1:i2], xalt)
             }
           } else  {
@@ -82,7 +82,7 @@ detectVariables <- function(object) {
     message("R variables selected automatically as any variable name that\noccurs in the MODEL, VARIABLE, or DEFINE section.")
     usevariables <- unique(v[sapply(v, function(var) any(grepl(var, x = tmpVARIABLE, ignore.case = TRUE)))])
 
-    if (!isTRUE(grepl("usevariables", object$VARIABLE, ignore.case=TRUE))) {
+    if (isFALSE(grepl("usevariables", object$VARIABLE, ignore.case=TRUE))) {
 
       message(sprintf("If any issues, suggest explicitly specifying USEVARIABLES.\nA starting point may be:\nUSEVARIABLES = %s;",
                       paste(usevariables, collapse = " ")))
@@ -247,16 +247,16 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
 
   class(object) <- c("mplusObject", "list")
 
-  if (!is.null(MONTECARLO) && missing(autov)) {
+  if (isFALSE(is.null(MONTECARLO)) && isTRUE(missing(autov))) {
     object$autov <- autov <- FALSE
   }
 
-  if (autov && is.null(usevariables) && !is.null(rdata) && !is.null(MODEL)) {
+  if (isTRUE(autov) && isTRUE(is.null(usevariables)) && isFALSE(is.null(rdata)) && isFALSE(is.null(MODEL))) {
       object$usevariables  <- detectVariables(object)
   }
 
   i <- duplicated(substr(object$usevariables, start = 1, stop = 8))
-  if (any(i)) {
+  if (isTRUE(any(i))) {
     message(sprintf("The following variables are not unique in the first 8 characters:\n %s",
       paste(object$usevariables[i], collapse = ", ")))
   }
@@ -298,7 +298,7 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
 update.mplusObject <- function(object, ...) {
 
   dots <- list(...)
-  if (!length(dots)) return(object)
+  if (isTRUE(length(dots) == 0)) return(object)
   sectionNames <- names(dots)
 
   mplusList <- c("TITLE", "DATA", "VARIABLE", "DEFINE",
@@ -310,11 +310,11 @@ update.mplusObject <- function(object, ...) {
   mplusIndex <- sectionNames[which(sectionNames %in% mplusList)]
   rIndex <- sectionNames[which(sectionNames %in% rList)]
 
-  if (length(mplusIndex)) {
+  if (isTRUE(length(mplusIndex) > 0)) {
     mplusSections <- lapply(mplusIndex, function(n) {
       tmp <- dots[[n]]
       tmp <- as.character(tmp[[2]])
-      if (any(grepl("^\\.$", tmp))) {
+      if (isTRUE(any(grepl("^\\.$", tmp)))) {
         old <- paste0(object[[n]], "\n")
       } else {
         old <- ""
@@ -326,11 +326,11 @@ update.mplusObject <- function(object, ...) {
     object[mplusIndex] <- mplusSections
   }
 
-  if (length(rIndex)) {
+  if (isTRUE(length(rIndex) > 0)) {
     object[rIndex] <- dots[rIndex]
   }
 
-  if (object$autov) {
+  if (isTRUE(object$autov)) {
     object$usevariables <- detectVariables(object)
   }
 
@@ -376,7 +376,7 @@ update.mplusObject <- function(object, ...) {
 #' rm(example1)
 #' closeAllConnections()
 createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE) {
-  stopifnot(inherits(object, "mplusObject"))
+  stopifnot(isTRUE(inherits(object, "mplusObject")))
 
   mplusList <- data.frame(
     Names = c("TITLE", "DATA", "VARIABLE", "DEFINE",
@@ -389,19 +389,19 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
               "OUTPUT", "SAVEDATA", "PLOT"),
     stringsAsFactors = FALSE)
 
-  simulation <- !is.null(object$MONTECARLO)
+  simulation <- isFALSE(is.null(object$MONTECARLO))
 
-  if (!simulation && !missing(filename)) {
+  if (isFALSE(simulation) && isFALSE(missing(filename))) {
     dFile <- paste0("FILE = \"", filename, "\";\n")
-    if (imputed) {
+    if (isTRUE(imputed)) {
       dFile <- paste0(dFile, "TYPE = IMPUTATION;\n")
     }
 
     object$DATA <- paste(dFile, object$DATA, collapse = "\n")
   }
 
-  if (!is.null(object$rdata) && !is.null(object$usevariables)) {
-    if (object$imputed) {
+  if (isFALSE(is.null(object$rdata)) && isFALSE(is.null(object$usevariables))) {
+    if (isTRUE(object$imputed)) {
       vNames <- createVarSyntax(object$rdata[[1]][, object$usevariables])
     } else {
       vNames <- createVarSyntax(object$rdata[, object$usevariables, drop = FALSE])
@@ -419,7 +419,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
   }))
   body <- paste(body, collapse = "\n")
 
-  if (check) {
+  if (isTRUE(check)) {
     body <- parseMplus(body, add = add)
   }
 
@@ -693,56 +693,56 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                          writeData = c("ifmissing", "always", "never"),
                          hashfilename = TRUE, ...) {
 
-  stopifnot((run %% 1) == 0 && length(run) == 1)
+  stopifnot(isTRUE((run %% 1) == 0 && length(run) == 1))
   oldSHELL <- Sys.getenv("SHELL")
   Sys.setenv(SHELL = Sys.getenv("COMSPEC"))
   on.exit(Sys.setenv(SHELL = oldSHELL))
 
   writeData <- match.arg(writeData)
 
-  simulation <- !is.null(object$MONTECARLO)
+  simulation <- isFALSE(is.null(object$MONTECARLO))
 
-  if (missing(modelout) & missing(dataout)) {
+  if (isTRUE(missing(modelout)) && isTRUE(missing(dataout))) {
     stop("You must specify either modelout or dataout")
-  } else if (missing(dataout) && !simulation) {
+  } else if (isTRUE(missing(dataout)) && isFALSE(simulation)) {
     dataout <- gsub("(^.*)(\\.inp$)", "\\1.dat", modelout)
-  } else if (missing(modelout)) {
+  } else if (isTRUE(missing(modelout))) {
     modelout <- gsub("(.*)(\\..+$)", "\\1.inp", dataout)
   }
 
-  if (simulation) {
-    if (run > 1) {
+  if (isTRUE(simulation)) {
+    if (isTRUE(run > 1)) {
       run <- 1L
       message("run cannot be greater than 1 when using montecarlo simulation, setting run = 1")
     }
     dataout <- dataout2 <- NULL
-  } else if (!simulation) {
-    if (object$imputed) {
+  } else if (isFALSE(simulation)) {
+    if (isTRUE(object$imputed)) {
       if (identical(writeData, "ifmissing")) {
         writeData <- "always"
         message("When imputed = TRUE, writeData cannot be 'ifmissing', setting to 'always'")
       }
-      if (hashfilename) {
+      if (isTRUE(hashfilename)) {
         hashfilename <- FALSE
         message("When imputed = TRUE, hashfilename cannot be TRUE, setting to FALSE")
       }
     }
-    if (run > 1) {
+    if (isTRUE(run > 1)) {
       if (identical(writeData, "ifmissing")) {
         writeData <- "always"
         message("When run > 1, writeData cannot be 'ifmissing', setting to 'always'")
       }
-      if (hashfilename) {
+      if (isTRUE(hashfilename)) {
         hashfilename <- FALSE
         message("When run > 1, hashfilename cannot be TRUE, setting to FALSE")
       }
     }
-    if (!hashfilename && identical(writeData, "ifmissing")) {
+    if (isFALSE(hashfilename) && identical(writeData, "ifmissing")) {
       writeData <- "always"
       message("When hashfilename = FALSE, writeData cannot be 'ifmissing', setting to 'always'")
     }
 
-    if (hashfilename) {
+    if (isTRUE(hashfilename)) {
       md5 <- .cleanHashData(
         df = object$rdata,
         keepCols = object$usevariables,
@@ -757,9 +757,9 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   }
 
   .run <- function(data, i, boot = TRUE, imputed = FALSE, ...) {
-    if (!simulation) {
-      if (imputed) {
-        if(boot) stop("Cannot use imputed data and bootstrap")
+    if (isFALSE(simulation)) {
+      if (isTRUE(imputed)) {
+        if (isTRUE(boot)) stop("Cannot use imputed data and bootstrap")
         prepareMplusData(df = data,
                          keepCols = object$usevariables,
                          filename = dataout,
@@ -781,8 +781,8 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
     runModels(target = modelout, Mplus_command = Mplus_command, logFile=NULL)
     outfile <- gsub("(^.*)(\\.inp$)", "\\1.out", modelout)
     results <- readModels(target = outfile)
-    if (!boot) {
-      if (!varwarnings) rmVarWarnings(outfile)
+    if (isFALSE(boot)) {
+      if (isFALSE(varwarnings)) rmVarWarnings(outfile)
       return(invisible(results))
     } else {
       with(results, unlist(lapply(
@@ -800,9 +800,9 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   writeLines(body, con = modelout, sep = "\n")
   message("Wrote model to: ", modelout)
 
-  if (!simulation) {
-    if (hashfilename && identical(writeData, "ifmissing")) {
-      if (tmp$fileexists) {
+  if (isFALSE(simulation)) {
+    if (isTRUE(hashfilename) && identical(writeData, "ifmissing")) {
+      if (isTRUE(tmp$fileexists)) {
         NULL
       } else {
         message("Wrote data to: ", dataout2)
@@ -815,18 +815,18 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   results <- bootres <- NULL
   finalres <- list(model = results, boot = bootres)
 
-  if (!simulation) {
-    if (run > 1 & !object$imputed) {
+  if (isFALSE(simulation)) {
+    if (isTRUE(run > 1) && isFALSE(object$imputed)) {
       bootres <- boot(object$rdata, .run, R = run, sim = "ordinary")
       finalres$boot <- bootres
       class(finalres) <- c("boot.mplus.model", "list")
     }
   }
 
-  if (run) {
+  if (isTRUE(run>0)) {
     results <- .run(data = object$rdata, boot = FALSE, imputed = object$imputed, ...)
     finalres$model <- results
-  } else if (!simulation) {
+  } else if (isFALSE(simulation)) {
     prepareMplusData(df = object$rdata,
                      keepCols = object$usevariables,
                      filename = dataout,
@@ -837,7 +837,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                      ...)
     return(object)
   }
-  if (run == 1) {
+  if (isTRUE(run == 1)) {
     object$results <- finalres$model
   } else {
     object$results <- finalres
@@ -999,7 +999,7 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
 
   indCov <- function(x, r, e, collapse) {
     n <- length(x)
-    if (collapse) {
+    if (isTRUE(collapse)) {
       res <- lapply(1:(n - 1), function(i) {
         paste0(x[i], " WITH ", paste(paste0(x, "@0")[(i+1):n], collapse = " "), ";")
       })
@@ -1030,7 +1030,7 @@ mplusRcov <- function(x, type = c("homogenous", "heterogenous", "cs", "toeplitz"
       ar = paste0(r, c("", seq_along(index)[-1]))
     )
 
-    if (collapse) {
+    if (isTRUE(collapse)) {
       res <- lapply(seq_along(index), function(i) {
         start <- paste(x[index[[i]][1, ]], collapse = " ")
         end <- paste(x[index[[i]][2, ]], collapse = " ")
@@ -1156,7 +1156,7 @@ paramExtract <- function(x, params = c("regression", "loading", "undirected", "e
   index <- sapply(keys, function(pattern) {
     grepl(paste0(".*", pattern, "$"), x[, "paramHeader"])
   })
-  if (is.matrix(index)) {
+  if (isTRUE(is.matrix(index))) {
     index <- rowSums(index) > 0
   } else {
     index <- sum(index) > 0
@@ -1164,7 +1164,7 @@ paramExtract <- function(x, params = c("regression", "loading", "undirected", "e
   index <- which(index)
 
   # catch cases where there is nothing to extract
-  if (!length(index)) return(NULL)
+  if (isFALSE(length(index) > 0)) return(NULL)
 
   output <- x[index, , drop=FALSE]
   attr(output, "type") <- params
@@ -1221,16 +1221,16 @@ parseMplus <- function(x, add = FALSE) {
   cc <- textConnection(x)
   init <- readLines(cc) #need to close the connection explicitly
   close(cc)
-  
+
   nospace <- gsub("[[:space:]]", "", init)
   empty <- nchar(nospace) < 1
   end <- grepl(".*[:;]$", nospace)
   semiok <- empty | end
-  if (!all(semiok)) {
+  if (isFALSE(all(semiok))) {
     index <- which(!semiok)
     message(paste(c("The following lines are not empty and do not end in a : or ;.",
             paste(index, init[index], sep = ": ")), collapse = "\n"))
-    if (add) {
+    if (isTRUE(add)) {
       init[index] <- paste0(init[index], ";")
       message("added semicolons ';' to all of the above lines")
     } else {
@@ -1240,7 +1240,7 @@ parseMplus <- function(x, add = FALSE) {
 
   notrailspace <- gsub("[[:space:]]+$", "", init)
   lengthok <- nchar(notrailspace) <= 90
-  if (!all(lengthok)) {
+  if (isFALSE(all(lengthok))) {
     index <- which(!lengthok)
     message(paste(c("The following lines are longer than 90 characters",
             paste(index, init[index], sep = ": ")), collapse = "\n"))
@@ -1248,7 +1248,7 @@ parseMplus <- function(x, add = FALSE) {
         "Consider breaking the line(s)")
   }
 
-  if(all(semiok & lengthok)) message("All ok")
+  if(isTRUE(all(semiok & lengthok))) message("All ok")
   return(paste(init, collapse = "\n"))
 }
 
@@ -1280,10 +1280,10 @@ rmVarWarnings <- function(file) {
 
   init <- grep("Variable name contains more than 8 characters.", dat)
 
-  stopifnot(all(
+  stopifnot(isTRUE(all(
     grepl("^\\*", dat[init - 1]),
     grepl("^[[:space:]]*Only", dat[init + 1]),
-    grepl("^[[:space:]]*Variable", dat[init + 2])))
+    grepl("^[[:space:]]*Variable", dat[init + 2]))))
 
   index <- sort(rep(init, each = 4) + (-1:2L))
 
@@ -1292,7 +1292,7 @@ rmVarWarnings <- function(file) {
 
   dat <- dat[-index[-1]]
 
-  if (file.access(file, mode = 2)==0) {
+  if (isTRUE(file.access(file, mode = 2)==0)) {
     unlink(file)
     writeLines(dat, con = file)
   } else {
@@ -1335,15 +1335,15 @@ rmVarWarnings <- function(file) {
 #' cd(base, pre, 2)
 #' }
 cd <- function(base, pre, num) {
-  stopifnot(is.character(base))
-  if (!missing(pre) & !missing(num)) {
+  stopifnot(isTRUE(is.character(base)))
+  if (isFALSE(missing(pre)) && isFALSE(missing(num))) {
     pre <- as.character(pre)
     num <- as.character(num)
     newdir <- file.path(base, paste0(pre, num))
   } else {
     newdir <- file.path(base)
   }
-  if (!file.exists(newdir)) {
+  if (isFALSE(file.exists(newdir))) {
     dir.create(newdir)
   }
   setwd(newdir)
