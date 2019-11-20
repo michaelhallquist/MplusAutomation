@@ -10,8 +10,8 @@
 #' @return A data frame (or matrix?)
 #' @keywords internal
 extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionName) {
-  if (missing(thisChunk) || is.na(thisChunk) || is.null(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
-  if (missing(columnNames) || is.na(columnNames) || is.null(columnNames)) stop("Missing column names for chunk.\n  ", filename)
+  if (isEmpty(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
+  if (isEmpty(columnNames)) stop("Missing column names for chunk.\n  ", filename)
   if (missing(sectionName)) { sectionName <- "" } #right now, just use sectionName for R-SQUARE section, where there are no subheaders per se
   
   #R-SQUARE sections are not divided into the usual subheader sections, and the order of top-level headers is not comparable to typical output.

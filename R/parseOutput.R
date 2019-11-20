@@ -1468,7 +1468,7 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
 extractFreeFile <- function(filename, outfile, make_symmetric=TRUE) {
   #Adapted from code graciously provided by Joe Glass.
   
-  if (is.null(filename) || is.na(filename)) return(NULL)
+  if (isEmpty(filename)) return(NULL)
   
   #TODO: make this filename building into a function (duped from read raw)
   outfileDirectory <- splitFilePath(outfile)$directory
