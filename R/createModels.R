@@ -1123,8 +1123,6 @@ processInit <- function(initsection) {
     return(element)
   })
 
-  #browser()
-
 
   #default output directory to the current directory
   if (is.null(arglist$outputDirectory)) {
@@ -1153,9 +1151,6 @@ processInit <- function(initsection) {
 createVarSyntax <- function(data) {
   #variable created for readability
   variableNames <- paste(gsub("\\.", "_", colnames(data)), collapse=" ")
-
-  #short names?
-  #shortNames <- paste(substr(names(df), 1, 8), collapse=" ")
 
   vnames <- paste(strwrap(paste(c("NAMES = ", variableNames, ";"), collapse = ""),
     width=85, exdent=5), collapse="\n")
@@ -1636,17 +1631,6 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
     return(invisible(""))
   }
 
-  ## if (imputed) {
-  ##   if (identical(writeData, "ifmissing")) {
-  ##     writeData <- "always"
-  ##     message("When imputed = TRUE, writeData cannot be 'ifmissing', setting to 'always'")
-  ##   }
-  ##   if (hashfilename) {
-  ##     hashfilename <- FALSE
-  ##     message("When imputed = TRUE, hashfilename cannot be TRUE, setting to FALSE")
-  ##   }
-  ## }
-
   if (!hashfilename && identical(writeData, "ifmissing")) {
     writeData <- "always"
     message("When hashfilename = FALSE, writeData cannot be 'ifmissing', setting to 'always'")
@@ -1683,9 +1667,10 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
 
   origfilename <- filename
 
-  impfilename <- gsub("\\.dat$", "_implist.dat", filename)
+  ## impfilename <- gsub("\\.dat$", "_implist.dat", filename)
+  impfilename <- filename
 
-  if (imputed && hashfilename) {
+  if (isTRUE(imputed) && isTRUE(hashfilename)) {
     tmp <- lapply(1:length(md5), function(i) {
       .hashifyFile(filename, md5[[i]],
                    useexisting = identical(writeData, "ifmissing"))
@@ -1693,7 +1678,7 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
     filename <- unlist(lapply(tmp, function(x) x$filename))
 
     allfilesexist <- all(vapply(tmp, function(x) x$fileexists, FUN.VALUE = NA))
-  } else if (imputed && !hashfilename) {
+  } else if (isTRUE(imputed) && isFALSE(hashfilename)) {
     filename.base <- gsub("\\.dat", "", filename)
     filename <- unlist(lapply(1:length(df), function(i) {
       paste0(filename.base, "_imp_", i, ".dat")
@@ -1702,17 +1687,17 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
     tmp <- .hashifyFile(filename, md5,
                         useexisting = identical(writeData, "ifmissing"))
     allfilesexist <- tmp$fileexists
-    if (hashfilename) {
+    if (isTRUE(hashfilename)) {
       filename <- tmp$filename
     }
   }
 
-  if (imputed) {
+  if (isTRUE(imputed)) {
     message("writing implist to ", impfilename)
     cat(filename, file = impfilename, sep = "\n")
   }
 
-  if (identical(writeData, "ifmissing") && allfilesexist) {
+  if (identical(writeData, "ifmissing") && isTRUE(allfilesexist)) {
     message(sprintf("File(s) with md5 hash matching data found, using \n%s",
                     paste(filename, collapse = "\n")))
   } else {
@@ -1722,7 +1707,7 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
 
   if (identical(writeData, "always")) {
     ## convert factors to numbers
-    if (imputed) {
+    if (isTRUE(imputed)) {
       df <- lapply(1:length(df), function(i) {
         if (i == 1) {
           .convertData(df[[i]])
@@ -1735,8 +1720,8 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
     }
 
     if (any(vapply(filename, file.exists, FUN.VALUE = NA))) {
-      if (overwrite) {
-        warning(paste("The file(s)\n", sQuote(
+      if (isTRUE(overwrite)) {
+        message(paste("The file(s)\n", sQuote(
                                        paste(vapply(filename[vapply(filename, file.exists, FUN.VALUE = NA)], basename,
                                                     FUN.VALUE = NA_character_), collapse = ";\n")),
                       "\ncurrently exist(s) and will be overwritten"))
@@ -1748,7 +1733,7 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
       }
     }
 
-    if (imputed) {
+    if (isTRUE(imputed)) {
       junk <- lapply(1:length(df), function(i) {
         fwrite(df[[i]], filename[[i]], sep = "\t",
                col.names = FALSE, row.names = FALSE, na=".")
@@ -1759,7 +1744,7 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
     }
   }
 
-  if (imputed) {
+  if (isTRUE(imputed)) {
     syntax <- c(
     "TITLE: Your title goes here\n",
     DATA <- paste0("DATA: FILE = \"", impfilename, "\";\n", "TYPE = IMPUTATION;\n"),
@@ -1783,13 +1768,13 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
   # either by user specification or automatically
   # by replacing extension of filename with .inp
   # then just use stdout
-  if (!is.character(inpfile)) {
+  if (isFALSE(is.character(inpfile))) {
     inpfile <- stdout()
   }
 
-  if (is.character(inpfile) && file.exists(inpfile)) {
+  if (isTRUE(is.character(inpfile)) && isTRUE(file.exists(inpfile))) {
     if (overwrite) {
-      warning(paste("The file", sQuote(basename(inpfile)),
+      message(paste("The file", sQuote(basename(inpfile)),
         "currently exists and will be overwritten"))
     } else {
       stop(paste("The file", sQuote(basename(inpfile)),
