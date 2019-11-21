@@ -778,6 +778,11 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
           identical(nextLine, c("Estimate", "S.E.", "Est./S.E.", "P-Value")))
         varNames <- c("param", "est", "se", "est_se", "pval")
       
+      #odds ratio parameters
+      else if (identical(thisLine, c("(Est.", "-", "1)", "Two-Tailed")) &&
+          identical(nextLine, c("Estimate", "S.E.", "/", "S.E.", "P-Value")))
+        varNames <- c("param", "est", "se", "est_se", "pval")
+      
       #Five-column output for R-Square that applies to most unstandardized and standardized sections in Mplus 5 and later
       else if ((identical(thisLine, c("Observed", "Two-Tailed")) || identical(thisLine, c("Latent", "Two-Tailed"))) &&
           identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value")))
