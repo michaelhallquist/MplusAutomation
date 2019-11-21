@@ -1380,22 +1380,27 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
     if (isTRUE(is.data.table(df))) {
       df <- as.data.frame(df)
     }
+
+    col_logical <- vapply(df, is.logical, FUN.VALUE = NA)
+    col_numeric <- vapply(df, is.numeric, FUN.VALUE = NA) | vapply(df, is.integer, FUN.VALUE = NA)
+    col_factor <- vapply(df, is.factor, FUN.VALUE = NA)
+
     col_class <- vapply(df, class, FUN.VALUE = NA_character_)
 
-    ok_cols <- col_class %in% c("numeric", "integer", "logical", "factor")
+    ok_cols <- col_logical | col_numeric | col_factor
 
     if (!all(ok_cols)) {
       stop(paste("\nCurrently only variables of class: ",
                  "numeric, integer, logical, or factor",
-                 "but found additional class types including: ",
+                 "are allowed but found additional class types including: ",
                  paste(unique(col_class[!ok_cols]), collapse = ", "),
                  "\nto see which variables are problematic, try:",
                  "str(yourdata)",
                  sep = "\n"))
     }
 
-    factor_cols <- which(col_class == "factor")
-    if (length(factor_cols)) {
+    factor_cols <- which(col_factor)
+    if (isTRUE(length(factor_cols) > 0)) {
       for (i in factor_cols) {
         message("Factor variable: ", names(df)[i], "; factor levels:",
                 paste(levels(df[,i]), collapse=", "), "\nconverted to numbers: ",
@@ -1404,8 +1409,8 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
       }
     }
 
-    logical_cols <- which(col_class == "logical")
-    if (length(logical_cols)) {
+    logical_cols <- which(col_logical)
+    if (isTRUE(length(logical_cols) > 0)) {
       for (i in logical_cols) {
         message("Logical variable: ", names(df)[i], " converted to integer")
         df[[i]] <- as.integer(df[[i]])
