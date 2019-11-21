@@ -1,4 +1,5 @@
 Version 0.7-4
+ - notice:      Removed getSavedata_Bparams in favor of readModels.
  - bugfix:      Extract standardized estimates from MONTE CARLO outputs
  - bugfix:      Extract R-SQUARE information from multilevel analyses (where header order is reversed)
  - bugfix:      Restore accidental section match for PSR subsection that led to TECH8 failure
