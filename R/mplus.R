@@ -251,7 +251,8 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
     object$autov <- autov <- FALSE
   }
 
-  if (isTRUE(autov) && isTRUE(is.null(usevariables)) && isFALSE(is.null(rdata)) && isFALSE(is.null(MODEL))) {
+  if (isTRUE(autov) && isTRUE(is.null(usevariables)) &&
+      isFALSE(is.null(rdata)) && isFALSE(is.null(MODEL))) {
       object$usevariables  <- detectVariables(object)
   }
 
@@ -402,7 +403,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 
   if (isFALSE(is.null(object$rdata)) && isFALSE(is.null(object$usevariables))) {
     if (isTRUE(object$imputed)) {
-      vNames <- createVarSyntax(object$rdata[[1]][, object$usevariables])
+      vNames <- createVarSyntax(object$rdata[[1]][, object$usevariables, drop = FALSE])
     } else {
       vNames <- createVarSyntax(object$rdata[, object$usevariables, drop = FALSE])
     }
@@ -681,6 +682,43 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #' # correlate merged factor scores against some other new variable
 #' with(dat, cor(F, qsec))
 #'
+#'
+#'
+#'
+#' # can write multiply imputed data too
+#' # here are three "imputed" datasets
+#' idat <- list(
+#'   data.frame(mpg = mtcars$mpg, hp = c(100, mtcars$hp[-1])),
+#'   data.frame(mpg = mtcars$mpg, hp = c(110, mtcars$hp[-1])),
+#'   data.frame(mpg = mtcars$mpg, hp = c(120, mtcars$hp[-1])))
+#'
+#' # if we turn on hashing in the filename the first time,
+#' # we can avoid overwriting notes the second time
+#' testobjimp <- mplusObject(MODEL = "[mpg];", rdata = idat, imputed = TRUE)
+#'
+#' testimp <- mplusModeler(
+#'   testobjimp,
+#'   modelout = "testimp.inp",
+#'   writeData = "ifmissing", hashfilename=FALSE)
+#'
+#' testimp <- mplusModeler(
+#'   testobjimp,
+#'   modelout = "testimp.inp",
+#'   writeData = "ifmissing", hashfilename=TRUE)
+#'
+#' testimp <- mplusModeler(
+#'   testobjimp,
+#'   modelout = "testimp.inp",
+#'   writeData = "ifmissing", hashfilename=TRUE,
+#'   run = TRUE)
+#'
+#' testobjimp2 <- mplusObject(MODEL = "[hp];", rdata = idat, imputed = TRUE)
+#' testimp2 <- mplusModeler(
+#'   testobjimp2,
+#'   modelout = "testimp2.inp",
+#'   writeData = "ifmissing", hashfilename=TRUE,
+#'   run = TRUE)
+#'
 #'  # remove files
 #'  unlink(resIDs$results$input$data$file)
 #'  unlink("testid.inp")
@@ -717,16 +755,16 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
     }
     dataout <- dataout2 <- NULL
   } else if (isFALSE(simulation)) {
-    if (isTRUE(object$imputed)) {
-      if (identical(writeData, "ifmissing")) {
-        writeData <- "always"
-        message("When imputed = TRUE, writeData cannot be 'ifmissing', setting to 'always'")
-      }
-      if (isTRUE(hashfilename)) {
-        hashfilename <- FALSE
-        message("When imputed = TRUE, hashfilename cannot be TRUE, setting to FALSE")
-      }
-    }
+    ## if (isTRUE(object$imputed)) {
+    ##   if (identical(writeData, "ifmissing")) {
+    ##     writeData <- "always"
+    ##     message("When imputed = TRUE, writeData cannot be 'ifmissing', setting to 'always'")
+    ##   }
+    ##   if (isTRUE(hashfilename)) {
+    ##     hashfilename <- FALSE
+    ##     message("When imputed = TRUE, hashfilename cannot be TRUE, setting to FALSE")
+    ##   }
+    ## }
     if (isTRUE(run > 1)) {
       if (identical(writeData, "ifmissing")) {
         writeData <- "always"
@@ -742,12 +780,11 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
       message("When hashfilename = FALSE, writeData cannot be 'ifmissing', setting to 'always'")
     }
 
-    if (isTRUE(hashfilename)) {
+    if (isTRUE(hashfilename) && isFALSE(object$imputed)) {
       md5 <- .cleanHashData(
         df = object$rdata,
         keepCols = object$usevariables,
         imputed = object$imputed)$md5
-
       tmp <- .hashifyFile(dataout, md5,
                           useexisting = identical(writeData, "ifmissing"))
       dataout2 <- tmp$filename
@@ -802,10 +839,12 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
 
   if (isFALSE(simulation)) {
     if (isTRUE(hashfilename) && identical(writeData, "ifmissing")) {
-      if (isTRUE(tmp$fileexists)) {
-        NULL
-      } else {
-        message("Wrote data to: ", dataout2)
+      if (isFALSE(object$imputed)) {
+        if (isTRUE(tmp$fileexists)) {
+          NULL
+        } else {
+          message("Wrote data to: ", dataout2)
+        }
       }
     } else {
       message("Wrote data to: ", dataout2)
