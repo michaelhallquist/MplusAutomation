@@ -498,6 +498,8 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'   data file name.  Defaults to \code{TRUE} in \code{mplusModeler}.  Note that this
 #'   behavior is a change from previous versions and differs from \code{prepareMplusData}
 #'   which maintains the old behavior by default of \code{FALSE}.
+#' @param killOnFail A logical whether or not to kill any mplus processes on failure.
+#'   Passed on to control behavior of \code{\link{runModels}}. Defaults to \code{TRUE}.
 #' @param \ldots additional arguments passed to the
 #'   \code{\link[MplusAutomation]{prepareMplusData}} function.
 #' @return An Mplus model object, with results.
@@ -732,7 +734,8 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 mplusModeler <- function(object, dataout, modelout, run = 0L,
                          check = FALSE, varwarnings = TRUE, Mplus_command="Mplus",
                          writeData = c("ifmissing", "always", "never"),
-                         hashfilename = TRUE, ...) {
+                         hashfilename = TRUE, killOnFail = TRUE,
+                         ...) {
 
   stopifnot(isTRUE((run %% 1) == 0 && length(run) == 1))
   oldSHELL <- Sys.getenv("SHELL")
@@ -818,7 +821,8 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
       }
     }
 
-    runModels(target = modelout, Mplus_command = Mplus_command, logFile=NULL)
+    runModels(target = modelout, Mplus_command = Mplus_command,
+              killOnFail = killOnFail, logFile=NULL)
     outfile <- gsub("(^.*)(\\.inp$)", "\\1.out", modelout)
     results <- readModels(target = outfile)
     if (isFALSE(boot)) {
