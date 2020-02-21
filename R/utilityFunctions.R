@@ -408,7 +408,8 @@ parse_into_sections <- function(outfiletext) {
       "Available post-processing tools:",
       "FACTOR SCORE INFORMATION \\(COMPLETE DATA\\)", "SUMMARY OF FACTOR SCORES", "PLOT INFORMATION", "SAVEDATA INFORMATION",
       "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
-      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
+      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN",
+      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):"
   )
   
   #form alternation pattern for regular expression (currently adds leading and trailing spaces permission to each header)
