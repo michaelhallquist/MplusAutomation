@@ -6,16 +6,13 @@
 .Rproj.user/
 # emacs files
 *~
-
 # README htmls in any folder
 README.html
-
 # The devtools zip is downloaded when the package is updating itself.  If it's not deleted, there's no reason to commit it to the repository.
 devtools.zip
-
 pkg_build
 local
 products
-
 #from mac
 .DS_Store
+MplusAutomation.Rproj
