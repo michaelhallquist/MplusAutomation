@@ -439,9 +439,10 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 #' @param outfiletext character vector of Mplus output file being processed
 #' @param filename name of Mplus output file being processed
 #' @param resultType (deprecated)
+#' @param efa indicates whether the output is from an EFA model (requires some additional processing)
 #' @return A list of parameters
 #' @keywords internal
-extractParameters_1file <- function(outfiletext, filename, resultType) {
+extractParameters_1file <- function(outfiletext, filename, resultType, efa = FALSE) {
 
   if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", outfiletext, ignore.case=TRUE, perl=TRUE)) > 0) {
     warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelParameters.\n  Skipping outfile: ", filename))
@@ -479,7 +480,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     
     if (!is.null(unstandardizedSection)) {
       allSections <- appendListElements(allSections, extractParameters_1section(filename, unstandardizedSection, "unstandardized"))
-    }      
+    }
   }
   
   standardizedSection <- getSection("^STANDARDIZED MODEL RESULTS$", outfiletext)
@@ -604,13 +605,20 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     if (!is.null(std.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, std.section, "ci.std.standardized"))
   }
 
+  if (efa) {
+    
+    allSections <- appendListElements(
+      allSections,
+      extractEFAparameters(outfiletext, filename)
+    )
+  }
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "r2", "ci.unstandardized",
       "irt.parameterization", "probability.scale",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",
       "std.standardized", "ci.std.standardized",
-      "wilevel.standardized")
+      "wilevel.standardized", "efa")
   listOrder <- listOrder[listOrder %in% names(allSections)]
 
 
