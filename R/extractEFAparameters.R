@@ -16,8 +16,8 @@ extractEFAparameters <- function(outfiletext, filename) {
   RESIDUALS_SE_HEADER	<- "^ *S.E. ESTIMATED RESIDUAL VARIANCES$"
   
   
-  FACTOR_HEADER_PREFFIX <- "Factor"
-  N_FACTORS_NAME_SUFFIX <- "factors"
+  FACTOR_HEADER_PREFFIX  <- "factor_"
+  N_FACTORS_NAME_PREFFIX <- "efa_factors_"
   
   
   POS_INT_NUMBER <- "[1-9][0-9]*"
@@ -57,7 +57,7 @@ extractEFAparameters <- function(outfiletext, filename) {
       
       for(i in seq_along(header_lines)) {
         
-        factor_headers <- paste(FACTOR_HEADER_PREFFIX, 1:n_factors[i])
+        factor_headers <- paste0(FACTOR_HEADER_PREFFIX, 1:n_factors[i])
         
         search_init <- header_lines[i]
         search_end  <- if (i != length(header_lines)) {
@@ -111,7 +111,7 @@ extractEFAparameters <- function(outfiletext, filename) {
             loading_est <- loading_sig <- matrix(
               ncol     = n_factors[i],
               nrow     = length(item_names),
-              dimnames = list(item_names, factor_headers)
+              dimnames = list(NULL, factor_headers)
             )
           }
           
@@ -119,7 +119,6 @@ extractEFAparameters <- function(outfiletext, filename) {
             loadings_lines,
             gregexpr(MPLUS_PARAM_AND_SIG, loadings_lines)
           )
-          
           loading_vals_num <- sapply(
             loading_vals,
             function(param) {
@@ -128,7 +127,7 @@ extractEFAparameters <- function(outfiletext, filename) {
             }
           )
           loading_est[, factor_indices] <- t(loading_vals_num)
-          
+
           loading_vals_sig <- t(
             sapply(
               loading_vals,
@@ -136,6 +135,16 @@ extractEFAparameters <- function(outfiletext, filename) {
           )
           loading_sig[, factor_indices] <- loading_vals_sig
         }
+        
+        loading_est <- data.frame(variable = item_names, loading_est)
+        loading_sig <- data.frame(variable = item_names, loading_sig)
+        
+        # Correlations:
+        corr_est <- corr_sig <- matrix(
+          ncol     = n_factors[i],
+          nrow     = n_factors[i],
+          dimnames = list(factor_headers, factor_headers)
+        )
         
         for(j in seq_along(corrs_header_lines)) {
           
@@ -159,15 +168,6 @@ extractEFAparameters <- function(outfiletext, filename) {
 
           corrs_lines <- lines_to_search[search_init:search_end]
           
-          if(j == 1) {
-            
-            corr_est <- corr_sig <- matrix(
-              ncol     = n_factors[i],
-              nrow     = n_factors[i],
-              dimnames = list(factor_headers, factor_headers)
-            )
-          }
-          
           corr_vals <- regmatches(
             corrs_lines,
             gregexpr(MPLUS_ONE_OR_PARAM_AND_SIG, corrs_lines)
@@ -185,10 +185,11 @@ extractEFAparameters <- function(outfiletext, filename) {
             function(param) grepl(MPLUS_SIGNIFICANT, param)
           )
           
+          init_factor <- min(factor_indices)
+          end_factor  <- max(factor_indices)
+          
           for(factor in seq_along(corr_vals_sig)) {
             
-            init_factor    <- min(factor_indices)
-            end_factor     <- max(factor_indices)
             current_factor <- init_factor + factor - 1
             
             corr_est[
@@ -203,6 +204,14 @@ extractEFAparameters <- function(outfiletext, filename) {
           }
         }
         
+        # The diagonal estimates of the correlation matrix should not have a
+        #   significance value at all
+        diag(corr_sig) <- NA
+
+        # Residuals:
+        residuals_est        <- numeric(length(item_names))
+        names(residuals_est) <- item_names
+        
         for(j in seq_along(residuals_header_lines)) {
           
           item_headers_line <- lines_to_search[residuals_header_lines[j] + 1]
@@ -213,12 +222,6 @@ extractEFAparameters <- function(outfiletext, filename) {
           
           residuals_line <- lines_to_search[residuals_header_lines[j] + 3]
           
-          if(j == 1) {
-            
-            residuals_est        <- numeric(length(item_names))
-            names(residuals_est) <- item_names
-          }
-          
           residuals_est[item_headers] <- as.numeric(
             regmatches(
               residuals_line,
@@ -226,6 +229,13 @@ extractEFAparameters <- function(outfiletext, filename) {
             )[[1]]
           )
         }
+        
+        # Loadings' estimation errors:
+        loadings_se <- matrix(
+          ncol     = n_factors[i],
+          nrow     = length(item_names),
+          dimnames = list(NULL, factor_headers)
+        )
         
         for(j in seq_along(loadings_se_header_lines)) {
           
@@ -249,15 +259,6 @@ extractEFAparameters <- function(outfiletext, filename) {
           
           loadings_lines <- lines_to_search[search_init:search_end]
           
-          if(j == 1) {
-            
-            loadings_se <- matrix(
-              ncol     = n_factors[i],
-              nrow     = length(item_names),
-              dimnames = list(item_names, factor_headers)
-            )
-          }
-          
           loadings_se_vals <- regmatches(
             loadings_lines,
             gregexpr(MPLUS_POS_PARAM, loadings_lines)
@@ -266,6 +267,15 @@ extractEFAparameters <- function(outfiletext, filename) {
             sapply(loadings_se_vals, as.numeric)
           )
         }
+        
+        loadings_se <- data.frame(variable = item_names, loadings_se)
+        
+        # Correlations' estimation errors:
+        corrs_se <- matrix(
+          ncol     = n_factors[i],
+          nrow     = n_factors[i],
+          dimnames = list(factor_headers, factor_headers)
+        )
         
         for(j in seq_along(corrs_se_header_lines)) {
           
@@ -289,32 +299,29 @@ extractEFAparameters <- function(outfiletext, filename) {
           
           corrs_lines <- lines_to_search[search_init:search_end]
           
-          if(j == 1) {
-            
-            corrs_se <- matrix(
-              ncol     = n_factors[i],
-              nrow     = n_factors[i],
-              dimnames = list(factor_headers, factor_headers)
-            )
-          }
-          
           corr_vals <- regmatches(
             corrs_lines,
             gregexpr(MPLUS_POS_PARAM, corrs_lines)
           )
           corr_vals_num <- lapply(corr_vals, as.numeric)
           
+          init_factor <- min(factor_indices)
+          end_factor  <- max(factor_indices)
+          
           for(factor in seq_along(corr_vals_num)) {
             
-            init_factor    <- min(factor_indices)
             current_factor <- init_factor + factor - 1
             
             corrs_se[
               current_factor,
-              init_factor:min(current_factor, max(factor_indices))
+              init_factor:min(current_factor, end_factor)
             ] <- corr_vals_num[[factor]]
           }
         }
+        
+        # Residuals' estimation errors:
+        residuals_se        <- numeric(length(item_names))
+        names(residuals_se) <- item_names
         
         for(j in seq_along(residuals_se_header_lines)) {
           
@@ -325,12 +332,6 @@ extractEFAparameters <- function(outfiletext, filename) {
           )[[1]]
           
           residuals_line <- lines_to_search[residuals_se_header_lines[j] + 3]
-          
-          if(j == 1) {
-            
-            residuals_se        <- numeric(length(item_names))
-            names(residuals_se) <- item_names
-          }
           
           residuals_se[item_headers] <- as.numeric(
             regmatches(
@@ -357,9 +358,9 @@ extractEFAparameters <- function(outfiletext, filename) {
         )
         
         complete_params <- append(complete_params, list(parameters))
-        names(complete_params)[length(complete_params)] <- paste(
-          n_factors[i],
-          N_FACTORS_NAME_SUFFIX
+        names(complete_params)[length(complete_params)] <- paste0(
+          N_FACTORS_NAME_PREFFIX,
+          n_factors[i]
         )
       }
       
