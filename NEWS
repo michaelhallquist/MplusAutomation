@@ -1,11 +1,15 @@
-Version 0.7-4
+
+
+Version 0.8
+ - feature:     Extract parameters from EFA outputs (thanks to Dani Mori!)
+ - feature:     Support BAYES outputs in compareModels
+ - feature:     Add PPP values for Bayesian Monte Carlo outputs
+ - feature:     Support PSR PPPP section in tech8
  - notice:      Removed getSavedata_Bparams in favor of readModels.
  - bugfix:      Extract standardized estimates from MONTE CARLO outputs
  - bugfix:      Extract R-SQUARE information from multilevel analyses (where header order is reversed)
  - bugfix:      Restore accidental section match for PSR subsection that led to TECH8 failure
- - feature:     Support BAYES outputs in compareModels
- - feature:     Add PPP values for Bayesian Monte Carlo outputs
- - feature:     Support PSR PPPP section in tech8
+ - bugfix:      Extract invariance tests when only two models are compared
 
 Version 0.7-3
  - feature:     Support use of plausible values for factors in BAYES output using SAVE=FSCORES(NIMP) approach

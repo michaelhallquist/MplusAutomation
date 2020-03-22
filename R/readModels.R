@@ -190,11 +190,11 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
         })
     }
 
-    is_efa <- grepl(
-      "EFA [1-9]\\d* [1-9]\\d*",
-      allFiles[[listID]]$input$analysis$type,
+    is_efa <- any(grepl(
+        "EXPLORATORY FACTOR ANALYSIS WITH \\d+ FACTOR(S):",
+        outfiletext,
       perl = TRUE
-    )
+    ))
     
     if (isTRUE("parameters" %in% what)) {
       #Model parameters (MODEL RESULTS section)

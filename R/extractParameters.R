@@ -605,6 +605,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     if (!is.null(std.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, std.section, "ci.std.standardized"))
   }
 
+  #extract EFA parameters if this is an EFA output
   if (efa) {
     
     allSections <- appendListElements(
@@ -612,6 +613,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
       extractEFAparameters(outfiletext, filename)
     )
   }
+
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "r2", "ci.unstandardized",
       "irt.parameterization", "probability.scale",

@@ -1285,7 +1285,7 @@ extractSampstat <- function(outfiletext, filename) {
   
   matchlines <- attr(sampstatSubsections, "matchlines")
   
-  if(is.na(sampstatSubsections)){
+  if(is.na(sampstatSubsections[1])){
     sampstatSubsections <- list(sampstatSection)
     matchlines <- attr(sampstatSubsections, "lines")
   }
@@ -2397,25 +2397,30 @@ extractDataSummary <- function(outfiletext, filename) {
 #Caspar van Lissa code for extract invariance testing section
 extractInvarianceTesting <- function(outfiletext, filename) {
   inv_test_firstline <- grep("^Invariance Testing$", outfiletext)
-  if (length(inv_test_firstline) == 0L) { return(list()) } #section not found
+  if (length(inv_test_firstline) == 0L) { return(list()) } #invariance section not found
   
   inv_test_endline <- grep("^MODEL FIT INFORMATION", outfiletext)
+  
   retlist <- list()
   inv_test_endline <- inv_test_endline[inv_test_endline > inv_test_firstline][1]
+  
   inv_test <- outfiletext[(inv_test_firstline+2):(inv_test_endline-3)]
+
+  #match words followed by four groups of numbers (Number of parameters, Chi-Square, Degrees of Freedom, P-Value)
   model_rows <- grep("^\\s+?\\w+(\\s{2,}[0-9.]+){4}$", inv_test, value = TRUE)
   model_rows <- t(sapply(model_rows, function(x){strsplit(trimws(x), "\\s+")[[1]]}, USE.NAMES = FALSE))
   model_rownames <- model_rows[, 1]
-  model_rows <- apply(model_rows[, -1], 2, as.numeric)
+  model_rows <- apply(model_rows[, -1, drop=FALSE], c(1,2), as.numeric)
   row.names(model_rows) <- model_rownames
   colnames(model_rows) <- c("Parameters", "Chi-Square", "DF", "Pvalue")
-  retlist$models <- model_rows[, -1]
+  retlist$models <- model_rows
+  
   
   test_rows <- grep("^\\s+?(\\w+\\s){3}(\\s{2,}[0-9.]+){3}$", inv_test, value = TRUE)
   test_rows <- t(sapply(test_rows, function(x){strsplit(trimws(x), "\\s{2,}")[[1]]}, USE.NAMES = FALSE))
-  model_rownames <- test_rows[, 1]
-  test_rows <- apply(test_rows[, -1], 2, as.numeric)
-  row.names(test_rows) <- model_rownames
+  test_rownames <- test_rows[, 1]
+  test_rows <- apply(test_rows[, -1, drop=FALSE], c(1,2), as.numeric)
+  row.names(test_rows) <- test_rownames
   colnames(test_rows) <- c("Chi-Square", "DF", "Pvalue")
   retlist$compared <- test_rows
   
