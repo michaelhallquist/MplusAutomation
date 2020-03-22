@@ -190,9 +190,15 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
         })
     }
 
+    is_efa <- grepl(
+      "EFA [1-9]\\d* [1-9]\\d*",
+      allFiles[[listID]]$input$analysis$type,
+      perl = TRUE
+    )
+    
     if (isTRUE("parameters" %in% what)) {
       #Model parameters (MODEL RESULTS section)
-      allFiles[[listID]]$parameters <- tryCatch(extractParameters_1file(outfiletext, curfile), error=function(e) {
+      allFiles[[listID]]$parameters <- tryCatch(extractParameters_1file(outfiletext, curfile, efa = is_efa), error=function(e) {
             message("Error extracting MODEL RESULTS in output file: ", curfile); print(e)
             return(list())
           })
