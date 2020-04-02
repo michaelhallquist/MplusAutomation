@@ -235,8 +235,13 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   } else if (sectionName == "irt.parameterization" || sectionName == "probability.scale") {
     #the IRT section follows from the MODEL RESULTS section, and column headers are not reprinted.
     #Same applies for RESULTS IN PROBABILITY SCALE section
-    #Thus, for now (first pass), assume a 5-column header -- kludge
-    columnNames <- c("param", "est", "se", "est_se", "pval")
+    
+    #Update 2020: at least for GPCM, v8.4 now reprints the header "Estimate", but does not provide se, est_se, or pval.
+    #Thus, first try to detect column names, but revert to default if this fails
+    columnNames <- suppressWarnings(detectColumnNames(filename, modelSection, "model_results"))
+    
+    #If we can't detect column names (because they're not reprinted from model results, assume a 5-column header -- heuristic
+    if (is.null(columnNames)) { columnNames <- c("param", "est", "se", "est_se", "pval") } #default if detection fails
   } else { sectionType <- "model_results" }
 
   if (!exists("columnNames")) { columnNames <- detectColumnNames(filename, modelSection, sectionType) }
@@ -582,7 +587,8 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     probParsed[[1]]$paramHeader <- NULL
     probParsed[[1]]$category <- sub("^.*\\.Cat\\.(\\d+)$", "\\1", probParsed[[1]]$param, perl=TRUE)
     probParsed[[1]]$param <- sub("^(.*)\\.Cat\\.\\d+$", "\\1", probParsed[[1]]$param, perl=TRUE)
-    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", "se", "est_se", "pval")] #reorder columns
+    unc_cols <- c("se", "est_se", "pval")[c("se", "est_se", "pval") %in% names(probParsed[[1]])] #only append se, est_se, pval cols in reorder if they're present
+    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", unc_cols)] #reorder columns
     allSections <- appendListElements(allSections, probParsed)
   }
 
