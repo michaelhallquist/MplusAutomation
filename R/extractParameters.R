@@ -587,8 +587,8 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     probParsed[[1]]$paramHeader <- NULL
     probParsed[[1]]$category <- sub("^.*\\.Cat\\.(\\d+)$", "\\1", probParsed[[1]]$param, perl=TRUE)
     probParsed[[1]]$param <- sub("^(.*)\\.Cat\\.\\d+$", "\\1", probParsed[[1]]$param, perl=TRUE)
-    unc_cols <- c("se", "est_se", "pval")[c("se", "est_se", "pval") %in% names(probParsed[[1]])] #only append se, est_se, pval cols in reorder if they're present
-    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", unc_cols)] #reorder columns
+    other_cols <- names(probParsed[[1]])[!names(probParsed[[1]]) %in% c("param", "category", "est")] #append any other columns after primary 3
+    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", other_cols)] #reorder columns
     allSections <- appendListElements(allSections, probParsed)
   }
 

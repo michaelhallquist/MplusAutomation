@@ -166,9 +166,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
 
       if (isFALSE(is.null(allFiles[[listID]][["summaries"]]))) {
         if (isFALSE(is.na(allFiles[[listID]]$summaries[["NGroups"]])) && isTRUE(allFiles[[listID]]$summaries[["NGroups"]] > 1)) {
-          obs <-
-            outfiletext[(grep("^\\s*Number of observations\\s*", outfiletext) + 1):(grep("^\\s*Total sample size", outfiletext) -
-                                                                                      1)]
+          obs <- outfiletext[(grep("^\\s*Number of observations\\s*", outfiletext) + 1):(grep("^\\s*Total sample size", outfiletext) - 1)]
           obs <- gsub("Group", "", obs)
           obs <- unlist(strsplit(trimws(obs), "\\s+"))
           if (isTRUE(length(obs) %% 2 == 0)) {
@@ -210,6 +208,11 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
             message("Error extracting latent class counts in output file: ", curfile); print(e)
             return(list())
           })
+      
+      #add total number of latent classes to summaries (in case of multiple categorical latent variables, this is just the product)
+      if (isTRUE("summaries" %in% what) && !is.null(allFiles[[listID]]$class_counts$modelEstimated)) {
+        allFiles[[listID]]$summaries$NLatentClasses <- nrow(allFiles[[listID]]$class_counts$modelEstimated)
+      }
     }
 
     if (isTRUE("indirect" %in% what)) {

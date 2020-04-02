@@ -3,12 +3,14 @@ Version 0.8
  - feature:     Support BAYES outputs in compareModels
  - feature:     Add PPP values for Bayesian Monte Carlo outputs
  - feature:     Support PSR PPPP section in tech8
+ - feature:     Add NLatentClasses to $summaries if available. Fixes Github Issue #103
  - notice:      Removed getSavedata_Bparams in favor of readModels.
  - bugfix:      Extract standardized estimates from MONTE CARLO outputs
  - bugfix:      Extract R-SQUARE information from multilevel analyses (where header order is reversed)
  - bugfix:      Restore accidental section match for PSR subsection that led to TECH8 failure
  - bugfix:      Extract invariance tests when only two models are compared
- - bugfix:      Extract RESULTS IN PROBABILITY SCALE for models that only provide an Estimate column (ex5.5 GPCM)
+ - bugfix:      Extract RESULTS IN PROBABILITY SCALE for models that only provide an Estimate column, like ex5.5 GPCM. Fixes Github Issue #118
+ - bugfix:      Preserve other columns like LatentClass for RESULTS IN PROBABILITY SCALE section. Fixes Github Issue #103
 
 Version 0.7-3
  - feature:     Support use of plausible values for factors in BAYES output using SAVE=FSCORES(NIMP) approach
