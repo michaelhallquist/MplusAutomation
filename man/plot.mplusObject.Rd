@@ -4,8 +4,7 @@
 \alias{plot.mplusObject}
 \title{Plot coefficients for an mplusObject}
 \usage{
-\method{plot}{mplusObject}(x, y, type = c("stdyx", "un", "std", "stdy"),
-  ...)
+\method{plot}{mplusObject}(x, y, type = c("stdyx", "un", "std", "stdy"), ...)
 }
 \arguments{
 \item{x}{An object of class mplusObject}

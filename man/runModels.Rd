@@ -4,10 +4,17 @@
 \alias{runModels}
 \title{Run Mplus Models}
 \usage{
-runModels(target = getwd(), recursive = FALSE, filefilter = NULL,
-  showOutput = FALSE, replaceOutfile = "always",
-  logFile = "Mplus Run Models.log", Mplus_command = "Mplus",
-  killOnFail = TRUE, local_tmpdir = FALSE)
+runModels(
+  target = getwd(),
+  recursive = FALSE,
+  filefilter = NULL,
+  showOutput = FALSE,
+  replaceOutfile = "always",
+  logFile = "Mplus Run Models.log",
+  Mplus_command = "Mplus",
+  killOnFail = TRUE,
+  local_tmpdir = FALSE
+)
 }
 \arguments{
 \item{target}{the directory containing Mplus input files (.inp) to run

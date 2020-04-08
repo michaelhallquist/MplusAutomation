@@ -4,8 +4,14 @@
 \alias{plotMixtureDensities}
 \title{Create density plots for mixture models}
 \usage{
-plotMixtureDensities(modelList, variables = NULL, bw = FALSE,
-  conditional = FALSE, alpha = 0.2, facet_labels = NULL)
+plotMixtureDensities(
+  modelList,
+  variables = NULL,
+  bw = FALSE,
+  conditional = FALSE,
+  alpha = 0.2,
+  facet_labels = NULL
+)
 }
 \arguments{
 \item{modelList}{A list object of Mplus models, or a single Mplus model}

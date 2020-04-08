@@ -4,10 +4,23 @@
 \alias{long2LGMM}
 \title{Long data to wide latent growth mixture model}
 \usage{
-long2LGMM(data, idvar, assessmentvar, dv, timevars, misstrick = TRUE,
-  k = 1L, title = "Trajectory Model", base = "trajmodel_",
-  run = FALSE, processors = 1L, starts = "500 100", newdata,
-  cov = c("un", "independent", "intercept", "zero"), model)
+long2LGMM(
+  data,
+  idvar,
+  assessmentvar,
+  dv,
+  timevars,
+  misstrick = TRUE,
+  k = 1L,
+  title = "Trajectory Model",
+  base = "trajmodel_",
+  run = FALSE,
+  processors = 1L,
+  starts = "500 100",
+  newdata,
+  cov = c("un", "independent", "intercept", "zero"),
+  model
+)
 }
 \arguments{
 \item{data}{A data frame in long format (i.e., multiple rows per ID).}

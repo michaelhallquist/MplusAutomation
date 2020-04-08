@@ -4,8 +4,7 @@
 \alias{l_getSavedata_Bparams}
 \title{Internal function to load the draws from the Bayesian model posterior distribution}
 \usage{
-l_getSavedata_Bparams(outfile, outfiletext, fileInfo,
-  discardBurnin = TRUE)
+l_getSavedata_Bparams(outfile, outfiletext, fileInfo, discardBurnin = TRUE)
 }
 \arguments{
 \item{outfile}{The Mplus output file to be used.}

@@ -4,7 +4,7 @@
 \alias{extractParameters_1file}
 \title{Extract Parameters for One File}
 \usage{
-extractParameters_1file(outfiletext, filename, resultType)
+extractParameters_1file(outfiletext, filename, resultType, efa = FALSE)
 }
 \arguments{
 \item{outfiletext}{character vector of Mplus output file being processed}
@@ -12,6 +12,8 @@ extractParameters_1file(outfiletext, filename, resultType)
 \item{filename}{name of Mplus output file being processed}
 
 \item{resultType}{(deprecated)}
+
+\item{efa}{indicates whether the output is from an EFA model (requires some additional processing)}
 }
 \value{
 A list of parameters

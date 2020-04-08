@@ -4,10 +4,19 @@
 \alias{mplusModeler}
 \title{Create, run, and read Mplus models.}
 \usage{
-mplusModeler(object, dataout, modelout, run = 0L, check = FALSE,
-  varwarnings = TRUE, Mplus_command = "Mplus",
-  writeData = c("ifmissing", "always", "never"), hashfilename = TRUE,
-  ...)
+mplusModeler(
+  object,
+  dataout,
+  modelout,
+  run = 0L,
+  check = FALSE,
+  varwarnings = TRUE,
+  Mplus_command = "Mplus",
+  writeData = c("ifmissing", "always", "never"),
+  hashfilename = TRUE,
+  killOnFail = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{An object of class mplusObject}
@@ -48,6 +57,9 @@ However, now the default is to write the data to disk only if it is missing
 data file name.  Defaults to \code{TRUE} in \code{mplusModeler}.  Note that this
 behavior is a change from previous versions and differs from \code{prepareMplusData}
 which maintains the old behavior by default of \code{FALSE}.}
+
+\item{killOnFail}{A logical whether or not to kill any mplus processes on failure.
+Passed on to control behavior of \code{\link{runModels}}. Defaults to \code{TRUE}.}
 
 \item{\ldots}{additional arguments passed to the
 \code{\link[MplusAutomation]{prepareMplusData}} function.}
@@ -272,6 +284,43 @@ dat <- merge(dat, resIDs$results$savedata[, c("F", "UID")],
 
 # correlate merged factor scores against some other new variable
 with(dat, cor(F, qsec))
+
+
+
+
+# can write multiply imputed data too
+# here are three "imputed" datasets
+idat <- list(
+  data.frame(mpg = mtcars$mpg, hp = c(100, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(110, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(120, mtcars$hp[-1])))
+
+# if we turn on hashing in the filename the first time,
+# we can avoid overwriting notes the second time
+testobjimp <- mplusObject(MODEL = "[mpg];", rdata = idat, imputed = TRUE)
+
+testimp <- mplusModeler(
+  testobjimp,
+  modelout = "testimp.inp",
+  writeData = "ifmissing", hashfilename=FALSE)
+
+testimp <- mplusModeler(
+  testobjimp,
+  modelout = "testimp.inp",
+  writeData = "ifmissing", hashfilename=TRUE)
+
+testimp <- mplusModeler(
+  testobjimp,
+  modelout = "testimp.inp",
+  writeData = "ifmissing", hashfilename=TRUE,
+  run = TRUE)
+
+testobjimp2 <- mplusObject(MODEL = "[hp];", rdata = idat, imputed = TRUE)
+testimp2 <- mplusModeler(
+  testobjimp2,
+  modelout = "testimp2.inp",
+  writeData = "ifmissing", hashfilename=TRUE,
+  run = TRUE)
 
  # remove files
  unlink(resIDs$results$input$data$file)

@@ -4,9 +4,18 @@
 \alias{SummaryTable}
 \title{Create a summary table of Mplus model statistics}
 \usage{
-SummaryTable(modelList, type = c("screen", "popup", "html", "latex",
-  "markdown", "none"), filename = "", keepCols, dropCols, sortBy,
-  caption = "", display = FALSE, ..., include.rownames = FALSE)
+SummaryTable(
+  modelList,
+  type = c("screen", "popup", "html", "latex", "markdown", "none"),
+  filename = "",
+  keepCols,
+  dropCols,
+  sortBy,
+  caption = "",
+  display = FALSE,
+  ...,
+  include.rownames = FALSE
+)
 }
 \arguments{
 \item{modelList}{A list of models returned from the \code{extractModelSummaries} function.}

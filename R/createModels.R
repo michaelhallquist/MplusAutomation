@@ -1401,18 +1401,22 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 
     factor_cols <- which(col_factor)
     if (isTRUE(length(factor_cols) > 0)) {
+      message("Factors will be converted to numbers in Mplus data file")
       for (i in factor_cols) {
-        message("Factor variable: ", names(df)[i], "; factor levels:",
-                paste(levels(df[,i]), collapse=", "), "\nconverted to numbers: ",
-                paste(seq_along(levels(df[,i])), collapse=", "), "\n")
-        df[[i]] <- as.numeric(df[[i]])
+        cat("\nFactor:", names(df)[i], "\n")
+        cat("Conversion:\n")
+        conv_df <- data.frame(level = levels(df[[i]]),
+                              number = seq_along(levels(df[[i]])))
+        print(conv_df, row.names=FALSE)
+        df[[i]] <- as.numeric(df[[i]]) #convert to number
       }
     }
 
     logical_cols <- which(col_logical)
     if (isTRUE(length(logical_cols) > 0)) {
+      message("Logical variables will be converted to numbers in Mplus data file")
       for (i in logical_cols) {
-        message("Logical variable: ", names(df)[i], " converted to integer")
+        message("Logical variable: ", names(df)[i], " converted to 0/1 integer")
         df[[i]] <- as.integer(df[[i]])
       }
     }

@@ -4,8 +4,14 @@
 \alias{getMultilineSection}
 \title{Extract a multiline section from Mplus output}
 \usage{
-getMultilineSection(header, outfiletext, filename, allowMultiple = FALSE,
-  allowSpace = TRUE, ignore.case = FALSE)
+getMultilineSection(
+  header,
+  outfiletext,
+  filename,
+  allowMultiple = FALSE,
+  allowSpace = TRUE,
+  ignore.case = FALSE
+)
 }
 \arguments{
 \item{header}{Header section}

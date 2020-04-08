@@ -5,9 +5,14 @@
 \alias{coef.mplusObject}
 \title{Return coefficients for an mplus.model object}
 \usage{
-\method{coef}{mplus.model}(object, type = c("un", "std", "stdy",
-  "stdyx"), params = c("regression", "loading", "undirected",
-  "expectation", "variability", "new"), ..., raw = FALSE)
+\method{coef}{mplus.model}(
+  object,
+  type = c("un", "std", "stdy", "stdyx"),
+  params = c("regression", "loading", "undirected", "expectation", "variability",
+    "new"),
+  ...,
+  raw = FALSE
+)
 
 \method{coef}{mplusObject}(object, ...)
 }
@@ -80,10 +85,11 @@ unlink("Mplus Run Models.log")
 \seealso{
 \code{\link{readModels}}
 
-Other Mplus-Formatting: \code{\link{confint.mplus.model}},
-  \code{\link{extract}},
-  \code{\link{print.MplusRstructure}},
-  \code{\link{summary.mplusObject}}
+Other Mplus-Formatting: 
+\code{\link{confint.mplus.model}()},
+\code{\link{extract}()},
+\code{\link{print.MplusRstructure}()},
+\code{\link{summary.mplusObject}()}
 }
 \author{
 Joshua F. Wiley <jwiley.psych@gmail.com>

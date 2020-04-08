@@ -3,7 +3,6 @@
 #' @param outfiletext character vector of Mplus output file being processed
 #' @param filename name of the output file
 #' @return list of parameters
-#' @examples
 extractEFAparameters <- function(outfiletext, filename) {
   
   EFA_HEADER          <-

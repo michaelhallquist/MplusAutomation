@@ -4,8 +4,17 @@
 \alias{.mplusMultinomial}
 \title{Internal Function for Multinomial Regression in Mplus}
 \usage{
-.mplusMultinomial(dv, iv, data, idvar = "", integration = 1000,
-  processors = 2, OR = TRUE, pairwise = TRUE, ...)
+.mplusMultinomial(
+  dv,
+  iv,
+  data,
+  idvar = "",
+  integration = 1000,
+  processors = 2,
+  OR = TRUE,
+  pairwise = TRUE,
+  ...
+)
 }
 \arguments{
 \item{dv}{A character string with the variable name for the

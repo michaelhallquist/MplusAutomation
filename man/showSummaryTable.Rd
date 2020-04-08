@@ -4,8 +4,7 @@
 \alias{showSummaryTable}
 \title{Display summary table of Mplus model statistics in separate window}
 \usage{
-showSummaryTable(modelList, keepCols, dropCols, sortBy,
-  font = "Courier 9")
+showSummaryTable(modelList, keepCols, dropCols, sortBy, font = "Courier 9")
 }
 \arguments{
 \item{modelList}{A list of models (as a \code{data.frame}) returned from the \code{extractModelSummaries} function.}

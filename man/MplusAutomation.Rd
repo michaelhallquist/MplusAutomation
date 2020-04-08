@@ -3,7 +3,6 @@
 \docType{package}
 \name{MplusAutomation}
 \alias{MplusAutomation}
-\alias{MplusAutomation-package}
 \title{Automating Mplus Model Estimation and Interpretation}
 \description{
 The MplusAutomation package leverages the flexibility of the
