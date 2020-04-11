@@ -374,6 +374,7 @@ parse_into_sections <- function(outfiletext) {
       "Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
       "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
       "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
+      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):",
       "MODEL RESULTS", "MODEL RESULTS FOR .*", "LOGISTIC REGRESSION ODDS RATIO RESULTS", "RESULTS IN PROBABILITY SCALE",
       "IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC METRIC",
       "IRT PARAMETERIZATION IN TWO-PARAMETER PROBIT METRIC",
@@ -402,14 +403,15 @@ parse_into_sections <- function(outfiletext) {
       "EQUALITY TESTS OF MEANS ACROSS CLASSES USING THE 3-STEP PROCEDURE",
       "EQUALITY TESTS OF MEANS/PROBABILITIES ACROSS CLASSES",
       "THE FOLLOWING DATA SET\\(S\\) DID NOT RESULT IN A COMPLETED REPLICATION:",
-      "RESIDUAL OUTPUT", "MODEL MODIFICATION INDICES", "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
+      "RESIDUAL OUTPUT", "RESIDUAL OUTPUT FOR THE.*", 
+      "MODEL MODIFICATION INDICES", "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
       "SUMMARIES OF PLAUSIBLE VALUES \\(N = NUMBER OF OBSERVATIONS * NUMBER OF IMPUTATIONS\\)",
       "SUMMARY OF PLAUSIBLE STANDARD DEVIATION \\(N = NUMBER OF OBSERVATIONS\\)",
       "Available post-processing tools:",
       "FACTOR SCORE INFORMATION \\(COMPLETE DATA\\)", "SUMMARY OF FACTOR SCORES", "PLOT INFORMATION", "SAVEDATA INFORMATION",
+      "CORRELATIONS AND MEAN SQUARE ERROR OF THE TRUE FACTOR VALUES AND THE FACTOR SCORES",
       "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
-      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN",
-      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):"
+      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
   )
   
   #form alternation pattern for regular expression (currently adds leading and trailing spaces permission to each header)

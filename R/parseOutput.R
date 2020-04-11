@@ -1088,33 +1088,21 @@ addHeaderToSavedata <- function(outfile, directory=getwd()) {
   
 }
 
-#' Extract residual matrices
-#'
-#' Function that extracts the residual matrices including standardized ones
-#'
-#' @param outfiletext the text of the output file
-#' @param filename The name of the file
-#' @return A list of the residual matrices
-#' @keywords internal
-#' @seealso \code{\link{matrixExtract}}
-#' @examples
-#' # make me!!!
-extractResiduals <- function(outfiletext, filename) {
-  residSection <- getSection("^RESIDUAL OUTPUT$", outfiletext)
-  if (is.null(residSection)) return(list()) #no residuals output
-  
+#' Helper subfunction to extract one section of OUTPUT: RESIDUALS
+#' Can be called multiple times, as in the case of invariance testing
+extractResiduals_1section <- function(residSection) {
   #allow for multiple groups
-  residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR [\\w\\d\\s\\.,_]+)*",
-    residSection, filename, allowMultiple=TRUE)
+  residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR .+)*",
+                                          residSection, filename, allowMultiple=TRUE)
   
   matchlines <- attr(residSubsections, "matchlines")
   
   if (length(residSubsections) == 0) {
     warning("No sections found within residuals output.")
     return(list())
+  } else if (length(residSubsections) > 1) {
+    groupNames <- make.names(gsub("^\\s*ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR (.+))*\\s*$", "\\2", residSection[matchlines], perl=TRUE))
   }
-  else if (length(residSubsections) > 1)
-    groupNames <- make.names(gsub("^\\s*ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", residSection[matchlines], perl=TRUE))
   
   residList <- list()
   #multiple groups possible
@@ -1129,19 +1117,61 @@ extractResiduals <- function(outfiletext, filename) {
     targetList[["covarianceResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
     targetList[["covarianceResid.std"]] <- matrixExtract(residSubsections[[g]], "Standardized Residuals \\(z-scores\\) for Covariances(/Correlations/Residual Corr)*", filename)
     targetList[["covarianceResid.norm"]] <- matrixExtract(residSubsections[[g]], "Normalized Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
+    targetList[["correlationEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Correlations", filename)
+    targetList[["correlationResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Correlations", filename)
     targetList[["slopeEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Slopes", filename)
     targetList[["slopeResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Slopes", filename)
     
     if (length(residSubsections) > 1) {
       class(targetList) <- c("list", "mplus.residuals")
       residList[[groupNames[g]]] <- targetList
-    }
-    else
+    } else{ 
       residList <- targetList
+    }
+    
   }
   
   class(residList) <- c("list", "mplus.residuals")
-  if (length(residSubsections) > 1) attr(residList, "group.names") <- groupNames
+  if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
+  
+  return(residList)
+}
+
+
+
+#' Extract residual matrices
+#'
+#' Function that extracts the residual matrices including standardized ones
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of the residual matrices
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractResiduals <- function(outfiletext, filename) {
+  #allow multiple model residual sections
+  #mimic extractParameters_1file
+  if (length(multisectionMatches <- grep("^\\s*RESIDUAL OUTPUT FOR .*", outfiletext, perl=TRUE, value=TRUE)) > 0L) {
+    sectionNames <- make.names(sub("^\\s*RESIDUAL OUTPUT FOR\\s+(?:THE)*\\s*([\\w\\.]+)", "\\1", multisectionMatches, perl=TRUE))
+    
+    residList <- list()
+    for (s in 1:length(sectionNames)) {
+      residSection <- getSection(multisectionMatches[s], outfiletext)
+      if (!is.null(residSection)) {
+        residList[[ sectionNames[s] ]] <- extractResiduals_1section(residSection) #[[1]]
+      }
+    }
+  } else {
+    residSection <- getSection("^RESIDUAL OUTPUT$", outfiletext)
+    if (is.null(residSection)) { return(list()) } #no residuals output
+    
+    residList <- extractResiduals_1section(residSection) #[[1]]
+  }
+  
+  # class(residList) <- c("list", "mplus.residuals")
+  # if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
   
   return(residList)
 }
