@@ -12,6 +12,7 @@ Version 0.8
  - bugfix:      Extract RESULTS IN PROBABILITY SCALE for models that only provide an Estimate column, like ex5.5 GPCM. Fixes Github Issue #118
  - bugfix:      Preserve other columns like LatentClass for RESULTS IN PROBABILITY SCALE section. Fixes Github Issue #103
  - bugfix:      Correct factor conversion notes in prepareMplusData. Provide conversion notes as a printed data frame for clarity.
+ - bugfix:      Extract specific indirect effects in Mplus v8.4+. Updated parser to handle new section headers. Fixes Github Issue #117
 
 Version 0.7-3
  - feature:     Support use of plausible values for factors in BAYES output using SAVE=FSCORES(NIMP) approach
