@@ -10,8 +10,8 @@
 #' @return A data frame (or matrix?)
 #' @keywords internal
 extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionName) {
-  if (missing(thisChunk) || is.na(thisChunk) || is.null(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
-  if (missing(columnNames) || is.na(columnNames) || is.null(columnNames)) stop("Missing column names for chunk.\n  ", filename)
+  if (isEmpty(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
+  if (isEmpty(columnNames)) stop("Missing column names for chunk.\n  ", filename)
   if (missing(sectionName)) { sectionName <- "" } #right now, just use sectionName for R-SQUARE section, where there are no subheaders per se
   
   #R-SQUARE sections are not divided into the usual subheader sections, and the order of top-level headers is not comparable to typical output.
@@ -235,8 +235,13 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   } else if (sectionName == "irt.parameterization" || sectionName == "probability.scale") {
     #the IRT section follows from the MODEL RESULTS section, and column headers are not reprinted.
     #Same applies for RESULTS IN PROBABILITY SCALE section
-    #Thus, for now (first pass), assume a 5-column header -- kludge
-    columnNames <- c("param", "est", "se", "est_se", "pval")
+    
+    #Update 2020: at least for GPCM, v8.4 now reprints the header "Estimate", but does not provide se, est_se, or pval.
+    #Thus, first try to detect column names, but revert to default if this fails
+    columnNames <- suppressWarnings(detectColumnNames(filename, modelSection, "model_results"))
+    
+    #If we can't detect column names (because they're not reprinted from model results, assume a 5-column header -- heuristic
+    if (is.null(columnNames)) { columnNames <- c("param", "est", "se", "est_se", "pval") } #default if detection fails
   } else { sectionType <- "model_results" }
 
   if (!exists("columnNames")) { columnNames <- detectColumnNames(filename, modelSection, sectionType) }
@@ -439,9 +444,10 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 #' @param outfiletext character vector of Mplus output file being processed
 #' @param filename name of Mplus output file being processed
 #' @param resultType (deprecated)
+#' @param efa indicates whether the output is from an EFA model (requires some additional processing)
 #' @return A list of parameters
 #' @keywords internal
-extractParameters_1file <- function(outfiletext, filename, resultType) {
+extractParameters_1file <- function(outfiletext, filename, resultType, efa = FALSE) {
 
   if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", outfiletext, ignore.case=TRUE, perl=TRUE)) > 0) {
     warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelParameters.\n  Skipping outfile: ", filename))
@@ -479,7 +485,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     
     if (!is.null(unstandardizedSection)) {
       allSections <- appendListElements(allSections, extractParameters_1section(filename, unstandardizedSection, "unstandardized"))
-    }      
+    }
   }
   
   standardizedSection <- getSection("^STANDARDIZED MODEL RESULTS$", outfiletext)
@@ -581,7 +587,8 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     probParsed[[1]]$paramHeader <- NULL
     probParsed[[1]]$category <- sub("^.*\\.Cat\\.(\\d+)$", "\\1", probParsed[[1]]$param, perl=TRUE)
     probParsed[[1]]$param <- sub("^(.*)\\.Cat\\.\\d+$", "\\1", probParsed[[1]]$param, perl=TRUE)
-    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", "se", "est_se", "pval")] #reorder columns
+    other_cols <- names(probParsed[[1]])[!names(probParsed[[1]]) %in% c("param", "category", "est")] #append any other columns after primary 3
+    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", other_cols)] #reorder columns
     allSections <- appendListElements(allSections, probParsed)
   }
 
@@ -604,13 +611,22 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     if (!is.null(std.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, std.section, "ci.std.standardized"))
   }
 
+  #extract EFA parameters if this is an EFA output
+  if (efa) {
+    
+    allSections <- appendListElements(
+      allSections,
+      extractEFAparameters(outfiletext, filename)
+    )
+  }
+
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "r2", "ci.unstandardized",
       "irt.parameterization", "probability.scale",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",
       "std.standardized", "ci.std.standardized",
-      "wilevel.standardized")
+      "wilevel.standardized", "efa")
   listOrder <- listOrder[listOrder %in% names(allSections)]
 
 

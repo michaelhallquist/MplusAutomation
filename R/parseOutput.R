@@ -1088,33 +1088,21 @@ addHeaderToSavedata <- function(outfile, directory=getwd()) {
   
 }
 
-#' Extract residual matrices
-#'
-#' Function that extracts the residual matrices including standardized ones
-#'
-#' @param outfiletext the text of the output file
-#' @param filename The name of the file
-#' @return A list of the residual matrices
-#' @keywords internal
-#' @seealso \code{\link{matrixExtract}}
-#' @examples
-#' # make me!!!
-extractResiduals <- function(outfiletext, filename) {
-  residSection <- getSection("^RESIDUAL OUTPUT$", outfiletext)
-  if (is.null(residSection)) return(list()) #no residuals output
-  
+#' Helper subfunction to extract one section of OUTPUT: RESIDUALS
+#' Can be called multiple times, as in the case of invariance testing
+extractResiduals_1section <- function(residSection) {
   #allow for multiple groups
-  residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR [\\w\\d\\s\\.,_]+)*",
-    residSection, filename, allowMultiple=TRUE)
+  residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR .+)*",
+                                          residSection, filename, allowMultiple=TRUE)
   
   matchlines <- attr(residSubsections, "matchlines")
   
   if (length(residSubsections) == 0) {
     warning("No sections found within residuals output.")
     return(list())
+  } else if (length(residSubsections) > 1) {
+    groupNames <- make.names(gsub("^\\s*ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR (.+))*\\s*$", "\\2", residSection[matchlines], perl=TRUE))
   }
-  else if (length(residSubsections) > 1)
-    groupNames <- make.names(gsub("^\\s*ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", residSection[matchlines], perl=TRUE))
   
   residList <- list()
   #multiple groups possible
@@ -1129,19 +1117,61 @@ extractResiduals <- function(outfiletext, filename) {
     targetList[["covarianceResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
     targetList[["covarianceResid.std"]] <- matrixExtract(residSubsections[[g]], "Standardized Residuals \\(z-scores\\) for Covariances(/Correlations/Residual Corr)*", filename)
     targetList[["covarianceResid.norm"]] <- matrixExtract(residSubsections[[g]], "Normalized Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
+    targetList[["correlationEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Correlations", filename)
+    targetList[["correlationResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Correlations", filename)
     targetList[["slopeEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Slopes", filename)
     targetList[["slopeResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Slopes", filename)
     
     if (length(residSubsections) > 1) {
       class(targetList) <- c("list", "mplus.residuals")
       residList[[groupNames[g]]] <- targetList
-    }
-    else
+    } else{ 
       residList <- targetList
+    }
+    
   }
   
   class(residList) <- c("list", "mplus.residuals")
-  if (length(residSubsections) > 1) attr(residList, "group.names") <- groupNames
+  if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
+  
+  return(residList)
+}
+
+
+
+#' Extract residual matrices
+#'
+#' Function that extracts the residual matrices including standardized ones
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of the residual matrices
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractResiduals <- function(outfiletext, filename) {
+  #allow multiple model residual sections
+  #mimic extractParameters_1file
+  if (length(multisectionMatches <- grep("^\\s*RESIDUAL OUTPUT FOR .*", outfiletext, perl=TRUE, value=TRUE)) > 0L) {
+    sectionNames <- make.names(sub("^\\s*RESIDUAL OUTPUT FOR\\s+(?:THE)*\\s*([\\w\\.]+)", "\\1", multisectionMatches, perl=TRUE))
+    
+    residList <- list()
+    for (s in 1:length(sectionNames)) {
+      residSection <- getSection(multisectionMatches[s], outfiletext)
+      if (!is.null(residSection)) {
+        residList[[ sectionNames[s] ]] <- extractResiduals_1section(residSection) #[[1]]
+      }
+    }
+  } else {
+    residSection <- getSection("^RESIDUAL OUTPUT$", outfiletext)
+    if (is.null(residSection)) { return(list()) } #no residuals output
+    
+    residList <- extractResiduals_1section(residSection) #[[1]]
+  }
+  
+  # class(residList) <- c("list", "mplus.residuals")
+  # if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
   
   return(residList)
 }
@@ -1285,7 +1315,7 @@ extractSampstat <- function(outfiletext, filename) {
   
   matchlines <- attr(sampstatSubsections, "matchlines")
   
-  if(is.na(sampstatSubsections)){
+  if(is.na(sampstatSubsections[1])){
     sampstatSubsections <- list(sampstatSection)
     matchlines <- attr(sampstatSubsections, "lines")
   }
@@ -1468,7 +1498,7 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
 extractFreeFile <- function(filename, outfile, make_symmetric=TRUE) {
   #Adapted from code graciously provided by Joe Glass.
   
-  if (is.null(filename) || is.na(filename)) return(NULL)
+  if (isEmpty(filename)) return(NULL)
   
   #TODO: make this filename building into a function (duped from read raw)
   outfileDirectory <- splitFilePath(outfile)$directory
@@ -1678,18 +1708,33 @@ extractTech8 <- function(outfiletext, filename) {
   psr <- data.frame(); class(psr) <- c("data.frame", "mplus.psr.data.frame"); tech8List[["psr"]] <- psr
   
   if (is.null(tech8Section)) return(tech8List) #no tech8 output
+
+  #psr extraction subfunction
+  extractPSR <- function(text) {
+    startline <- grep("ITERATION\\s+SCALE REDUCTION\\s+HIGHEST PSR", text, perl=TRUE)
+    if (length(startline) > 0L) {
+      firstBlank <- which(text == "")
+      firstBlank <- firstBlank[firstBlank > startline][1L] #first blank after starting line
+      toparse <- text[(startline+1):firstBlank]
+      psr <- data.frame(matrix(as.numeric(unlist(strsplit(trimSpace(toparse), "\\s+", perl=TRUE))), ncol=3, byrow=TRUE, dimnames=list(NULL, c("iteration", "psr", "param.highest.psr"))))
+      class(psr) <- c("data.frame", "mplus.psr.data.frame")
+      return(psr)
+    } else {
+      return(NULL)
+    }
+  }    
   
   bayesPSR <- getMultilineSection("TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION", tech8Section, filename, allowMultiple=FALSE)
   
   if (!is.na(bayesPSR[1L])) {
-    startline <- grep("ITERATION\\s+SCALE REDUCTION\\s+HIGHEST PSR", bayesPSR, perl=TRUE)
-    if (length(startline) > 0L) {
-      firstBlank <- which(bayesPSR == "")
-      firstBlank <- firstBlank[firstBlank > startline][1L] #first blank after starting line
-      toparse <- bayesPSR[(startline+1):firstBlank]
-      psr <- data.frame(matrix(as.numeric(unlist(strsplit(trimSpace(toparse), "\\s+", perl=TRUE))), ncol=3, byrow=TRUE, dimnames=list(NULL, c("iteration", "psr", "param.highest.psr"))))
-      class(psr) <- c("data.frame", "mplus.psr.data.frame")
-      tech8List[["psr"]] <- psr
+    #new outputs have "Iterations for model estimation" and "Iterations for computing PPPP"
+    if (any(grepl("Iterations for computing PPPP", bayesPSR))) {
+      pppp_text <- getSection("Iterations for computing PPPP", bayesPSR, headers = c("Iterations for computing PPPP", "Iterations for model estimation"))
+      model_text <- getSection("Iterations for model estimation", bayesPSR, headers = c("Iterations for computing PPPP", "Iterations for model estimation"))
+      tech8List[["psr"]] <- extractPSR(model_text)
+      tech8List[["psr_pppp"]] <- extractPSR(pppp_text)
+    } else {
+      tech8List[["psr"]] <- extractPSR(bayesPSR)
     }
   }
   
@@ -2382,25 +2427,30 @@ extractDataSummary <- function(outfiletext, filename) {
 #Caspar van Lissa code for extract invariance testing section
 extractInvarianceTesting <- function(outfiletext, filename) {
   inv_test_firstline <- grep("^Invariance Testing$", outfiletext)
-  if (length(inv_test_firstline) == 0L) { return(list()) } #section not found
+  if (length(inv_test_firstline) == 0L) { return(list()) } #invariance section not found
   
   inv_test_endline <- grep("^MODEL FIT INFORMATION", outfiletext)
+  
   retlist <- list()
   inv_test_endline <- inv_test_endline[inv_test_endline > inv_test_firstline][1]
+  
   inv_test <- outfiletext[(inv_test_firstline+2):(inv_test_endline-3)]
+
+  #match words followed by four groups of numbers (Number of parameters, Chi-Square, Degrees of Freedom, P-Value)
   model_rows <- grep("^\\s+?\\w+(\\s{2,}[0-9.]+){4}$", inv_test, value = TRUE)
   model_rows <- t(sapply(model_rows, function(x){strsplit(trimws(x), "\\s+")[[1]]}, USE.NAMES = FALSE))
   model_rownames <- model_rows[, 1]
-  model_rows <- apply(model_rows[, -1], 2, as.numeric)
+  model_rows <- apply(model_rows[, -1, drop=FALSE], c(1,2), as.numeric)
   row.names(model_rows) <- model_rownames
   colnames(model_rows) <- c("Parameters", "Chi-Square", "DF", "Pvalue")
-  retlist$models <- model_rows[, -1]
+  retlist$models <- model_rows
+  
   
   test_rows <- grep("^\\s+?(\\w+\\s){3}(\\s{2,}[0-9.]+){3}$", inv_test, value = TRUE)
   test_rows <- t(sapply(test_rows, function(x){strsplit(trimws(x), "\\s{2,}")[[1]]}, USE.NAMES = FALSE))
-  model_rownames <- test_rows[, 1]
-  test_rows <- apply(test_rows[, -1], 2, as.numeric)
-  row.names(test_rows) <- model_rownames
+  test_rownames <- test_rows[, 1]
+  test_rows <- apply(test_rows[, -1, drop=FALSE], c(1,2), as.numeric)
+  row.names(test_rows) <- test_rownames
   colnames(test_rows) <- c("Chi-Square", "DF", "Pvalue")
   retlist$compared <- test_rows
   

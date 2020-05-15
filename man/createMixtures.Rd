@@ -4,11 +4,17 @@
 \alias{createMixtures}
 \title{Create syntax for a batch of mixture models}
 \usage{
-createMixtures(classes = 1L, filename_stem = NULL,
-  model_overall = NULL, model_class_specific = NULL, rdata = NULL,
-  usevariables = NULL, OUTPUT = "TECH11 TECH14;",
+createMixtures(
+  classes = 1L,
+  filename_stem = NULL,
+  model_overall = NULL,
+  model_class_specific = NULL,
+  rdata = NULL,
+  usevariables = NULL,
+  OUTPUT = "TECH11 TECH14;",
   SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;",
-  ...)
+  ...
+)
 }
 \arguments{
 \item{classes}{A vector of integers, indicating which class solutions to

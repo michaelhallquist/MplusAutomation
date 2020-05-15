@@ -33,6 +33,9 @@ str(update(example1, MODEL = ~ "wt ON hp;"))
 str(update(example1, MODEL = ~ . + "wt ON hp;"))
 str(update(example1, ANALYSIS = x, MODEL = ~ . + "wt ON hp;"))
 
+## check that use variables can be updated & over ridden
+str(update(example1, usevariables = c("mpg", "hp", "cyl")))
+
 # test to make sure . in Mplus code does not cause problems
 str(update(example1, ANALYSIS = x, MODEL = ~ . + "wt ON hp*.5;"))
 rm(example1, x)

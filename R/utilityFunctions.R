@@ -374,6 +374,7 @@ parse_into_sections <- function(outfiletext) {
       "Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
       "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
       "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
+      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):",
       "MODEL RESULTS", "MODEL RESULTS FOR .*", "LOGISTIC REGRESSION ODDS RATIO RESULTS", "RESULTS IN PROBABILITY SCALE",
       "IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC METRIC",
       "IRT PARAMETERIZATION IN TWO-PARAMETER PROBIT METRIC",
@@ -402,11 +403,13 @@ parse_into_sections <- function(outfiletext) {
       "EQUALITY TESTS OF MEANS ACROSS CLASSES USING THE 3-STEP PROCEDURE",
       "EQUALITY TESTS OF MEANS/PROBABILITIES ACROSS CLASSES",
       "THE FOLLOWING DATA SET\\(S\\) DID NOT RESULT IN A COMPLETED REPLICATION:",
-      "RESIDUAL OUTPUT", "MODEL MODIFICATION INDICES", "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
+      "RESIDUAL OUTPUT", "RESIDUAL OUTPUT FOR THE.*", 
+      "MODEL MODIFICATION INDICES", "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
       "SUMMARIES OF PLAUSIBLE VALUES \\(N = NUMBER OF OBSERVATIONS * NUMBER OF IMPUTATIONS\\)",
       "SUMMARY OF PLAUSIBLE STANDARD DEVIATION \\(N = NUMBER OF OBSERVATIONS\\)",
       "Available post-processing tools:",
       "FACTOR SCORE INFORMATION \\(COMPLETE DATA\\)", "SUMMARY OF FACTOR SCORES", "PLOT INFORMATION", "SAVEDATA INFORMATION",
+      "CORRELATIONS AND MEAN SQUARE ERROR OF THE TRUE FACTOR VALUES AND THE FACTOR SCORES",
       "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
       "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
   )
@@ -778,6 +781,11 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
           identical(nextLine, c("Estimate", "S.E.", "Est./S.E.", "P-Value")))
         varNames <- c("param", "est", "se", "est_se", "pval")
       
+      #odds ratio parameters
+      else if (identical(thisLine, c("(Est.", "-", "1)", "Two-Tailed")) &&
+          identical(nextLine, c("Estimate", "S.E.", "/", "S.E.", "P-Value")))
+        varNames <- c("param", "est", "se", "est_se", "pval")
+      
       #Five-column output for R-Square that applies to most unstandardized and standardized sections in Mplus 5 and later
       else if ((identical(thisLine, c("Observed", "Two-Tailed")) || identical(thisLine, c("Latent", "Two-Tailed"))) &&
           identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value")))
@@ -1018,4 +1026,25 @@ mplusAvailable <- function(silent = TRUE) {
   
   if (!silent) message(c("Mplus is installed and can be found", note)[res+1])
   return(invisible(res))
+}
+
+#' Check whether a useable function argument was provided
+#'
+#' This is a simple utility to check whether a function argument is missing,
+#' \code{NULL}, or has only \code{NA}s.
+#'
+#' @param arg A function argument
+#' @return Logical vector of lenght 1.
+#' @examples
+#' f1 <- function(x) {
+#'   if (!isEmpty(x)) return(mean(x, na.rm = TRUE))
+#'   return(NULL)
+#' }
+#' 
+#' f1()                 #> NULL
+#' f1(x = NA)           #> NULL
+#' f1(x = NULL)         #> NULL
+#' f1(x = c(NA, 1:2))   #> 1.5
+isEmpty <- function(arg) {
+  missing(arg) || isTRUE(is.na(arg)) || is.null(arg)
 }

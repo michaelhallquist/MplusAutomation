@@ -4,9 +4,18 @@
 \alias{prepareMplusData}
 \title{Create tab-delimited file and Mplus input syntax from R data.frame}
 \usage{
-prepareMplusData(df, filename, keepCols, dropCols, inpfile = FALSE,
-  interactive = TRUE, overwrite = TRUE, imputed = FALSE,
-  writeData = c("always", "ifmissing", "never"), hashfilename = FALSE)
+prepareMplusData(
+  df,
+  filename,
+  keepCols,
+  dropCols,
+  inpfile = FALSE,
+  interactive = TRUE,
+  overwrite = TRUE,
+  imputed = FALSE,
+  writeData = c("always", "ifmissing", "never"),
+  hashfilename = FALSE
+)
 }
 \arguments{
 \item{df}{The R data.frame to be prepared for Mplus}

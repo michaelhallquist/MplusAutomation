@@ -5,9 +5,15 @@
 \alias{confint.mplusObject}
 \title{Return confidence intervals for an mplus.model object}
 \usage{
-\method{confint}{mplus.model}(object, parm, level = 0.95,
-  type = c("un", "std", "stdy", "stdyx"), params = c("regression",
-  "loading", "undirected", "expectation", "variability", "new"), ...)
+\method{confint}{mplus.model}(
+  object,
+  parm,
+  level = 0.95,
+  type = c("un", "std", "stdy", "stdyx"),
+  params = c("regression", "loading", "undirected", "expectation", "variability",
+    "new"),
+  ...
+)
 
 \method{confint}{mplusObject}(object, ...)
 }
@@ -80,10 +86,11 @@ unlink("Mplus Run Models.log")
 \seealso{
 \code{\link{readModels}}
 
-Other Mplus-Formatting: \code{\link{coef.mplus.model}},
-  \code{\link{extract}},
-  \code{\link{print.MplusRstructure}},
-  \code{\link{summary.mplusObject}}
+Other Mplus-Formatting: 
+\code{\link{coef.mplus.model}()},
+\code{\link{extract}()},
+\code{\link{print.MplusRstructure}()},
+\code{\link{summary.mplusObject}()}
 }
 \author{
 Joshua F. Wiley <jwiley.psych@gmail.com>

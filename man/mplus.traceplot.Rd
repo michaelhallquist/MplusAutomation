@@ -4,8 +4,7 @@
 \alias{mplus.traceplot}
 \title{Plot the samples for each MCMC chain as a function of iterations}
 \usage{
-mplus.traceplot(mplus.model, rows = 4, cols = 4,
-  parameters_only = TRUE)
+mplus.traceplot(mplus.model, rows = 4, cols = 4, parameters_only = TRUE)
 }
 \arguments{
 \item{mplus.model}{An Mplus model extracted by the \code{readModels} function.}

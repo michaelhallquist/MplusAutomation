@@ -386,21 +386,24 @@ getSavedata_Data <- function(outfile) {
 #' @keywords interface
 getSavedata_Bparams <- function(outfile, discardBurnin=TRUE) {
   #exposed wrapper for l_getSavedata_readRawFile, which pulls bayesian parameters into a data.frame
-  if(!file.exists(outfile)) {
-    stop("Cannot locate outfile: ", outfile)
-  }
-
-  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
-
-  if (length(outfiletext) == 0) {
-    warning("Empty outfile")
-    return(NULL)
-  }
-
-  fileInfo <- l_getSavedata_Fileinfo(outfile, outfiletext)
-
-  if (is.null(fileInfo) || all(is.na(fileInfo))) return(NULL)
-  else return(l_getSavedata_Bparams(outfile, outfiletext, fileInfo, discardBurnin=discardBurnin))
+  
+  message("getSavedata_Bparams has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"bparameters\")$bparameters to replicate the old functionality.")
+  
+#  if(!file.exists(outfile)) {
+#    stop("Cannot locate outfile: ", outfile)
+#  }
+#
+#  outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
+#
+#  if (length(outfiletext) == 0) {
+#    warning("Empty outfile")
+#    return(NULL)
+#  }
+#
+#  fileInfo <- l_getSavedata_Fileinfo(outfile, outfiletext)
+#
+#  if (is.null(fileInfo) || all(is.na(fileInfo))) return(NULL)
+#  else return(l_getSavedata_Bparams(outfile, outfiletext, fileInfo, discardBurnin=discardBurnin))
 
 }
 
@@ -499,7 +502,7 @@ l_getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", file
   outfileDirectory <- splitFilePath(outfile)$directory
 
   #if file requested is missing, then abort data pull
-  if (is.null(fileName) || is.na(fileName) || is.null(varNames) || is.na(varNames)) return(NULL)
+  if (isEmpty(fileName) || isEmpty(varNames)) return(NULL)
 
   savedataSplit <- splitFilePath(fileName)
 

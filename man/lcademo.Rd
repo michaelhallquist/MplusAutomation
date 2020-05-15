@@ -4,7 +4,8 @@
 \name{lcademo}
 \alias{lcademo}
 \title{Latent Class Analysis Demonstration}
-\format{A list containing 11 elements.
+\format{
+A list containing 11 elements.
 \describe{
   \item{Data}{2 Class LCA data simulated using Mplus}
   \item{CFA}{Mplus output file for CFA}
@@ -17,7 +18,8 @@
   \item{LCA3GH5}{GH5 file for 3 class LCA}
   \item{LCA4GH5}{GH5 file for 4 class LCA}
   \item{LCA5GH5}{GH5 file for 5 class LCA}
-}}
+}
+}
 \usage{
 lcademo
 }

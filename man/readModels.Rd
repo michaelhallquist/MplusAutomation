@@ -4,8 +4,13 @@
 \alias{readModels}
 \title{Read Parameters, Summary Statistics, and Savedata from Mplus Output}
 \usage{
-readModels(target = getwd(), recursive = FALSE, filefilter,
-  what = "all", quiet = FALSE)
+readModels(
+  target = getwd(),
+  recursive = FALSE,
+  filefilter,
+  what = "all",
+  quiet = FALSE
+)
 }
 \arguments{
 \item{target}{the directory containing Mplus output files (.out) to

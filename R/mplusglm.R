@@ -94,7 +94,7 @@
   allldv <- levels(data[[dv]])
   tabres <- vector("list", length = length(allldv))
 
-  for (i in if(pairwise) seq_along(allldv) else length(allldv)) {
+  for (i in if(isTRUE(pairwise)) seq_along(allldv) else length(allldv)) {
     data[[dv]] <- factor(data[[dv]], levels = c(allldv[-i], allldv[i]))
     ldv <- levels(data[[dv]])
     res <- mplusModeler(object = update(m, rdata = data),
@@ -209,14 +209,14 @@ mplusGLM <- function(formula, data, idvar = "", ...) {
   for (i in seq_along(iv)) {
     v <- iv[i]
     x <- mf[[v]]
-    if (is.factor(x) | is.character(x)) {
+    if (isTRUE(is.factor(x)) | isTRUE(is.character(x))) {
       x2 <- factor(x)
       lx <- levels(x2)
       x2 <- as.character(x2)
       j <- 1
-      while (any(uniquerecords[j] %in% unique(x2))) {
+      while (isTRUE(any(uniquerecords[j] %in% unique(x2)))) {
         j <- j + 1
-        if (j > 3) stop("Cannot find a unique value for missing data")
+        if (isTRUE(j > 3)) stop("Cannot find a unique value for missing data")
       }
       x2[is.na(x2)] <- uniquerecords[j]
       x2 <- factor(x2, levels = c(uniquerecords[j], lx))
@@ -260,7 +260,7 @@ mplusGLM <- function(formula, data, idvar = "", ...) {
     ll0 <- res0$Model$results$summaries$LL
     cf <- (k0 * cf0 - k1 * cf1) / (k0 - k1)
 
-    if (cf > 0) {
+    if (isTRUE(cf > 0)) {
       ChiSqDiff <- -2 * (ll0 - ll1) / cf
       pDiff <- pchisq(ChiSqDiff, dfDiff, lower.tail = FALSE)
     } else {

@@ -44,11 +44,13 @@ MODEL:
 cat(parseMplus(test), file=stdout(), fill=TRUE)
 # add missing semicolons and return
 cat(parseMplus(test, TRUE), file=stdout(), fill=TRUE)
+# line that is too long for Mplus
 test <- "
 MODEL:
   mpg cyl disp hp drat wt qsec vs am gear PWITH cyl disp hp drat wt qsec vs am gear carb;
 "
 cat(parseMplus(test), file=stdout())
+closeAllConnections()
 }
 \seealso{
 \code{\link{mplusModeler}}

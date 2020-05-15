@@ -4,8 +4,14 @@
 \alias{LatexSummaryTable}
 \title{Display summary table of Mplus model statistics in separate window}
 \usage{
-LatexSummaryTable(modelList, keepCols, dropCols, sortBy, label = NULL,
-  caption = NULL)
+LatexSummaryTable(
+  modelList,
+  keepCols,
+  dropCols,
+  sortBy,
+  label = NULL,
+  caption = NULL
+)
 }
 \arguments{
 \item{modelList}{A list of models (as a \code{data.frame}) returned from the \code{extractModelSummaries} function.}

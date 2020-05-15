@@ -4,8 +4,15 @@
 \alias{l_getSavedata_readRawFile}
 \title{Internal function to load the draws from the Bayesian model posterior distribution}
 \usage{
-l_getSavedata_readRawFile(outfile, outfiletext, format = "fixed",
-  fileName, varNames, varWidths, input)
+l_getSavedata_readRawFile(
+  outfile,
+  outfiletext,
+  format = "fixed",
+  fileName,
+  varNames,
+  varWidths,
+  input
+)
 }
 \arguments{
 \item{outfile}{The Mplus output file to be used.}
