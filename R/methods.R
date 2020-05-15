@@ -95,6 +95,29 @@ summary.mplusObject <- function(object, verbose=FALSE, ...) {
   }
 }
 
+#' @method print mplusObject
+#' @export
+print.mplusObject <- function(x, ...){
+  print(summary(x))
+}
+
+#' @method print mplus.model
+#' @export
+print.mplus.model <- print.mplusObject
+
+#' @method summary mplus.model
+#' @export
+summary.mplus.model <- function(object, verbose = FALSE, ...)
+{
+  stopifnot(!is.null(object$summaries))
+  Args <- as.list(match.call()[-1])
+  Args$object <- list(results = object)
+  class(Args$object) <- c("mplusObject", class(Args$object))
+  do.call(summary, Args)
+}
+
+
+
 #' Return coefficients for an mplus.model object
 #'
 #' This is a method for returning the coefficients of an mplus.model object.
