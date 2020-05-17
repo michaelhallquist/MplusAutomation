@@ -75,18 +75,45 @@ summary.mplusObject <- function(object, verbose=FALSE, ...) {
     cat(sprintf("Number of obs: %s, number of (free) parameters: %s \n\n",
       x$Observations, x$Parameters))
 
-    cat(with(x, sprintf("Model: Chi2(df = %s) = %s, p = %s \n",
-      ChiSqM_DF, ChiSqM_Value, ChiSqM_PValue)))
-
+    if(!is.null(x[["ChiSqM_DF"]])){
+      cat(with(x, sprintf("Model: Chi2(df = %s) = %s, p = %s \n",
+                          ChiSqM_DF, ChiSqM_Value, ChiSqM_PValue)))
+    }
+    if(!is.null(x[["ChiSqBaseline_DF"]])){
     cat(with(x, sprintf("Baseline model: Chi2(df = %s) = %s, p = %s \n\n",
       ChiSqBaseline_DF, ChiSqBaseline_Value, ChiSqBaseline_PValue)))
-
+    }
+    if(is.null(x[["CFI"]])){
+      x[["CFI"]] <- NA
+    }
+    if(is.null(x[["TLI"]])){
+      x[["TLI"]] <- NA
+    }
+    if(is.null(x[["SRMR"]])){
+      x[["SRMR"]] <- NA
+    }
     cat("Fit Indices: \n\n")
     cat(with(x, sprintf("CFI = %s, TLI = %s, SRMR = %s \n", CFI, TLI, SRMR)))
-
+    if(is.null(x[["RMSEA_Estimate"]])){
+      x[["RMSEA_Estimate"]] <- NA
+    }
+    if(is.null(x[["RMSEA_90CI_LB"]])){
+      x[["RMSEA_90CI_LB"]] <- NA
+    }
+    if(is.null(x[["RMSEA_90CI_UB"]])){
+      x[["RMSEA_90CI_UB"]] <- NA
+    }
+    if(is.null(x[["RMSEA_pLT05"]])){
+      x[["RMSEA_pLT05"]] <- NA
+    }
     cat(with(x, sprintf("RMSEA = %s, 90%% CI [%s, %s], p < .05 = %s \n",
       RMSEA_Estimate, RMSEA_90CI_LB, RMSEA_90CI_UB, RMSEA_pLT05)))
-
+    if(is.null(x[["AIC"]])){
+      x[["AIC"]] <- NA
+    }
+    if(is.null(x[["BIC"]])){
+      x[["BIC"]] <- NA
+    }
     cat(with(x, sprintf("AIC = %s, BIC = %s \n", AIC, BIC)))
   } else if(isTRUE(verbose)) {
     invisible(lapply(names(x), function(n) {
