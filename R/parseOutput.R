@@ -1409,12 +1409,12 @@ extractSampstat <- function(outfiletext, filename) {
     }
   }
 
-# Extract univariate sample statistics ------------------------------------
+  # Extract univariate sample statistics ------------------------------------
 
   univariate_sampstat <- getSection("^UNIVARIATE SAMPLE STATISTICS$", outfiletext)
   if(!is.null(univariate_sampstat)){
     stats <- lapply(univariate_sampstat[grepl("\\d$", univariate_sampstat)], function(x){strsplit(trimws(x), split = "\\s+")[[1]]})
-    if(length(stats) %% 2 == 0){
+    if(length(stats) %% 2 == 0) {
       out <- cbind(do.call(rbind, stats[seq(1, length(stats), by = 2)]),
             do.call(rbind, stats[seq(2, length(stats), by = 2)]))
       #headers <- univariate_sampstat[grepl("\\/", univariate_sampstat)]
@@ -1425,10 +1425,12 @@ extractSampstat <- function(outfiletext, filename) {
       #colnames(out) <- gsub(" %", "%", c(headers[[1]], headers[[2]]))
       var_names <- out[, 1]
       out <- gsub("%", "", out)
-      out <- apply(out[, -1], 2, as.numeric)
+      out <- out[,-1, drop=FALSE] #drop variable column
+      dd <- dim(out)
+      out <- matrix(apply(out, 2, as.numeric), nrow=dd[1], ncol=dd[2]) #need to preserve dimensions in the single-row case
       colnames(out) <- c("Mean", "Skewness", "Minimum", "%Min", "20%", "40%", "Median", "Sample Size", "Variance", "Kurtosis", "Maximum", "%Max", "60%", "80%")
       rownames(out) <- var_names
-      sampstatList$univariate.sample.statistics <- out[, c("Sample Size", "Mean", "Variance", "Skewness", "Kurtosis", "Minimum", "Maximum", "%Min", "%Max", "20%", "40%", "Median", "60%", "80%")]
+      sampstatList$univariate.sample.statistics <- out[, c("Sample Size", "Mean", "Variance", "Skewness", "Kurtosis", "Minimum", "Maximum", "%Min", "%Max", "20%", "40%", "Median", "60%", "80%"), drop=FALSE]
     }
   }
   class(sampstatList) <- c("list", "mplus.sampstat")
@@ -1929,10 +1931,6 @@ extractFacScoreStats <- function(outfiletext, filename) {
 #' # make me!!!
 extractClassCounts <- function(outfiletext, filename, summaries) {
   
-  ####
-  #TODO: Implement class count extraction for multiple categorical latent variable models.
-  #Example: UG7.21
-  #Output is quite different because of latent class patterns, transition probabilities, etc.
   #helper function for three-column class output
   getClassCols <- function(sectiontext) {
     #identify lines of the form class number, class count, class proportion: e.g., 1		136.38		.2728
@@ -1959,10 +1957,10 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   
   countlist <- list()
   
-  if(is.null(summaries)||missing(summaries)||summaries$NCategoricalLatentVars==1||is.na(summaries$NCategoricalLatentVars)){
+  if (is.null(summaries) || missing(summaries) || summaries$NCategoricalLatentVars==1 || is.na(summaries$NCategoricalLatentVars)) {
     #Starting in Mplus v7.3 and above, formatting of the class counts appears to have changed...
     #Capture the alternatives here
-    if (is.null(summaries)||missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
+    if (is.null(summaries) || missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
       modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$", outfiletext)
       ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$", outfiletext)
       mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
@@ -2010,7 +2008,8 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
     
     countlist[["logitProbs.mostLikely"]] <- unlabeledMatrixExtract(classificationLogitProbs, filename)
   } else {
-    # Exctract class_counts for multiple categorical latent variables.
+    # Extract class_counts for multiple categorical latent variables.
+    
     getClassCols_lta <- function(sectiontext) {
       numberLines <- grep("^\\s*([a-zA-Z0-9]+)?(\\s+[0-9\\.-]{1,}){1,}$", sectiontext, perl=TRUE)
       if (length(numberLines) > 0) {
@@ -2073,49 +2072,54 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
           outfiletext
         )
       )
-    countlist[["posteriorProb.patterns"]] <-
-      getClassCols_lta(posteriorProb.patterns)
-    countlist[["mostLikely.patterns"]] <-
-      getClassCols_lta(mostLikely.patterns)
     
-    countlist[which(names(countlist) %in% c("modelEstimated.patterns",
-          "posteriorProb.patterns",
-          "mostLikely.patterns"))] <-
-      lapply(countlist[which(names(countlist) %in% c("modelEstimated.patterns",
-              "posteriorProb.patterns",
-              "mostLikely.patterns"))],
-        setNames,
-        c(paste0("class.", unique(
-              c(countlist[["mostLikely"]]$variable, countlist[["modelEstimated"]]$variable, countlist[["posteriorProb"]]$variable)
-            )), "count", "proportion"))
+    countlist[["posteriorProb.patterns"]] <- getClassCols_lta(posteriorProb.patterns)
+    countlist[["mostLikely.patterns"]] <- getClassCols_lta(mostLikely.patterns)
     
-    #Average latent class probabilities
-    avgProbs <- getSection(
-      "^Average Latent Class Probabilities for Most Likely Latent Class Pattern \\((Row|Column)\\)$::^by Latent Class Pattern \\((Row|Column)\\)$",
-      outfiletext)
-    
-    column_headers <- strsplit(trimws(grep("\\s*Latent Class\\s{2,}", avgProbs, value = TRUE)), "\\s+", perl=TRUE)[[1]][-1]
-    variable_pattern_rows <- grep(paste(c("^(\\s{2,}\\d+){", length(column_headers), "}$"), collapse = ""), avgProbs, perl=TRUE)
-    variable_pattern_rows <- variable_pattern_rows[!c(FALSE, diff(variable_pattern_rows) != 1)]
-    variable_patterns <- avgProbs[variable_pattern_rows]
-    variable_patterns <- data.frame(t(sapply(strsplit(trimws(variable_patterns), "\\s+", perl=TRUE), as.numeric)))
-    names(variable_patterns) <- c("Latent Class Pattern No.", column_headers[-1])
-    
-    probs <- grep(paste(c("^\\s+\\d{1,}(\\s{2,}[0-9\\.-]+)+$"), collapse = ""), avgProbs[(variable_pattern_rows[length(variable_pattern_rows)]+1):length(avgProbs)], perl=TRUE, value = TRUE)
-    # If the table is truncated, concatenate its parts
-    if(length(probs) %% nrow(variable_patterns) > 1){
-      for(i in 2:(length(probs) %% nrow(variable_patterns))){
-        probs[1:(nrow(variable_patterns)+1)] <- 
-          paste(probs[1:(nrow(variable_patterns)+1)],
-            substring(probs[((i-1)*(nrow(variable_patterns)+1)+1):(i*(nrow(variable_patterns)+1))], first = 8)
-          )
-      }
-      probs <- probs[1:nrow(variable_patterns)]
+    # Determine order of column names for categorical latent variables
+    morder <- getSection("MODEL RESULTS USE THE LATENT CLASS VARIABLE ORDER", outfiletext)
+    if (!is.null(morder)) {
+      first_present <- which(morder != "")[1]
+      catvar_names <- strsplit(trimSpace(morder[first_present]), "\\s+")[[1]]
+    } else {
+      catvar_names <- unique(countlist[["mostLikely"]]$variable) #fall back approximation
+      #stop("Unable to determine names of categorical latent variables.")
     }
-    probs <- t(sapply(strsplit(trimws(probs[-1]), "\\s+", perl=TRUE), as.numeric))[,-1]
     
-    countlist[["avgProbs.mostLikely"]] <- probs
-    countlist[["avgProbs.mostLikely.patterns"]] <- variable_patterns
+    rename_sections <- which(names(countlist) %in% c("modelEstimated.patterns", "posteriorProb.patterns", "mostLikely.patterns"))
+    if (length(rename_sections) > 0L) {
+      for (s in rename_sections) {
+        countlist[[s]] <- setNames(countlist[[s]], c(catvar_names, "count", "proportion"))
+      }
+    }
+    
+    #Average latent class probabilities (not always present in outputs)
+    avgProbs <- getSection("^Average Latent Class Probabilities for Most Likely Latent Class Pattern \\((Row|Column)\\)$::^by Latent Class Pattern \\((Row|Column)\\)$", outfiletext)
+    
+    if (!is.null(avgProbs)) {
+      column_headers <- strsplit(trimws(grep("\\s*Latent Class\\s{2,}", avgProbs, value = TRUE)), "\\s+", perl=TRUE)[[1]][-1]
+      variable_pattern_rows <- grep(paste(c("^(\\s{2,}\\d+){", length(column_headers), "}$"), collapse = ""), avgProbs, perl=TRUE)
+      variable_pattern_rows <- variable_pattern_rows[!c(FALSE, diff(variable_pattern_rows) != 1)]
+      variable_patterns <- avgProbs[variable_pattern_rows]
+      variable_patterns <- data.frame(t(sapply(strsplit(trimws(variable_patterns), "\\s+", perl=TRUE), as.numeric)))
+      names(variable_patterns) <- c("Latent Class Pattern No.", column_headers[-1])
+      
+      probs <- grep(paste(c("^\\s+\\d{1,}(\\s{2,}[0-9\\.-]+)+$"), collapse = ""), avgProbs[(variable_pattern_rows[length(variable_pattern_rows)]+1):length(avgProbs)], perl=TRUE, value = TRUE)
+      # If the table is truncated, concatenate its parts
+      if(length(probs) %% nrow(variable_patterns) > 1){
+        for(i in 2:(length(probs) %% nrow(variable_patterns))){
+          probs[1:(nrow(variable_patterns)+1)] <- 
+            paste(probs[1:(nrow(variable_patterns)+1)],
+                  substring(probs[((i-1)*(nrow(variable_patterns)+1)+1):(i*(nrow(variable_patterns)+1))], first = 8)
+            )
+        }
+        probs <- probs[1:nrow(variable_patterns)]
+      }
+      probs <- t(sapply(strsplit(trimws(probs[-1]), "\\s+", perl=TRUE), as.numeric))[,-1]
+      
+      countlist[["avgProbs.mostLikely"]] <- probs
+      countlist[["avgProbs.mostLikely.patterns"]] <- variable_patterns
+    }
     
     # AFAIK this section is not reported for multiple categorical variables
     countlist[["classificationProbs.mostLikely"]] <- NULL

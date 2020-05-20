@@ -1,9 +1,12 @@
 Version 0.8
  - feature:     Extract parameters from EFA outputs (thanks to Dani Mori!)
+ - feature:     Extract residuals from invariance models. Addresses Github issue #95
+ - feature:     Extract model-estimated correlations and correlation residuals
  - feature:     Support BAYES outputs in compareModels
  - feature:     Add PPP values for Bayesian Monte Carlo outputs
  - feature:     Support PSR PPPP section in tech8
  - feature:     Add NLatentClasses to $summaries if available. Fixes Github Issue #103
+ - feature:     Extract results from "Results/Parameters for Class-specific Model Parts" sections (e.g., ex8.12)
  - notice:      Removed getSavedata_Bparams in favor of readModels.
  - bugfix:      Extract standardized estimates from MONTE CARLO outputs
  - bugfix:      Extract R-SQUARE information from multilevel analyses (where header order is reversed)
@@ -13,6 +16,9 @@ Version 0.8
  - bugfix:      Preserve other columns like LatentClass for RESULTS IN PROBABILITY SCALE section. Fixes Github Issue #103
  - bugfix:      Correct factor conversion notes in prepareMplusData. Provide conversion notes as a printed data frame for clarity.
  - bugfix:      Extract specific indirect effects in Mplus v8.4+. Updated parser to handle new section headers. Fixes Github Issue #117
+ - bugfix:      Parse categorical latent variable names correctly for multiple latent variable models
+ - bugfix:      Parse univariate sample statistics for single-variable models
+ 
 
 Version 0.7-3
  - feature:     Support use of plausible values for factors in BAYES output using SAVE=FSCORES(NIMP) approach

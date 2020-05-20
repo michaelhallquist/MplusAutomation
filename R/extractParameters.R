@@ -267,8 +267,9 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", modelSection, ignore.case=TRUE, perl=TRUE) #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
   classPropMatches <- grep("^\\s*Class Proportions\\s*$", modelSection, ignore.case=TRUE)
+  classSpecificMatches <- grep("^\\s*(Results|Parameters) for Class-specific Model Parts of [\\w_\\.]+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
 
-  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches))
+  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches, classSpecificMatches))
   
   if (length(topLevelMatches) > 0) {
 
@@ -288,7 +289,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
           #replace any spaces with periods to create usable unique lc levels
           lcNum <- gsub("\\s+", "\\.", postPattern, perl=TRUE)
         }
-        else lcNum <- sub("^\\s*(?:Latent )*Class\\s+(\\d+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
+        else lcNum <- sub("^\\s*(?:Latent )*Class\\s+([\\w#]+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
       } else if (match %in% multipleGroupMatches) groupName <- sub("^\\s*Group (\\w+)(?:\\s+\\(\\d+\\))*\\s*$", "\\1", modelSection[match], perl=TRUE)
       else if (match %in% catLatentMatches) {
         #the categorical latent variables section is truly "top level"

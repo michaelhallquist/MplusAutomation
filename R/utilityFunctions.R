@@ -362,6 +362,7 @@ parse_into_sections <- function(outfiletext) {
       "RANDOM STARTS RESULTS RANKED FROM THE BEST TO THE WORST LOGLIKELIHOOD VALUES",
       "TESTS OF MODEL FIT", "MODEL FIT INFORMATION", "MODEL FIT INFORMATION FOR .*", "CLASSIFICATION QUALITY",
       "SUMMARY OF MODEL FIT INFORMATION", "RESULTS FOR EXPLORATORY FACTOR ANALYSIS",
+      "MODEL RESULTS USE THE LATENT CLASS VARIABLE ORDER",
       "FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES",
       "FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS",
       "CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN",#
@@ -374,7 +375,6 @@ parse_into_sections <- function(outfiletext) {
       "Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
       "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
       "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
-      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):",
       "MODEL RESULTS", "MODEL RESULTS FOR .*", "LOGISTIC REGRESSION ODDS RATIO RESULTS", "RESULTS IN PROBABILITY SCALE",
       "IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC METRIC",
       "IRT PARAMETERIZATION IN TWO-PARAMETER PROBIT METRIC",
@@ -411,7 +411,8 @@ parse_into_sections <- function(outfiletext) {
       "FACTOR SCORE INFORMATION \\(COMPLETE DATA\\)", "SUMMARY OF FACTOR SCORES", "PLOT INFORMATION", "SAVEDATA INFORMATION",
       "CORRELATIONS AND MEAN SQUARE ERROR OF THE TRUE FACTOR VALUES AND THE FACTOR SCORES",
       "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
-      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
+      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN",
+      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):"
   )
   
   #form alternation pattern for regular expression (currently adds leading and trailing spaces permission to each header)
@@ -726,6 +727,8 @@ splitFilePath <- function(abspath) {
 #' @examples
 #' # make me!!!
 detectColumnNames <- function(filename, modelSection, sectionType="model_results") {
+  
+  if (all(modelSection=="")) { return(NULL) } #empty section (e.g., R-SQUARE)
   
   detectionFinished <- FALSE
   line <- 1
