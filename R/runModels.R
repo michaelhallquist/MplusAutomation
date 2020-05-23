@@ -206,8 +206,8 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #' This function runs a group of Mplus models (.inp files) located within a
 #' single directory or nested within subdirectories.
 #'
-#' @param target the directory containing Mplus input files (.inp) to run
-#'   OR the single .inp file to be run. May be a full path, relative path,
+#' @param target a character vector where each element is a directory containing Mplus input files 
+#'   (.inp) to run OR a single .inp file to be run. Elements may be a full path, relative path,
 #'   or a filename within the working directory.
 #'   Defaults to the current working directory. Example: \dQuote{C:/Users/Michael/Mplus Runs}
 #' @param recursive optional. If \code{TRUE}, run all models nested in subdirectories
@@ -247,48 +247,65 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #'     replaceOutfile="modifiedDate", logFile="MH_RunLog.txt",
 #'     Mplus_command="C:\\Users\\Michael\\Mplus Install\\Mplus51.exe")
 #' }
+#' \dontrun{
+#'   runModels(getwd(), filefilter = "ex8.*", logFile=NULL)
+#' }
 runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOutput=FALSE,
-    replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus", killOnFail=TRUE, local_tmpdir=FALSE) {
+    replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus", 
+    killOnFail=TRUE, local_tmpdir=FALSE) {
 
   stopifnot(replaceOutfile %in% c("always", "never", "modifiedDate"))
 
-  #TODO: would be good to come back and make this more versatile, supporting a vector target
-  if (isTRUE(length(target) > 1L)) { stop("target for runModels must be a single file or single directory")}
-
+  #helper subfunction to crawl over the target vector, determine if it is a file or folder,
+  #then locate all .inp files, and convert them to absolute paths
+  convert_to_filelist <- function(target, filefilter=NULL, recursive=FALSE) {
+    filelist <- c()
+    for (tt in target) {
+      fi <- file.info(tt)
+      if (isTRUE(is.na(fi$size))) { stop("Cannot find target: ", tt) } #do not tolerate missing files or folders
+        
+      if (isTRUE(fi$isdir)) {
+        #folder
+        ## remove trailing slash, which generates file.exists error on windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
+        directory <- sub("(\\\\|/)?$", "", tt, perl=TRUE)
+        ## however, trailing slash is needed if at root of a drive on Windows
+        if (isTRUE(.Platform$OS.type == "windows") && isTRUE(grepl("^[a-zA-Z]:$", directory))) {
+          directory <- paste0(directory, "/")
+        }
+        
+        if (isFALSE(file.exists(directory))) { stop("runModels cannot find directory: ", directory) }
+        
+        #list files in the current directory
+        this_set <- list.files(path=directory, recursive=recursive, pattern=".*\\.inp?$", full.names = TRUE)
+        filelist <- c(filelist, this_set)
+      } else {
+        #element is a file
+        #check file extension
+        if (!grepl(".*\\.inp?$", tt, perl=TRUE)) {
+          warning("Target: ", tt, "does not appear to be an .inp file. Ignoring it.")
+          next
+        } else {
+          if (isFALSE(file.exists(tt))) { stop("runModels cannot find input file: ", tt) }
+          
+          filelist <- c(filelist, tt)
+        }
+      }
+    }
+    
+    #apply user filter, if requested
+    if (!is.null(filefilter)) { filelist <- grep(filefilter, filefilter, perl=TRUE, value=TRUE) } 
+    
+    #normalize paths to convert everything to absolute
+    filelist <- normalizePath(filelist)
+    return(filelist)
+  }
+  
+  #Use of ~/ home directory doesn't play well with call to sh later.
+  if (grepl("^~/", Mplus_command, perl=TRUE)) { Mplus_command <- normalizePath(Mplus_command) }
+  
   #retain working directory and reset at end of run
   #need to set here to ensure that logTarget initialization below is within target directory, not getwd()
   curdir <- getwd()
-
-  #check whether target is a directory or a single file
-  if (isTRUE(grepl(".*\\.inp?$", target, perl=TRUE))) { #tolerate .in and .inp files
-    directory <- dirname(target)
-    filelist <- basename(target)
-
-    if (isFALSE(is.null(filefilter))) { warning("Using runModels() with a single .inp target ignores filefilter") }
-    if (isFALSE(file.exists(target))) { stop("runModels cannot locate target file: ", target) }
-    setwd(directory)
-
-    #look for .out file of the same name to handle skipping existing files downstream.
-    if (isTRUE(file.exists(outtest <- sub("\\.inp?$", ".out", filelist, perl=TRUE)))) {
-      filelist <- c(filelist, outtest)
-    }
-
-  } else {
-    ## remove trailing slash, which generates file.exists error on windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
-    directory <- sub("(\\\\|/)?$", "", target, perl=TRUE)
-    ## however, trailing slash is needed if at root of a drive on Windows
-    if (isTRUE(.Platform$OS.type == "windows") && isTRUE(grepl("^[a-zA-Z]:$", directory))) {
-      directory <- paste0(directory, "/")
-    }
-
-    if (isFALSE(file.exists(directory))) {
-      stop("runModels cannot change to directory: ", directory)
-    }
-    setwd(directory)
-
-    #list files in the current directory
-    filelist <- list.files(recursive=recursive, pattern=filefilter)
-  }
 
   normalComplete <- FALSE
 
@@ -344,7 +361,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
         #if the process is currently running and we kill it, then the output and gph files will be incomplete.
         #in general, it would be good to delete these.
         if(isTRUE(deleteOnKill)) {
-          noExtension <- substr(absFilename, length(absFilename) - 4, length(absFilename))
+          noExtension <- substr(cur_inpfile, length(cur_inpfile) - 4, length(cur_inpfile))
           outDelete <- paste(noExtension, ".out", sep="")
           gphDelete <- paste(noExtension, ".gph", sep="")
           if (isTRUE(file.exists(outDelete))) {
@@ -374,16 +391,24 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
 
   on.exit(exitRun())
 
-  #select only .inp files using grep
-  inpfiles <- filelist[grep(".*\\.inp?$", filelist, ignore.case=TRUE)] #tolerate .in and .inp files
-  outfiles <- filelist[grep(".*\\.out$", filelist, ignore.case=TRUE)]
+  #find all inp files in each element of target and return a single vector of absolute paths to inp files
+  inpfiles <- convert_to_filelist(target, filefilter, recursive)
 
-  if(isTRUE(length(inpfiles) < 1)) stop("No Mplus input files detected in the target directory: ", directory)
+  #find .out files corresponding to each .inp file  
+  outfiles <- unlist(lapply(inpfiles, function(x) {
+    if (file.exists(otest <- sub("\\.inp?$", ".out", x))) {
+      return(otest)
+    } else {
+      return(NULL)
+    }
+  }))
+  
+  if(isTRUE(length(inpfiles) < 1)) stop("No Mplus input files detected in the provided target: ", paste(target, collapse=", "))
 
   dropOutExtensions <- sapply(outfiles, function(x) {
-        if (isTRUE(nchar(x) >= 4)) return(tolower(substr(x, 1, (nchar(x)-4))))
-      })
-
+    if (isTRUE(nchar(x) >= 4)) return(tolower(substr(x, 1, (nchar(x)-4))))
+  })
+  
   for (i in 1:length(inpfiles)) {
 
     if (isFALSE(replaceOutfile == "always")) {
@@ -408,7 +433,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
             next
           }
         }
-        else if (isTRUE(replaceOutfile == "never")){
+        else if (isTRUE(replaceOutfile == "never")) {
           if (isTRUE(isLogOpen())) {
             writeLines(paste("Skipping model because output file already exists for:", inpfiles[i]), logTarget)
             flush(logTarget)
@@ -419,15 +444,9 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
     }
 
     #split input file into one element per directory (e.g., "dir1/dir2/mytest.inp" becomes a 3-element vector
-    #code adapted from R.utils filePath command
-    inputSplit <- splitFilePath(inpfiles[i])
-    if (isTRUE(is.na(inputSplit$directory))) dirtocd <- directory
-    else dirtocd <- file.path(directory, inputSplit$directory)
+    inputSplit <- splitFilePath(inpfiles[i], normalize=TRUE)
 
-    #the absolute path to the file combines the passed-in directory with the subdirectories
-    #identified in the case of recursive=T
-
-    absFilename <- file.path(directory, inpfiles[i])
+    cur_inpfile <- inpfiles[i] #tmp var used in case of attempt to kill current job
 
     #UPDATE 21Oct2011: Since mplus has been released for linux, don't default to wine.
     if (isTRUE(.Platform$OS.type == "unix") && isTRUE(Mplus_command == "Mplus")) {
@@ -438,7 +457,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
     #navigate to working directory in DOS using cd command so that Mplus finds the appropriate files (support rel paths)
     #switched over to use relative filename because of problems in Mplus via Wine misinterpreting absolute paths due to forward slashes.
     #25Jul2012: Quote Mplus_command in case it's in a path with spaces.
-    command <- paste("cd \"", dirtocd, "\" && \"", Mplus_command, "\" \"", inputSplit$filename, "\"", sep="")
+    command <- paste("cd \"", inputSplit$directory, "\" && \"", Mplus_command, "\" \"", inputSplit$filename, "\"", sep="")
 
     #allow for divergence if the package is being run in Linux (Mplus via wine)
     if (isTRUE(.Platform$OS.type == "windows")) {
@@ -452,8 +471,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
 
       #assemble full command from the shell call, flag, and command
       command <- paste(shellcommand, flag, command)
-    }
-    else if (isTRUE(.Platform$OS.type == "unix")) {
+    } else if (isTRUE(.Platform$OS.type == "unix")) {
       #allow for unix-specific customization here
     }
 
@@ -474,8 +492,8 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
       else stdout.value = NULL
       #need to switch to each directory, then run Mplus within using just the filename
       oldwd <- getwd()
-      setwd(dirtocd)
-      if (isTRUE(local_tmpdir)) { Sys.setenv(TMPDIR=dirtocd) } #define TMPDIR local to the .inp file to execute
+      setwd(inputSplit$directory)
+      if (isTRUE(local_tmpdir)) { Sys.setenv(TMPDIR=inputSplit$directory) } #define TMPDIR local to the .inp file to execute
       exitCode <- system2(Mplus_command, args=c(shQuote(inputSplit$filename)), stdout=stdout.value, wait=TRUE)
       if (isTRUE(exitCode > 0L)) {
         warning("Mplus returned error code: ", exitCode, ", for model: ", inputSplit$filename, "\n")

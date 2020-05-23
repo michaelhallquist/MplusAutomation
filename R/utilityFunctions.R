@@ -682,7 +682,7 @@ getOutFileList <- function(target, recursive=FALSE, filefilter) {
 #' @keywords internal
 #' @examples
 #' # make me!!!
-splitFilePath <- function(abspath) {
+splitFilePath <- function(abspath, normalize=FALSE) {
   if (!is.character(abspath)) stop("Path not a character string")
   if (nchar(abspath) < 1 || is.na(abspath)) stop("Path is missing or of zero length")
   
@@ -700,14 +700,18 @@ splitFilePath <- function(abspath) {
   
   if (lcom == 1) {
     dirpart <- NA_character_
-  }
-  else if (lcom > 1) {
+  } else if (lcom > 1) {
     #drop the file from the list (the last element)
     components <- components[-lcom]
     dirpart <- do.call("file.path", as.list(components))
     
     #if path begins with C:, /, ~/, //, or \\, then treat as absolute
-    if (grepl("^([A-Z]{1}:|~/|/|//|\\\\)+.*$", dirpart, perl=TRUE)) absolute <- TRUE
+    if (grepl("^([A-Z]{1}:|~/|/|//|\\\\)+.*$", dirpart, perl=TRUE)) { absolute <- TRUE }
+    
+    if (normalize) { #convert to absolute path
+      dirpart <- normalizePath(dirpart)
+      absolute <- TRUE
+    }
   }
   
   return(list(directory=dirpart, filename=relFilename, absolute=absolute))
