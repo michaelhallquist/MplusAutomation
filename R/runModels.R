@@ -213,8 +213,8 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #' @param recursive optional. If \code{TRUE}, run all models nested in subdirectories
 #'   within \code{directory}. Defaults to \code{FALSE}. Not relevant if \code{target} is a single file.
 #' @param filefilter a Perl regular expression (PCRE-compatible) specifying particular input
-#'   files to be run within \code{directory}. See \code{regex} or \url{http://www.pcre.org/pcre.txt}
-#'   for details about regular expression syntax. Not relevant if \code{target} is a single file.
+#'   files to be run among those found in \code{target}. See \code{regex} or \url{http://www.pcre.org/pcre.txt}
+#'   for details about regular expression syntax.
 #' @param showOutput optional. If \code{TRUE}, show estimation output (TECH8)
 #'   in the R console. Note that if run within Rgui, output will display within R,
 #'   but if run via Rterm, a separate window will appear during estimation.
@@ -313,17 +313,16 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
   if (isFALSE(is.null(logFile))) {
     logTarget <- file(description = logFile, open = "wt", blocking = TRUE)
     writeLines(c(paste("------Begin Mplus Model Run: ", format(Sys.time(), "%d%b%Y %H:%M:%S"), "------", sep=""),
-            paste("Target directory: ", directory, sep=""),
-            "Run options:",
-            paste("\tRecursive (run models in subdirectories):", as.character(recursive)),
-            paste("\tShow output on console:", as.character(showOutput)),
-            paste("\tReplace existing outfile:", replaceOutfile),
-            "------"
-        ), con=logTarget)
+                 "Run options:",
+                 paste("\tRecursive (run models in subdirectories):", as.character(recursive)),
+                 paste("\tShow output on console:", as.character(showOutput)),
+                 paste("\tReplace existing outfile:", replaceOutfile),
+                 "------"
+    ), con=logTarget)
     #need to flush after each writeLines to keep the text file current.
     flush(logTarget)
   }
-
+  
   isLogOpen <- function() {
     #if null is passed as the log file, then it is by definition not open (non-existent)
     if (isTRUE(is.null(logFile))) return(FALSE)
