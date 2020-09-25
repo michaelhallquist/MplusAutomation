@@ -4,8 +4,13 @@
 \alias{plotLTA}
 \title{Plot latent transition model}
 \usage{
-plotLTA(mplusModel, node_stroke = 2, max_edge_width = 2,
-  node_labels = "variable.class", x_labels = "variable")
+plotLTA(
+  mplusModel,
+  node_stroke = 2,
+  max_edge_width = 2,
+  node_labels = "variable.class",
+  x_labels = "variable"
+)
 }
 \arguments{
 \item{mplusModel}{A single Mplus model object, returned by . This

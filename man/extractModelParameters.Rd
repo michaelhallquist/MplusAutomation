@@ -4,8 +4,13 @@
 \alias{extractModelParameters}
 \title{Extract model parameters from MODEL RESULTS section.}
 \usage{
-extractModelParameters(target = getwd(), recursive = FALSE, filefilter,
-  dropDimensions = FALSE, resultType)
+extractModelParameters(
+  target = getwd(),
+  recursive = FALSE,
+  filefilter,
+  dropDimensions = FALSE,
+  resultType
+)
 }
 \arguments{
 \item{target}{the directory containing Mplus output files (.out) to parse OR the single output file to

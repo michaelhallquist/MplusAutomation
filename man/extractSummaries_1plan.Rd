@@ -4,8 +4,13 @@
 \alias{extractSummaries_1plan}
 \title{Worker function used in extractSummaries_1section}
 \usage{
-extractSummaries_1plan(arglist, sectionHeaders, sectionFields, textToParse,
-  filename)
+extractSummaries_1plan(
+  arglist,
+  sectionHeaders,
+  sectionFields,
+  textToParse,
+  filename
+)
 }
 \arguments{
 \item{arglist}{The argument list}

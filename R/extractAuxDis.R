@@ -9,7 +9,7 @@
 #' @importFrom stats reshape
 #' @keywords internal
 extractAux <- function(outfiletext, filename) {
-  if (missing(outfiletext) || is.na(outfiletext) || is.null(outfiletext)) stop("Missing mean equality to parse.\n ", filename)
+  if (isEmpty(outfiletext)) stop("Missing mean equality to parse.\n ", filename)
 
   ppSection <- getSection("EQUALITY TESTS OF MEANS ACROSS CLASSES USING POSTERIOR PROBABILITY-BASED", outfiletext)
   bchSection <- getSection("EQUALITY TESTS OF MEANS ACROSS CLASSES USING THE BCH PROCEDURE", outfiletext)
@@ -229,7 +229,7 @@ extractAux <- function(outfiletext, filename) {
   }
 
   ret <- list(overall=allMeans, pairwise=allPairwise)
-  class(ret) <- c("list", "mplus.auxE")
+  class(ret) <- c("mplus.auxE", "list")
 
   return(ret)
 }

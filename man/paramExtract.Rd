@@ -4,8 +4,11 @@
 \alias{paramExtract}
 \title{Extract parameters from a data frame of Mplus estimates}
 \usage{
-paramExtract(x, params = c("regression", "loading", "undirected",
-  "expectation", "variability", "new"))
+paramExtract(
+  x,
+  params = c("regression", "loading", "undirected", "expectation", "variability",
+    "new")
+)
 }
 \arguments{
 \item{x}{A data frame (specifically the type returned by \code{readModels}) containing

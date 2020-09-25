@@ -153,7 +153,41 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
       elist$summaries <- elist$summaries[,c("pred", "outcome", "summary", columnNames[-1])]
       
       #use white space to demarcate ending of specific indirect subsection
-      specSection <- trimSpace(getMultilineSection("Specific indirect", esection, curfile))
+      #new versions of Mplus (8.4+, I think) add numbers for each indirect effect to the output, which breaks the logic below
+      #
+      #  Old format:
+      #      Specific indirect
+      # 
+      #        BPD_I
+      #        A11XEMOT
+      #        IMPLW1            -0.002      0.001     -1.744      0.081
+      #
+      #  New format:
+      #      Specific indirect 1
+      #        KOMP5TO
+      #        SNITT02
+      #        FODTMND           -0.010      0.005     -2.132      0.033
+      #
+      #      Specific indirect 2
+      #        KOMP5TO
+      #        FORSTEON
+      #        FODTMND           -0.003      0.002     -1.113      0.266
+      
+      if (any(grepl("Specific indirect\\s+\\d+", esection, perl=TRUE))) { #numbered subsections
+        specSection <- trimSpace(getMultilineSection("Specific indirect(\\s+\\d+)*", esection, curfile, allowMultiple=TRUE))
+        
+        #specSection is now a matches x match-lines matrix with the headers dumped (which is useful)
+        #flatten into a vector so that parsing below proceeds as usual
+        specSection <- as.vector(specSection)
+        
+        #N.B. The parser below depends on the first line of the section being blank to demarcate the first effect.
+        #  The new format, however, starts with Specific indirect 1, then goes straight to the effect.
+        #  Thus, add a blank line to the section before proceeding
+        specSection <- c("", specSection)
+      } else { #single section
+        specSection <- trimSpace(getMultilineSection("Specific indirect", esection, curfile))
+      }
+      
       blanks <- which(specSection=="")
       if (length(blanks) > 0L) {
         thisEffect <- NULL
@@ -174,7 +208,7 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
           source <- strsplit(toparse[length(toparse)], "\\s+")[[1]] #this should always be the earliest variable in the chain; it should have the statistics on it
           names(source) <- columnNames
           names(source)[1] <- "pred" #for specific effects, the first column of source is actually the predictor, not outcome (bit of a kludge here)
-          source <- data.frame(as.list(source), stringAsFactors=FALSE)
+          source <- as.data.frame(as.list(source), stringAsFactors=FALSE)
           intervening <- toparse[2:(length(toparse)-1)]
           thisEffect <- rbind(thisEffect, data.frame(source[,"pred", drop=F], intervening = paste(intervening, collapse="."), outcome=outcome, source[,-1*which(names(source)=="pred")]))
         }

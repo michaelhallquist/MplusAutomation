@@ -4,9 +4,14 @@
 \alias{runModels_Interactive}
 \title{Run Mplus Models Using Graphical Interface}
 \usage{
-runModels_Interactive(directory = getwd(), recursive = "0",
-  showOutput = "1", replaceOutfile = "1", checkDate = "0",
-  logFile = "1")
+runModels_Interactive(
+  directory = getwd(),
+  recursive = "0",
+  showOutput = "1",
+  replaceOutfile = "1",
+  checkDate = "0",
+  logFile = "1"
+)
 }
 \arguments{
 \item{directory}{optional. The starting directory that will display in the dialog window. Defaults to the

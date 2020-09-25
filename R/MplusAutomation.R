@@ -59,8 +59,8 @@
 #' \tabular{ll}{
 #' Package: \tab MplusAutomation\cr
 #' Type: \tab Package\cr
-#' Version: \tab 0.7-2\cr
-#' Date: \tab 2018-04-05\cr
+#' Version: \tab 0.7-3\cr
+#' Date: \tab 2018-11-19\cr
 #' License: \tab LGPL-3\cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -91,7 +91,7 @@ NULL
 
     paste("Hallquist, M. N. & Wiley, J. F. (2018).",
       "MplusAutomation: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus.",
-      "Structural Equation Modeling, 1-18.",
+      "Structural Equation Modeling, 25, 621-638.",
       "doi: 10.1080/10705511.2017.1402334.\n\n"),
 
     '-- see citation("MplusAutomation").'

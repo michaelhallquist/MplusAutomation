@@ -4,8 +4,14 @@
 \alias{HTMLSummaryTable}
 \title{Create an HTML file containing a summary table of Mplus model statistics}
 \usage{
-HTMLSummaryTable(modelList, filename = file.path(getwd(),
-  "Model Comparison.html"), keepCols, dropCols, sortBy, display = FALSE)
+HTMLSummaryTable(
+  modelList,
+  filename = file.path(getwd(), "Model Comparison.html"),
+  keepCols,
+  dropCols,
+  sortBy,
+  display = FALSE
+)
 }
 \arguments{
 \item{modelList}{A list of models (as a \code{data.frame}) returned from the \code{extractModelSummaries} function.}

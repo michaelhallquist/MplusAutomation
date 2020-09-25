@@ -4,8 +4,15 @@
 \alias{trainLGMM}
 \title{Train a variety of latent growth mixture model}
 \usage{
-trainLGMM(data, idvar, assessmentvar, newdata = FALSE, tuneGrid, cl,
-  ncores = 1L)
+trainLGMM(
+  data,
+  idvar,
+  assessmentvar,
+  newdata = FALSE,
+  tuneGrid,
+  cl,
+  ncores = 1L
+)
 }
 \arguments{
 \item{data}{A data frame or data table in long format (i.e., multiple rows per ID).}

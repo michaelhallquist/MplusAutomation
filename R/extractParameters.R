@@ -10,8 +10,8 @@
 #' @return A data frame (or matrix?)
 #' @keywords internal
 extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionName) {
-  if (missing(thisChunk) || is.na(thisChunk) || is.null(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
-  if (missing(columnNames) || is.na(columnNames) || is.null(columnNames)) stop("Missing column names for chunk.\n  ", filename)
+  if (isEmpty(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
+  if (isEmpty(columnNames)) stop("Missing column names for chunk.\n  ", filename)
   if (missing(sectionName)) { sectionName <- "" } #right now, just use sectionName for R-SQUARE section, where there are no subheaders per se
   
   #R-SQUARE sections are not divided into the usual subheader sections, and the order of top-level headers is not comparable to typical output.
@@ -228,14 +228,20 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   #first trim all leading and trailing spaces (new under strip.white=FALSE)
   modelSection <- gsub("(^\\s+|\\s+$)", "", modelSection, perl=TRUE)
 
-  #detectColumn names sub-divides (perhaps unnecessarily) the matches based on the putative section type of the output
+  #detectColumnNames sub-divides (perhaps unnecessarily) the matches based on the putative section type of the output
   #current distinctions include modification indices, confidence intervals, and model results.
-  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized")) { sectionType <- "confidence_intervals"
+  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized")) { 
+    sectionType <- "confidence_intervals"
   } else if (sectionName == "irt.parameterization" || sectionName == "probability.scale") {
     #the IRT section follows from the MODEL RESULTS section, and column headers are not reprinted.
     #Same applies for RESULTS IN PROBABILITY SCALE section
-    #Thus, for now (first pass), assume a 5-column header -- kludge
-    columnNames <- c("param", "est", "se", "est_se", "pval")
+    
+    #Update 2020: at least for GPCM, v8.4 now reprints the header "Estimate", but does not provide se, est_se, or pval.
+    #Thus, first try to detect column names, but revert to default if this fails
+    columnNames <- suppressWarnings(detectColumnNames(filename, modelSection, "model_results"))
+    
+    #If we can't detect column names (because they're not reprinted from model results, assume a 5-column header -- heuristic
+    if (is.null(columnNames)) { columnNames <- c("param", "est", "se", "est_se", "pval") } #default if detection fails
   } else { sectionType <- "model_results" }
 
   if (!exists("columnNames")) { columnNames <- detectColumnNames(filename, modelSection, sectionType) }
@@ -243,7 +249,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   #return nothing if unable to detect column names (this will then get filtered out in the extractParameters_1file process
   if (is.null(columnNames)) {
     x <- data.frame() #empty
-    class(x) <- c("data.frame", "mplus.params")
+    class(x) <- c("mplus.params", "data.frame")
     attr(x, "filename") <- filename
     return(x)
   }
@@ -261,9 +267,10 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", modelSection, ignore.case=TRUE, perl=TRUE) #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
   classPropMatches <- grep("^\\s*Class Proportions\\s*$", modelSection, ignore.case=TRUE)
+  classSpecificMatches <- grep("^\\s*(Results|Parameters) for Class-specific Model Parts of [\\w_\\.]+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
 
-  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches))
-
+  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches, classSpecificMatches))
+  
   if (length(topLevelMatches) > 0) {
 
     lcNum <- NULL
@@ -282,7 +289,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
           #replace any spaces with periods to create usable unique lc levels
           lcNum <- gsub("\\s+", "\\.", postPattern, perl=TRUE)
         }
-        else lcNum <- sub("^\\s*(?:Latent )*Class\\s+(\\d+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
+        else lcNum <- sub("^\\s*(?:Latent )*Class\\s+([\\w#]+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
       } else if (match %in% multipleGroupMatches) groupName <- sub("^\\s*Group (\\w+)(?:\\s+\\(\\d+\\))*\\s*$", "\\1", modelSection[match], perl=TRUE)
       else if (match %in% catLatentMatches) {
         #the categorical latent variables section is truly "top level"
@@ -322,8 +329,30 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         thisChunk <- modelSection[(match+1):length(modelSection)]
         chunkToParse <- TRUE
       }
-
+      
       if (chunkToParse == TRUE && !all(thisChunk=="")) { #omit completely blank chunks (v8 ex9.32.out)
+        # In R-SQUARE output for multilevel models, we violate the usual convention of column headers that
+        # are superordinate to the Within/Between distinction. This leads the chunk to contain the labels.
+        # Here's an example:
+        #
+        # R-SQUARE
+        #
+        # Within Level
+        #
+        # Observed                                        Two-Tailed   Rate of
+        # Variable        Estimate       S.E.  Est./S.E.    P-Value    Missing
+        #
+        # ASRREA             0.266      0.013     20.079      0.000      0.026
+  
+        #Thus, we need to delete these lines prior to parsing. Implement attr tagging in detectColumnNames
+        if (sectionName == "r2") {
+          #need to delete header lines from each chunk using the header_lines attribute
+          header_lines <- modelSection[attr(columnNames, "header_lines")]
+          thisChunk <- thisChunk[!thisChunk %in% header_lines]
+        }
+  
+  
+        #parse the chunk into a data.frame      
         parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
         
         #WORKAROUND: For confidence intervals in multilevel mixtures, the Categorical Latent Variables section does not
@@ -402,7 +431,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
   #tag as mplusParams class
   listParameters <- lapply(listParameters, function(x) {
-        class(x) <- c("data.frame", "mplus.params")
+        class(x) <- c("mplus.params", "data.frame")
         attr(x, "filename") <- filename
         return(x)
       })
@@ -416,9 +445,10 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 #' @param outfiletext character vector of Mplus output file being processed
 #' @param filename name of Mplus output file being processed
 #' @param resultType (deprecated)
+#' @param efa indicates whether the output is from an EFA model (requires some additional processing)
 #' @return A list of parameters
 #' @keywords internal
-extractParameters_1file <- function(outfiletext, filename, resultType) {
+extractParameters_1file <- function(outfiletext, filename, resultType, efa = FALSE) {
 
   if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", outfiletext, ignore.case=TRUE, perl=TRUE)) > 0) {
     warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelParameters.\n  Skipping outfile: ", filename))
@@ -456,7 +486,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     
     if (!is.null(unstandardizedSection)) {
       allSections <- appendListElements(allSections, extractParameters_1section(filename, unstandardizedSection, "unstandardized"))
-    }      
+    }
   }
   
   standardizedSection <- getSection("^STANDARDIZED MODEL RESULTS$", outfiletext)
@@ -558,7 +588,8 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     probParsed[[1]]$paramHeader <- NULL
     probParsed[[1]]$category <- sub("^.*\\.Cat\\.(\\d+)$", "\\1", probParsed[[1]]$param, perl=TRUE)
     probParsed[[1]]$param <- sub("^(.*)\\.Cat\\.\\d+$", "\\1", probParsed[[1]]$param, perl=TRUE)
-    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", "se", "est_se", "pval")] #reorder columns
+    other_cols <- names(probParsed[[1]])[!names(probParsed[[1]]) %in% c("param", "category", "est")] #append any other columns after primary 3
+    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", other_cols)] #reorder columns
     allSections <- appendListElements(allSections, probParsed)
   }
 
@@ -581,13 +612,22 @@ extractParameters_1file <- function(outfiletext, filename, resultType) {
     if (!is.null(std.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, std.section, "ci.std.standardized"))
   }
 
+  #extract EFA parameters if this is an EFA output
+  if (efa) {
+    
+    allSections <- appendListElements(
+      allSections,
+      extractEFAparameters(outfiletext, filename)
+    )
+  }
+
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "r2", "ci.unstandardized",
       "irt.parameterization", "probability.scale",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",
       "std.standardized", "ci.std.standardized",
-      "wilevel.standardized")
+      "wilevel.standardized", "efa")
   listOrder <- listOrder[listOrder %in% names(allSections)]
 
 

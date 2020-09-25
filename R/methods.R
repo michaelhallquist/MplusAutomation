@@ -63,11 +63,11 @@ print.MplusRstructure <- function(x, ...) {
 #' unlink("Mplus Run Models.log")
 #' }
 summary.mplusObject <- function(object, verbose=FALSE, ...) {
-  stopifnot(!is.null(object$results))
+  stopifnot(isFALSE(is.null(object$results)))
 
   x <- object$results$summaries
 
-  if(!verbose) {
+  if(isFALSE(verbose)) {
 
     cat(gsub("(.*)(;)", "\\1 \n\n", x$Title))
     cat(sprintf("Estimated using %s \n", x$Estimator))
@@ -75,25 +75,75 @@ summary.mplusObject <- function(object, verbose=FALSE, ...) {
     cat(sprintf("Number of obs: %s, number of (free) parameters: %s \n\n",
       x$Observations, x$Parameters))
 
-    cat(with(x, sprintf("Model: Chi2(df = %s) = %s, p = %s \n",
-      ChiSqM_DF, ChiSqM_Value, ChiSqM_PValue)))
-
+    if(!is.null(x[["ChiSqM_DF"]])){
+      cat(with(x, sprintf("Model: Chi2(df = %s) = %s, p = %s \n",
+                          ChiSqM_DF, ChiSqM_Value, ChiSqM_PValue)))
+    }
+    if(!is.null(x[["ChiSqBaseline_DF"]])){
     cat(with(x, sprintf("Baseline model: Chi2(df = %s) = %s, p = %s \n\n",
       ChiSqBaseline_DF, ChiSqBaseline_Value, ChiSqBaseline_PValue)))
-
+    }
+    if(is.null(x[["CFI"]])){
+      x[["CFI"]] <- NA
+    }
+    if(is.null(x[["TLI"]])){
+      x[["TLI"]] <- NA
+    }
+    if(is.null(x[["SRMR"]])){
+      x[["SRMR"]] <- NA
+    }
     cat("Fit Indices: \n\n")
     cat(with(x, sprintf("CFI = %s, TLI = %s, SRMR = %s \n", CFI, TLI, SRMR)))
-
+    if(is.null(x[["RMSEA_Estimate"]])){
+      x[["RMSEA_Estimate"]] <- NA
+    }
+    if(is.null(x[["RMSEA_90CI_LB"]])){
+      x[["RMSEA_90CI_LB"]] <- NA
+    }
+    if(is.null(x[["RMSEA_90CI_UB"]])){
+      x[["RMSEA_90CI_UB"]] <- NA
+    }
+    if(is.null(x[["RMSEA_pLT05"]])){
+      x[["RMSEA_pLT05"]] <- NA
+    }
     cat(with(x, sprintf("RMSEA = %s, 90%% CI [%s, %s], p < .05 = %s \n",
       RMSEA_Estimate, RMSEA_90CI_LB, RMSEA_90CI_UB, RMSEA_pLT05)))
-
+    if(is.null(x[["AIC"]])){
+      x[["AIC"]] <- NA
+    }
+    if(is.null(x[["BIC"]])){
+      x[["BIC"]] <- NA
+    }
     cat(with(x, sprintf("AIC = %s, BIC = %s \n", AIC, BIC)))
-  } else if(verbose) {
+  } else if(isTRUE(verbose)) {
     invisible(lapply(names(x), function(n) {
       cat(sprintf("%s: %s \n", n, x[[n]]))
     }))
   }
 }
+
+#' @method print mplusObject
+#' @export
+print.mplusObject <- function(x, ...){
+  print(summary(x))
+}
+
+#' @method print mplus.model
+#' @export
+print.mplus.model <- print.mplusObject
+
+#' @method summary mplus.model
+#' @export
+summary.mplus.model <- function(object, verbose = FALSE, ...)
+{
+  stopifnot(!is.null(object$summaries))
+  Args <- as.list(match.call()[-1])
+  Args$object <- list(results = object)
+  class(Args$object) <- c("mplusObject", class(Args$object))
+  do.call(summary, Args)
+}
+
+
 
 #' Return coefficients for an mplus.model object
 #'
@@ -161,7 +211,7 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
   ..., raw=FALSE) {
   type <- match.arg(type)
 
-  stopifnot(!is.null(object$parameters))
+  stopifnot(isFALSE(is.null(object$parameters)))
 
   p <- switch(type,
     un = object$parameters$unstandardized,
@@ -169,7 +219,7 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
     stdy = object$parameters$stdy.standardized,
     stdyx = object$parameters$stdyx.standardized)
 
-  if (raw) {
+  if (isTRUE(raw)) {
     n <- paste(p[, "paramHeader"], p[, "param"], sep = ":")
     est <- p[, "est"]
     names(est) <- n
@@ -197,11 +247,11 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
 
   extralabels <- rep("", nrow(out))
 
-  if ("LatentClass" %in% colnames(out)) {
+  if (isTRUE("LatentClass" %in% colnames(out))) {
     extralabels <- paste0(extralabels, " C_", out[, "LatentClass"])
   }
 
-  if ("BetweenWithin" %in% colnames(out)) {
+  if (isTRUE("BetweenWithin" %in% colnames(out))) {
     extralabels <- paste0(extralabels, " ", substr(out[, "BetweenWithin"], 1, 1))
   }
 
@@ -210,16 +260,16 @@ coef.mplus.model <- function(object, type = c("un", "std", "stdy", "stdyx"),
   out$Label <- paste(extralabels, out$Label, sep = " ")
 
   estimate <- "est"
-  if ("se" %in% colnames(out)) {
+  if (isTRUE("se" %in% colnames(out))) {
     se <- "se"
-  } else if ("posterior_sd" %in% colnames(out)) {
+  } else if (isTRUE("posterior_sd" %in% colnames(out))) {
     colnames(out)[which(colnames(out) == "posterior_sd")] <- "se"
     se <- "se"
   }
 
   pvalue <- "pval"
 
-  if ("Group" %in% colnames(out)) {
+  if (isTRUE("Group" %in% colnames(out))) {
 
     out <- split(out[, c("Label", estimate, se, pvalue)],
                  out[, "Group"])
@@ -303,9 +353,9 @@ confint.mplus.model <- function(object, parm, level = .95,
 
   type <- match.arg(type)
 
-  stopifnot(level %in% c(.95, .90, .99))
+  stopifnot(isTRUE(level %in% c(.95, .90, .99)))
 
-  stopifnot(!is.null(object$parameters))
+  stopifnot(isFALSE(is.null(object$parameters)))
 
   p <- switch(type,
     un = object$parameters$ci.unstandardized,
@@ -334,11 +384,11 @@ confint.mplus.model <- function(object, parm, level = .95,
 
   extralabels <- rep("", nrow(out))
 
-  if ("LatentClass" %in% colnames(out)) {
+  if (isTRUE("LatentClass" %in% colnames(out))) {
     extralabels <- paste0(extralabels, " C_", out[, "LatentClass"])
   }
 
-  if ("BetweenWithin" %in% colnames(out)) {
+  if (isTRUE("BetweenWithin" %in% colnames(out))) {
     extralabels <- paste0(extralabels, " ", substr(out[, "BetweenWithin"], 1, 1))
   }
 
@@ -355,7 +405,7 @@ confint.mplus.model <- function(object, parm, level = .95,
                "0.95" = "up2.5",
                "0.99" = "up.5")
 
-  if ("Group" %in% colnames(out)) {
+  if (isTRUE("Group" %in% colnames(out))) {
     out <- split(out[, c("Label", lo, hi)], out[, "Group"])
     out <- lapply(out, function(x) {
       names(out) <- c("Label", "LowerCI", "UpperCI", "Group")
@@ -463,8 +513,8 @@ confint.mplusObject <- function(object, ...) {
 #' unlink("Mplus Run Models.log")
 #' }
 extract.mplus.model <- function(model, summaries = "none", cis = FALSE, escape.latex = FALSE, ...) {
-  if (summaries[1] != "none") {
-    stopifnot(all(summaries %in% colnames(model$summaries)))
+  if (isTRUE(summaries[1] != "none")) {
+    stopifnot(isTRUE(all(summaries %in% colnames(model$summaries))))
 
     knownsummaries <- c("Title","Mplus.version", "AnalysisType", "DataType", "Filename", "Estimator",
               "Observations", "Parameters", "ChiSqM_Value", "ChiSqM_DF", "ChiSqM_PValue",
@@ -503,14 +553,14 @@ extract.mplus.model <- function(model, summaries = "none", cis = FALSE, escape.l
   }
 
   params <- coef(model, ...)
-  if (cis) {
+  if (isTRUE(cis)) {
     ci <- confint(model, ...)
   }
   estimate <- "est"
   se <- "se"
   pvalue <- "pval"
 
-  if (inherits(params, "mplus.model.coefs")) {
+  if (isTRUE(inherits(params, "mplus.model.coefs"))) {
     tr <- createTexreg(
       coef.names = if (escape.latex) {
                      gsub("\\$", "\\\\$", as.character(params$Label))
@@ -525,10 +575,10 @@ extract.mplus.model <- function(model, summaries = "none", cis = FALSE, escape.l
       gof.names = summaries,
       gof = summary.values,
       gof.decimal = use.decimals)
-  } else if (inherits(params, "mplus.model.coefs.list")) {
+  } else if (isTRUE(inherits(params, "mplus.model.coefs.list"))) {
     tr <- lapply(params, function(params.i) {
       createTexreg(
-        coef.names = if (escape.latex) {
+        coef.names = if (isTRUE(escape.latex)) {
                      gsub("\\$", "\\\\$", as.character(params.i$Label))
                    } else {
                      as.character(params.i$Label)
@@ -536,8 +586,8 @@ extract.mplus.model <- function(model, summaries = "none", cis = FALSE, escape.l
         coef = params.i[, estimate],
         se = params.i[, se],
         pvalues = params.i[, pvalue],
-        ci.low = if (cis) ci[, "LowerCI"] else numeric(0),
-        ci.up = if (cis) ci[, "UpperCI"] else numeric(0),
+        ci.low = if (isTRUE(cis)) ci[, "LowerCI"] else numeric(0),
+        ci.up = if (isTRUE(cis)) ci[, "UpperCI"] else numeric(0),
         gof.names = summaries,
         gof = summary.values,
         gof.decimal = use.decimals)
@@ -642,9 +692,9 @@ setMethod("extract", signature = className("mplusObject", "MplusAutomation"),
 #' }
 plot.mplusObject <- function(x, y, type = c("stdyx", "un", "std", "stdy"), ...) {
   type <- match.arg(type)
-  stopifnot(!is.null(x$results))
+  stopifnot(isFALSE(is.null(x$results)))
 
-  if (type == "stdyx" & is.null(x$results$parameters$stdyx.standardized)) {
+  if (isTRUE(type == "stdyx") && isTRUE(is.null(x$results$parameters$stdyx.standardized))) {
     warning("No standardized estimates, using unstandardized")
     type <- "un"
   }
@@ -658,7 +708,7 @@ plot.mplusObject <- function(x, y, type = c("stdyx", "un", "std", "stdy"), ...) 
   sections <- c("regression", "loading", "undirected", "expectation", "variability")
   res <- lapply(sections, function(params) {
     tmp <- paramExtract(p, params = params)
-    if (!nrow(tmp)) return(NULL)
+    if (isTRUE(nrow(tmp) == 0)) return(NULL)
     n <- paste(tmp[, "paramHeader"], tmp[, "param"], sep = ":")
     data.frame(Name = n, Estimate = tmp[, "est"], Section = paste("Type:", type),
        stringsAsFactors=FALSE)

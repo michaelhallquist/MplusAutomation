@@ -47,11 +47,14 @@ unlink("Mplus Run Models.log")
 }
 }
 \seealso{
-Other Mplus-Formatting: \code{\link{coef.mplus.model}},
-  \code{\link{confint.mplus.model}}, \code{\link{extract}},
-  \code{\link{print.MplusRstructure}}
+Other Mplus-Formatting: 
+\code{\link{coef.mplus.model}()},
+\code{\link{confint.mplus.model}()},
+\code{\link{extract}()},
+\code{\link{print.MplusRstructure}()}
 }
 \author{
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
+\concept{Mplus-Formatting}
 \keyword{interface}

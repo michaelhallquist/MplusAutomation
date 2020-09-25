@@ -4,10 +4,18 @@
 \alias{plotGrowthMixtures}
 \title{Plot growth mixture models}
 \usage{
-plotGrowthMixtures(modelList, bw = FALSE, rawdata = FALSE,
-  estimated = TRUE, poly = FALSE, alpha_range = c(0, 0.1),
-  growth_variables = NULL, time_scale = NULL, jitter_lines = NULL,
-  coefficients = "unstandardized")
+plotGrowthMixtures(
+  modelList,
+  bw = FALSE,
+  rawdata = FALSE,
+  estimated = TRUE,
+  poly = FALSE,
+  alpha_range = c(0, 0.1),
+  growth_variables = NULL,
+  time_scale = NULL,
+  jitter_lines = NULL,
+  coefficients = "unstandardized"
+)
 }
 \arguments{
 \item{modelList}{A list object of Mplus models, or a single Mplus model. This

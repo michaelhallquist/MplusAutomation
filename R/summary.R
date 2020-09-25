@@ -139,6 +139,7 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
 #'  unlink("mtcars.inp")
 #'  unlink("mtcars.out")
 #'  unlink("Mplus Run Models.log")
+#'  closeAllConnections()
 #' }
 SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex", "markdown", "none"),
                          filename = "", keepCols, dropCols, sortBy, caption = "",

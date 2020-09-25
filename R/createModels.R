@@ -1123,8 +1123,6 @@ processInit <- function(initsection) {
     return(element)
   })
 
-  #browser()
-
 
   #default output directory to the current directory
   if (is.null(arglist$outputDirectory)) {
@@ -1152,10 +1150,7 @@ processInit <- function(initsection) {
 #' MplusAutomation:::createVarSyntax(mtcars)
 createVarSyntax <- function(data) {
   #variable created for readability
-  variableNames <- paste(gsub("\\.", "_", names(data)), collapse=" ")
-
-  #short names?
-  #shortNames <- paste(substr(names(df), 1, 8), collapse=" ")
+  variableNames <- paste(gsub("\\.", "_", colnames(data)), collapse=" ")
 
   vnames <- paste(strwrap(paste(c("NAMES = ", variableNames, ";"), collapse = ""),
     width=85, exdent=5), collapse="\n")
@@ -1199,7 +1194,21 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' @rdname MplusAutomationUtils
 #' @examples
 #' \dontrun{
-#'   MplusAutomation:::.cleanHashData(mtcars)
+#'
+#' ## basic example
+#' MplusAutomation:::.cleanHashData(mtcars)
+#'
+#' ## has changes when data changes
+#' MplusAutomation:::.cleanHashData(mtcars[-15,])
+#'
+#' ## example on a list (e.g., for multiply imputed data)
+#'
+#' MplusAutomation:::.cleanHashData(
+#'  list(
+#'    data.frame(a = 1:4),
+#'    data.frame(a = c(2, 2, 3, 4))),
+#'   imputed = TRUE)
+#'
 #' }
 .cleanHashData <- function(df, keepCols, dropCols, imputed=FALSE) {
   if (imputed) {
@@ -1262,7 +1271,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
   }
 
   if (imputed) {
-    hash <- digest(as.vector(unlist(lapply(df, f))), "md5")
+    hash <- lapply(seq_along(df), function(i) digest(f(df[[i]]), "md5"))
   } else {
     hash <- digest(f(df), "md5")
   }
@@ -1300,10 +1309,136 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
   list(filename = filename, fileexists = fileexists)
 }
 
+
+
+
+#' Convert a matrix or data frame to numeric or integer for Mplus
+#'
+#' Primarily an internal utility function, for \code{prepareMplusData}.
+#'
+#' @param df A matrix or data frame
+#' @return An error if it cannot be converted or
+#'   a matrix or data frame with all variables converted to
+#'   numeric or integer classes
+#' @importFrom data.table is.data.table
+#' @keywords internal
+#' @examples
+#'
+#' \dontrun{
+#' df1 <- df2 <- df3 <- df4 <- mtcars
+#'
+#' df2$cyl <- factor(df2$cyl)
+#' df2$am <- as.logical(df2$am)
+#'
+#' df3$mpg <- as.character(df3$mpg)
+#'
+#' df4$vs <- as.Date(df4$vs, origin = "1989-01-01")
+#'
+#' df5 <- as.matrix(cars)
+#'
+#' df6 <- matrix(c(TRUE, TRUE, FALSE, FALSE), ncol = 2)
+#'
+#' df7 <- as.list(mtcars)
+#'
+#'
+#' MplusAutomation:::.convertData(df1)
+#'
+#' MplusAutomation:::.convertData(df2)
+#'
+#' MplusAutomation:::.convertData(df3)
+#'
+#' MplusAutomation:::.convertData(df4)
+#'
+#' MplusAutomation:::.convertData(df5)
+#'
+#' MplusAutomation:::.convertData(df6)
+#'
+#' MplusAutomation:::.convertData(df7)
+#'
+#' rm(df1, df2, df3, df4, df5, df6, df7)
+#' }
+.convertData <- function(df) {
+  if (isTRUE(is.matrix(df))) {
+    if (isTRUE(is.numeric(df)) || isTRUE(is.integer(df))) {
+    NULL ## do nothing
+    } else if (isTRUE(is.logical(df))) {
+      message("Logical matrix converted to integer")
+      storage.mode(df) <- "integer"
+    } else {
+      stop(paste(
+        "\nIf data are passed as a matrix, must be of class",
+        "numeric, integer, or logical, but data was of class",
+        class(df[,1]),
+        sep = "\n"))
+    }
+
+    if (isTRUE(is.null(colnames(df)[1]))) {
+      message("no variable names, setting to V1, V2, etc")
+      colnames(df) <- paste0("V", 1:ncol(df))
+    }
+  } else if (isTRUE(is.data.frame(df))) {
+    if (isTRUE(is.data.table(df))) {
+      df <- as.data.frame(df)
+    }
+
+    col_logical <- vapply(df, is.logical, FUN.VALUE = NA)
+    col_numeric <- vapply(df, is.numeric, FUN.VALUE = NA) | vapply(df, is.integer, FUN.VALUE = NA)
+    col_factor <- vapply(df, is.factor, FUN.VALUE = NA)
+
+    col_class <- vapply(df, class, FUN.VALUE = NA_character_)
+
+    ok_cols <- col_logical | col_numeric | col_factor
+
+    if (!all(ok_cols)) {
+      stop(paste("\nCurrently only variables of class: ",
+                 "numeric, integer, logical, or factor",
+                 "are allowed but found additional class types including: ",
+                 paste(unique(col_class[!ok_cols]), collapse = ", "),
+                 "\nto see which variables are problematic, try:",
+                 "str(yourdata)",
+                 sep = "\n"))
+    }
+
+    factor_cols <- which(col_factor)
+    if (isTRUE(length(factor_cols) > 0)) {
+      message("Factors will be converted to numbers in Mplus data file")
+      for (i in factor_cols) {
+        cat("\nFactor:", names(df)[i], "\n")
+        cat("Conversion:\n")
+        conv_df <- data.frame(level = levels(df[[i]]),
+                              number = seq_along(levels(df[[i]])))
+        print(conv_df, row.names=FALSE)
+        df[[i]] <- as.numeric(df[[i]]) #convert to number
+      }
+    }
+
+    logical_cols <- which(col_logical)
+    if (isTRUE(length(logical_cols) > 0)) {
+      message("Logical variables will be converted to numbers in Mplus data file")
+      for (i in logical_cols) {
+        message("Logical variable: ", names(df)[i], " converted to 0/1 integer")
+        df[[i]] <- as.integer(df[[i]])
+      }
+    }
+  } else {
+    stop (paste(
+      "\nCan only convert matrix or data frame class ",
+      "data but found data of class:",
+      class(df),
+      sep = "\n"))
+  }
+  return(df)
+}
+
+
+
+
+
 #' Create tab-delimited file and Mplus input syntax from R data.frame
 #'
-#' The \code{prepareMplusData} function converts an R data.frame object
-#' into a tab-delimited file (without header) to be used in an Mplus
+#' The \code{prepareMplusData} function converts an R data.frame
+#' (or a list of data frames), into a tab-delimited
+#' file (without header) to be used in an Mplus
 #' input file. The corresponding Mplus syntax, including the
 #' data file definition and variable names,
 #' is printed to the console or optionally to an input file.
@@ -1366,6 +1501,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'   data files and optionally input files.
 #' @keywords interface
 #' @importFrom utils write.table
+#' @importFrom data.table fwrite
 #' @author Michael Hallquist
 #' @export
 #' @examples
@@ -1381,8 +1517,17 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' # basic example
 #' test01 <- prepareMplusData(mtcars, "test01.dat")
 #'
+#'
+#'
 #' # see that syntax was stored
 #' test01
+#'
+#' # example when there is a factor and logical
+#' tmpd <- mtcars
+#' tmpd$cyl <- factor(tmpd$cyl)
+#' tmpd$am <- as.logical(tmpd$am)
+#' prepareMplusData(tmpd, "test_type.dat")
+#' rm(tmpd)
 #'
 #' # by default, if re-run, data is re-written, with a note
 #' test01b <- prepareMplusData(mtcars, "test01.dat")
@@ -1393,10 +1538,17 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'
 #' # now that the filename was hashed in test01c, future calls do not re-write data
 #' # as long as the hash matches
-#' test01d <- prepareMplusData(mtcars, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
+#' test01d <- prepareMplusData(mtcars, "test01c.dat",
+#'   writeData = "ifmissing", hashfilename=TRUE)
+#'
+#' # now that the filename was hashed in test01c, future calls do not re-write data
+#' # as long as the hash matches
+#' test01db <- prepareMplusData(mtcars, "test01d.dat",
+#'   writeData = "ifmissing", hashfilename=TRUE)
 #'
 #' # however, if the data change, then the file is re-written
-#' test01e <- prepareMplusData(iris, "test01c.dat", writeData = "ifmissing", hashfilename=TRUE)
+#' test01e <- prepareMplusData(iris, "test01c.dat",
+#'   writeData = "ifmissing", hashfilename=TRUE)
 #'
 #' # tests for keeping and dropping variables
 #' prepareMplusData(mtcars, "test02.dat", keepCols = c("mpg", "hp"))
@@ -1435,6 +1587,46 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' # new errors if files exist and overwrite=FALSE
 #' prepareMplusData(mtcars, "test10.dat",
 #'   inpfile="test10alt.inp", overwrite=FALSE)
+#'
+#'
+#' # can write multiply imputed data too
+#' # here are three "imputed" datasets
+#' idat <- list(
+#'   data.frame(mpg = mtcars$mpg, hp = c(100, mtcars$hp[-1])),
+#'   data.frame(mpg = mtcars$mpg, hp = c(110, mtcars$hp[-1])),
+#'   data.frame(mpg = mtcars$mpg, hp = c(120, mtcars$hp[-1])))
+#'
+#' # if we turn on hashing in the filename the first time,
+#' # we can avoid overwriting notes the second time
+#' testimp1 <- prepareMplusData(idat, "testi1.dat",
+#'   writeData = "ifmissing", hashfilename=TRUE,
+#'   imputed = TRUE)
+#'
+#' # now that the filename was hashed, future calls do not re-write data
+#' # as long as all the hashes match
+#' testimp2 <- prepareMplusData(idat, "testi2.dat",
+#'   writeData = "ifmissing", hashfilename=TRUE,
+#'   imputed = TRUE)
+#'
+#' # in fact, the number of imputations can decrease
+#' # and they still will not be re-written
+#' testimp3 <- prepareMplusData(idat[-3], "testi3.dat",
+#'   writeData = "ifmissing", hashfilename=TRUE,
+#'   imputed = TRUE)
+#'
+#' # however, if the data changes, then all are re-written
+#' # note that it warns for the two files that already exist
+#' # as these two are overwritten
+#'
+#' idat2 <- list(
+#'   data.frame(mpg = mtcars$mpg, hp = c(100, mtcars$hp[-1])),
+#'   data.frame(mpg = mtcars$mpg, hp = c(109, mtcars$hp[-1])),
+#'   data.frame(mpg = mtcars$mpg, hp = c(120, mtcars$hp[-1])))
+#' testimp4 <- prepareMplusData(idat2, "testi4.dat",
+#'   writeData = "ifmissing", hashfilename=TRUE,
+#'   imputed = TRUE)
+#'
+#'
 #' }
 prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
                              interactive=TRUE, overwrite=TRUE, imputed=FALSE,
@@ -1446,17 +1638,6 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
   if (identical(writeData, "never")) {
     message("No action taken as writeData = 'never'")
     return(invisible(""))
-  }
-
-  if (imputed) {
-    if (identical(writeData, "ifmissing")) {
-      writeData <- "always"
-      message("When imputed = TRUE, writeData cannot be 'ifmissing', setting to 'always'")
-    }
-    if (hashfilename) {
-      hashfilename <- FALSE
-      message("When imputed = TRUE, hashfilename cannot be TRUE, setting to FALSE")
-    }
   }
 
   if (!hashfilename && identical(writeData, "ifmissing")) {
@@ -1474,7 +1655,8 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
     if (missing(dropCols)) {
       cleand <- .cleanHashData(df = df, keepCols = keepCols, imputed = imputed)
     } else {
-      cleand <- .cleanHashData(df = df, keepCols = keepCols, dropCols = dropCols, imputed = imputed)
+      cleand <- .cleanHashData(df = df, keepCols = keepCols,
+                               dropCols = dropCols, imputed = imputed)
     }
   }
 
@@ -1492,14 +1674,41 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
   ## if filename is still missing at this point, throw an error
   stopifnot(!missing(filename))
 
-  tmp <- .hashifyFile(filename, md5, useexisting = identical(writeData, "ifmissing"))
+  origfilename <- filename
 
-  if (hashfilename) {
-    filename <- tmp$filename
+  ## impfilename <- gsub("\\.dat$", "_implist.dat", filename)
+  impfilename <- filename
+
+  if (isTRUE(imputed) && isTRUE(hashfilename)) {
+    tmp <- lapply(1:length(md5), function(i) {
+      .hashifyFile(filename, md5[[i]],
+                   useexisting = identical(writeData, "ifmissing"))
+    })
+    filename <- unlist(lapply(tmp, function(x) x$filename))
+
+    allfilesexist <- all(vapply(tmp, function(x) x$fileexists, FUN.VALUE = NA))
+  } else if (isTRUE(imputed) && isFALSE(hashfilename)) {
+    filename.base <- gsub("\\.dat", "", filename)
+    filename <- unlist(lapply(1:length(df), function(i) {
+      paste0(filename.base, "_imp_", i, ".dat")
+    }))
+  } else {
+    tmp <- .hashifyFile(filename, md5,
+                        useexisting = identical(writeData, "ifmissing"))
+    allfilesexist <- tmp$fileexists
+    if (isTRUE(hashfilename)) {
+      filename <- tmp$filename
+    }
   }
 
-  if (identical(writeData, "ifmissing") && tmp$fileexists) {
-    message(sprintf("File with md5 hash matching data found, using %s", filename))
+  if (isTRUE(imputed)) {
+    message("writing implist to ", impfilename)
+    cat(filename, file = impfilename, sep = "\n")
+  }
+
+  if (identical(writeData, "ifmissing") && isTRUE(allfilesexist)) {
+    message(sprintf("File(s) with md5 hash matching data found, using \n%s",
+                    paste(filename, collapse = "\n")))
   } else {
     ## even if writeData = 'ifmissing' if the data are missing, need to write out
     writeData <- "always"
@@ -1507,79 +1716,47 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
 
   if (identical(writeData, "always")) {
     ## convert factors to numbers
-    if (imputed) {
-    df <- lapply(1:length(df), function(i) {
-       as.data.frame(qv <- lapply(1:ncol(df[[i]]), function(col) {
-              if (is.factor(df[[i]][, col])) {
-                ## numeric storage of the levels corresponds to the order of the levels
-                if (i == 1) {
-                  cat("Factor variable:", names(df[[i]])[col], "; factor levels:", paste(levels(df[[i]][, col]), collapse=", "), "converted to numbers:",
-                      paste(seq_along(levels(df[[i]][, col])), collapse=", "), "\n\n")
-                }
-                col_value <- as.numeric(df[[i]][, col])
-              } else {
-                col_value <- df[[i]][, col]
-              }
-
-              if (is.character(df[[i]][, col])) {
-                if (i == 1) warning("Character data requested for output using prepareMplusData.\n  Mplus does not support character data.")
-              }
-
-              col_value <- list(col_value)
-              names(col_value) <- names(df[[i]])[col]
-              return(col_value)
-            }))
-     })
+    if (isTRUE(imputed)) {
+      df <- lapply(1:length(df), function(i) {
+        if (i == 1) {
+          .convertData(df[[i]])
+        } else {
+          suppressMessages(.convertData(df[[i]]))
+        }
+      })
     } else {
-
-    df <- as.data.frame(qv <- lapply(1:ncol(df), function(col) {
-              #can't use ifelse because is.factor returns only one element,
-              #and ifelse enforces identical length
-              if (is.factor(df[, col])) {
-                # numeric storage of the levels corresponds to the order of the levels
-                message("Factor variable:", names(df)[col], "; factor levels:", paste(levels(df[,col]), collapse=", "), "converted to numbers:",
-                    paste(seq_along(levels(df[,col])), collapse=", "), "\n\n")
-                col_value <- as.numeric(df[,col])
-              } else {
-                col_value <- df[,col]
-              }
-
-              if (is.character(df[,col])) {
-                warning("Character data requested for output using prepareMplusData.\n  Mplus does not support character data.")
-              }
-
-              col_value <- list(col_value)
-              names(col_value) <- names(df)[col]
-              return(col_value)
-            }))
+      df <- .convertData(df)
     }
 
-    if (file.exists(filename)) {
-      if (overwrite) {
-        warning(paste("The file", sQuote(basename(filename)),
-          "currently exists and will be overwritten"))
+    if (any(vapply(filename, file.exists, FUN.VALUE = NA))) {
+      if (isTRUE(overwrite)) {
+        message(paste("The file(s)\n", sQuote(
+                                       paste(vapply(filename[vapply(filename, file.exists, FUN.VALUE = NA)], basename,
+                                                    FUN.VALUE = NA_character_), collapse = ";\n")),
+                      "\ncurrently exist(s) and will be overwritten"))
       } else {
-        stop(paste("The file", sQuote(basename(filename)),
-          "currently exists. Specify a different filename or set overwrite=TRUE"))
+        stop(paste("The file(s)\n", sQuote(
+                                 paste(vapply(filename[vapply(filename, file.exists, FUN.VALUE = NA)], basename,
+                                              FUN.VALUE = NA_character_), collapse = ";\n")),
+                   "\ncurrently exist(s). Specify a different filename or set overwrite=TRUE"))
       }
     }
 
-    if (imputed) {
-      filename.base <- gsub("\\.dat", "", filename)
+    if (isTRUE(imputed)) {
       junk <- lapply(1:length(df), function(i) {
-        write.table(df[[i]], paste0(filename.base, "_imp_", i, ".dat"), sep = "\t",
-          col.names = FALSE, row.names = FALSE, na=".")
+        fwrite(df[[i]], filename[[i]], sep = "\t",
+               col.names = FALSE, row.names = FALSE, na=".")
       })
-      cat(paste0(filename.base, "_imp_", 1:length(df), ".dat"), file = filename, sep = "\n")
     } else {
-      write.table(df, filename, sep = "\t", col.names = FALSE, row.names = FALSE, na=".")
+      fwrite(df, filename, sep = "\t",
+             col.names = FALSE, row.names = FALSE, na=".")
     }
   }
 
-  if (imputed) {
+  if (isTRUE(imputed)) {
     syntax <- c(
     "TITLE: Your title goes here\n",
-    DATA <- paste0("DATA: FILE = \"", filename, "\";\n", "TYPE = IMPUTATION;\n"),
+    DATA <- paste0("DATA: FILE = \"", impfilename, "\";\n", "TYPE = IMPUTATION;\n"),
     "VARIABLE: \n", createVarSyntax(df[[1]]), "MISSING=.;\n")
 
   } else {
@@ -1593,20 +1770,20 @@ prepareMplusData <- function(df, filename, keepCols, dropCols, inpfile=FALSE,
   # then create the file using filename
   # changing the extension to .inp
   if (is.logical(inpfile) && inpfile) {
-    inpfile <- gsub("(.*)\\..*$", "\\1.inp", filename)
+    inpfile <- gsub("(.*)\\..*$", "\\1.inp", origfilename)
   }
 
   # if the input file is not a character
   # either by user specification or automatically
   # by replacing extension of filename with .inp
   # then just use stdout
-  if (!is.character(inpfile)) {
+  if (isFALSE(is.character(inpfile))) {
     inpfile <- stdout()
   }
 
-  if (is.character(inpfile) && file.exists(inpfile)) {
+  if (isTRUE(is.character(inpfile)) && isTRUE(file.exists(inpfile))) {
     if (overwrite) {
-      warning(paste("The file", sQuote(basename(inpfile)),
+      message(paste("The file", sQuote(basename(inpfile)),
         "currently exists and will be overwritten"))
     } else {
       stop(paste("The file", sQuote(basename(inpfile)),

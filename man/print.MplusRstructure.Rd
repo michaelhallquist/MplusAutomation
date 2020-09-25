@@ -28,11 +28,14 @@ print(mplusRcov(c("a", "b", "c"), type = "ar"))
 str(mplusRcov(c("a", "b", "c"), type = "ar"))
 }
 \seealso{
-Other Mplus-Formatting: \code{\link{coef.mplus.model}},
-  \code{\link{confint.mplus.model}}, \code{\link{extract}},
-  \code{\link{summary.mplusObject}}
+Other Mplus-Formatting: 
+\code{\link{coef.mplus.model}()},
+\code{\link{confint.mplus.model}()},
+\code{\link{extract}()},
+\code{\link{summary.mplusObject}()}
 }
 \author{
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
+\concept{Mplus-Formatting}
 \keyword{interface}

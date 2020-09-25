@@ -157,11 +157,13 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
     modelFitSectionHeaders <- c(
       "", #section-nonspecific parameters
       "Chi-Square Test of Model Fit",
-#        "Chi-Square Test of Model Fit for the Baseline Model",
+#      "Chi-Square Test of Model Fit for the Baseline Model",
       "Loglikelihood::H0 Value",
       "Loglikelihood::H1 Value",
       "CFI/TLI::CFI",
       "CFI/TLI::TLI",
+      "Bayesian Posterior Predictive Checking using Chi-Square::Posterior Predictive P-Value",
+      "Bayesian Prior Posterior Predictive Checking using Chi-Square::Prior Posterior Predictive P-Value",
       "Information Criteria( Including the Auxiliary Part)*::Akaike \\(AIC\\)",
       "Information Criteria( Including the Auxiliary Part)*::Bayesian \\(BIC\\)",
       "Information Criteria( Including the Auxiliary Part)*::Sample-Size Adjusted BIC \\(n\\* = \\(n \\+ 2\\) / 24\\)",
@@ -204,6 +206,16 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
       ),
       data.frame(
         varName=c("TLI_Mean", "TLI_SD", "TLI_NumComputations"),
+        regexPattern=c("Mean", "Std Dev", "Number of successful computations"),
+        varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
+      ),
+      data.frame(
+        varName=c("PostPred_PValue_Mean", "PostPred_PValue_SD", "PostPred_PValue_NumComputations"),
+        regexPattern=c("Mean", "Std Dev", "Number of successful computations"),
+        varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
+      ),
+      data.frame(
+        varName=c("PriorPostPred_PValue_Mean", "PriorPostPred_PValue_SD", "PriorPostPred_PValue_NumComputations"),
         regexPattern=c("Mean", "Std Dev", "Number of successful computations"),
         varType=c("dec", "dec", "int"), stringsAsFactors=FALSE
       ),
@@ -497,8 +509,8 @@ divideIntoFields <- function(section.text, required) {
 extractWarningsErrors_1file <- function(outfiletext, filename, input) {
   
   warnerr <- list(warnings = list(), errors = list())
-  class(warnerr$errors) <- c("list", "mplus.errors")
-  class(warnerr$warnings) <- c("list", "mplus.warnings")
+  class(warnerr$errors) <- c("mplus.errors", "list")
+  class(warnerr$warnings) <- c("mplus.warnings", "list")
   if (!inherits(input, "mplus.inp")) {
     warning("Could not identify warnings and errors; input is not of class mplus.inp")
     return(warnerr)
@@ -645,7 +657,7 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
 #' # make me!!!
 extractInput_1file <- function(outfiletext, filename) {
   input <- list()
-  class(input) <- c("list", "mplus.inp")
+  class(input) <- c("mplus.inp", "list")
   
   startInput <- grep("^\\s*INPUT INSTRUCTIONS\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
   if (length(startInput) == 0L) {
@@ -758,6 +770,10 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   
   arglist$Estimator <- extractValue(pattern="^\\s*Estimator\\s*", analysisSummarySection, filename, type="str")
   arglist$Observations <- extractValue(pattern="^\\s*Number of observations\\s*", analysisSummarySection, filename, type="int")
+  # Fix for multigroup models, where Observations were not parsed correctly
+  if(is.na(arglist$Observations)){
+    arglist$Observations <- extractValue(pattern="^\\s*Total sample size\\s*", analysisSummarySection, filename, type="int")
+  }
   arglist$NGroups <- extractValue(pattern="^\\s*Number of groups\\s*", analysisSummarySection, filename, type="int")
   arglist$NDependentVars <- extractValue(pattern="^\\s*Number of dependent variables\\s*", analysisSummarySection, filename, type="int")
   arglist$NIndependentVars <- extractValue(pattern="^\\s*Number of independent variables\\s*", analysisSummarySection, filename, type="int")
@@ -926,7 +942,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   arglist$Filename <- splitFilePath(filename)$filename #only retain filename, not path
   
   arglist <- as.data.frame(arglist, stringsAsFactors=FALSE)
-  class(arglist) <- c("data.frame", "mplus.summaries")
+  class(arglist) <- c("mplus.summaries", "data.frame")
   attr(arglist, "filename") <- arglist$Filename
   
   return(arglist)
@@ -1072,33 +1088,21 @@ addHeaderToSavedata <- function(outfile, directory=getwd()) {
   
 }
 
-#' Extract residual matrices
-#'
-#' Function that extracts the residual matrices including standardized ones
-#'
-#' @param outfiletext the text of the output file
-#' @param filename The name of the file
-#' @return A list of the residual matrices
-#' @keywords internal
-#' @seealso \code{\link{matrixExtract}}
-#' @examples
-#' # make me!!!
-extractResiduals <- function(outfiletext, filename) {
-  residSection <- getSection("^RESIDUAL OUTPUT$", outfiletext)
-  if (is.null(residSection)) return(list()) #no residuals output
-  
+#' Helper subfunction to extract one section of OUTPUT: RESIDUALS
+#' Can be called multiple times, as in the case of invariance testing
+extractResiduals_1section <- function(residSection) {
   #allow for multiple groups
-  residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR [\\w\\d\\s\\.,_]+)*",
-    residSection, filename, allowMultiple=TRUE)
+  residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR .+)*",
+                                          residSection, filename, allowMultiple=TRUE)
   
   matchlines <- attr(residSubsections, "matchlines")
   
   if (length(residSubsections) == 0) {
     warning("No sections found within residuals output.")
     return(list())
+  } else if (length(residSubsections) > 1) {
+    groupNames <- make.names(gsub("^\\s*ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR (.+))*\\s*$", "\\2", residSection[matchlines], perl=TRUE))
   }
-  else if (length(residSubsections) > 1)
-    groupNames <- make.names(gsub("^\\s*ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", residSection[matchlines], perl=TRUE))
   
   residList <- list()
   #multiple groups possible
@@ -1113,19 +1117,61 @@ extractResiduals <- function(outfiletext, filename) {
     targetList[["covarianceResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
     targetList[["covarianceResid.std"]] <- matrixExtract(residSubsections[[g]], "Standardized Residuals \\(z-scores\\) for Covariances(/Correlations/Residual Corr)*", filename)
     targetList[["covarianceResid.norm"]] <- matrixExtract(residSubsections[[g]], "Normalized Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
+    targetList[["correlationEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Correlations", filename)
+    targetList[["correlationResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Correlations", filename)
     targetList[["slopeEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Slopes", filename)
     targetList[["slopeResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Slopes", filename)
     
     if (length(residSubsections) > 1) {
-      class(targetList) <- c("list", "mplus.residuals")
+      class(targetList) <- c("mplus.residuals", "list")
       residList[[groupNames[g]]] <- targetList
-    }
-    else
+    } else{ 
       residList <- targetList
+    }
+    
   }
   
-  class(residList) <- c("list", "mplus.residuals")
-  if (length(residSubsections) > 1) attr(residList, "group.names") <- groupNames
+  class(residList) <- c("mplus.residuals", "list")
+  if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
+  
+  return(residList)
+}
+
+
+
+#' Extract residual matrices
+#'
+#' Function that extracts the residual matrices including standardized ones
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of the residual matrices
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractResiduals <- function(outfiletext, filename) {
+  #allow multiple model residual sections
+  #mimic extractParameters_1file
+  if (length(multisectionMatches <- grep("^\\s*RESIDUAL OUTPUT FOR .*", outfiletext, perl=TRUE, value=TRUE)) > 0L) {
+    sectionNames <- make.names(sub("^\\s*RESIDUAL OUTPUT FOR\\s+(?:THE)*\\s*([\\w\\.]+)", "\\1", multisectionMatches, perl=TRUE))
+    
+    residList <- list()
+    for (s in 1:length(sectionNames)) {
+      residSection <- getSection(multisectionMatches[s], outfiletext)
+      if (!is.null(residSection)) {
+        residList[[ sectionNames[s] ]] <- extractResiduals_1section(residSection) #[[1]]
+      }
+    }
+  } else {
+    residSection <- getSection("^RESIDUAL OUTPUT$", outfiletext)
+    if (is.null(residSection)) { return(list()) } #no residuals output
+    
+    residList <- extractResiduals_1section(residSection) #[[1]]
+  }
+  
+  # class(residList) <- c("mplus.residuals", "list")
+  # if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
   
   return(residList)
 }
@@ -1186,14 +1232,14 @@ extractTech1 <- function(outfiletext, filename) {
     }
     
     if (length(paramSpecSubsections) > 1) {
-      class(targetList) <- c("list", "mplus.parameterSpecification")
+      class(targetList) <- c("mplus.parameterSpecification", "list")
       paramSpecList[[groupNames[g]]] <- targetList
     }
     else
       paramSpecList <- targetList
   }
   
-  class(paramSpecList) <- c("list", "mplus.parameterSpecification")
+  class(paramSpecList) <- c("mplus.parameterSpecification", "list")
   if (length(paramSpecSubsections) > 1) attr(paramSpecList, "group.names") <- groupNames
   
   startValSubsections <- getMultilineSection("STARTING VALUES( FOR [\\w\\d\\s\\.,_]+)*",
@@ -1235,18 +1281,18 @@ extractTech1 <- function(outfiletext, filename) {
     }
     
     if (length(startValSubsections) > 1) {
-      class(targetList) <- c("list", "mplus.startingValues")
+      class(targetList) <- c("mplus.startingValues", "list")
       startValList[[groupNames[g]]] <- targetList
     }
     else
       startValList <- targetList
   }
   
-  class(startValList) <- c("list", "mplus.startingValues")
+  class(startValList) <- c("mplus.startingValues", "list")
   if (length(startValSubsections) > 1) attr(startValList, "group.names") <- groupNames
   
   tech1List <- list(parameterSpecification=paramSpecList, startingValues=startValList)
-  class(tech1List) <- c("list", "mplus.tech1")
+  class(tech1List) <- c("mplus.tech1", "list")
   
   return(tech1List)
   
@@ -1258,13 +1304,21 @@ extractSampstat <- function(outfiletext, filename) {
     #try output from TYPE=BASIC, which places these in a section of a different name
     sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
   }
+  if(!is.null(sampstatSection) & all(sampstatSection == "")){
+    first_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][1]+1)
+    final_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][2]-1)
+    sampstatSection <- outfiletext[first_line:final_line]
+  }
   sampstatList <- list()
-  
   sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
     sampstatSection, filename, allowMultiple=TRUE)
   
   matchlines <- attr(sampstatSubsections, "matchlines")
   
+  if(is.na(sampstatSubsections[1])){
+    sampstatSubsections <- list(sampstatSection)
+    matchlines <- attr(sampstatSubsections, "lines")
+  }
   if (length(sampstatSubsections) == 0)
     warning ("No sample statistics sections found within SAMPSTAT output.")
   else if (length(sampstatSubsections) > 1)
@@ -1301,11 +1355,12 @@ extractSampstat <- function(outfiletext, filename) {
 #    }
     
     if (length(sampstatSubsections) > 1) {
-      class(targetList) <- c("list", "mplus.sampstat")
+      class(targetList) <- c("mplus.sampstat", "list")
       sampstatList[[groupNames[g]]] <- targetList
-    }
-    else
+    } else{
       sampstatList <- targetList
+    }
+    
   }
   
   ##Extract Univariate counts and proportions
@@ -1343,18 +1398,42 @@ extractSampstat <- function(outfiletext, filename) {
       #targetList[["proportions.counts"]] <- df
       targetList <- df #just a single element at the moment
       
-      class(targetList) <- c("data.frame", "mplus.propcounts.data.frame")
+      class(targetList) <- c("mplus.propcounts.data.frame", "data.frame")
       
       if (length(countSubsections) > 1) {
-        #class(targetList) <- c("list", "mplus.propcounts")
+        #class(targetList) <- c("mplus.propcounts", "list")
         sampstatList[[groupNames[g]]][["proportions.counts"]] <- targetList
       }
       else
         sampstatList[["proportions.counts"]] <- targetList
     }
   }
-  
-  class(sampstatList) <- c("list", "mplus.sampstat")
+
+  # Extract univariate sample statistics ------------------------------------
+
+  univariate_sampstat <- getSection("^UNIVARIATE SAMPLE STATISTICS$", outfiletext)
+  if(!is.null(univariate_sampstat)){
+    stats <- lapply(univariate_sampstat[grepl("\\d$", univariate_sampstat)], function(x){strsplit(trimws(x), split = "\\s+")[[1]]})
+    if(length(stats) %% 2 == 0) {
+      out <- cbind(do.call(rbind, stats[seq(1, length(stats), by = 2)]),
+            do.call(rbind, stats[seq(2, length(stats), by = 2)]))
+      #headers <- univariate_sampstat[grepl("\\/", univariate_sampstat)]
+      #headers <- gsub("%", " %", headers)
+      #headers <- lapply(trimws(headers), function(x){strsplit(x, "\\s{2,}")[[1]]})
+      #headers[[1]] <- c(gsub("\\/", "", headers[[1]][grepl("\\/", headers[[1]])]), gsub("\\/.*$", "", headers[[2]][grepl("\\/", headers[[2]])]))
+      #headers[[2]] <- gsub("^.+?\\/", "", headers[[2]])
+      #colnames(out) <- gsub(" %", "%", c(headers[[1]], headers[[2]]))
+      var_names <- out[, 1]
+      out <- gsub("%", "", out)
+      out <- out[,-1, drop=FALSE] #drop variable column
+      dd <- dim(out)
+      out <- matrix(apply(out, 2, as.numeric), nrow=dd[1], ncol=dd[2]) #need to preserve dimensions in the single-row case
+      colnames(out) <- c("Mean", "Skewness", "Minimum", "%Min", "20%", "40%", "Median", "Sample Size", "Variance", "Kurtosis", "Maximum", "%Max", "60%", "80%")
+      rownames(out) <- var_names
+      sampstatList$univariate.sample.statistics <- out[, c("Sample Size", "Mean", "Variance", "Skewness", "Kurtosis", "Minimum", "Maximum", "%Min", "%Max", "20%", "40%", "Median", "60%", "80%"), drop=FALSE]
+    }
+  }
+  class(sampstatList) <- c("mplus.sampstat", "list")
   if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
   
   return(sampstatList)
@@ -1391,15 +1470,15 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
     targetList <- matrixExtract(covcoverageSubsections[[g]], "Covariance Coverage", filename)
     
     if (length(covcoverageSubsections) > 1) {
-      #class(targetList) <- c("list", "mplus.covcoverage")
+      #class(targetList) <- c("mplus.covcoverage", "list")
       covcoverageList[[groupNames[g]]] <- targetList
     }
     else
       covcoverageList <- targetList
   }
   
-  if (is.list(covcoverageList)) { class(covcoverageList) <- c("list", "mplus.covcoverage")
-  } else { class(covcoverageList) <- c("matrix", "mplus.covcoverage") } #single numeric matrix
+  if (is.list(covcoverageList)) { class(covcoverageList) <- c("mplus.covcoverage", "list")
+  } else { class(covcoverageList) <- c("mplus.covcoverage", "matrix") } #single numeric matrix
   if (length(covcoverageSubsections) > 1) { attr(covcoverageList, "group.names") <- groupNames }
   
   return(covcoverageList)
@@ -1421,7 +1500,7 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
 extractFreeFile <- function(filename, outfile, make_symmetric=TRUE) {
   #Adapted from code graciously provided by Joe Glass.
   
-  if (is.null(filename) || is.na(filename)) return(NULL)
+  if (isEmpty(filename)) return(NULL)
   
   #TODO: make this filename building into a function (duped from read raw)
   outfileDirectory <- splitFilePath(outfile)$directory
@@ -1500,7 +1579,7 @@ extractTech3 <- function(outfiletext, savedata_info, filename) {
     tech3List[["paramCov.savedata"]] <- NULL
   }
   
-  class(tech3List) <- c("list", "mplus.tech3")
+  class(tech3List) <- c("mplus.tech3", "list")
   
   return(tech3List)
 }
@@ -1544,7 +1623,7 @@ extractTech4 <- function(outfiletext, filename) {
     targetList[["latCorEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES", filename)
     
     if (length(tech4Subsections) > 1) {
-      class(targetList) <- c("list", "mplus.tech4")
+      class(targetList) <- c("mplus.tech4", "list")
       tech4List[[groupNames[g]]] <- targetList
     }
     else
@@ -1552,7 +1631,7 @@ extractTech4 <- function(outfiletext, filename) {
     
   }
   
-  class(tech4List) <- c("list", "mplus.tech4")
+  class(tech4List) <- c("mplus.tech4", "list")
   
   return(tech4List)
 }
@@ -1597,14 +1676,14 @@ extractTech7 <- function(outfiletext, filename) {
     targetList[["classSampCovs"]] <- matrixExtract(tech7Subsections[[g]], "Covariances", filename)
     
     if (length(tech7Subsections) > 1) {
-      class(targetList) <- c("list", "mplus.tech7")
+      class(targetList) <- c("mplus.tech7", "list")
       tech7List[[groupNames[g]]] <- targetList
     }
     else
       tech7List <- targetList
   }
   
-  class(tech7List) <- c("list", "mplus.tech7")
+  class(tech7List) <- c("mplus.tech7", "list")
   
   return(tech7List)
 }
@@ -1627,22 +1706,37 @@ extractTech8 <- function(outfiletext, filename) {
   #for now, this function only extract PSR in Bayes models
   tech8Section <- getSection("^TECHNICAL 8 OUTPUT$", outfiletext)
   tech8List <- list()
-  class(tech8List) <- c("list", "mplus.tech8")
-  psr <- data.frame(); class(psr) <- c("data.frame", "mplus.psr.data.frame"); tech8List[["psr"]] <- psr
+  class(tech8List) <- c("mplus.tech8", "list")
+  psr <- data.frame(); class(psr) <- c("mplus.psr.data.frame", "data.frame"); tech8List[["psr"]] <- psr
   
   if (is.null(tech8Section)) return(tech8List) #no tech8 output
+
+  #psr extraction subfunction
+  extractPSR <- function(text) {
+    startline <- grep("ITERATION\\s+SCALE REDUCTION\\s+HIGHEST PSR", text, perl=TRUE)
+    if (length(startline) > 0L) {
+      firstBlank <- which(text == "")
+      firstBlank <- firstBlank[firstBlank > startline][1L] #first blank after starting line
+      toparse <- text[(startline+1):firstBlank]
+      psr <- data.frame(matrix(as.numeric(unlist(strsplit(trimSpace(toparse), "\\s+", perl=TRUE))), ncol=3, byrow=TRUE, dimnames=list(NULL, c("iteration", "psr", "param.highest.psr"))))
+      class(psr) <- c("mplus.psr.data.frame", "data.frame")
+      return(psr)
+    } else {
+      return(NULL)
+    }
+  }    
   
   bayesPSR <- getMultilineSection("TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION", tech8Section, filename, allowMultiple=FALSE)
   
   if (!is.na(bayesPSR[1L])) {
-    startline <- grep("ITERATION\\s+SCALE REDUCTION\\s+HIGHEST PSR", bayesPSR, perl=TRUE)
-    if (length(startline) > 0L) {
-      firstBlank <- which(bayesPSR == "")
-      firstBlank <- firstBlank[firstBlank > startline][1L] #first blank after starting line
-      toparse <- bayesPSR[(startline+1):firstBlank]
-      psr <- data.frame(matrix(as.numeric(unlist(strsplit(trimSpace(toparse), "\\s+", perl=TRUE))), ncol=3, byrow=TRUE, dimnames=list(NULL, c("iteration", "psr", "param.highest.psr"))))
-      class(psr) <- c("data.frame", "mplus.psr.data.frame")
-      tech8List[["psr"]] <- psr
+    #new outputs have "Iterations for model estimation" and "Iterations for computing PPPP"
+    if (any(grepl("Iterations for computing PPPP", bayesPSR))) {
+      pppp_text <- getSection("Iterations for computing PPPP", bayesPSR, headers = c("Iterations for computing PPPP", "Iterations for model estimation"))
+      model_text <- getSection("Iterations for model estimation", bayesPSR, headers = c("Iterations for computing PPPP", "Iterations for model estimation"))
+      tech8List[["psr"]] <- extractPSR(model_text)
+      tech8List[["psr_pppp"]] <- extractPSR(pppp_text)
+    } else {
+      tech8List[["psr"]] <- extractPSR(bayesPSR)
     }
   }
   
@@ -1663,7 +1757,7 @@ extractTech8 <- function(outfiletext, filename) {
 #' # make me!!!
 extractTech9 <- function(outfiletext, filename) {
   tech9List <- list()
-  class(tech9List) <- c("list", "mplus.tech9")
+  class(tech9List) <- c("mplus.tech9", "list")
   
   tech9Section <- getSection("^TECHNICAL 9 OUTPUT$", outfiletext)
   if (is.null(tech9Section)) return(tech9List) #no tech9 output
@@ -1783,7 +1877,7 @@ extractTech12 <- function(outfiletext, filename) {
   #not sure whether there are sometimes multiple groups within this section.
   tech12Section <- getSection("^TECHNICAL 12 OUTPUT$", outfiletext)
   tech12List <- list()
-  class(tech12List) <- c("list", "mplus.tech12")
+  class(tech12List) <- c("mplus.tech12", "list")
   
   if (is.null(tech12Section)) return(tech12List) #no tech12 output
   
@@ -1817,16 +1911,40 @@ extractTech12 <- function(outfiletext, filename) {
     targetList[["mixedKurtosisResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Kurtosis", filename)
     
     if (length(tech12Subsections) > 1) {
-      class(targetList) <- c("list", "mplus.tech12")
+      class(targetList) <- c("mplus.tech12", "list")
       tech12List[[g]] <- targetList #no known case where there are many output sections
     }
     else
       tech12List <- targetList
   }
   
-  class(tech12List) <- c("list", "mplus.tech12")
+  class(tech12List) <- c("mplus.tech12", "list")
   
   return(tech12List)
+}
+
+
+
+#' Extract Technical 15 from Mplus
+#'
+#' The TECH15 option is used in conjunction with TYPE=MIXTURE to request conditional probabilities
+#' for the latent class variables.
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech15}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractTech15 <- function(outfiletext, filename) {
+  tech15Section <- getSection("^TECHNICAL 15 OUTPUT$", outfiletext)
+  tech15List <- list(conditional.probabilities = trimws(tech15Section[grepl("^\\s+?P\\(", tech15Section)]))
+  class(tech15List) <- c("mplus.tech15", "list")
+  
+  if (is.null(tech15Section)) return(tech15List) #no tech15 output
+  
+  return(tech15List)
 }
 
 #' Extract Factor Score Statistics
@@ -1847,7 +1965,7 @@ extractFacScoreStats <- function(outfiletext, filename) {
   fssSection <- getMultilineSection("SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES::SAMPLE STATISTICS",
     outfiletext, filename, allowMultiple=FALSE)
   fssList <- list()
-  class(fssList) <- c("list", "mplus.facscorestats")
+  class(fssList) <- c("mplus.facscorestats", "list")
   
   if (is.na(fssSection[1L])) return(fssList) #no factor scores output
   
@@ -1871,11 +1989,6 @@ extractFacScoreStats <- function(outfiletext, filename) {
 #' @examples
 #' # make me!!!
 extractClassCounts <- function(outfiletext, filename, summaries) {
-  
-  ####
-  #TODO: Implement class count extraction for multiple categorical latent variable models.
-  #Example: UG7.21
-  #Output is quite different because of latent class patterns, transition probabilities, etc.
   
   #helper function for three-column class output
   getClassCols <- function(sectiontext) {
@@ -1903,10 +2016,10 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   
   countlist <- list()
   
-  if(missing(summaries)||summaries$NCategoricalLatentVars==1||is.na(summaries$NCategoricalLatentVars)){
+  if (is.null(summaries) || missing(summaries) || summaries$NCategoricalLatentVars==1 || is.na(summaries$NCategoricalLatentVars)) {
     #Starting in Mplus v7.3 and above, formatting of the class counts appears to have changed...
     #Capture the alternatives here
-    if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
+    if (is.null(summaries) || missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
       modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$", outfiletext)
       ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$", outfiletext)
       mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
@@ -1954,7 +2067,8 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
     
     countlist[["logitProbs.mostLikely"]] <- unlabeledMatrixExtract(classificationLogitProbs, filename)
   } else {
-    # Exctract class_counts for multiple categorical latent variables.
+    # Extract class_counts for multiple categorical latent variables.
+    
     getClassCols_lta <- function(sectiontext) {
       numberLines <- grep("^\\s*([a-zA-Z0-9]+)?(\\s+[0-9\\.-]{1,}){1,}$", sectiontext, perl=TRUE)
       if (length(numberLines) > 0) {
@@ -2017,49 +2131,54 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
           outfiletext
         )
       )
-    countlist[["posteriorProb.patterns"]] <-
-      getClassCols_lta(posteriorProb.patterns)
-    countlist[["mostLikely.patterns"]] <-
-      getClassCols_lta(mostLikely.patterns)
     
-    countlist[which(names(countlist) %in% c("modelEstimated.patterns",
-          "posteriorProb.patterns",
-          "mostLikely.patterns"))] <-
-      lapply(countlist[which(names(countlist) %in% c("modelEstimated.patterns",
-              "posteriorProb.patterns",
-              "mostLikely.patterns"))],
-        setNames,
-        c(paste0("class.", unique(
-              c(countlist[["mostLikely"]]$variable, countlist[["modelEstimated"]]$variable, countlist[["posteriorProb"]]$variable)
-            )), "count", "proportion"))
+    countlist[["posteriorProb.patterns"]] <- getClassCols_lta(posteriorProb.patterns)
+    countlist[["mostLikely.patterns"]] <- getClassCols_lta(mostLikely.patterns)
     
-    #Average latent class probabilities
-    avgProbs <- getSection(
-      "^Average Latent Class Probabilities for Most Likely Latent Class Pattern \\((Row|Column)\\)$::^by Latent Class Pattern \\((Row|Column)\\)$",
-      outfiletext)
-    
-    column_headers <- strsplit(trimws(grep("\\s*Latent Class\\s{2,}", avgProbs, value = TRUE)), "\\s+", perl=TRUE)[[1]][-1]
-    variable_pattern_rows <- grep(paste(c("^(\\s{2,}\\d+){", length(column_headers), "}$"), collapse = ""), avgProbs, perl=TRUE)
-    variable_pattern_rows <- variable_pattern_rows[!c(FALSE, diff(variable_pattern_rows) != 1)]
-    variable_patterns <- avgProbs[variable_pattern_rows]
-    variable_patterns <- data.frame(t(sapply(strsplit(trimws(variable_patterns), "\\s+", perl=TRUE), as.numeric)))
-    names(variable_patterns) <- c("Latent Class Pattern No.", column_headers[-1])
-    
-    probs <- grep(paste(c("^\\s+\\d{1,}(\\s{2,}[0-9\\.-]+)+$"), collapse = ""), avgProbs[(variable_pattern_rows[length(variable_pattern_rows)]+1):length(avgProbs)], perl=TRUE, value = TRUE)
-    # If the table is truncated, concatenate its parts
-    if(length(probs) %% nrow(variable_patterns) > 1){
-      for(i in 2:(length(probs) %% nrow(variable_patterns))){
-        probs[1:(nrow(variable_patterns)+1)] <- 
-          paste(probs[1:(nrow(variable_patterns)+1)],
-            substring(probs[((i-1)*(nrow(variable_patterns)+1)+1):(i*(nrow(variable_patterns)+1))], first = 8)
-          )
-      }
-      probs <- probs[1:nrow(variable_patterns)]
+    # Determine order of column names for categorical latent variables
+    morder <- getSection("MODEL RESULTS USE THE LATENT CLASS VARIABLE ORDER", outfiletext)
+    if (!is.null(morder)) {
+      first_present <- which(morder != "")[1]
+      catvar_names <- strsplit(trimSpace(morder[first_present]), "\\s+")[[1]]
+    } else {
+      catvar_names <- unique(countlist[["mostLikely"]]$variable) #fall back approximation
+      #stop("Unable to determine names of categorical latent variables.")
     }
-    probs <- t(sapply(strsplit(trimws(probs[-1]), "\\s+", perl=TRUE), as.numeric))[,-1]
     
-    countlist[["avgProbs.mostLikely"]] <- probs
-    countlist[["avgProbs.mostLikely.patterns"]] <- variable_patterns
+    rename_sections <- which(names(countlist) %in% c("modelEstimated.patterns", "posteriorProb.patterns", "mostLikely.patterns"))
+    if (length(rename_sections) > 0L) {
+      for (s in rename_sections) {
+        countlist[[s]] <- setNames(countlist[[s]], c(catvar_names, "count", "proportion"))
+      }
+    }
+    
+    #Average latent class probabilities (not always present in outputs)
+    avgProbs <- getSection("^Average Latent Class Probabilities for Most Likely Latent Class Pattern \\((Row|Column)\\)$::^by Latent Class Pattern \\((Row|Column)\\)$", outfiletext)
+    
+    if (!is.null(avgProbs)) {
+      column_headers <- strsplit(trimws(grep("\\s*Latent Class\\s{2,}", avgProbs, value = TRUE)), "\\s+", perl=TRUE)[[1]][-1]
+      variable_pattern_rows <- grep(paste(c("^(\\s{2,}\\d+){", length(column_headers), "}$"), collapse = ""), avgProbs, perl=TRUE)
+      variable_pattern_rows <- variable_pattern_rows[!c(FALSE, diff(variable_pattern_rows) != 1)]
+      variable_patterns <- avgProbs[variable_pattern_rows]
+      variable_patterns <- data.frame(t(sapply(strsplit(trimws(variable_patterns), "\\s+", perl=TRUE), as.numeric)))
+      names(variable_patterns) <- c("Latent Class Pattern No.", column_headers[-1])
+      
+      probs <- grep(paste(c("^\\s+\\d{1,}(\\s{2,}[0-9\\.-]+)+$"), collapse = ""), avgProbs[(variable_pattern_rows[length(variable_pattern_rows)]+1):length(avgProbs)], perl=TRUE, value = TRUE)
+      # If the table is truncated, concatenate its parts
+      if(length(probs) %% nrow(variable_patterns) > 1){
+        for(i in 2:(length(probs) %% nrow(variable_patterns))){
+          probs[1:(nrow(variable_patterns)+1)] <- 
+            paste(probs[1:(nrow(variable_patterns)+1)],
+                  substring(probs[((i-1)*(nrow(variable_patterns)+1)+1):(i*(nrow(variable_patterns)+1))], first = 8)
+            )
+        }
+        probs <- probs[1:nrow(variable_patterns)]
+      }
+      probs <- t(sapply(strsplit(trimws(probs[-1]), "\\s+", perl=TRUE), as.numeric))[,-1]
+      
+      countlist[["avgProbs.mostLikely"]] <- probs
+      countlist[["avgProbs.mostLikely.patterns"]] <- variable_patterns
+    }
     
     # AFAIK this section is not reported for multiple categorical variables
     countlist[["classificationProbs.mostLikely"]] <- NULL
@@ -2280,11 +2399,17 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE) 
 
 #EXTRACT DATA SUMMARY SECTION
 #NB. This does not support three-level output yet!
-extractDataSummary <- function(outfiletext, curfile) {
+
+#' Function to extract the SUMMARY OF DATA section from Mplus outputs
+#'
+#' @param outfiletext The text of the output file 
+#' @param filename the name of the file containing textToScan. Used to make more intelligible warning messages.
+#' @keywords internal
+extractDataSummary <- function(outfiletext, filename) {
   dataSummarySection <- getSection("^\\s*SUMMARY OF DATA( FOR THE FIRST DATA SET)*\\s*$", outfiletext)
   if (is.null(dataSummarySection)) {
     empty <- list()
-    class(empty) <- c("list", "mplus.data_summary")
+    class(empty) <- c("mplus.data_summary", "list")
     return(empty)
   }
   
@@ -2358,32 +2483,37 @@ extractDataSummary <- function(outfiletext, curfile) {
     iccs$Group <- NULL    
   }
   retlist <- list(overall=summaries, ICCs=iccs) 
-  class(retlist) <- c("list", "mplus.data_summary")
+  class(retlist) <- c("mplus.data_summary", "list")
   return(retlist)   
 }
 
 #Caspar van Lissa code for extract invariance testing section
-extractInvarianceTesting <- function(outfiletext, curfile) {
+extractInvarianceTesting <- function(outfiletext, filename) {
   inv_test_firstline <- grep("^Invariance Testing$", outfiletext)
-  if (length(inv_test_firstline) == 0L) { return(list()) } #section not found
+  if (length(inv_test_firstline) == 0L) { return(list()) } #invariance section not found
   
   inv_test_endline <- grep("^MODEL FIT INFORMATION", outfiletext)
+  
   retlist <- list()
   inv_test_endline <- inv_test_endline[inv_test_endline > inv_test_firstline][1]
+  
   inv_test <- outfiletext[(inv_test_firstline+2):(inv_test_endline-3)]
+
+  #match words followed by four groups of numbers (Number of parameters, Chi-Square, Degrees of Freedom, P-Value)
   model_rows <- grep("^\\s+?\\w+(\\s{2,}[0-9.]+){4}$", inv_test, value = TRUE)
   model_rows <- t(sapply(model_rows, function(x){strsplit(trimws(x), "\\s+")[[1]]}, USE.NAMES = FALSE))
   model_rownames <- model_rows[, 1]
-  model_rows <- apply(model_rows[, -1], 2, as.numeric)
+  model_rows <- apply(model_rows[, -1, drop=FALSE], c(1,2), as.numeric)
   row.names(model_rows) <- model_rownames
   colnames(model_rows) <- c("Parameters", "Chi-Square", "DF", "Pvalue")
-  retlist$models <- model_rows[, -1]
+  retlist$models <- model_rows
+  
   
   test_rows <- grep("^\\s+?(\\w+\\s){3}(\\s{2,}[0-9.]+){3}$", inv_test, value = TRUE)
   test_rows <- t(sapply(test_rows, function(x){strsplit(trimws(x), "\\s{2,}")[[1]]}, USE.NAMES = FALSE))
-  model_rownames <- test_rows[, 1]
-  test_rows <- apply(test_rows[, -1], 2, as.numeric)
-  row.names(test_rows) <- model_rownames
+  test_rownames <- test_rows[, 1]
+  test_rows <- apply(test_rows[, -1, drop=FALSE], c(1,2), as.numeric)
+  row.names(test_rows) <- test_rownames
   colnames(test_rows) <- c("Chi-Square", "DF", "Pvalue")
   retlist$compared <- test_rows
   

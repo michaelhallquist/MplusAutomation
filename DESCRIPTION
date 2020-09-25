@@ -1,14 +1,17 @@
 Package: MplusAutomation
 Type: Package
 Title: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus
-Version: 0.7-2
-Date: 2018-04-05
+Version: 0.7-3
+Date: 2018-11-19
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "michael.hallquist@gmail.com"),
     person("Joshua", "Wiley", role = "aut",
     email = "jwiley.psych@gmail.com"),
     person(given = "Caspar", family ="van Lissa", role = "ctb",
-    email = "c.j.vanlissa@uu.nl"))
+    email = "c.j.vanlissa@uu.nl"),
+    person("Daniel", "Morillo", role = "ctb",
+    email = "danivorillo@gmail.com")
+    )
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
 Description: Leverages the R language to automate latent variable model estimation
 	and interpretation using 'Mplus', a powerful latent variable modeling program
@@ -18,7 +21,7 @@ Description: Leverages the R language to automate latent variable model estimati
 License: LGPL-3
 URL: https://github.com/michaelhallquist/MplusAutomation
 Depends:
-    R (>= 2.15.0),
+    R (>= 3.5.0),
     methods
 Imports:
     utils,
@@ -32,7 +35,9 @@ Imports:
     pander,
     digest,
     parallel,
-	ggplot2
+    ggplot2,
+    data.table,
+    rlang
 Suggests:
     rhdf5,
     tcltk,
@@ -40,4 +45,5 @@ Suggests:
     testthat
 LazyLoad: yes
 LazyData: yes
-RoxygenNote: 6.0.1
+RoxygenNote: 7.1.0
+Encoding: UTF-8
