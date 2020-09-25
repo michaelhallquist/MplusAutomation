@@ -412,7 +412,7 @@ parse_into_sections <- function(outfiletext) {
       "CORRELATIONS AND MEAN SQUARE ERROR OF THE TRUE FACTOR VALUES AND THE FACTOR SCORES",
       "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
       "BIVARIATE MODEL FIT INFORMATION",
-      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
+      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN",
       "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):"
   )
   
