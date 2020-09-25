@@ -249,7 +249,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   #return nothing if unable to detect column names (this will then get filtered out in the extractParameters_1file process
   if (is.null(columnNames)) {
     x <- data.frame() #empty
-    class(x) <- c("data.frame", "mplus.params")
+    class(x) <- c("mplus.params", "data.frame")
     attr(x, "filename") <- filename
     return(x)
   }
@@ -431,7 +431,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
   #tag as mplusParams class
   listParameters <- lapply(listParameters, function(x) {
-        class(x) <- c("data.frame", "mplus.params")
+        class(x) <- c("mplus.params", "data.frame")
         attr(x, "filename") <- filename
         return(x)
       })

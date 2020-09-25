@@ -307,7 +307,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
     if (isTRUE("tech8" %in% what)) {
       allFiles[[listID]]$tech8 <- tryCatch(extractTech8(outfiletext, curfile), error=function(e) {
             message("Error extracting TECH8 in output file: ", curfile); print(e)
-            lempty <- list(); class(lempty) <- c("list", "mplus.tech8")
+            lempty <- list(); class(lempty) <- c("mplus.tech8", "list")
             return(lempty)
           })
     }

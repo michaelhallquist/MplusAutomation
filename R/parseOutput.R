@@ -509,8 +509,8 @@ divideIntoFields <- function(section.text, required) {
 extractWarningsErrors_1file <- function(outfiletext, filename, input) {
   
   warnerr <- list(warnings = list(), errors = list())
-  class(warnerr$errors) <- c("list", "mplus.errors")
-  class(warnerr$warnings) <- c("list", "mplus.warnings")
+  class(warnerr$errors) <- c("mplus.errors", "list")
+  class(warnerr$warnings) <- c("mplus.warnings", "list")
   if (!inherits(input, "mplus.inp")) {
     warning("Could not identify warnings and errors; input is not of class mplus.inp")
     return(warnerr)
@@ -657,7 +657,7 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
 #' # make me!!!
 extractInput_1file <- function(outfiletext, filename) {
   input <- list()
-  class(input) <- c("list", "mplus.inp")
+  class(input) <- c("mplus.inp", "list")
   
   startInput <- grep("^\\s*INPUT INSTRUCTIONS\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
   if (length(startInput) == 0L) {
@@ -942,7 +942,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   arglist$Filename <- splitFilePath(filename)$filename #only retain filename, not path
   
   arglist <- as.data.frame(arglist, stringsAsFactors=FALSE)
-  class(arglist) <- c("data.frame", "mplus.summaries")
+  class(arglist) <- c("mplus.summaries", "data.frame")
   attr(arglist, "filename") <- arglist$Filename
   
   return(arglist)
@@ -1123,7 +1123,7 @@ extractResiduals_1section <- function(residSection) {
     targetList[["slopeResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Slopes", filename)
     
     if (length(residSubsections) > 1) {
-      class(targetList) <- c("list", "mplus.residuals")
+      class(targetList) <- c("mplus.residuals", "list")
       residList[[groupNames[g]]] <- targetList
     } else{ 
       residList <- targetList
@@ -1131,7 +1131,7 @@ extractResiduals_1section <- function(residSection) {
     
   }
   
-  class(residList) <- c("list", "mplus.residuals")
+  class(residList) <- c("mplus.residuals", "list")
   if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
   
   return(residList)
@@ -1170,7 +1170,7 @@ extractResiduals <- function(outfiletext, filename) {
     residList <- extractResiduals_1section(residSection) #[[1]]
   }
   
-  # class(residList) <- c("list", "mplus.residuals")
+  # class(residList) <- c("mplus.residuals", "list")
   # if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
   
   return(residList)
@@ -1232,14 +1232,14 @@ extractTech1 <- function(outfiletext, filename) {
     }
     
     if (length(paramSpecSubsections) > 1) {
-      class(targetList) <- c("list", "mplus.parameterSpecification")
+      class(targetList) <- c("mplus.parameterSpecification", "list")
       paramSpecList[[groupNames[g]]] <- targetList
     }
     else
       paramSpecList <- targetList
   }
   
-  class(paramSpecList) <- c("list", "mplus.parameterSpecification")
+  class(paramSpecList) <- c("mplus.parameterSpecification", "list")
   if (length(paramSpecSubsections) > 1) attr(paramSpecList, "group.names") <- groupNames
   
   startValSubsections <- getMultilineSection("STARTING VALUES( FOR [\\w\\d\\s\\.,_]+)*",
@@ -1281,18 +1281,18 @@ extractTech1 <- function(outfiletext, filename) {
     }
     
     if (length(startValSubsections) > 1) {
-      class(targetList) <- c("list", "mplus.startingValues")
+      class(targetList) <- c("mplus.startingValues", "list")
       startValList[[groupNames[g]]] <- targetList
     }
     else
       startValList <- targetList
   }
   
-  class(startValList) <- c("list", "mplus.startingValues")
+  class(startValList) <- c("mplus.startingValues", "list")
   if (length(startValSubsections) > 1) attr(startValList, "group.names") <- groupNames
   
   tech1List <- list(parameterSpecification=paramSpecList, startingValues=startValList)
-  class(tech1List) <- c("list", "mplus.tech1")
+  class(tech1List) <- c("mplus.tech1", "list")
   
   return(tech1List)
   
@@ -1355,7 +1355,7 @@ extractSampstat <- function(outfiletext, filename) {
 #    }
     
     if (length(sampstatSubsections) > 1) {
-      class(targetList) <- c("list", "mplus.sampstat")
+      class(targetList) <- c("mplus.sampstat", "list")
       sampstatList[[groupNames[g]]] <- targetList
     } else{
       sampstatList <- targetList
@@ -1398,10 +1398,10 @@ extractSampstat <- function(outfiletext, filename) {
       #targetList[["proportions.counts"]] <- df
       targetList <- df #just a single element at the moment
       
-      class(targetList) <- c("data.frame", "mplus.propcounts.data.frame")
+      class(targetList) <- c("mplus.propcounts.data.frame", "data.frame")
       
       if (length(countSubsections) > 1) {
-        #class(targetList) <- c("list", "mplus.propcounts")
+        #class(targetList) <- c("mplus.propcounts", "list")
         sampstatList[[groupNames[g]]][["proportions.counts"]] <- targetList
       }
       else
@@ -1433,7 +1433,7 @@ extractSampstat <- function(outfiletext, filename) {
       sampstatList$univariate.sample.statistics <- out[, c("Sample Size", "Mean", "Variance", "Skewness", "Kurtosis", "Minimum", "Maximum", "%Min", "%Max", "20%", "40%", "Median", "60%", "80%"), drop=FALSE]
     }
   }
-  class(sampstatList) <- c("list", "mplus.sampstat")
+  class(sampstatList) <- c("mplus.sampstat", "list")
   if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
   
   return(sampstatList)
@@ -1470,15 +1470,15 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
     targetList <- matrixExtract(covcoverageSubsections[[g]], "Covariance Coverage", filename)
     
     if (length(covcoverageSubsections) > 1) {
-      #class(targetList) <- c("list", "mplus.covcoverage")
+      #class(targetList) <- c("mplus.covcoverage", "list")
       covcoverageList[[groupNames[g]]] <- targetList
     }
     else
       covcoverageList <- targetList
   }
   
-  if (is.list(covcoverageList)) { class(covcoverageList) <- c("list", "mplus.covcoverage")
-  } else { class(covcoverageList) <- c("matrix", "mplus.covcoverage") } #single numeric matrix
+  if (is.list(covcoverageList)) { class(covcoverageList) <- c("mplus.covcoverage", "list")
+  } else { class(covcoverageList) <- c("mplus.covcoverage", "matrix") } #single numeric matrix
   if (length(covcoverageSubsections) > 1) { attr(covcoverageList, "group.names") <- groupNames }
   
   return(covcoverageList)
@@ -1579,7 +1579,7 @@ extractTech3 <- function(outfiletext, savedata_info, filename) {
     tech3List[["paramCov.savedata"]] <- NULL
   }
   
-  class(tech3List) <- c("list", "mplus.tech3")
+  class(tech3List) <- c("mplus.tech3", "list")
   
   return(tech3List)
 }
@@ -1623,7 +1623,7 @@ extractTech4 <- function(outfiletext, filename) {
     targetList[["latCorEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES", filename)
     
     if (length(tech4Subsections) > 1) {
-      class(targetList) <- c("list", "mplus.tech4")
+      class(targetList) <- c("mplus.tech4", "list")
       tech4List[[groupNames[g]]] <- targetList
     }
     else
@@ -1631,7 +1631,7 @@ extractTech4 <- function(outfiletext, filename) {
     
   }
   
-  class(tech4List) <- c("list", "mplus.tech4")
+  class(tech4List) <- c("mplus.tech4", "list")
   
   return(tech4List)
 }
@@ -1676,14 +1676,14 @@ extractTech7 <- function(outfiletext, filename) {
     targetList[["classSampCovs"]] <- matrixExtract(tech7Subsections[[g]], "Covariances", filename)
     
     if (length(tech7Subsections) > 1) {
-      class(targetList) <- c("list", "mplus.tech7")
+      class(targetList) <- c("mplus.tech7", "list")
       tech7List[[groupNames[g]]] <- targetList
     }
     else
       tech7List <- targetList
   }
   
-  class(tech7List) <- c("list", "mplus.tech7")
+  class(tech7List) <- c("mplus.tech7", "list")
   
   return(tech7List)
 }
@@ -1706,8 +1706,8 @@ extractTech8 <- function(outfiletext, filename) {
   #for now, this function only extract PSR in Bayes models
   tech8Section <- getSection("^TECHNICAL 8 OUTPUT$", outfiletext)
   tech8List <- list()
-  class(tech8List) <- c("list", "mplus.tech8")
-  psr <- data.frame(); class(psr) <- c("data.frame", "mplus.psr.data.frame"); tech8List[["psr"]] <- psr
+  class(tech8List) <- c("mplus.tech8", "list")
+  psr <- data.frame(); class(psr) <- c("mplus.psr.data.frame", "data.frame"); tech8List[["psr"]] <- psr
   
   if (is.null(tech8Section)) return(tech8List) #no tech8 output
 
@@ -1719,7 +1719,7 @@ extractTech8 <- function(outfiletext, filename) {
       firstBlank <- firstBlank[firstBlank > startline][1L] #first blank after starting line
       toparse <- text[(startline+1):firstBlank]
       psr <- data.frame(matrix(as.numeric(unlist(strsplit(trimSpace(toparse), "\\s+", perl=TRUE))), ncol=3, byrow=TRUE, dimnames=list(NULL, c("iteration", "psr", "param.highest.psr"))))
-      class(psr) <- c("data.frame", "mplus.psr.data.frame")
+      class(psr) <- c("mplus.psr.data.frame", "data.frame")
       return(psr)
     } else {
       return(NULL)
@@ -1757,7 +1757,7 @@ extractTech8 <- function(outfiletext, filename) {
 #' # make me!!!
 extractTech9 <- function(outfiletext, filename) {
   tech9List <- list()
-  class(tech9List) <- c("list", "mplus.tech9")
+  class(tech9List) <- c("mplus.tech9", "list")
   
   tech9Section <- getSection("^TECHNICAL 9 OUTPUT$", outfiletext)
   if (is.null(tech9Section)) return(tech9List) #no tech9 output
@@ -1818,7 +1818,7 @@ extractTech12 <- function(outfiletext, filename) {
   #not sure whether there are sometimes multiple groups within this section.
   tech12Section <- getSection("^TECHNICAL 12 OUTPUT$", outfiletext)
   tech12List <- list()
-  class(tech12List) <- c("list", "mplus.tech12")
+  class(tech12List) <- c("mplus.tech12", "list")
   
   if (is.null(tech12Section)) return(tech12List) #no tech12 output
   
@@ -1852,14 +1852,14 @@ extractTech12 <- function(outfiletext, filename) {
     targetList[["mixedKurtosisResid"]] <- matrixExtract(tech12Subsections[[g]], "Residuals for Mixed Kurtosis", filename)
     
     if (length(tech12Subsections) > 1) {
-      class(targetList) <- c("list", "mplus.tech12")
+      class(targetList) <- c("mplus.tech12", "list")
       tech12List[[g]] <- targetList #no known case where there are many output sections
     }
     else
       tech12List <- targetList
   }
   
-  class(tech12List) <- c("list", "mplus.tech12")
+  class(tech12List) <- c("mplus.tech12", "list")
   
   return(tech12List)
 }
@@ -1881,7 +1881,7 @@ extractTech12 <- function(outfiletext, filename) {
 extractTech15 <- function(outfiletext, filename) {
   tech15Section <- getSection("^TECHNICAL 15 OUTPUT$", outfiletext)
   tech15List <- list(conditional.probabilities = trimws(tech15Section[grepl("^\\s+?P\\(", tech15Section)]))
-  class(tech15List) <- c("list", "mplus.tech15")
+  class(tech15List) <- c("mplus.tech15", "list")
   
   if (is.null(tech15Section)) return(tech15List) #no tech15 output
   
@@ -1906,7 +1906,7 @@ extractFacScoreStats <- function(outfiletext, filename) {
   fssSection <- getMultilineSection("SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES::SAMPLE STATISTICS",
     outfiletext, filename, allowMultiple=FALSE)
   fssList <- list()
-  class(fssList) <- c("list", "mplus.facscorestats")
+  class(fssList) <- c("mplus.facscorestats", "list")
   
   if (is.na(fssSection[1L])) return(fssList) #no factor scores output
   
@@ -2350,7 +2350,7 @@ extractDataSummary <- function(outfiletext, filename) {
   dataSummarySection <- getSection("^\\s*SUMMARY OF DATA( FOR THE FIRST DATA SET)*\\s*$", outfiletext)
   if (is.null(dataSummarySection)) {
     empty <- list()
-    class(empty) <- c("list", "mplus.data_summary")
+    class(empty) <- c("mplus.data_summary", "list")
     return(empty)
   }
   
@@ -2424,7 +2424,7 @@ extractDataSummary <- function(outfiletext, filename) {
     iccs$Group <- NULL    
   }
   retlist <- list(overall=summaries, ICCs=iccs) 
-  class(retlist) <- c("list", "mplus.data_summary")
+  class(retlist) <- c("mplus.data_summary", "list")
   return(retlist)   
 }
 
