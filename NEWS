@@ -11,6 +11,7 @@ Version 0.8
  - feature:     Refactor runModels to support a vector of folder and files to execute (target argument).
  - notice:      Removed getSavedata_Bparams in favor of readModels.
  - bugfix:      Extract standardized estimates from MONTE CARLO outputs
+ - bugfix:      Parse univariate sample statistics for multiple groups models (ex5.27)
  - bugfix:      Extract R-SQUARE information from multilevel analyses (where header order is reversed)
  - bugfix:      Restore accidental section match for PSR subsection that led to TECH8 failure
  - bugfix:      Extract invariance tests when only two models are compared

@@ -190,7 +190,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
     }
 
     is_efa <- any(grepl(
-        "EXPLORATORY FACTOR ANALYSIS WITH \\d+ FACTOR(S):",
+        "EXPLORATORY FACTOR ANALYSIS WITH \\d+ FACTOR\\(S\\):",
         outfiletext,
       perl = TRUE
     ))

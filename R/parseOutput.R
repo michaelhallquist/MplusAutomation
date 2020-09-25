@@ -1304,11 +1304,13 @@ extractSampstat <- function(outfiletext, filename) {
     #try output from TYPE=BASIC, which places these in a section of a different name
     sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
   }
+  
   if(!is.null(sampstatSection) & all(sampstatSection == "")){
     first_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][1]+1)
     final_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][2]-1)
     sampstatSection <- outfiletext[first_line:final_line]
   }
+  
   sampstatList <- list()
   sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
     sampstatSection, filename, allowMultiple=TRUE)
@@ -1319,12 +1321,14 @@ extractSampstat <- function(outfiletext, filename) {
     sampstatSubsections <- list(sampstatSection)
     matchlines <- attr(sampstatSubsections, "lines")
   }
-  if (length(sampstatSubsections) == 0)
+  
+  if (length(sampstatSubsections) == 0) {
     warning ("No sample statistics sections found within SAMPSTAT output.")
-  else if (length(sampstatSubsections) > 1)
+  } else if (length(sampstatSubsections) > 1) {
     groupNames <- make.names(gsub("^\\s*ESTIMATED SAMPLE STATISTICS( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", sampstatSection[matchlines], perl=TRUE))
-  else #just one section, no groups
+  } else { #just one section, no groups
     groupNames <- ""
+  }
   
   for (g in 1:length(sampstatSubsections)) {
     targetList <- list()
@@ -1403,35 +1407,75 @@ extractSampstat <- function(outfiletext, filename) {
       if (length(countSubsections) > 1) {
         #class(targetList) <- c("mplus.propcounts", "list")
         sampstatList[[groupNames[g]]][["proportions.counts"]] <- targetList
-      }
-      else
+      } else {
         sampstatList[["proportions.counts"]] <- targetList
+      }
+        
     }
   }
 
   # Extract univariate sample statistics ------------------------------------
 
   univariate_sampstat <- getSection("^UNIVARIATE SAMPLE STATISTICS$", outfiletext)
-  if(!is.null(univariate_sampstat)){
-    stats <- lapply(univariate_sampstat[grepl("\\d$", univariate_sampstat)], function(x){strsplit(trimws(x), split = "\\s+")[[1]]})
-    if(length(stats) %% 2 == 0) {
-      out <- cbind(do.call(rbind, stats[seq(1, length(stats), by = 2)]),
-            do.call(rbind, stats[seq(2, length(stats), by = 2)]))
-      #headers <- univariate_sampstat[grepl("\\/", univariate_sampstat)]
-      #headers <- gsub("%", " %", headers)
-      #headers <- lapply(trimws(headers), function(x){strsplit(x, "\\s{2,}")[[1]]})
-      #headers[[1]] <- c(gsub("\\/", "", headers[[1]][grepl("\\/", headers[[1]])]), gsub("\\/.*$", "", headers[[2]][grepl("\\/", headers[[2]])]))
-      #headers[[2]] <- gsub("^.+?\\/", "", headers[[2]])
-      #colnames(out) <- gsub(" %", "%", c(headers[[1]], headers[[2]]))
-      var_names <- out[, 1]
-      out <- gsub("%", "", out)
-      out <- out[,-1, drop=FALSE] #drop variable column
-      dd <- dim(out)
-      out <- matrix(apply(out, 2, as.numeric), nrow=dd[1], ncol=dd[2]) #need to preserve dimensions in the single-row case
-      colnames(out) <- c("Mean", "Skewness", "Minimum", "%Min", "20%", "40%", "Median", "Sample Size", "Variance", "Kurtosis", "Maximum", "%Max", "60%", "80%")
-      rownames(out) <- var_names
-      sampstatList$univariate.sample.statistics <- out[, c("Sample Size", "Mean", "Variance", "Skewness", "Kurtosis", "Minimum", "Maximum", "%Min", "%Max", "20%", "40%", "Median", "60%", "80%"), drop=FALSE]
+  if (!is.null(univariate_sampstat)) {
+    
+    #group-wise headings don't follow Mplus indentation conventions. Hack these by prefixing with X, then use getMultilineSection to parse
+    has_groups <- any(which_g <- grepl("UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS(?: FOR [\\w\\d\\s\\.,_]+)*", univariate_sampstat, perl=TRUE))
+    if (has_groups) {
+      univariate_sampstat[which_g] <- sub("^(.*)$", "X\\1", univariate_sampstat[which_g], perl=TRUE)
+      univariateSubsections <- getMultilineSection("X.*UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS(?: FOR [\\w\\d\\s\\.,_]+)*",
+                                              univariate_sampstat, filename, allowMultiple=TRUE)
+    } else {
+      univariateSubsections <- NA
     }
+
+    matchlines <- attr(univariateSubsections, "matchlines")
+    
+    if(is.na(univariateSubsections[1])) {
+      univariateSubsections <- list(univariate_sampstat)
+      matchlines <- attr(univariateSubsections, "lines")
+    }
+    
+    if (length(univariateSubsections) == 0L) {
+      warning ("No univariate statistics sections found within SAMPSTAT output.")
+    } else if (length(univariateSubsections) > 1) {
+      groupNames <- make.names(gsub("^X\\s*UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", univariate_sampstat[matchlines], perl=TRUE))
+    } else { #just one section, no groups
+      groupNames <- ""
+    }
+    
+    for (g in 1:length(univariateSubsections)) {
+      thisSub <- univariateSubsections[[g]]
+      stats <- lapply(thisSub[grepl("\\d$", thisSub)], function(x) { strsplit(trimws(x), split = "\\s+")[[1]] })
+      if(length(stats) %% 2 == 0) {
+        out <- cbind(do.call(rbind, stats[seq(1, length(stats), by = 2)]),
+                     do.call(rbind, stats[seq(2, length(stats), by = 2)]))
+        
+        #headers <- univariate_sampstat[grepl("\\/", univariate_sampstat)]
+        #headers <- gsub("%", " %", headers)
+        #headers <- lapply(trimws(headers), function(x){strsplit(x, "\\s{2,}")[[1]]})
+        #headers[[1]] <- c(gsub("\\/", "", headers[[1]][grepl("\\/", headers[[1]])]), gsub("\\/.*$", "", headers[[2]][grepl("\\/", headers[[2]])]))
+        #headers[[2]] <- gsub("^.+?\\/", "", headers[[2]])
+        #colnames(out) <- gsub(" %", "%", c(headers[[1]], headers[[2]]))
+        var_names <- out[, 1]
+        out <- gsub("%", "", out)
+        out <- out[,-1, drop=FALSE] #drop variable column
+        dd <- dim(out)
+        out <- matrix(apply(out, 2, as.numeric), nrow=dd[1], ncol=dd[2]) #need to preserve dimensions in the single-row case
+        colnames(out) <- c("Mean", "Skewness", "Minimum", "%Min", "20%", "40%", "Median", "Sample Size", "Variance", "Kurtosis", "Maximum", "%Max", "60%", "80%")
+        rownames(out) <- var_names
+        
+        out <- out[, c("Sample Size", "Mean", "Variance", "Skewness", "Kurtosis", "Minimum", "Maximum", "%Min", "%Max", "20%", "40%", "Median", "60%", "80%"), drop=FALSE]
+        
+        if (length(univariateSubsections) > 1) {
+          #class(targetList) <- c("mplus.propcounts", "list")
+          sampstatList[[groupNames[g]]][["univariate.sample.statistics"]] <- out
+        } else {
+          sampstatList[["univariate.sample.statistics"]] <- out
+        }
+      }
+    }
+    
   }
   class(sampstatList) <- c("mplus.sampstat", "list")
   if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames

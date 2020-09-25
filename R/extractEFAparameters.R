@@ -55,7 +55,6 @@ extractEFAparameters <- function(outfiletext, filename) {
       complete_params <- list()
       
       for(i in seq_along(header_lines)) {
-        
         factor_headers <- paste0(FACTOR_HEADER_PREFFIX, 1:n_factors[i])
         
         search_init <- header_lines[i]
@@ -64,12 +63,10 @@ extractEFAparameters <- function(outfiletext, filename) {
           header_lines[i + 1]
           
         } else {
-          
           length(outfiletext) 
         }
-
-        lines_to_search <- outfiletext[search_init:search_end]
         
+        lines_to_search <- outfiletext[search_init:search_end]
         
         loadings_header_lines			<- grep(LOADINGS_HEADER,     lines_to_search)
         corrs_header_lines				<- grep(CORRS_HEADER,        lines_to_search)
@@ -98,7 +95,7 @@ extractEFAparameters <- function(outfiletext, filename) {
             
             corrs_header_lines - 3
           }
-            
+          
           loadings_lines <- lines_to_search[search_init:search_end]
           
           if(j == 1) {
@@ -126,7 +123,7 @@ extractEFAparameters <- function(outfiletext, filename) {
             }
           )
           loading_est[, factor_indices] <- t(loading_vals_num)
-
+          
           loading_vals_sig <- t(
             sapply(
               loading_vals,
@@ -164,7 +161,7 @@ extractEFAparameters <- function(outfiletext, filename) {
             
             corrs_header_lines[j + 1] - 3
           }
-
+          
           corrs_lines <- lines_to_search[search_init:search_end]
           
           corr_vals <- regmatches(
@@ -206,7 +203,7 @@ extractEFAparameters <- function(outfiletext, filename) {
         # The diagonal estimates of the correlation matrix should not have a
         #   significance value at all
         diag(corr_sig) <- NA
-
+        
         # Residuals:
         residuals_est        <- numeric(length(item_names))
         names(residuals_est) <- item_names
@@ -345,11 +342,11 @@ extractEFAparameters <- function(outfiletext, filename) {
             estimates = loading_est,
             sig       = loading_sig,
             std_errs  = loadings_se),
-            corrs     = list(
-              estimates = corr_est,
-              sig       = corr_sig,
-              std_errs  = corrs_se
-            ),
+          corrs     = list(
+            estimates = corr_est,
+            sig       = corr_sig,
+            std_errs  = corrs_se
+          ),
           residuals   = list(
             estimates = residuals_est,
             std_errs  = residuals_se
