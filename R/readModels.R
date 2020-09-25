@@ -30,7 +30,7 @@
 #' c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
 #'      "parameters", "class_counts", "indirect", "mod_indices", "residuals",
 #'      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-#'      "tech9", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
+#'      "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
 #'
 #'
 #' @return A list with one mplus.model per file. Each mplus.model object is composed of
@@ -59,6 +59,7 @@
 #'   \item{tech7}{a list containing sample statistics for each latent class from OUTPUT: TECH7}
 #'   \item{tech8}{a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8}
 #'   \item{tech9}{a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9}
+#'   \item{tech10}{a list containing model fit information from OUTPUT: TECH10}'   
 #'   \item{tech12}{a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
 #'   \item{fac_score_stats}{factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section}
 #'   \item{lcCondMeans}{conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models}
@@ -79,7 +80,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
   allsections <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
       "invariance_testing", "parameters", "class_counts", "indirect", "mod_indices", "residuals",
       "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-      "tech9", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "gh5")
+      "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "gh5")
 
   if (isTRUE(what[1L] == "all")) {
     what <- allsections
@@ -320,6 +321,14 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
           })
     }
 
+    #TECH10: errors and warnings for model fit info
+    if ("tech10" %in% what) {
+      allFiles[[listID]]$tech10 <- tryCatch(extractTech10(outfiletext, curfile), error=function(e) {
+        message("Error extracting TECH10 in output file: ", curfile); print(e)
+        return(list())
+      })
+    }    
+    
     #TECH12: observed versus estimated sample stats for TYPE=MIXTURE
     if (isTRUE("tech12" %in% what)) {
       allFiles[[listID]]$tech12 <- tryCatch(extractTech12(outfiletext, curfile), error=function(e) {
