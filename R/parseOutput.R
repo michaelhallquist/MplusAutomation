@@ -1312,7 +1312,7 @@ extractSampstat <- function(outfiletext, filename) {
   }
   
   sampstatList <- list()
-  sampstatSubsections <- getMultilineSection("ESTIMATED SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
+  sampstatSubsections <- getMultilineSection("(ESTIMATED )*SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
     sampstatSection, filename, allowMultiple=TRUE)
   
   matchlines <- attr(sampstatSubsections, "matchlines")
@@ -1325,7 +1325,7 @@ extractSampstat <- function(outfiletext, filename) {
   if (length(sampstatSubsections) == 0) {
     warning ("No sample statistics sections found within SAMPSTAT output.")
   } else if (length(sampstatSubsections) > 1) {
-    groupNames <- make.names(gsub("^\\s*ESTIMATED SAMPLE STATISTICS( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", sampstatSection[matchlines], perl=TRUE))
+    groupNames <- make.names(gsub("^\\s*(?:ESTIMATED )*SAMPLE STATISTICS( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", sampstatSection[matchlines], perl=TRUE))
   } else { #just one section, no groups
     groupNames <- ""
   }
