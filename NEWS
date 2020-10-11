@@ -1,5 +1,5 @@
 Version 0.8
- - feature:     Extract parameters from EFA outputs (thanks to Dani Mori!)
+ - feature:     Extract parameters from EFA outputs (thanks to Dani Mori for the excellent foundation!)
  - feature:     Extract TECH10 bivariate model fit (thanks to Sam Crawley!)
  - feature:     Extract residuals from invariance models. Addresses Github issue #95
  - feature:     Extract model-estimated correlations and correlation residuals
