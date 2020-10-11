@@ -787,14 +787,19 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   #handle EFA output, which has separate model fit sections within each file
   #do this by extracting model fit sections for each and using an rbind call
   if (grepl("(?!MIXTURE|TWOLEVEL)\\s*EFA\\s+", arglist$AnalysisType, ignore.case=TRUE, perl=TRUE)) {
-    factorLB <- as.numeric(sub(".*EFA\\s+(\\d+).*", "\\1", arglist$AnalysisType, perl=TRUE))
-    factorUB <- as.numeric(sub(".*EFA\\s+\\d+\\s+(\\d+).*", "\\1", arglist$AnalysisType, perl=TRUE))
-    factorSeq <- seq(factorLB, factorUB)
+
+    EFASections <- grep(paste(c(
+      "^\\s*(EXPLORATORY FACTOR ANALYSIS WITH \\d+ FACTOR\\(S\\):|",
+      "EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND \\d+ BETWEEN FACTOR\\(S\\):|",
+      "EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND UNRESTRICTED BETWEEN COVARIANCE:|",
+      "EXPLORATORY FACTOR ANALYSIS WITH UNRESTRICTED WITHIN COVARIANCE AND \\d+ BETWEEN FACTOR\\(S\\):",
+      ")\\s*$"), collapse=""), outfiletext, perl=TRUE)
     
-    EFASections <- grep(paste("^\\s*EXPLORATORY FACTOR ANALYSIS WITH (",
-        paste(factorSeq, collapse="|"), ") FACTOR\\(S\\):\\s*$", sep=""), outfiletext, perl=TRUE)
+    efa_nfac <- get_efa_nfactors(outfiletext[EFASections])
+
+    mlefa <- nrow(efa_nfac) == 2L #a little error prone if we later build out the helper function, but okay for now
     
-    if (!length(EFASections) > 0) stop("Unable to locate section headers for EFA model fit statistics")
+    if (!length(EFASections) > 0) { stop("Unable to locate section headers for EFA model fit statistics") }
     
     #need to convert from list to data.frame format to allow for proper handling of rbind below
     arglistBase <- as.data.frame(arglist, stringsAsFactors=FALSE)
@@ -802,9 +807,23 @@ extractSummaries_1file <- function(outfiletext, filename, input)
     efaList <- list()
     for (thisFactor in 1:length(EFASections)) {
       #subset output by starting text to be searched at the point where factor output begins
-      modelFitSection <- getSection_Blanklines("^(TESTS OF MODEL FIT|MODEL FIT INFORMATION)$", outfiletext[EFASections[thisFactor]:length(outfiletext)])
+      s_end <- ifelse(thisFactor==length(EFASections), length(outfiletext), EFASections[thisFactor+1])
+      modelFitSection <- getSection_Blanklines("^(TESTS OF MODEL FIT|MODEL FIT INFORMATION)$", outfiletext[EFASections[thisFactor]:s_end])
+      
+      #N.B. Multilevel EFA outputs produce two top-level section headers for each combination of wi + bw factors
+      #  But, MODEL FIT INFORMATION is only produced in the first section. Thus, the second section will not have this
+      #  information, returning NULL for modelFitSection. This is no problem since we don't want to duplicate
+      #  global fit information. Thus, a NULL indicates that we may safely skip to the next iteration.
+      if (is.null(modelFitSection)) { next }
+      
       efaList[[thisFactor]] <- extractSummaries_1section(modelFitSection, arglistBase, filename)
-      efaList[[thisFactor]]$NumFactors <- factorSeq[thisFactor]
+      if (isTRUE(mlefa)) {
+        efaList[[thisFactor]]$NumFactors_Between <- efa_nfac["bw", thisFactor]
+        efaList[[thisFactor]]$NumFactors_Within <- efa_nfac["wi", thisFactor]
+      } else {
+        efaList[[thisFactor]]$NumFactors <- efa_nfac["f", thisFactor]
+      }
+      
     }
     
     arglist <- do.call(rbind, efaList)
@@ -1031,46 +1050,7 @@ extractModelSummaries <- function(target=getwd(), recursive=FALSE, filefilter) {
   #message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
   message("extractModelSummaries has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"summaries\")$summaries to replicate the old functionality.")
   
-  #retain working directory and reset at end of run
-#  curdir <- getwd()
-#
-#  outfiles <- getOutFileList(target, recursive, filefilter)
-#
-#  details <- list()
-#
-#  #for each output file, use the extractSummaries_1file function to extract relevant data
-#  #note that extractSummaries_1file returns data as a list
-#  #rbind creates an array of lists by appending each extractSummaries_1file return value
-#  for (i in 1:length(outfiles)) {
-#    #read the file
-#    readfile <- scan(outfiles[i], what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
-#
-#    #bomb out for EFA files
-#    if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", readfile, ignore.case=TRUE, perl=TRUE)) > 0) {
-#      warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelSummaries.\n  Skipping outfile: ", outfiles[i]))
-#      next #skip file
-#    }
-#
-#    #append params for this file to the details array
-#    #note that this is a memory-inefficient solution because of repeated copying. Better to pre-allocate.
-#
-#    inp <- extractInput_1file(readfile, outfiles[i])
-#    details[[i]] <- extractSummaries_1file(readfile, outfiles[i], inp)
-#  }
-#
-#  #if there are several output files, then use rbind.fill to align fields
-#  if (length(details) > 1L) details <- do.call(rbind.fill, details)
-#  else details <- details[[1L]]
-#
-#  #reset working directory
-#  setwd(curdir)
-#
-#  #cleanup columns containing only NAs
-#  for (col in names(details)) {
-#    if (all(is.na(details[[col]]))) details[[col]] <- NULL
-#  }
-#
-#  return(details)
+  return(invisible(NULL))
 }
 
 
@@ -1090,7 +1070,11 @@ addHeaderToSavedata <- function(outfile, directory=getwd()) {
 
 #' Helper subfunction to extract one section of OUTPUT: RESIDUALS
 #' Can be called multiple times, as in the case of invariance testing
-extractResiduals_1section <- function(residSection) {
+#' 
+#' @param residSection The character vector containing strings for the residual section to be parsed
+#' @param filename Character string containing the current output filename being parsed
+#' @keywords internal
+extractResiduals_1section <- function(residSection, filename) {
   #allow for multiple groups
   residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR .+)*",
                                           residSection, filename, allowMultiple=TRUE)
@@ -1160,7 +1144,7 @@ extractResiduals <- function(outfiletext, filename) {
     for (s in 1:length(sectionNames)) {
       residSection <- getSection(multisectionMatches[s], outfiletext)
       if (!is.null(residSection)) {
-        residList[[ sectionNames[s] ]] <- extractResiduals_1section(residSection) #[[1]]
+        residList[[ sectionNames[s] ]] <- extractResiduals_1section(residSection, filename) #[[1]]
       }
     }
   } else {
@@ -1298,6 +1282,13 @@ extractTech1 <- function(outfiletext, filename) {
   
 }
 
+#' Helper function to extract the sample statistics from Mplus output
+#' Depends on OUTPUT: SAMPSTAT
+#' 
+#' @param outfiletext The character vector containing all strings from output file
+#' @param filename The current out file being parsed
+#' @importFrom utils tail
+#' @keywords internal
 extractSampstat <- function(outfiletext, filename) {
   sampstatSection <- getSection("^SAMPLE STATISTICS$", outfiletext)
   if (is.null(sampstatSection)) {
@@ -2347,11 +2338,14 @@ unlabeledMatrixExtract <- function(outfiletext, filename) {
 #' @param outfiletext The text of the output file
 #' @param headerLine The header line
 #' @param filename The name of the output file
+#' @param ignore.case Whether to ignore case of header line
+#' @param expect_sig Whether to track value significance TRUE/FALSE (* in Mplus) as an attribute
 #' @return a matrix
 #' @keywords internal
 #' @examples
 #' # make me!!!
-matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE) {
+matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE, expect_sig=FALSE) {
+  
   matLines <- getMultilineSection(headerLine, outfiletext, filename, allowMultiple=TRUE, ignore.case=ignore.case)
   
   if (!is.na(matLines[1])) {
@@ -2406,11 +2400,15 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE) 
       mat <- matrix(NA_real_, nrow=length(rowHeaders), ncol=length(colHeaders),
         dimnames=list(rowHeaders, colHeaders))
       
+      if (isTRUE(expect_sig)) { attr(mat, "sig") <- array(NA, dim=dim(mat)) }
+      
       for (r in 1:length(splitData)) {
-        line <- mplus_as.numeric(splitData[[r]][-1]) #use mplus_as.numeric to handle D+XX scientific notation in output
-        if ((lenDiff <- length(colHeaders) - length(line)) > 0)
-          line <- c(line, rep(NA, lenDiff))
-        mat[r,] <- line
+        #use mplus_as.numeric to handle D+XX scientific notation in output and sig values
+        line <- mplus_as.numeric(splitData[[r]][-1], expect_sig=expect_sig)
+        if (length(line) == 0L) { next } #occasionally have blank rows, skip assignment into mat
+        
+        mat[r,1:length(line)] <- line
+        if (isTRUE(expect_sig)) { attr(mat, "sig")[r,1:length(line)] <- attr(line, "sig") }
       }
       
       blockList[[m]] <- mat
@@ -2420,6 +2418,7 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE) 
     aggMatCols <- do.call("c", lapply(blockList, colnames))
     aggMatRows <- rownames(blockList[[1]]) #row names are shared across blocks in Mplus output
     aggMat <- matrix(NA, nrow=length(aggMatRows), ncol=length(aggMatCols), dimnames=list(aggMatRows, aggMatCols))
+    attr(aggMat, "sig") <- array(NA, dim=dim(aggMat), dimnames = dimnames(aggMat))
     
     #Unfortunately, due to Mplus 8-character printing limits for matrix sections, row/col names are not guaranteed to be unique.
     #This causes problems for using name-based matching to fill the matrix.
@@ -2429,13 +2428,16 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE) 
     colCounter <- 1
     for (l in blockList) {
       aggMat[rownames(l), colCounter:(colCounter + ncol(l) - 1)] <- l #fill in just the block of the aggregate matrix represented in l
+      if (isTRUE(expect_sig)) { attr(aggMat, "sig")[rownames(l), colCounter:(colCounter + ncol(l) - 1)] <- attr(l, "sig") } #add sig values
       colCounter <- colCounter + ncol(l)
     }
-  }
-  else {
+  } else {
     #warning("No lines identified for matrix extraction using header: \n  ", headerLine)
     aggMat <- NULL
   }
+  
+  #if sig is not used, ensure that we dump it as an attribute
+  if (isFALSE(expect_sig)) { attr(aggMat, "sig") <- NULL }
   
   return(aggMat)
   

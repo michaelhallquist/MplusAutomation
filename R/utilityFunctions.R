@@ -404,7 +404,8 @@ parse_into_sections <- function(outfiletext) {
       "EQUALITY TESTS OF MEANS/PROBABILITIES ACROSS CLASSES",
       "THE FOLLOWING DATA SET\\(S\\) DID NOT RESULT IN A COMPLETED REPLICATION:",
       "RESIDUAL OUTPUT", "RESIDUAL OUTPUT FOR THE.*", 
-      "MODEL MODIFICATION INDICES", "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
+      "MODEL MODIFICATION INDICES", "MODIFICATION INDICES", 
+      "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
       "SUMMARIES OF PLAUSIBLE VALUES \\(N = NUMBER OF OBSERVATIONS * NUMBER OF IMPUTATIONS\\)",
       "SUMMARY OF PLAUSIBLE STANDARD DEVIATION \\(N = NUMBER OF OBSERVATIONS\\)",
       "Available post-processing tools:",
@@ -413,7 +414,10 @@ parse_into_sections <- function(outfiletext) {
       "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
       "BIVARIATE MODEL FIT INFORMATION",
       "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN",
-      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):"
+      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):",
+      "EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND \\d+ BETWEEN FACTOR\\(S\\):",
+      "EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND UNRESTRICTED BETWEEN COVARIANCE:",
+      "EXPLORATORY FACTOR ANALYSIS WITH UNRESTRICTED WITHIN COVARIANCE AND \\d+ BETWEEN FACTOR\\(S\\):"
   )
   
   #form alternation pattern for regular expression (currently adds leading and trailing spaces permission to each header)
@@ -938,13 +942,25 @@ trimSpace <- function(string) {
 #'
 #' @param vec A character vector of Mplus numbers
 #'   to convert to numeric
+#' @param expect_sig Whether to expect significance values denoted by asterisk;
+#'   yields a 'sig' attribute that will be TRUE/FALSE
 #' @return A numeric vector
 #' @keywords internal
 #' @examples
 #' MplusAutomation:::mplus_as.numeric("3.1D2")
-mplus_as.numeric <- function(vec) {
+mplus_as.numeric <- function(vec, expect_sig=FALSE) {
   vec <- sub("D", "E", vec, fixed=TRUE)
-  as.numeric(vec)
+  
+  #Allow for significance to be indicated by asterisk. Add as attribute
+  if (isTRUE(expect_sig)) {
+    sig <- grepl("*", vec, fixed=TRUE)
+    vec <- as.numeric(sub("*", "", vec, fixed=TRUE))
+    attr(vec, "sig") <- sig
+  } else {
+    vec <- as.numeric(vec)  
+  }
+  
+  return(vec)
 }
 
 #' Separate Hyphenated Variable Strings
@@ -1042,8 +1058,10 @@ mplusAvailable <- function(silent = TRUE) {
 #' \code{NULL}, or has only \code{NA}s.
 #'
 #' @param arg A function argument
-#' @return Logical vector of lenght 1.
+#' @return Logical vector of length 1.
+#' @keywords internal
 #' @examples
+#' \dontrun{
 #' f1 <- function(x) {
 #'   if (!isEmpty(x)) return(mean(x, na.rm = TRUE))
 #'   return(NULL)
@@ -1053,6 +1071,32 @@ mplusAvailable <- function(silent = TRUE) {
 #' f1(x = NA)           #> NULL
 #' f1(x = NULL)         #> NULL
 #' f1(x = c(NA, 1:2))   #> 1.5
+#' }
 isEmpty <- function(arg) {
   missing(arg) || isTRUE(is.na(arg)) || is.null(arg)
+}
+
+#' Small helper function to obtain number of factors for an EFA output section
+#' 
+#' @param headers a vector of EFA section headers from which to parse number of factors
+#' @return A vector of the number of factors in each heading, or a matrix if multilevel output
+#' @keywords internal
+get_efa_nfactors <- function(headers) { 
+  ret <- lapply(headers, function(ll) {
+    mlefa <- grepl("(WITHIN FAC|BETWEEN FAC|UNRESTRICTED BETWEEN|UNRESTRICTED WITHIN)", ll)
+    if (mlefa) {
+      wi <- ifelse(grepl("UNRESTRICTED WITHIN COVARIANCE", ll), "0",
+                   sub("^\\s*EXPLORATORY FACTOR ANALYSIS WITH (\\d+) WITHIN FACTOR.*", "\\1", ll, perl=TRUE))
+      bw <- ifelse(grepl("UNRESTRICTED BETWEEN COVARIANCE", ll), "0",
+                   sub("^\\s*EXPLORATORY FACTOR ANALYSIS WITH.*(\\d+) BETWEEN FACTOR.*", "\\1", ll, perl=TRUE))
+      
+      vv <- c(wi=as.numeric(wi), bw=as.numeric(bw))
+    } else {
+      vv <- c(f=as.numeric(sub("^\\s*EXPLORATORY FACTOR ANALYSIS WITH (\\d+) FACTOR\\(S\\).*", "\\1", ll, perl=TRUE)))
+    }
+    
+    return(vv)
+  })
+
+  do.call(cbind, ret)
 }

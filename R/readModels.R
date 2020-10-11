@@ -167,7 +167,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
 
       if (isFALSE(is.null(allFiles[[listID]][["summaries"]]))) {
         if (isFALSE(is.na(allFiles[[listID]]$summaries[["NGroups"]])) && isTRUE(allFiles[[listID]]$summaries[["NGroups"]] > 1)) {
-          obs <- outfiletext[(grep("^\\s*Number of observations\\s*", outfiletext)[1L] + 1):(grep("^\\s*(Total sample size|Number of dependent variables)", outfiletext)[1L] - 1)]
+          obs <- outfiletext[(grep("^\\s*(Average )*Number of observations\\s*", outfiletext, ignore.case = TRUE)[1L] + 1):(grep("^\\s*(Total sample size|Number of dependent variables|Number of replications)", outfiletext)[1L] - 1)]
           obs <- gsub("Group", "", obs)
           obs <- unlist(strsplit(trimws(obs), "\\s+"))
           if (isTRUE(length(obs) %% 2 == 0)) {
@@ -188,7 +188,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
     }
 
     is_efa <- any(grepl(
-        "EXPLORATORY FACTOR ANALYSIS WITH \\d+ FACTOR\\(S\\):",
+        "(EXPLORATORY FACTOR ANALYSIS WITH \\d+ FACTOR\\(S\\):|EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND \\d+ BETWEEN FACTOR\\(S\\):)",
         outfiletext,
       perl = TRUE
     ))
@@ -373,7 +373,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
           warning(paste(c("Unable to read gh5 file because rhdf5 package not installed.\n",
                           "To install, in an R session, type:\n",
                           "  install.packages(\"BiocManager\")\n",
-                          "  BiocManager::install(c(\"rhdf5\"))\n")))
+                          "  BiocManager::install(\"rhdf5\")\n")))
         }
       }
       allFiles[[listID]]$gh5 <- gh5

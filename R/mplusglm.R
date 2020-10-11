@@ -175,6 +175,7 @@
 #' @return A list of results and Mplus model object.
 #' @export
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
+#' @importFrom stats model.matrix update get_all_vars
 #' @examples
 #' \dontrun{
 #' set.seed(1234)

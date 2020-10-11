@@ -5,9 +5,15 @@
 \title{Helper subfunction to extract one section of OUTPUT: RESIDUALS
 Can be called multiple times, as in the case of invariance testing}
 \usage{
-extractResiduals_1section(residSection)
+extractResiduals_1section(residSection, filename)
+}
+\arguments{
+\item{residSection}{The character vector containing strings for the residual section to be parsed}
+
+\item{filename}{Character string containing the current output filename being parsed}
 }
 \description{
 Helper subfunction to extract one section of OUTPUT: RESIDUALS
 Can be called multiple times, as in the case of invariance testing
 }
+\keyword{internal}
