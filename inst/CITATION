@@ -8,7 +8,7 @@ citEntry(entry = "Article",
   year         = "2018",
   pages        = "1--18",
   doi          = "10.1080/10705511.2017.1402334",
-  url          = "http://www.tandfonline.com/doi/full/10.1080/10705511.2017.1402334",
+  url          = "https://www.tandfonline.com/doi/full/10.1080/10705511.2017.1402334",
 
   textVersion  =
   paste("Hallquist, M. N. & Wiley, J. F. (2018).",
