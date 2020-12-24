@@ -4,11 +4,14 @@
 \alias{mplus_as.numeric}
 \title{Convert Mplus Number to Numeric}
 \usage{
-mplus_as.numeric(vec)
+mplus_as.numeric(vec, expect_sig = FALSE)
 }
 \arguments{
 \item{vec}{A character vector of Mplus numbers
 to convert to numeric}
+
+\item{expect_sig}{Whether to expect significance values denoted by asterisk;
+yields a 'sig' attribute that will be TRUE/FALSE}
 }
 \value{
 A numeric vector

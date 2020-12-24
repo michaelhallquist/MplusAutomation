@@ -61,6 +61,7 @@ a single mplus.model object, not a list of files. Specific elements are:
   \item{tech7}{a list containing sample statistics for each latent class from OUTPUT: TECH7}
   \item{tech8}{a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8}
   \item{tech9}{a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9}
+  \item{tech10}{a list containing model fit information from OUTPUT: TECH10}'   
   \item{tech12}{a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
   \item{fac_score_stats}{factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section}
   \item{lcCondMeans}{conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models}
@@ -79,7 +80,7 @@ as a character vector from the following options:
 c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
      "parameters", "class_counts", "indirect", "mod_indices", "residuals",
      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-     "tech9", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
+     "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
 }
 \examples{
 \dontrun{

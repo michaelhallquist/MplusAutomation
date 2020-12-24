@@ -10,13 +10,14 @@ isEmpty(arg)
 \item{arg}{A function argument}
 }
 \value{
-Logical vector of lenght 1.
+Logical vector of length 1.
 }
 \description{
 This is a simple utility to check whether a function argument is missing,
 \code{NULL}, or has only \code{NA}s.
 }
 \examples{
+\dontrun{
 f1 <- function(x) {
   if (!isEmpty(x)) return(mean(x, na.rm = TRUE))
   return(NULL)
@@ -27,3 +28,5 @@ f1(x = NA)           #> NULL
 f1(x = NULL)         #> NULL
 f1(x = c(NA, 1:2))   #> 1.5
 }
+}
+\keyword{internal}

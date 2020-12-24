@@ -362,6 +362,7 @@ parse_into_sections <- function(outfiletext) {
       "RANDOM STARTS RESULTS RANKED FROM THE BEST TO THE WORST LOGLIKELIHOOD VALUES",
       "TESTS OF MODEL FIT", "MODEL FIT INFORMATION", "MODEL FIT INFORMATION FOR .*", "CLASSIFICATION QUALITY",
       "SUMMARY OF MODEL FIT INFORMATION", "RESULTS FOR EXPLORATORY FACTOR ANALYSIS",
+      "MODEL RESULTS USE THE LATENT CLASS VARIABLE ORDER",
       "FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES",
       "FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS",
       "CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN",#
@@ -374,7 +375,6 @@ parse_into_sections <- function(outfiletext) {
       "Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
       "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Row\\)",
       "Logits for the Classification Probabilities for the Most Likely Latent Class Membership \\(Column\\)",
-      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):",
       "MODEL RESULTS", "MODEL RESULTS FOR .*", "LOGISTIC REGRESSION ODDS RATIO RESULTS", "RESULTS IN PROBABILITY SCALE",
       "IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC METRIC",
       "IRT PARAMETERIZATION IN TWO-PARAMETER PROBIT METRIC",
@@ -404,14 +404,20 @@ parse_into_sections <- function(outfiletext) {
       "EQUALITY TESTS OF MEANS/PROBABILITIES ACROSS CLASSES",
       "THE FOLLOWING DATA SET\\(S\\) DID NOT RESULT IN A COMPLETED REPLICATION:",
       "RESIDUAL OUTPUT", "RESIDUAL OUTPUT FOR THE.*", 
-      "MODEL MODIFICATION INDICES", "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
+      "MODEL MODIFICATION INDICES", "MODIFICATION INDICES", 
+      "MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES",
       "SUMMARIES OF PLAUSIBLE VALUES \\(N = NUMBER OF OBSERVATIONS * NUMBER OF IMPUTATIONS\\)",
       "SUMMARY OF PLAUSIBLE STANDARD DEVIATION \\(N = NUMBER OF OBSERVATIONS\\)",
       "Available post-processing tools:",
       "FACTOR SCORE INFORMATION \\(COMPLETE DATA\\)", "SUMMARY OF FACTOR SCORES", "PLOT INFORMATION", "SAVEDATA INFORMATION",
       "CORRELATIONS AND MEAN SQUARE ERROR OF THE TRUE FACTOR VALUES AND THE FACTOR SCORES",
       "RESULTS SAVING INFORMATION", "SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES", "DIAGRAM INFORMATION",
-      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN"
+      "BIVARIATE MODEL FIT INFORMATION",
+      "Beginning Time:\\s*\\d+:\\d+:\\d+", "MUTHEN & MUTHEN",
+      "EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):",
+      "EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND \\d+ BETWEEN FACTOR\\(S\\):",
+      "EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND UNRESTRICTED BETWEEN COVARIANCE:",
+      "EXPLORATORY FACTOR ANALYSIS WITH UNRESTRICTED WITHIN COVARIANCE AND \\d+ BETWEEN FACTOR\\(S\\):"
   )
   
   #form alternation pattern for regular expression (currently adds leading and trailing spaces permission to each header)
@@ -681,7 +687,7 @@ getOutFileList <- function(target, recursive=FALSE, filefilter) {
 #' @keywords internal
 #' @examples
 #' # make me!!!
-splitFilePath <- function(abspath) {
+splitFilePath <- function(abspath, normalize=FALSE) {
   if (!is.character(abspath)) stop("Path not a character string")
   if (nchar(abspath) < 1 || is.na(abspath)) stop("Path is missing or of zero length")
   
@@ -699,14 +705,18 @@ splitFilePath <- function(abspath) {
   
   if (lcom == 1) {
     dirpart <- NA_character_
-  }
-  else if (lcom > 1) {
+  } else if (lcom > 1) {
     #drop the file from the list (the last element)
     components <- components[-lcom]
     dirpart <- do.call("file.path", as.list(components))
     
     #if path begins with C:, /, ~/, //, or \\, then treat as absolute
-    if (grepl("^([A-Z]{1}:|~/|/|//|\\\\)+.*$", dirpart, perl=TRUE)) absolute <- TRUE
+    if (grepl("^([A-Z]{1}:|~/|/|//|\\\\)+.*$", dirpart, perl=TRUE)) { absolute <- TRUE }
+    
+    if (normalize) { #convert to absolute path
+      dirpart <- normalizePath(dirpart)
+      absolute <- TRUE
+    }
   }
   
   return(list(directory=dirpart, filename=relFilename, absolute=absolute))
@@ -726,6 +736,8 @@ splitFilePath <- function(abspath) {
 #' @examples
 #' # make me!!!
 detectColumnNames <- function(filename, modelSection, sectionType="model_results") {
+  
+  if (all(modelSection=="")) { return(NULL) } #empty section (e.g., R-SQUARE)
   
   detectionFinished <- FALSE
   line <- 1
@@ -930,13 +942,25 @@ trimSpace <- function(string) {
 #'
 #' @param vec A character vector of Mplus numbers
 #'   to convert to numeric
+#' @param expect_sig Whether to expect significance values denoted by asterisk;
+#'   yields a 'sig' attribute that will be TRUE/FALSE
 #' @return A numeric vector
 #' @keywords internal
 #' @examples
 #' MplusAutomation:::mplus_as.numeric("3.1D2")
-mplus_as.numeric <- function(vec) {
+mplus_as.numeric <- function(vec, expect_sig=FALSE) {
   vec <- sub("D", "E", vec, fixed=TRUE)
-  as.numeric(vec)
+  
+  #Allow for significance to be indicated by asterisk. Add as attribute
+  if (isTRUE(expect_sig)) {
+    sig <- grepl("*", vec, fixed=TRUE)
+    vec <- as.numeric(sub("*", "", vec, fixed=TRUE))
+    attr(vec, "sig") <- sig
+  } else {
+    vec <- as.numeric(vec)  
+  }
+  
+  return(vec)
 }
 
 #' Separate Hyphenated Variable Strings
@@ -1034,8 +1058,10 @@ mplusAvailable <- function(silent = TRUE) {
 #' \code{NULL}, or has only \code{NA}s.
 #'
 #' @param arg A function argument
-#' @return Logical vector of lenght 1.
+#' @return Logical vector of length 1.
+#' @keywords internal
 #' @examples
+#' \dontrun{
 #' f1 <- function(x) {
 #'   if (!isEmpty(x)) return(mean(x, na.rm = TRUE))
 #'   return(NULL)
@@ -1045,6 +1071,32 @@ mplusAvailable <- function(silent = TRUE) {
 #' f1(x = NA)           #> NULL
 #' f1(x = NULL)         #> NULL
 #' f1(x = c(NA, 1:2))   #> 1.5
+#' }
 isEmpty <- function(arg) {
   missing(arg) || isTRUE(is.na(arg)) || is.null(arg)
+}
+
+#' Small helper function to obtain number of factors for an EFA output section
+#' 
+#' @param headers a vector of EFA section headers from which to parse number of factors
+#' @return A vector of the number of factors in each heading, or a matrix if multilevel output
+#' @keywords internal
+get_efa_nfactors <- function(headers) { 
+  ret <- lapply(headers, function(ll) {
+    mlefa <- grepl("(WITHIN FAC|BETWEEN FAC|UNRESTRICTED BETWEEN|UNRESTRICTED WITHIN)", ll)
+    if (mlefa) {
+      wi <- ifelse(grepl("UNRESTRICTED WITHIN COVARIANCE", ll), "0",
+                   sub("^\\s*EXPLORATORY FACTOR ANALYSIS WITH (\\d+) WITHIN FACTOR.*", "\\1", ll, perl=TRUE))
+      bw <- ifelse(grepl("UNRESTRICTED BETWEEN COVARIANCE", ll), "0",
+                   sub("^\\s*EXPLORATORY FACTOR ANALYSIS WITH.*(\\d+) BETWEEN FACTOR.*", "\\1", ll, perl=TRUE))
+      
+      vv <- c(wi=as.numeric(wi), bw=as.numeric(bw))
+    } else {
+      vv <- c(f=as.numeric(sub("^\\s*EXPLORATORY FACTOR ANALYSIS WITH (\\d+) FACTOR\\(S\\).*", "\\1", ll, perl=TRUE)))
+    }
+    
+    return(vv)
+  })
+
+  do.call(cbind, ret)
 }

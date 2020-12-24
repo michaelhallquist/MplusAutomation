@@ -4,7 +4,13 @@
 \alias{matrixExtract}
 \title{Reconstruct matrix from multi-line text output}
 \usage{
-matrixExtract(outfiletext, headerLine, filename, ignore.case = FALSE)
+matrixExtract(
+  outfiletext,
+  headerLine,
+  filename,
+  ignore.case = FALSE,
+  expect_sig = FALSE
+)
 }
 \arguments{
 \item{outfiletext}{The text of the output file}
@@ -12,6 +18,10 @@ matrixExtract(outfiletext, headerLine, filename, ignore.case = FALSE)
 \item{headerLine}{The header line}
 
 \item{filename}{The name of the output file}
+
+\item{ignore.case}{Whether to ignore case of header line}
+
+\item{expect_sig}{Whether to track value significance TRUE/FALSE (* in Mplus) as an attribute}
 }
 \value{
 a matrix

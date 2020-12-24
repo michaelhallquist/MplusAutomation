@@ -12,7 +12,7 @@ extractEFAparameters(outfiletext, filename)
 \item{filename}{name of the output file}
 }
 \value{
-list of parameters
+list of parsed EFA parameters
 }
 \description{
 Extract the model parameters from an EFA Mplus model output

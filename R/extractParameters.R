@@ -249,7 +249,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   #return nothing if unable to detect column names (this will then get filtered out in the extractParameters_1file process
   if (is.null(columnNames)) {
     x <- data.frame() #empty
-    class(x) <- c("data.frame", "mplus.params")
+    class(x) <- c("mplus.params", "data.frame")
     attr(x, "filename") <- filename
     return(x)
   }
@@ -267,8 +267,9 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", modelSection, ignore.case=TRUE, perl=TRUE) #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
   classPropMatches <- grep("^\\s*Class Proportions\\s*$", modelSection, ignore.case=TRUE)
+  classSpecificMatches <- grep("^\\s*(Results|Parameters) for Class-specific Model Parts of [\\w_\\.]+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
 
-  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches))
+  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches, classSpecificMatches))
   
   if (length(topLevelMatches) > 0) {
 
@@ -288,7 +289,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
           #replace any spaces with periods to create usable unique lc levels
           lcNum <- gsub("\\s+", "\\.", postPattern, perl=TRUE)
         }
-        else lcNum <- sub("^\\s*(?:Latent )*Class\\s+(\\d+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
+        else lcNum <- sub("^\\s*(?:Latent )*Class\\s+([\\w#]+)\\s*(\\(\\s*\\d+\\s*\\))*$", "\\1", modelSection[match], perl=TRUE)
       } else if (match %in% multipleGroupMatches) groupName <- sub("^\\s*Group (\\w+)(?:\\s+\\(\\d+\\))*\\s*$", "\\1", modelSection[match], perl=TRUE)
       else if (match %in% catLatentMatches) {
         #the categorical latent variables section is truly "top level"
@@ -430,7 +431,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
   #tag as mplusParams class
   listParameters <- lapply(listParameters, function(x) {
-        class(x) <- c("data.frame", "mplus.params")
+        class(x) <- c("mplus.params", "data.frame")
         attr(x, "filename") <- filename
         return(x)
       })
@@ -449,10 +450,10 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 #' @keywords internal
 extractParameters_1file <- function(outfiletext, filename, resultType, efa = FALSE) {
 
-  if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", outfiletext, ignore.case=TRUE, perl=TRUE)) > 0) {
-    warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelParameters.\n  Skipping outfile: ", filename))
-    return(NULL) #skip file
-  }
+  # if (length(grep("TYPE\\s+(IS|=|ARE)\\s+((MIXTURE|TWOLEVEL)\\s+)+EFA\\s+\\d+", outfiletext, ignore.case=TRUE, perl=TRUE)) > 0) {
+  #   warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelParameters.\n  Skipping outfile: ", filename))
+  #   return(NULL) #skip file
+  # }
 
   # copy elements of append into target. note that data.frames inherit list,
   # so could be wonky if append is a data.frame (shouldn't happen here)
@@ -755,42 +756,4 @@ extractModelParameters <- function(target=getwd(), recursive=FALSE, filefilter, 
   #extractParameters_1section: extract model parameters for a given section.
   #extractParameters_1chunk: extract model parameters for a given chunk (e.g., Latent class 2, Between Level) within a given section.
 
-#  outfiles <- getOutFileList(target, recursive, filefilter)
-#
-#  allFiles <- list()
-#  for (curfile in outfiles) {
-#    #if not recursive, then each element is uniquely identified (we hope!) by filename alone
-#    if (recursive==FALSE)	listID <- make.names(splitFilePath(curfile)$filename) #each list element is named by the respective file
-#    else listID <- make.names(curfile) #each list element is named by the respective file
-#
-#    outfiletext <- scan(curfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
-#
-#    allFiles[[listID]] <- extractParameters_1file(outfiletext, curfile, resultType)
-#  }
-#
-#
-#  #dropDimensions <- TRUE
-#  if (length(allFiles) == 1) allFiles <- allFiles[[1]] # when only extracting a single file, return just the parameters list for the single model
-#  else if (dropDimensions == TRUE) {
-#    #in the case of multi-file output, we want to ensure that the interior lists (which contain model sections like stdyx.standardized)
-#    #all have a similar structure. But if all of them have only one element
-#    allNames <- sapply(allFiles, names)
-#    allLengths <- sapply(allNames, length)
-#
-#    #if there is only one unique name in the bunch and all sub-list lengths are 1, then collapse
-#    #could probably just check for one unique name.
-#    if (length(unique(unlist(allLengths))) == 1 && length(unique(unlist(allNames))) == 1) {
-#      allFiles <- sapply(allFiles, "[", 1)
-#    }
-#		nameLengths <- sapply(allNames, length)
-#		names(nameLengths) <- NULL
-#		numUniqueLengths <- length(unique(nameLengths))
-#		if (numUniqueLengths == 1) {
-#			#all files in the model results list have the same number of elements
-#			#need to check for identical names
-#
-#		}
-#  }
-#
-#  return(allFiles)
 }

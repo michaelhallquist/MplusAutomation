@@ -4,7 +4,7 @@
 \alias{splitFilePath}
 \title{Split File and Path into Separate Parts}
 \usage{
-splitFilePath(abspath)
+splitFilePath(abspath, normalize = FALSE)
 }
 \arguments{
 \item{abspath}{A character string of the file path}

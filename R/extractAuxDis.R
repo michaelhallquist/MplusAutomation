@@ -229,7 +229,7 @@ extractAux <- function(outfiletext, filename) {
   }
 
   ret <- list(overall=allMeans, pairwise=allPairwise)
-  class(ret) <- c("list", "mplus.auxE")
+  class(ret) <- c("mplus.auxE", "list")
 
   return(ret)
 }

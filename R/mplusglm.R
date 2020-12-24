@@ -18,6 +18,7 @@
 #' @param ... Additional arguments passed to \code{mplusModeler()}.
 #' @return A list of results and Mplus model object.
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
+#' @importFrom data.table as.data.table :=
 #' @examples
 #' \dontrun{
 #'
@@ -115,6 +116,9 @@
     tabres[[i]] <- tab
   }
 
+  #create local variables to avoid R CMD check complaints
+  UID <- RHS <- Ref <- Comparator <- Type <- Res <- est <- pval <- LowerCI <- UpperCI <- NULL
+  
   Table <- do.call(rbind, tabres)
   uTable <- as.data.table(Table)
   uTable[, UID := paste0(RHS, paste(sort(c(Ref, Comparator)), collapse = "")),
@@ -175,6 +179,7 @@
 #' @return A list of results and Mplus model object.
 #' @export
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
+#' @importFrom stats model.matrix update get_all_vars
 #' @examples
 #' \dontrun{
 #' set.seed(1234)
