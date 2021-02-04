@@ -50,7 +50,6 @@ MODEL:
   mpg cyl disp hp drat wt qsec vs am gear PWITH cyl disp hp drat wt qsec vs am gear carb;
 "
 cat(parseMplus(test), file=stdout())
-closeAllConnections()
 }
 \seealso{
 \code{\link{mplusModeler}}

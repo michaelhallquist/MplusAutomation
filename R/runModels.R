@@ -485,7 +485,10 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
 
     #unix system command does not have show.output.on.console or invisible parameters
     if (isTRUE(.Platform$OS.type == "windows"))	{
-      system(command, show.output.on.console = showOutput, invisible=(!showOutput), wait=TRUE)
+      the_output <- system(command, intern = TRUE, invisible=(!showOutput), wait=TRUE)
+      if(showOutput){
+        cat(the_output, sep = "\n")
+      }
     } else {
       if(isTRUE(showOutput)) stdout.value = ""
       else stdout.value = NULL
