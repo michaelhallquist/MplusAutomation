@@ -293,7 +293,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
     }
     
     #apply user filter, if requested
-    if (!is.null(filefilter)) { filelist <- grep(filefilter, filefilter, perl=TRUE, value=TRUE) } 
+    if (!is.null(filefilter)) { filelist <- grep(filefilter, filelist, perl=TRUE, value=TRUE) } 
     
     #normalize paths to convert everything to absolute
     filelist <- normalizePath(filelist)
