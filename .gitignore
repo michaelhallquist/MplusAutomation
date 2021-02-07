@@ -19,3 +19,9 @@ products
 
 #from mac
 .DS_Store
+
+# Mplus files
+*.dat
+*.inp
+*.out
+*.log
