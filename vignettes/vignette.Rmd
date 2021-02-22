@@ -4,7 +4,7 @@ author: "Michael N. Hallquist"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{mplusautomation-examples}
+  %\VignetteIndexEntry{MplusAutomation Examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
