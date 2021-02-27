@@ -17,17 +17,16 @@ vignette: >
 # Overview
 
 This guide provides examples of how to use the functions in the `MplusAutomation` package.
-The package is designed to automate three major aspects of latent variable modeling in Mplus:
-1) creating related groups of models, 2) running batches of models, and 3)
-extracting and comparing model parameters and fit statistics.
+The package is designed to automate three major aspects of latent variable modeling in `Mplus`:
 
-As of version 0.4, the package supports extraction of summary statistics, but not model parameters, from
-`TYPE=EFA` models.
+1. creating related groups of models
+2. running batches of models
+3. extracting and comparing model parameters and fit statistics
 
 The guide tries to make few assumptions about the user's familiarity with the
 `R` environment, as many Mplus user's may be unfamiliar with `R`. Note that the `MplusAutomation`
 package was written to be compatible with Mplus version 5.21 or later. Although many functions
-are likely to work with earlier versions, there may be incompatabilities.
+are likely to work with earlier versions, there may be incompatibilities.
 
 Note: some examples herein reference examples from the Mplus User's Guide. The input
 and output files for these examples are assumed to reside in the directory:
@@ -37,17 +36,27 @@ and output files for these examples are assumed to reside in the directory:
 If you have installed Mplus to a different location, please use the
 correct directory in the code below.
 
+## Clarifying the relationship between MplusAutomation and Mplus
+
+Please note that `MplusAutomation` does not provide a copy of the `Mplus` software, which is proprietary.
+All of the model estimation is handled by `Mplus` (think of it as the computation engine), while `MplusAutomation`
+provides convenience functions for interfacing with `Mplus` in `R` and working with model outputs using familiar `R` data structures such as `data.frame` objects.
+
+Thus, you must have a working copy of `Mplus` to estimate latent variable models using `MplusAutomation` using the
+`runModels()` or `mplusModeler()` functions. If you would like to obtain a copy of `Mplus`, please follow the 
+instructions on the [statmodel.com website](http://statmodel.com/orderonline/).
+
 # Installing and loading the package
 
-The `MplusAutomation` package is compatible with `R` and
-`Mplus` on Windows, Mac OS X, and Linux platforms.
+**Note**: You only need to install the `MplusAutomation` package *once* on a given machine. Once you follow 
+these instructions, you can just use `library(MplusAutomation)` to load the package in future sessions.
 
-The package was built using `R` 2.15.1, although it should be compatible
-with most older versions of `R`. To obtain `R` for Windows,
-follow [this link](http://cran.r-project.org/bin/windows/).
+The `MplusAutomation` package is compatible with `R` and `Mplus` on Windows, Mac OS X, and Linux platforms.
 
-After installing the program and launching `R`, type the following at the command
-line:
+The package was initially built using `R` 2.15.1 and has been tested with modern versions
+up through `R` 4.0.2. To obtain `R` follow [this link](http://cran.r-project.org/).
+
+After installing `R` and launching a new session, type the following at the command line:
 
 ```{r, eval=FALSE, echo=TRUE}
 
@@ -55,11 +64,9 @@ install.packages("MplusAutomation")
 
 ``` 
 
-Depending on which version of Windows you're using, you may need to run `R`
-as an administrator (right-click, Run as administrator).
+If you're running on Windows, you may need to run `R` as an administrator (right-click, Run as administrator).
 
-To load the `MplusAutomation` package so that its functions are available to use,
-type:
+To load the `MplusAutomation` package so that its functions are available to use, type:
 
 
 ```{r}
@@ -68,9 +75,8 @@ library(MplusAutomation)
 
 ```
 
-**Note:** Mac users may experiences crashes if they have not setup Tcl/Tk properly within `R`.
-The default distribution of Tcl/Tk shipped with Mac OS X is not compatible with `R`. Instead, users
-should download and install the Tcl/Tk distribution 
+**Note:** Mac users using versions of `R` *prior to* 4.0.0 may experiences crashes if they have not setup
+Tcl/Tk properly within `R`. The default distribution of Tcl/Tk shipped with Mac OS X is not compatible with `R`. Instead, users should download and install the Tcl/Tk distribution 
 [here](http://cran.r-project.org/bin/macosx/tools).
 
 ## Determine the version of `MplusAutomation` on your machine
@@ -87,17 +93,24 @@ sessionInfo()
 
 ## Updating the package to the latest version
 
-As is conventional for `R` packages, the latest version of
-`MplusAutomation` may be obtained from CRAN using the
-`update.packages()` function in an `R` session.
+As is conventional for `R` packages, the latest version of `MplusAutomation` may be obtained from CRAN using the
+`update.packages()` function in an `R` session. As of `r Sys.Date()`, the current version of the package is 
+`r utils::packageVersion("MplusAutomation")`.
+
+```{r, eval=FALSE}
+
+update.packages(ask=FALSE, checkBuilt=TRUE)
+
+```
 
 # Exporting data from `R` to Mplus
 
-In version 0.3-2, a helper function, `prepareMplusData()`, was added to ease the task
-of transferring data from `R` to Mplus. Mplus requires that files not have a header row and that the variable
-names be specified within the Mplus input syntax. The `prepareMplusData()` function converts an
-`R` `data.frame` object (the typical way to represent two-dimensional data in `R`) to a tab-delimited
-file and it prints the corresponding Mplus syntax to the console. This syntax can then be pasted into the head of
+
+The helper function, `prepareMplusData()`, eases the task of transferring data from `R` to Mplus. 
+Mplus requires that files not have a header row and that the variable names be specified within 
+the Mplus input syntax. The `prepareMplusData()` function converts an `R` `data.frame` object
+(the typical way to represent two-dimensional data in `R`) to a tab-delimited file and it prints
+the corresponding Mplus syntax to the console. This syntax can then be pasted into the head of
 a new Mplus input file. Here are two basic examples of using the command:
 
 ```{r, eval=FALSE, echo=TRUE}
@@ -118,6 +131,26 @@ The first call requests that only the variables specified by `keepCols` be inclu
 Mplus data file. In like manner, the second call requests that all variables except those specified by `dropCols`
 by included in the data file. If neither `keepCols` nor `dropCols` is specified, then the entire
 `data.frame` is output.
+
+For factors and character variables (categorical), `prepareMplusData` converts each level into an integer value
+(first level = 1, second level = 2, etc.) and prints out information about how the levels were converted
+so that you can use them properly inside the Mplus syntax. Alternatively, if you use the 
+`dummyCode` argument for `prepareMplusData`, you will get a set of dummy codes that can be used in the Mplus
+syntax.
+
+Here, in the `mtcars` dataset, we convert the number of gears (in the car) to a factor so that `prepareMplusData`
+will know to convert its unique values (3, 4, 5) into an integer-valued variable (1, 2, 3) that can be used in
+`Mplus` syntax. For the number of cylinders (`cyl`) and transmission type (`am`), we ask `prepareMplusData`
+to generate dummy codes for each level of these factors. Note that one dummy code is returned for *each level*,
+so no reference category is implied. Thus, it is up to you to drop one of the dummy codes in the Mplus syntax
+to denote the reference category and avoid multicollinearity.
+
+```{r}
+data(mtcars)
+mtcars$gear <- factor(mtcars$gear)
+prepareMplusData(mtcars, "mtcars.dat", dummyCode = c("cyl", "am"))
+```
+
 
 # Running batches of Mplus models
 
@@ -601,7 +634,7 @@ print(myLatexTable)
 See the Sweave manual for more details about combining LaTeX with `R`.
 
 
-#Extracting model modification indices
+# Extracting model modification indices
 
 The `extractModIndices()` function extracts the model modification indices from
 the MODEL MODIFICATION INDICES sections of one or more Mplus output files. It is up to the user to request

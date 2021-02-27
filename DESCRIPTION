@@ -38,7 +38,9 @@ Imports:
     parallel,
     ggplot2,
     data.table,
-    rlang
+    rlang,
+    fastDummies,
+    checkmate
 Suggests:
     rhdf5,
     tcltk,
