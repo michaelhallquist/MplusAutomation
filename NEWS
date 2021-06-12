@@ -1,3 +1,7 @@
+Version 0.8-1
+ - feature:     prepareMplusData can create dummy codes for categorical variables using the dummyCode argument
+ - bugfix:      handle extraction of parameters from mixture model outputs in Mplus 8.6 (new top-level sections)
+
 Version 0.8
  - feature:     Extract parameters from EFA outputs (thanks to Dani Mori for the excellent foundation!)
  - feature:     Extract TECH10 bivariate model fit (thanks to Sam Crawley!)

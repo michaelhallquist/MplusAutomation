@@ -334,7 +334,7 @@ update.mplusObject <- function(object, ...) {
     object[rIndex] <- dots[rIndex]
   }
 
-  if (isTRUE(object$autov) && isFALSE("usevariables" %in% rList)) {
+  if (isTRUE(object$autov) && isFALSE("usevariables" %in% rIndex)) {
     object$usevariables <- detectVariables(object)
   }
 
