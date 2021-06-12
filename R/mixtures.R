@@ -51,6 +51,54 @@ mixtureSummaryTable <- function(modelList,
                                   "min_prob",
                                   "max_prob"
                                 )) {
+  UseMethod("mixtureSummaryTable", modelList)
+}
+
+#' @method mixtureSummaryTable model.list
+#' @export
+mixtureSummaryTable.model.list <- function(modelList,
+                                     keepCols = c(
+                                       "Title",
+                                       "Classes",
+                                       "Warnings",
+                                       "AIC",
+                                       "BIC",
+                                       "aBIC",
+                                       "Entropy",
+                                       "T11_VLMR_PValue",
+                                       "T11_LMR_PValue",
+                                       "BLRT_PValue",
+                                       "min_N",
+                                       "max_N",
+                                       "min_prob",
+                                       "max_prob"
+                                     )) {
+  cl <- match.call()
+  cl$modelList <- lapply(modelList, `[[`, "results")
+  cl[[1L]] <- quote(mixtureSummaryTable)
+  eval.parent(cl)
+}
+
+#' @method mixtureSummaryTable list
+#' @export
+mixtureSummaryTable.list <- function(modelList,
+                                keepCols = c(
+                                  "Title",
+                                  "Classes",
+                                  "Warnings",
+                                  "AIC",
+                                  "BIC",
+                                  "aBIC",
+                                  "Entropy",
+                                  "T11_VLMR_PValue",
+                                  "T11_LMR_PValue",
+                                  "BLRT_PValue",
+                                  "min_N",
+                                  "max_N",
+                                  "min_prob",
+                                  "max_prob"
+                                )) {
+
   # Check if modelList is of class mplus.model
   if (!(inherits(modelList, "mplus.model") |
         all(sapply(modelList, function(x) {
@@ -174,8 +222,8 @@ mixtureSummaryTable <- function(modelList,
   }) > 0)
   if (length(not_replicated) > 0) {
     warning(
-      "The best loglikelihood value was not replicated in some models. The solution may not be trustworthy due to local maxima. Increase the number of random starts. The problematic models were:\n",
-      paste(names(not_replicated), collapse = "\n"),
+      "The best loglikelihood value was not replicated in some models. The solution may not be trustworthy due to local maxima. Increase the number of random starts. The problematic models were row number(s): ",
+      paste(not_replicated, collapse = ", "),
       call. = FALSE
     )
   }
@@ -187,14 +235,18 @@ mixtureSummaryTable <- function(modelList,
   }) > 0)
   if (length(not_terminated) > 0) {
     warning(
-      "Model estimation did not terminate normally due to an error in the computation. Change your model and/or starting values. The problematic models were:\n",
-      paste(names(not_terminated), collapse = "\n"),
+      "Model estimation did not terminate normally due to an error in the computation. Change your model and/or starting values. The problematic models were row number(s): ",
+      paste(not_terminated, collapse = ", "),
       call. = FALSE
     )
   }
   
   return(model_summaries)
 }
+
+#' @method mixtureSummaryTable mplus.model
+#' @export
+mixtureSummaryTable.mplus.model <- mixtureSummaryTable.list
 
 #' Create latent profile plots
 #'
@@ -1307,14 +1359,8 @@ createMixtures <- function(classes = 1L,
                            OUTPUT = "TECH11 TECH14;",
                            SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;",
                            ...) {
-  Args <- c(
-    list(
-      rdata = rdata,
-      usevariables = usevariables,
-      OUTPUT = OUTPUT
-    ),
-    list(...)
-  )
+  Args <- match.call()
+  Args[c("classes", "filename_stem", "model_overall", "model_class_specific")] <- NULL
   if (hasArg("MODEL")) {
     warning(
       "MODEL argument was dropped: createMixtures constructs its own MODEL argument from model_overall and model_class_specific."
@@ -1365,7 +1411,13 @@ createMixtures <- function(classes = 1L,
   n_classes <- length(classes)
   
   # Create mplusObject template
-  base_object <- do.call(mplusObject, Args)
+  cl_mplusoject <- Args[c(1, which(names(Args) %in% c("TITLE", "DATA", "VARIABLE", "DEFINE", "MONTECARLO", "MODELPOPULATION", 
+                                                      "MODELMISSING", "ANALYSIS", "MODEL", "MODELINDIRECT", "MODELCONSTRAINT", 
+                                                      "MODELTEST", "MODELPRIORS", "OUTPUT", "SAVEDATA", "PLOT", "usevariables", 
+                                                      "rdata", "autov", "imputed")))]
+  cl_mplusoject[[1]] <- quote(mplusObject)
+  
+  base_object <- eval.parent(cl_mplusoject)
   
   # Expand template for requested classes
   input_list <- lapply(classes, function(num_classes) {
@@ -1424,26 +1476,35 @@ createMixtures <- function(classes = 1L,
     base_object
   })
   
-  # Write files
-  invisible(suppressMessages(lapply(1:n_classes, function(class) {
-    mplusModeler(
-      object = input_list[[class]],
-      dataout = if (is.null(filename_stem)) {
-        "data.dat"
+  # Evaluate models
+  # Create mplusModeler call
+  cl_mplusmodeler <- Args[c(1, which(names(Args) %in% c("run", "check", "varwarnings", 
+                                                        "Mplus_command", "writeData", "hashfilename", "killOnFail")))]
+  cl_mplusmodeler[[1]] <- quote(mplusModeler)
+  
+  if(!"run" %in% names(cl_mplusmodeler)) cl_mplusmodeler$run <- 0L
+  if(!"check" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["check"]] <- FALSE
+  if(!"varwarnings" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["varwarnings"]] <- TRUE
+  if(!"Mplus_command" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["Mplus_command"]] <- "Mplus"
+  if(!"writeData" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["writeData"]] <- "ifmissing"
+  if(!"hashfilename" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["hashfilename"]] <- TRUE
+  
+  invisible(suppressMessages({
+    out <- lapply(1:n_classes, function(class) {
+    cl_mplusmodeler[["object"]] <- input_list[[class]]
+    cl_mplusmodeler[["dataout"]] <- if (is.null(filename_stem)) {
+      "data.dat"
       } else {
         paste(c("data_", filename_stem, ".dat"), collapse = "")
-      },
-      modelout = paste0(paste(
-        c(filename_stem, classes[[class]], "class"), collapse = "_"
-      ), ".inp"),
-      run = 0L,
-      check = FALSE,
-      varwarnings = TRUE,
-      Mplus_command = "Mplus",
-      writeData = "ifmissing",
-      hashfilename = TRUE
-    )
-  })))
+      }
+    cl_mplusmodeler[["modelout"]] <- paste0(paste(
+      c(filename_stem, classes[[class]], "class"), collapse = "_"
+      ), ".inp")
+    eval.parent(cl_mplusmodeler)
+  })
+  class(out) <- c("model.list", class(out))
+  return(out)
+  }))
 }
 
 #' Plot latent transition model
