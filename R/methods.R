@@ -63,7 +63,7 @@ print.MplusRstructure <- function(x, ...) {
 #' unlink("Mplus Run Models.log")
 #' }
 summary.mplusObject <- function(object, verbose=FALSE, ...) {
-  stopifnot(isFALSE(is.null(object$results)))
+  stopifnot("This mplusObject does not yet have a valid results section." = isFALSE(is.null(object$results)))
 
   x <- object$results$summaries
 
