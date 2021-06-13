@@ -7,3 +7,7 @@ pkg_build
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^.*\.inp$
+^.*\.out$
+^.*\.dat$
+^.*\.log$

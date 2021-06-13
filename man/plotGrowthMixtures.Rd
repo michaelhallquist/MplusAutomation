@@ -48,7 +48,8 @@ variables for the growth trajectory to plot. If NULL (default), all latent
 growth variables are used. Use this option to plot one trajectory when a
 model contains multiple latent growth trajectories.}
 
-\item{time_scale}{Numeric vector. In case some of the loadings of the growth model are freely
+\item{time_scale}{Numeric vector. In case some of the loadings of the growth
+model are freely
 estimated, provide the correct time scale here (e.g., c(0, 1, 2)).}
 
 \item{jitter_lines}{Numeric. Indicate the amount (expressed in fractions of a
@@ -65,33 +66,32 @@ specified using Mplus' '|' notation (e.g., i s | ).
 }
 \examples{
 \dontrun{
-mydat <- read.table("http://statmodel.com/usersguide/chap8/ex8.2.dat", header = FALSE)[,-6]
-createMixtures(classes = 1:3, filename_stem = "ex8.2",
-               model_overall = "i s | V1@0 V2@1 V3@2 V4@3;  i s on V5;",
-               rdata = mydat,
-               OUTPUT = "tech11 tech14;", usevariables = c("V1", "V2", "V3",
-                                                           "V4", "V5"))
-runModels(replaceOutfile = "modifiedDate")
-mplus_output <- readModels(filefilter = "ex8.2")
-plotGrowthMixtures(mplus_output, estimated = TRUE, rawdata = TRUE, time_scale = c(0, 1, 2, 3))
-plotGrowthMixtures(mplus_output, estimated = FALSE, rawdata = TRUE,
-                  poly = TRUE)
+mydat <- read.table("http://statmodel.com/usersguide/chap8/ex8.2.dat",
+                    header = FALSE)[,-6]
+res <- createMixtures(classes = 1:3, filename_stem = "ex8.2",
+                      model_overall = 
+                                    "i s | V1@0 V2@1 V3@2 V4@3;  i s on V5;",
+                      rdata = mydat,
+                      OUTPUT = "tech11 tech14;", 
+                      usevariables = c("V1", "V2", "V3", "V4", "V5"),
+                      run = 1L)
+plotGrowthMixtures(res, estimated = TRUE, rawdata = TRUE, 
+                   time_scale = c(0, 1, 2, 3))
+plotGrowthMixtures(res, estimated = FALSE, rawdata = TRUE, poly = TRUE)
 
-createMixtures(classes = 1:3, filename_stem = "ex8.2_free",
-               model_overall = "i s | V1@0 V2* V3* V4@3;  i s on V5;",
-               rdata = mydat,
-               OUTPUT = "tech11 tech14;", usevariables = c("V1", "V2", "V3",
-                                                           "V4", "V5"))
-runModels(replaceOutfile = "modifiedDate")
-mplus_output_free <- readModels(filefilter = "ex8.2_free")
-plotMixtureDensities(mplus_output_free, variables = c("V1", "V2", "V3",
-                                                      "V4"))
-plotGrowthMixtures(mplus_output_free, estimated = TRUE, rawdata = TRUE,
-                  bw = TRUE, time_scale = c(0, 1, 2, 3),
-                  alpha_range = c(0, .05))
+res <- createMixtures(classes = 1:3, filename_stem = "ex8.2_free",
+                      model_overall = "i s | V1@0 V2* V3* V4@3;  i s on V5;",
+                      rdata = mydat,
+                      OUTPUT = "tech11 tech14;",
+                      usevariables = c("V1", "V2", "V3", "V4", "V5"),
+                      run = 1L)
+plotMixtureDensities(res, variables = c("V1", "V2", "V3", "V4"))
+plotGrowthMixtures(res, estimated = TRUE, rawdata = TRUE,
+                   bw = TRUE, time_scale = c(0, 1, 2, 3),
+                   alpha_range = c(0, .05))
 
-plotGrowthMixtures(mplus_output, estimated = FALSE, rawdata = TRUE,
-                  poly = TRUE, bw = TRUE, time_scale = c(0, 1, 2, 3))
+plotGrowthMixtures(res, estimated = FALSE, rawdata = TRUE,
+                   poly = TRUE, bw = TRUE, time_scale = c(0, 1, 2, 3))
 }
 }
 \author{

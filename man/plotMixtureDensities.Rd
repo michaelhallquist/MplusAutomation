@@ -58,9 +58,8 @@ participants being assigned to those clases.
 }
 \examples{
 \dontrun{
-createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
-runModels(filefilter = "iris")
-results <- readModels(filefilter = "iris")
+results <- createMixtures(classes = 1:3, filename_stem = "iris",
+                          rdata = iris, run = 1L)
 plotMixtureDensities(results)
 }
 \dontrun{
