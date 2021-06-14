@@ -74,7 +74,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'
 #' }
 .cleanHashData <- function(df, keepCols=NULL, dropCols=NULL, imputed=FALSE) {
-  checkmate::assert_data_frame(df)
+  if(!imputed) checkmate::assert_data_frame(df)
   #checkmate::assert_character(keepCols, null.ok = TRUE, all.missing = FALSE)
   #checkmate::assert_character(dropCols, null.ok = TRUE, all.missing = FALSE)
   checkmate::assert_logical(imputed, null.ok = FALSE)
