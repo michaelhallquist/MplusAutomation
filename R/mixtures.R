@@ -24,15 +24,10 @@
 #' @keywords mixture mplus
 #' @examples
 #' \dontrun{
-#' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
-#' runModels(filefilter = "iris")
-#' results <- readModels(filefilter = "iris")
-#' mixtureSummaryTable(results)
-#' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris,
-#'                OUTPUT = "tech11 tech14;")
-#' runModels(filefilter = "iris", replaceOutfile = "modifiedDate")
-#' results <- readModels(filefilter = "iris")[c(1:2)]
-#' mixtureSummaryTable(results)
+#' res <- createMixtures(classes = 1:2, filename_stem = "iris", rdata = iris,
+#'                OUTPUT = "tech11 tech14;",
+#'                run = 1L)
+#' mixtureSummaryTable(res)
 #' }
 mixtureSummaryTable <- function(modelList,
                                 keepCols = c(
@@ -51,34 +46,13 @@ mixtureSummaryTable <- function(modelList,
                                   "min_prob",
                                   "max_prob"
                                 )) {
-  # Check if modelList is of class mplus.model
-  if (!(inherits(modelList, "mplus.model") |
-        all(sapply(modelList, function(x) {
-          inherits(x, "mplus.model")
-        })))) {
+  modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
-  }
-  if (inherits(modelList, "mplus.model")) {
-    modelList <- list(Model_1 = modelList)
-  }
-      
-  # Check if all models in the list are mixture models
-  mixtures <- sapply(modelList, function(x) {
-    !is.null(x$input$analysis[["type"]])
   })
-  mixtures[mixtures] <- sapply(modelList[mixtures], function(x) {
-    grepl("mixture", tolower(x$input$analysis$type))
-  })
-  if (!any(mixtures))
-    stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
-  if (any(!mixtures))
-    warning(
-      "Some output files were excluded because they are not mixture models; specifically: ",
-      paste(names(mixtures)[which(!mixtures)], collapse = ", ")
-    )
   
   # Remove models which are not type "mixture"
-  modelList <- modelList[which(mixtures)]
+  modelList <- check_mixtures(modelList)
+  
   # In the unlikely case that the user deleted keepCols, set to default
   if (is.null(keepCols)) {
     keepCols <-
@@ -140,6 +114,7 @@ mixtureSummaryTable <- function(modelList,
   # Extract model summaries
   summarytable_keepCols <- unique(c("Filename",
                                     keepCols[which(!keepCols %in% c("min_N", "max_N", "min_prob", "max_prob"))]))
+  summarytable_keepCols <- c(summarytable_keepCols, paste0(summarytable_keepCols, "_Mean"))
   if (length(summarytable_keepCols > 0)) {
     model_summaries <-
       merge(
@@ -153,6 +128,10 @@ mixtureSummaryTable <- function(modelList,
       )
   }
   
+  if(any(!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries))){
+    warning("Returned mean value of: ", paste0(keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)], collapse = ", "))
+    keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)] <- paste0(keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)], "_Mean")
+  }
   model_summaries <-
     model_summaries[order(model_summaries[["Classes"]]),
                     keepCols[which(keepCols %in% names(model_summaries))],
@@ -174,8 +153,8 @@ mixtureSummaryTable <- function(modelList,
   }) > 0)
   if (length(not_replicated) > 0) {
     warning(
-      "The best loglikelihood value was not replicated in some models. The solution may not be trustworthy due to local maxima. Increase the number of random starts. The problematic models were:\n",
-      paste(names(not_replicated), collapse = "\n"),
+      "The best loglikelihood value was not replicated in some models. The solution may not be trustworthy due to local maxima. Increase the number of random starts. The problematic models were row number(s): ",
+      paste(not_replicated, collapse = ", "),
       call. = FALSE
     )
   }
@@ -187,14 +166,15 @@ mixtureSummaryTable <- function(modelList,
   }) > 0)
   if (length(not_terminated) > 0) {
     warning(
-      "Model estimation did not terminate normally due to an error in the computation. Change your model and/or starting values. The problematic models were:\n",
-      paste(names(not_terminated), collapse = "\n"),
+      "Model estimation did not terminate normally due to an error in the computation. Change your model and/or starting values. The problematic models were row number(s): ",
+      paste(not_terminated, collapse = ", "),
       call. = FALSE
     )
   }
   
   return(model_summaries)
 }
+
 
 #' Create latent profile plots
 #'
@@ -225,22 +205,32 @@ mixtureSummaryTable <- function(modelList,
 #' @keywords plot mixture mplus
 #' @examples
 #' \dontrun{
-#' createMixtures(classes = 1:4, filename_stem = "cars",
-#'                model_overall = "wt ON drat;",
-#'                model_class_specific = "wt;  qsec;",
-#'                rdata = mtcars,
-#'                usevariables = c("wt", "qsec", "drat"),
-#'                OUTPUT = "standardized")
-#' runModels(replaceOutfile = "modifiedDate")
-#' cars_results <- readModels(filefilter = "cars")
-#' plotMixtures(cars_results, rawdata = TRUE)
+#' res <- createMixtures(classes = 1:2, filename_stem = "cars",
+#'                       model_overall = "wt ON drat;",
+#'                       model_class_specific = "wt;  qsec;",
+#'                       rdata = mtcars,
+#'                       usevariables = c("wt", "qsec", "drat"),
+#'                       OUTPUT = "standardized",
+#'                       run = 1L)
+#' plotMixtures(res, rawdata = TRUE)
 #' }
 #' \dontrun{
-#' plotMixtures(cars_results, variables = "wt")
+#' plotMixtures(res, variables = "wt")
 #' }
 #' \dontrun{
-#' plotMixtures(cars_results, coefficients = "stdyx.standardized")
+#' plotMixtures(res, coefficients = "stdyx.standardized")
 #' }
+# modelList,
+# variables = NULL,
+# coefficients = c("unstandardized",
+#                  "stdyx.standardized",
+#                  "stdy.standardized",
+#                  "stdy.standardized"),
+# parameter = c("Means", "Intercepts"),
+# ci = .95,
+# bw = FALSE,
+# rawdata = FALSE,
+# alpha_range = c(0, .1)
 plotMixtures <- function(modelList,
                          variables = NULL,
                          coefficients = c("unstandardized",
@@ -253,42 +243,18 @@ plotMixtures <- function(modelList,
                          rawdata = FALSE,
                          alpha_range = c(0, .1))
 {
+
   coefficients <- coefficients[1]
   # Check if mplusModel is of class mplus.model
-  if (!(inherits(modelList, "mplus.model") |
-        all(sapply(modelList, function(x) {
-          inherits(x, "mplus.model")
-        })))) {
+  modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
     stop(
       "plotMixtures requires an object of class 'mplus.model' or a list of mplus.models as its first argument."
     )
-  }
-  if (inherits(modelList, "mplus.model")) {
-    modelList <- list(Model_1 = modelList)
-  }
-  # Check if mplusModel is a mixture model
-  if (inherits(modelList, "mplus.model")) {
-    modelList <- list(Model_1 = modelList)
-  }
-  mixtures <- sapply(modelList, function(x) {
-    !is.null(x$input$analysis[["type"]])
   })
-  mixtures[which(mixtures)] <-
-    sapply(modelList[which(mixtures)], function(x) {
-      grepl("mixture", tolower(x$input$analysis$type))
-    })
-  if (!any(mixtures))
-    stop(
-      "plotMixtures requires a list of mixture models, or one mixture model, as its first argument."
-    )
-  if (any(!mixtures))
-    warning(
-      "Some output files were excluded because they are not mixture models; specifically: ",
-      paste(names(mixtures)[which(!mixtures)], collapse = ", "),
-      call. = FALSE
-    )
+    
   # Remove models which are not type "mixture"
-  modelList <- modelList[which(mixtures)]
+  modelList <- check_mixtures(modelList)
+  
   # Check if all models were run on the same dataset
   if (length(unique(sapply(modelList, function(x) {
     x$input$data$file
@@ -331,6 +297,7 @@ plotMixtures <- function(modelList,
     lapply(modelList, function(x) {
       subset(x$parameters[[coefficients]], x$parameters[[coefficients]]$paramHeader %in% parameter)
     })
+  
   # Bind into one df with identifying variable
   plotdat <- do.call(rbind, lapply(names(modelList), function(x) {
     data.frame(Title = modelList[[x]]$input$title, plotdat[[x]])
@@ -528,7 +495,8 @@ plotMixtures <- function(modelList,
 #' variables for the growth trajectory to plot. If NULL (default), all latent
 #' growth variables are used. Use this option to plot one trajectory when a
 #' model contains multiple latent growth trajectories.
-#' @param time_scale Numeric vector. In case some of the loadings of the growth model are freely
+#' @param time_scale Numeric vector. In case some of the loadings of the growth
+#' model are freely
 #' estimated, provide the correct time scale here (e.g., c(0, 1, 2)).
 #' @param jitter_lines Numeric. Indicate the amount (expressed in fractions of a
 #' standard deviation of all observed data) by which the observed trajectories
@@ -541,35 +509,33 @@ plotMixtures <- function(modelList,
 #' @keywords internal
 #' @examples
 #' \dontrun{
-#' mydat <- read.table("http://statmodel.com/usersguide/chap8/ex8.2.dat", header = FALSE)[,-6]
-#' createMixtures(classes = 1:3, filename_stem = "ex8.2",
-#'                model_overall = "i s | V1@0 V2@1 V3@2 V4@3;  i s on V5;",
-#'                rdata = mydat,
-#'                OUTPUT = "tech11 tech14;", usevariables = c("V1", "V2", "V3",
-#'                                                            "V4", "V5"))
-#' runModels(replaceOutfile = "modifiedDate")
-#' mplus_output <- readModels(filefilter = "ex8.2")
-#' plotGrowthMixtures(mplus_output, estimated = TRUE, rawdata = TRUE, time_scale = c(0, 1, 2, 3))
-#' plotGrowthMixtures(mplus_output, estimated = FALSE, rawdata = TRUE,
-#'                   poly = TRUE)
+#' mydat <- read.table("http://statmodel.com/usersguide/chap8/ex8.2.dat",
+#'                     header = FALSE)[,-6]
+#' res <- createMixtures(classes = 1:3, filename_stem = "ex8.2",
+#'                       model_overall = 
+#'                                     "i s | V1@0 V2@1 V3@2 V4@3;  i s on V5;",
+#'                       rdata = mydat,
+#'                       OUTPUT = "tech11 tech14;", 
+#'                       usevariables = c("V1", "V2", "V3", "V4", "V5"),
+#'                       run = 1L)
+#' plotGrowthMixtures(res, estimated = TRUE, rawdata = TRUE, 
+#'                    time_scale = c(0, 1, 2, 3))
+#' plotGrowthMixtures(res, estimated = FALSE, rawdata = TRUE, poly = TRUE)
 #'
-#' createMixtures(classes = 1:3, filename_stem = "ex8.2_free",
-#'                model_overall = "i s | V1@0 V2* V3* V4@3;  i s on V5;",
-#'                rdata = mydat,
-#'                OUTPUT = "tech11 tech14;", usevariables = c("V1", "V2", "V3",
-#'                                                            "V4", "V5"))
-#' runModels(replaceOutfile = "modifiedDate")
-#' mplus_output_free <- readModels(filefilter = "ex8.2_free")
-#' plotMixtureDensities(mplus_output_free, variables = c("V1", "V2", "V3",
-#'                                                       "V4"))
-#' plotGrowthMixtures(mplus_output_free, estimated = TRUE, rawdata = TRUE,
-#'                   bw = TRUE, time_scale = c(0, 1, 2, 3),
-#'                   alpha_range = c(0, .05))
+#' res <- createMixtures(classes = 1:3, filename_stem = "ex8.2_free",
+#'                       model_overall = "i s | V1@0 V2* V3* V4@3;  i s on V5;",
+#'                       rdata = mydat,
+#'                       OUTPUT = "tech11 tech14;",
+#'                       usevariables = c("V1", "V2", "V3", "V4", "V5"),
+#'                       run = 1L)
+#' plotMixtureDensities(res, variables = c("V1", "V2", "V3", "V4"))
+#' plotGrowthMixtures(res, estimated = TRUE, rawdata = TRUE,
+#'                    bw = TRUE, time_scale = c(0, 1, 2, 3),
+#'                    alpha_range = c(0, .05))
 #'
-#' plotGrowthMixtures(mplus_output, estimated = FALSE, rawdata = TRUE,
-#'                   poly = TRUE, bw = TRUE, time_scale = c(0, 1, 2, 3))
+#' plotGrowthMixtures(res, estimated = FALSE, rawdata = TRUE,
+#'                    poly = TRUE, bw = TRUE, time_scale = c(0, 1, 2, 3))
 #' }
-
 plotGrowthMixtures <-
   function(modelList,
            bw = FALSE,
@@ -581,39 +547,14 @@ plotGrowthMixtures <-
            time_scale = NULL,
            jitter_lines = NULL,
            coefficients = "unstandardized") {
-    # Check if mplusModel is of class mplus.model
-    if (!(inherits(modelList, "mplus.model") |
-          all(sapply(modelList, function(x) {
-            inherits(x, "mplus.model")
-          })))) {
+    modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
       stop(
         "plotGrowthMixtures requires an object of class 'mplus.model' or a list of mplus.models as its first argument."
       )
-    }
-    if (inherits(modelList, "mplus.model")) {
-      modelList <- list(Model_1 = modelList)
-    }
-    mixtures <- sapply(modelList, function(x) {
-      !is.null(x$input$analysis[["type"]])
     })
-    mixtures[which(mixtures)] <-
-      sapply(modelList[which(mixtures)], function(x) {
-        grepl("mixture", tolower(x$input$analysis$type))
-      })
     
-    if (any(!mixtures)){
-      if (!any(mixtures))
-        stop(
-          "plotMixtures requires a list of mixture models, or one mixture model, as its first argument."
-        )
-      warning(
-        "Some output files were excluded because they are not mixture models; specifically: ",
-        paste(names(modelList)[which(!mixtures)], collapse = ", "),
-        call. = FALSE
-      )
-      modelList <- modelList[which(mixtures)]
-    }
     # Remove models which are not type "mixture"
+    modelList <- check_mixtures(modelList)
     
     # Check if all models were run on the same dataset
     if (length(unique(sapply(modelList, function(x) {
@@ -755,7 +696,7 @@ plotGrowthMixtures <-
     }), use.names = FALSE)
     Title <- unlist(mapply(FUN = function(Title, Times){
       rep(Title, Times*length(time_scale))
-    }, Title = sapply(names(loadings), function(x){
+    }, Title = sapply(1:length(modelList), function(x){
       trimws(modelList[[x]]$input$title)
     }), Times = classes))
     
@@ -1006,9 +947,8 @@ plotGrowthMixtures <-
 #' @keywords mixture models mplus
 #' @examples
 #' \dontrun{
-#' createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
-#' runModels(filefilter = "iris")
-#' results <- readModels(filefilter = "iris")
+#' results <- createMixtures(classes = 1:3, filename_stem = "iris",
+#'                           rdata = iris, run = 1L)
 #' plotMixtureDensities(results)
 #' }
 #' \dontrun{
@@ -1030,223 +970,49 @@ plotMixtureDensities <-
            conditional = FALSE,
            alpha = .2,
            facet_labels = NULL) {
-    # Check if mplusModel is of class mplus.model
-    if (!(inherits(modelList, "mplus.model") |
-          all(sapply(modelList, function(x) {
-            inherits(x, "mplus.model")
-          })))) {
-      stop(
-        "plotMixtureDensities requires an object of class 'mplus.model' or a list of mplus.models as its first argument."
-      )
-    }
-    
-    # Check if mplusModel is a mixture model
-    if (inherits(modelList, "mplus.model")) {
-      modelList <- list(Model_1 = modelList)
-    }
-    mixtures <- sapply(modelList, function(x) {
-      !is.null(x$input$analysis[["type"]])
-    })
-    mixtures[mixtures] <- sapply(modelList[mixtures], function(x) {
-      grepl("mixture", tolower(x$input$analysis$type))
-    })
-    if (!any(mixtures))
-      stop(
-        "plotMixtureDensities requires a list of mixture models, or one mixture model, as its first argument."
-      )
-    if (any(!mixtures))
-      warning(
-        "Some output files were excluded because they are not mixture models; specifically: ",
-        paste(names(mixtures)[which(!mixtures)], collapse = ", ")
-      )
-    # Remove models which are not type "mixture"
-    modelList <- modelList[which(mixtures)]
-    missing_savedata <-
-      sapply(modelList, function(x) {
-        is.null(x[["savedata"]])
-      })
-    if (any(missing_savedata)) {
-      if (sum(missing_savedata) == length(modelList)) {
-        stop(
-          "All models are missing savedata. Make sure to specify 'SAVEDATA = FILE IS filename.dat; SAVE = cprobabilities;' in the Mplus syntax.",
-          call. = FALSE
-        )
-      } else{
-        warning(
-          "Some models are missing savedata and were dropped from the analysis. Make sure to specify 'SAVEDATA = FILE IS filename.dat; SAVE = cprobabilities;' in the Mplus syntax.",
-          call. = FALSE
-        )
-        modelList <- modelList[-which(missing_savedata)]
-      }
-    }
-    # Check if all models were run on the same dataset
-    if (length(unique(sapply(modelList, function(x) {
-      x$input$data$file
-    }))) > 1) {
-      stop("Models were not all run on the same data file.")
-    }
-    # Check if all variables (except CPROBs) are identical across models
-    rawdata <- lapply(modelList, function(x) {
-      x$savedata
-    })
-    var_names <-
-      sapply(modelList, function(x) {
-        names(x$savedata)[-grep("^CPROB", names(x$savedata))]
-      })
-    if (!class(var_names) == "matrix") {
-      var_names <- table(unlist(var_names))
-      warning(
-        "Savedata variables are not identical across Mplus output files. Dropped the following variables: ",
-        paste(names(var_names)[which(var_names != max(var_names))], collapse = ", ")
-      )
-      var_names <-
-        matrix(names(var_names)[which(var_names == max(var_names))], ncol = 1)
-    }
+    cl <- match.call()
+    modelList <- mplus_as_list(modelList)
+    modelList <- as.tidyLPA_model.list(modelList)
     # If no variables have been specified, use all variables
+    var_names <- names(modelList[[1]]$dff)
+    var_names <- var_names[1:min((which(var_names == "CPROB1")-1), length(var_names))]
+    var_names <- var_names[-grep("^(model_number|classes_number|CPROB\\d+|Class)$", var_names)]
     if (is.null(variables)) {
-      variables <- var_names[, 1]
-      class_names <- unique(sapply(modelList, function(x){
-        sapply(unlist(strsplit(x$input$variable$classes, " ")), gsub, pattern = "\\(\\d+\\)", replacement = "")
-        }))
-      variables <- variables[!toupper(variables) %in% toupper(class_names)]
+      variables <- var_names
     } else {
-      variables <- variables[which(toupper(variables) %in% toupper(var_names[, 1]))]
+      variables <- variables[which((variables) %in% (var_names))]
     }
-    rawdata <-
-      lapply(modelList, function(x) {
-        x$savedata[, which(names(x$savedata) %in% c(grep("^CPROB", names(x$savedata), value = TRUE), toupper(variables)))]
-      })
-    rawdata <- lapply(rawdata, function(x) {
-      if (length(grep("^CPROB", names(x))) == 1) {
-        names(x) <- gsub("^CPROB1", "Probability.Total", names(x))
-        x
-      } else {
-        names(x) <- gsub("^CPROB", "Probability.", names(x))
-        data.frame(x, Probability.Total = 1)
-      }
-      
-    })
+    if (!length(variables))
+      stop("No valid variables provided.")
     
-    for (i in names(rawdata)) {
-      rawdata[[i]][, grep("^Probability", names(rawdata[[i]]))] <-
-        lapply(rawdata[[i]][grep("^Probability", names(rawdata[[i]]))], function(x) {
-          x / length(x)
-        })
-    }
-    
-    
-    rawdata <- lapply(rawdata, function(x) {
-      reshape(
-        x,
-        direction = "long",
-        varying =
-          grep("^Probability", names(x), value = TRUE),
-        timevar = "Class",
-        idvar = "ID"
-      )
-    })
-    
-    rawdata <-
-      do.call(rbind, lapply(names(modelList), function(x) {
-        data.frame(Title = trimws(modelList[[x]]$input$title), rawdata[[x]])
-      }))
-    
-    variable_names <- which(!(names(rawdata) %in% c("Title", "Class", "Probability", "ID")))
-    
-    names(rawdata)[variable_names] <- sapply(names(rawdata)[variable_names], function(x){
-      paste(c("Value.", toupper(substring(x, 1, 1)), tolower(substring(x, 2))), collapse = "")})
-    
-    rawdata <- reshape(
-      rawdata,
-      direction = "long",
-      varying =
-        grep("^Value", names(rawdata), value = TRUE),
-      timevar = "Variable"
-    )[, c("Title", "Variable", "Value", "Class", "Probability")]
-    
-    rawdata$Variable <- factor(rawdata$Variable)
-    rawdata$Class <- factor(rawdata$Class)
-    rawdata$Class <-
-      ordered(rawdata$Class, levels = c("Total", levels(rawdata$Class)[-length(levels(rawdata$Class))]))
-
-    # Plot figure
-    if (bw) {
-      if (conditional) {
-        rawdata <- rawdata[-which(rawdata$Class == "Total"),]
-        density_plot <-
-          ggplot(rawdata,
-                 aes_string(x = "Value", y = "..count..", fill = "Class", weight = "Probability")) +
-          geom_density(position = "fill") + scale_fill_grey(start = 0.2, end = 0.8)
-      } else{
-        density_plot <-
-          ggplot(rawdata,
-                 aes_string(x = "Value", linetype = "Class", weight = "Probability")) +
-          geom_density()
-      }
-    } else{
-      if (conditional) {
-        rawdata <- rawdata[-which(rawdata$Class == "Total"),]
-        density_plot <-
-          ggplot(rawdata,
-                 aes_string(x = "Value", y = "..count..", fill = "Class", weight = "Probability")) +
-          geom_density(position = "fill")
-      } else{
-        density_plot <-
-          ggplot(rawdata,
-                 aes_string(x = "Value",
-                   fill = "Class",
-                   colour = "Class",
-                   weight = "Probability"
-                 )) +
-          geom_density(alpha = alpha)
-      }
-    }
-    # Relabel facets
-    label_facets <- c(levels(rawdata$Variable), levels(rawdata$Title))
-    names(label_facets) <- label_facets
-    if(!is.null(facet_labels)){
-      label_facets[which(tolower(names(label_facets)) %in% tolower(names(facet_labels)))] <- facet_labels[which(tolower(names(facet_labels)) %in% tolower(names(label_facets)))]
-    }
-    # Facet the plot
-    if (length(modelList) > 1) {
-      if (length(variables) > 1) {
-
-        density_plot <- density_plot + 
-          facet_grid(Title ~ Variable, labeller = labeller(Title = label_facets, Variable = label_facets))
-
-      } else {
-        density_plot <- density_plot +
-          facet_grid( ~ Title, labeller = labeller(Title = label_facets))
-      }
-    } else {
-      if (length(variables) > 1) {
-        density_plot <- density_plot +
-          facet_grid( ~ Variable, labeller = labeller(Variable = label_facets))
-      }
-    }
-    
-    density_plot <- density_plot +
-      theme_bw() +
-      scale_x_continuous(expand = c(0, 0)) +
-      scale_y_continuous(expand = c(0, 0))
-
-    suppressWarnings(print(density_plot))
-    return(invisible(density_plot))
+    cl[["variables"]] <- variables
+    cl[["x"]] <- modelList
+    cl_dens <- cl
+    cl_dens[[1L]] <- str2lang("MplusAutomation:::.extract_density_data")
+    cl_dens <- cl_dens[c(1, which(names(cl_dens) %in% c("x", "variables")))]
+    cl[["x"]] <- eval.parent(cl_dens)
+    cl[["x"]] <- cl[["x"]][!is.na(cl[["x"]]$Value), ]
+    cl[[1L]] <- str2lang("MplusAutomation:::plot_density_default")
+    cl <- cl[c(1, which(names(cl) %in% c("x", "variables", "bw", "conditional", "alpha", "facet_labels")))]
+    eval.parent(cl)
   }
 
 #' Create syntax for a batch of mixture models
 #'
 #' Dynamically creates syntax for a batch of mixture models, with intelligent
-#' defaults. This function is a wrapper around \code{mplusObject}, and
-#' additional arguments can be passed to this function using \code{...}.
-#' In all arguments to \code{mplusObject}, a double space (\dQuote{  }) is
-#' replaced with a newline character. This can be used to obtain nicely
-#' formatted Mplus syntax.
+#' defaults. This function is a wrapper around \code{mplusObject} and
+#' \code{mplusModeler}, and the respective arguments of those functions can be
+#' passed on using \code{...}. For instance, passing the argument
+#' \code{run = 1L} means that the models will be evaluated and returned.
+#' 
 #' In the arguments \code{model_class_specific} and \code{SAVEDATA}, the
 #' character string \dQuote{\{C\}} is substituted with the correct class number.
 #' The character string \dQuote{\{filename_stem\}} is substituted with the
 #' filename stem, for example, to name savedata in line with the input files.
 #'
+#' In all arguments to \code{mplusObject}, a double space (\dQuote{  }) is
+#' replaced with a newline character. This can be used to obtain nicely
+#' formatted Mplus syntax.
 #' @param classes A vector of integers, indicating which class solutions to
 #' generate. Defaults to 1L. E.g., \code{classes = 1:6},
 #' \code{classes = c(1:4, 6:8)}.
@@ -1273,7 +1039,9 @@ plotMixtureDensities <-
 #' adequate.
 #' @param ... Additional arguments, passed to \link{mplusObject}, such as syntax
 #' for other Mplus options.
-#' @return None. Function is used for its side effects (generating syntax).
+#' @return None, unless the argument \code{run = 1L} is specified. In that case,
+#' a list with elements of class \code{mplusObject} is returned. Otherwise, this
+#' function is used for its side effects (generating syntax).
 #' @author Caspar J. van Lissa
 #' @seealso \code{\link{mplusObject}}, \code{\link{mplusModeler}}
 #' @export
@@ -1307,52 +1075,47 @@ createMixtures <- function(classes = 1L,
                            OUTPUT = "TECH11 TECH14;",
                            SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;",
                            ...) {
-  Args <- c(
-    list(
-      rdata = rdata,
-      usevariables = usevariables,
-      OUTPUT = OUTPUT
-    ),
-    list(...)
-  )
+  dots <- list(...)
+  cl <- match.call()
+  cl[c("classes", "filename_stem", "model_overall", "model_class_specific")] <- NULL
   if (hasArg("MODEL")) {
     warning(
       "MODEL argument was dropped: createMixtures constructs its own MODEL argument from model_overall and model_class_specific."
     )
-    Args$MODEL <- NULL
+    cl$MODEL <- NULL
   }
   if (!is.null(SAVEDATA)) {
-    Args$SAVEDATA <- gsub("\\{filename_stem\\}",
-                         filename_stem, SAVEDATA)
+    cl$SAVEDATA <- gsub("\\{filename_stem\\}",
+                        filename_stem, SAVEDATA)
   } else {
-    Args$SAVEDATA <- NULL
+    cl$SAVEDATA <- NULL
   }
   if (!hasArg(usevariables) & !hasArg("DEFINE")) {
     message("No usevariables provided, or variables defined. All variables in rdata were used.")
-    Args[["usevariables"]] <- names(rdata)
+    cl[["usevariables"]] <- names(rdata)
   }
-  if (any(sapply(Args[["usevariables"]], nchar) > 8)) {
+  if (any(sapply(usevariables, nchar) > 8)) {
     warning(
       "Some variable names exceed 8 characters and will be truncated by Mplus. This can cause problems when plotting mixture models. Please rename variables."
     )
   }
-  if (any(sapply(Args[["usevariables"]], grepl, "\\."))) {
-    Args[["usevariables"]] <- gsub("\\.", "_", Args[["usevariables"]])
+  if (any(sapply(usevariables, grepl, "\\."))) {
+    cl[["usevariables"]] <- gsub("\\.", "_", usevariables)
     warning("Some variable names contain periods ('.'). These were replaced with underscores.")
   }
   
-  Args[["MODEL"]] <-
+  cl[["MODEL"]] <-
     paste(c("%OVERALL%\n", model_overall, "\n\n"), collapse = "")
   if (hasArg("ANALYSIS")) {
-    Args[["ANALYSIS"]] <-
-      paste0("TYPE = mixture;\n", Args[["ANALYSIS"]])
+    cl[["ANALYSIS"]] <-
+      paste0("TYPE = mixture;\n", dots[["ANALYSIS"]])
   } else {
-    Args[["ANALYSIS"]] <- "TYPE = mixture;\n"
+    cl[["ANALYSIS"]] <- "TYPE = mixture;\n"
   }
   
-  char_args <- which(sapply(Args, is.character))
-  Args[char_args] <-
-    lapply(Args[char_args], function(x) {
+  char_args <- which(sapply(cl, is.character))
+  cl[char_args] <-
+    lapply(cl[char_args], function(x) {
       gsub("  ", "\n", x)
     })
   
@@ -1365,7 +1128,13 @@ createMixtures <- function(classes = 1L,
   n_classes <- length(classes)
   
   # Create mplusObject template
-  base_object <- do.call(mplusObject, Args)
+  cl_mplusoject <- cl[c(1, which(names(cl) %in% c("TITLE", "DATA", "VARIABLE", "DEFINE", "MONTECARLO", "MODELPOPULATION", 
+                                                  "MODELMISSING", "ANALYSIS", "MODEL", "MODELINDIRECT", "MODELCONSTRAINT", 
+                                                  "MODELTEST", "MODELPRIORS", "OUTPUT", "SAVEDATA", "PLOT", "usevariables", 
+                                                  "rdata", "autov", "imputed")))]
+  cl_mplusoject[[1]] <- quote(mplusObject)
+  
+  base_object <- eval.parent(cl_mplusoject)
   
   # Expand template for requested classes
   input_list <- lapply(classes, function(num_classes) {
@@ -1424,26 +1193,35 @@ createMixtures <- function(classes = 1L,
     base_object
   })
   
-  # Write files
-  invisible(suppressMessages(lapply(1:n_classes, function(class) {
-    mplusModeler(
-      object = input_list[[class]],
-      dataout = if (is.null(filename_stem)) {
+  # Evaluate models
+  # Create mplusModeler call
+  cl_mplusmodeler <- cl[c(1, which(names(cl) %in% c("run", "check", "varwarnings", 
+                                                    "Mplus_command", "writeData", "hashfilename", "killOnFail")))]
+  cl_mplusmodeler[[1]] <- quote(mplusModeler)
+  
+  if(!"run" %in% names(cl_mplusmodeler)) cl_mplusmodeler$run <- 0L
+  if(!"check" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["check"]] <- FALSE
+  if(!"varwarnings" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["varwarnings"]] <- TRUE
+  if(!"Mplus_command" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["Mplus_command"]] <- "Mplus"
+  if(!"writeData" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["writeData"]] <- "ifmissing"
+  if(!"hashfilename" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["hashfilename"]] <- TRUE
+  
+  invisible(suppressMessages({
+    out <- lapply(1:n_classes, function(class) {
+      cl_mplusmodeler[["object"]] <- input_list[[class]]
+      cl_mplusmodeler[["dataout"]] <- if (is.null(filename_stem)) {
         "data.dat"
       } else {
         paste(c("data_", filename_stem, ".dat"), collapse = "")
-      },
-      modelout = paste0(paste(
+      }
+      cl_mplusmodeler[["modelout"]] <- paste0(paste(
         c(filename_stem, classes[[class]], "class"), collapse = "_"
-      ), ".inp"),
-      run = 0L,
-      check = FALSE,
-      varwarnings = TRUE,
-      Mplus_command = "Mplus",
-      writeData = "ifmissing",
-      hashfilename = TRUE
-    )
-  })))
+      ), ".inp")
+      eval.parent(cl_mplusmodeler)
+    })
+    class(out) <- c("model.list", class(out))
+    return(out)
+  }))
 }
 
 #' Plot latent transition model
@@ -1505,11 +1283,10 @@ plotLTA <-
            x_labels = "variable") {
     
     # Check if mplusModel is of class mplus.model
-    if (!(inherits(mplusModel, "mplus.model"))) {
-      stop(
-        "plotLTA requires an object of class 'mplus.model' as its first argument."
-      )
-    }
+    mplusModel <- tryCatch(one_mplus_model(mplusModel), error = function(e){
+      stop("plotLTA can only plot a single model. Please extract the desired model from the list.")
+    })
+    
     if(is.null(mplusModel$input$analysis[["type"]]))
       stop(
         "plotLTA requires a mixture model as its first argument."
@@ -1624,3 +1401,499 @@ plotLTA <-
     }
     p
   }
+
+
+check_mixtures <- function(modelList){
+  # Check if all models in the list are mixture models
+  mixtures <- sapply(modelList, function(x) {
+    !is.null(x$input$analysis[["type"]])
+  })
+  mixtures[mixtures] <- sapply(modelList[mixtures], function(x) {
+    grepl("mixture", tolower(x$input$analysis$type))
+  })
+  if (!any(mixtures))
+    stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
+  if (any(!mixtures))
+    warning(
+      "Some output files were excluded because they are not mixture models; specifically: ",
+      paste(names(mixtures)[which(!mixtures)], collapse = ", ")
+    )
+  
+  # Remove models which are not type "mixture"
+  modelList[which(mixtures)]
+}
+
+mplus_as_list <- function(x){
+  out <- switch(class(x)[1],
+         mplus.model.list = x,
+         mplus.model = list(Model_1 = x),
+         mplusObject = list(Model_1 = x$results),
+         model.list = lapply(x, `[[`, "results"),
+         list = {
+           if(all(sapply(x, inherits, what = "mplusObject"))){
+             lapply(x, `[[`, "results")
+           } else {
+             if(all(sapply(x, inherits, what = "mplus.model"))){
+               x
+             } else {
+               stop("Not a list of Mplus models.")
+             } 
+           }
+           
+         },
+         stop("Not a list of Mplus models.")
+         )
+  if(is.null(names(out))){
+    nms <- sapply(1:length(out), function(i){
+      if(!is.null(out[[i]][["input"]][["title"]])){
+        out[[i]][["input"]][["title"]]
+      } else {
+        paste0("Model ", i)
+      }
+    })
+    names(out) <- nms
+  } else {
+    if(any(names(out) == "")){
+      names(out)[which(names(out) == "")] <- paste0("Model ", which(names(out) == ""))
+    }
+  }
+  out
+}
+
+
+one_mplus_model <- function(x){
+  out <- switch(class(x)[1],
+                mplus.model = x,
+                mplusObject = x$results,
+                model.list = {
+                  if(length(x) == 1){
+                    x[[1]][["results"]]
+                  } else {
+                    stop("Not a single Mplus model.")
+                  }},
+                list = {
+                  if(length(x) == 1){
+                    if(inherits(x, "mplusObject")){
+                      x[["results"]]
+                    } else {
+                      if(inherits(x, "mplus.model")){
+                        x
+                      } else {
+                        stop("Not a single Mplus model.")
+                      }
+                    }
+                  }
+                },
+                mplus.model.list = {
+                  if(length(x) == 1){
+                    x
+                  } else {
+                    stop("Not a single Mplus model.")
+                  }
+                },
+                stop("Not a single Mplus model.")
+  )
+  out
+}
+
+
+as.tidyLPA_model.list <- function(modelList) {
+  # Remove models which are not type "mixture"
+  modelList <- check_mixtures(modelList)
+  
+  # Check if all models were run on the same dataset
+  if (length(unique(sapply(modelList, function(x) {
+    x$input$data$file
+  }))) > 1) {
+    stop("Models were not all run on the same data file.")
+  }
+  # Check if any models have missing columns (result of nonconvergence)
+  missing_cols <-
+    sapply(modelList, function(x) {
+      length(names(x$parameters[["unstandardized"]]))
+    })
+  missing_cols <- which(missing_cols != max(missing_cols))
+  if (length(missing_cols) > 0) {
+    warning(
+      "Some models had missing columns in the coefficients section. This likely indicates a convergence problem. These models were dropped: ",
+      paste(names(modelList)[missing_cols], collapse = ", "),
+      call. = FALSE
+    )
+    modelList <- modelList[-missing_cols]
+  }
+  # Prepare plot data
+  # Get coefficients
+  missing_coefficients <-
+    which(sapply(modelList, function(x) {
+      is.null(x$parameters[["unstandardized"]])
+    }))
+  if (length(missing_coefficients > 0)) {
+    warning(
+      "Some models were missing the unstandardized coefficients. Please request these coefficients from Mplus.",
+      call. = FALSE,
+      immediate. = TRUE
+    )
+    modelList <- modelList[-missing_coefficients]
+  }
+  if (length(modelList) < 1)
+    stop("No models left to convert to tidyLPA.", call. = FALSE)
+  
+  # Try to figure out what kind of model it was
+  # lapply(modelList, function(x){
+  #     class_specific <- which(grepl("\\d%", x$input$model))
+  # })
+  model_numbers <-
+    paste0(as.numeric(factor(sapply(modelList, function(x) {
+      end_first_class <- grep("#2%", x$input$model)
+      end_first_class <-
+        ifelse(length(end_first_class) == 0,
+               length(x$input$model),
+               end_first_class - 1)
+      paste(x$input$model[1:end_first_class], collapse = "")
+    }))))
+  
+  out_list <- lapply(modelList, function(x) {
+    this_class <- nrow(x$class_counts$modelEstimated)
+    this_model <- 99
+    
+    out <- list(model = x)
+    out$fit <-
+      c(Model = this_model,
+        Classes = this_class,
+        calc_fit(out$model))
+    out$estimates <- tryCatch(estimates(out$model), error = function(e){ stop("No valid parameters in this model.", call. = FALSE)})
+    out$estimates$Model <- this_model
+    out$estimates$Classes <- this_class
+    
+    out$dff <- out$model$savedata
+    if(!is.null(out[["dff"]])){
+      out$dff$model_number <- this_model
+      out$dff$classes_number <- this_class
+      out$dff <-
+        out$dff[, c((ncol(out$dff) - 1), ncol(out$dff), 1:(ncol(out$dff) - 2))]
+      if(names(out$dff)[length(names(out$dff))] == "C"){
+        names(out$dff)[length(names(out$dff))] <- "Class"
+      }
+    }
+    
+    #if(simplify) out$model <- NULL
+    class(out) <-
+      c("tidyProfile.mplus", "tidyProfile", "list")
+    out
+  })
+  
+  class(out_list) <- c("tidyLPA", "list")
+  names(out_list) <-
+    paste("model_",
+          model_numbers,
+          "_class_",
+          sapply(out_list, function(x) {
+            x$fit["Classes"]
+          }),
+          sep = "")
+  out_list
+}
+
+calc_fit <- function(model){
+  modsums <- model[["summaries"]]
+  names(modsums) <- gsub("_Mean$", "", names(modsums))
+  ll <- modsums$LL
+  parameters <- modsums$Parameters
+  n <- modsums$Observations
+  fits <- c(ifelse(is.null(modsums$Entropy), 1, modsums$Entropy),
+            tryCatch(range(diag(model$class_counts$classificationProbs.mostLikely)),
+                     warning = function(x) {
+                       c(NA, NA)
+                     }),
+            range(model$class_counts$mostLikely$proportion),
+            ifelse(is.null(modsums$BLRT_2xLLDiff), NA, modsums$BLRT_2xLLDiff),
+            ifelse(is.null(modsums$BLRT_PValue), NA, modsums$BLRT_PValue)
+  )
+  
+  fits <- c(
+    LogLik = ll,
+    AIC = -2*ll + 2*parameters,
+    AWE = -2*(ll + fits[1]) + 2*parameters*(3/2 + log(n)),
+    BIC = -2*ll + parameters * log(n),
+    CAIC = -2*ll + parameters * (log(n)+1),
+    CLC = -2*ll + 2*fits[1],
+    KIC = -2*ll + 3*(parameters + 1),
+    SABIC = -2*ll + parameters * log(((n+2)/24)),
+    ICL = NA,
+    fits
+  )
+  names(fits) <- c("LogLik", "AIC", "AWE", "BIC", "CAIC", "CLC", "KIC", "SABIC", "ICL", "Entropy", "prob_min", "prob_max", "n_min", "n_max", "BLRT_val", "BLRT_p")
+  fits
+}
+
+
+
+# Functions from tidyLPA --------------------------------------------------
+
+plot_density_default <-
+  function(x,
+           variables = NULL,
+           bw = FALSE,
+           conditional = FALSE,
+           alpha = .2,
+           facet_labels = NULL) {
+    plot_df <- x
+    if(!inherits(plot_df[["Title"]], "factor")){
+      plot_df[["Title"]] <- factor(plot_df[["Title"]])
+    }
+    # Plot figure
+    Args <- as.list(match.call()[-1])
+    Args <- Args[which(names(Args) %in% c("variables", "bw", "conditional", "alpha"))]
+    Args <- c(Args, list(plot_df = plot_df))
+    density_plot <- do.call(.plot_density_fun, Args)
+    # Relabel facets
+    label_facets <- c(levels(plot_df$Variable), levels(plot_df$Title))
+    names(label_facets) <- label_facets
+    if(!is.null(facet_labels)){
+      label_facets[which(tolower(names(label_facets)) %in% tolower(names(facet_labels)))] <- facet_labels[which(tolower(names(facet_labels)) %in% tolower(names(label_facets)))]
+    }
+    # Facet the plot
+    if (length(unique(plot_df$Title)) > 1) {
+      if (length(variables) > 1) {
+        
+        density_plot <- density_plot +
+          facet_grid(Title ~ Variable, labeller = labeller(Title = label_facets, Variable = label_facets), scales = "free_x")
+        
+      } else {
+        density_plot <- density_plot +
+          facet_grid( ~ Title, labeller = labeller(Title = label_facets))
+      }
+    } else {
+      if (length(variables) > 1) {
+        density_plot <- density_plot +
+          facet_grid( ~ Variable, labeller = labeller(Variable = label_facets))
+      }
+    }
+    
+    density_plot <- density_plot +
+      theme_bw()
+    
+    suppressWarnings(print(density_plot))
+    return(invisible(density_plot))
+  }
+
+.extract_density_data <- function(x,
+                                  variables = NULL, longform = TRUE){
+  if(inherits(x, "tidyProfile")){
+    x <- list(x)
+  }
+  x[sapply(x, function(i){is.null(i[["dff"]])})] <- NULL
+  # Check if all variables (except CPROBs) are identical across models
+  plot_df <- lapply(x, function(x)
+    as.data.frame(x$dff))
+  
+  
+  plot_df <-
+    lapply(plot_df, function(x) {
+      x <- x[, which(names(x) %in% c(grep("^CPROB", names(x), value = TRUE), variables))]
+      names(x) <- gsub("^CPROB", "Probability.", names(x))
+      data.frame(x, Probability.Total = 1)
+    })
+  
+  for (i in names(plot_df)) {
+    plot_df[[i]][, grep("^Probability", names(plot_df[[i]]))] <-
+      lapply(plot_df[[i]][grep("^Probability", names(plot_df[[i]]))], function(x) {
+        x / length(x)
+      })
+  }
+  
+  plot_df <- lapply(plot_df, function(x) {
+    reshape(
+      x,
+      direction = "long",
+      varying =
+        grep("^Probability", names(x), value = TRUE),
+      timevar = "Class",
+      idvar = "ID"
+    )
+  })
+  
+  if(length(plot_df) > 1){
+    plot_df <-
+      do.call(rbind, lapply(names(plot_df), function(x) {
+        data.frame(Title = gsub("_", " ", x), plot_df[[x]])
+      }))
+  } else {
+    plot_df <- data.frame(Title = "", plot_df[[1]])
+  }
+  
+  if(longform){
+    variable_names <-
+      which(!(
+        names(plot_df) %in% c("Title", "Class", "Probability", "ID")
+      ))
+    
+    names(plot_df)[variable_names] <-
+      sapply(names(plot_df)[variable_names], function(x) {
+        paste(c(
+          "Value_____",
+          toupper(substring(x, 1, 1)),
+          tolower(substring(x, 2))
+        ), collapse = "")
+      })
+    
+    plot_df <- reshape(
+      plot_df,
+      direction = "long",
+      varying =
+        grep("^Value", names(plot_df), value = TRUE),
+      sep = "_____",
+      timevar = "Variable"
+    )[, c("Title", "Variable", "Value", "Class", "Probability")]
+    
+    plot_df$Variable <- factor(plot_df$Variable)
+  }
+  
+  plot_df$Class <- factor(plot_df$Class)
+  plot_df$Class <-
+    ordered(plot_df$Class, levels = c("Total", levels(plot_df$Class)[-length(levels(plot_df$Class))]))
+  plot_df
+}
+
+.plot_density_fun <- function(plot_df, variables, bw = FALSE, conditional = FALSE, alpha = .2){
+  if (conditional) {
+    if (bw) {
+      plot_df <- plot_df[-which(plot_df$Class == "Total"),]
+      density_plot <-
+        ggplot(plot_df,
+               aes_string(x = "Value", y = "..count..", fill = "Class", weight = "Probability")) +
+        geom_density(position = "fill") + scale_fill_grey(start = 0.2, end = 0.8)
+    } else {
+      plot_df <- plot_df[-which(plot_df$Class == "Total"),]
+      density_plot <-
+        ggplot(plot_df,
+               aes_string(x = "Value", y = "..count..", fill = "Class", weight = "Probability")) +
+        scale_fill_manual(values = get_palette(length(levels(plot_df$Class))-1)) +
+        geom_density(position = "fill")
+    }
+  } else {
+    densities <- .get_dens_for_plot(plot_df)
+    densities$alpha <- alpha
+    densities$alpha[densities$Class == "Total"] <- 0
+    densities$Class <- ordered(densities$Class, levels = c(levels(plot_df$Class)[-1][order(as.numeric(levels(plot_df$Class)[-1]))], levels(plot_df$Class)[1]))
+    if (bw) {
+      density_plot <-
+        ggplot(densities,
+               aes_string(x = "x",
+                          y = "y",
+                          linetype = "Class"
+                          #size = "size"
+               )) + labs(x = "Value", y = "density")
+      density_plot <- density_plot +
+        geom_path()+
+        scale_linetype_manual(values = c(2:length(levels(plot_df$Class)), 1))+
+        scale_x_continuous(expand = c(0, 0))+
+        scale_y_continuous(expand = c(0, 0))
+    } else{
+      density_plot <-
+        ggplot(densities,
+               aes_string(x = "x",
+                          y = "y",
+                          fill = "Class",
+                          colour = "Class",
+                          alpha = "alpha"#,
+                          #size = "size"
+               )) + labs(x = "Value", y = "density")
+      class_colors <- c(get_palette(length(levels(plot_df$Class))-1), "#000000")
+      density_plot <- density_plot +
+        scale_colour_manual(values = class_colors)+
+        scale_fill_manual(values = class_colors) +
+        scale_alpha_continuous(range = c(0, alpha), guide = FALSE)+
+        scale_size_continuous(range = c(.5, 1), guide = FALSE)+
+        geom_area(position = "identity")+
+        scale_x_continuous(expand = c(0, 0))+
+        scale_y_continuous(expand = c(0, 0))
+      
+    }
+  }
+  density_plot
+}
+
+#' @importFrom stats density
+.get_dens_for_plot <- function(plot_df){
+  vars <- unique(plot_df[["Variable"]])
+  titles <- unique(plot_df[["Title"]])
+  if(is.null(vars)) vars <- ""
+  if(is.null(titles)) titles <- ""
+  if(length(titles) < 2 ){
+    if(length(vars) < 2){
+      densities <- lapply(unique(plot_df$Class), function(thisclass){
+        thedf <- plot_df[plot_df$Class == thisclass, ]
+        thep <- thedf$Probability
+        data.frame(Title = titles,
+                   Variable = vars,
+                   Class = thisclass,
+                   suppressWarnings(density(thedf$Value, weights = thep))[c("x", "y")])
+      })
+      do.call(rbind, densities)
+    } else {
+      do.call(rbind, lapply(vars, function(thisvar){
+        .get_dens_for_plot(plot_df[plot_df$Variable == thisvar, ])
+      }))
+    }
+  } else {
+    do.call(rbind, lapply(titles, function(thistit){
+      .get_dens_for_plot(plot_df[plot_df$Title == thistit, ])
+    }))
+  }
+  
+}
+
+estimates <- function(model){
+  # Select means, variances, covariances of class-specific parameters; drop est_se
+  df <- suppressWarnings(subset(model$parameters[["unstandardized"]], grepl("(^Means$|^Intercepts$|^Variances$|\\.WITH$)", model$parameters[["unstandardized"]]$paramHeader) & !is.na(as.numeric(model$parameters[["unstandardized"]]$LatentClass)), select = -5))
+  df <- df[!df$pval == "999", ]
+  # Extract original variable names
+  
+  varnames <- strsplit(model$input$variable$names, " ")[[1]]
+  # Match original var names to names in $param column
+  param_match <- sapply(df$param, pmatch, toupper(varnames))
+  # Replace names in $param column
+  df$param[!is.na(param_match)] <- varnames[param_match[!is.na(param_match)]]
+  # Match original var names to names in $paramHeader column (remove any suffixes starting with ., like .WITH)
+  param_match <- sapply(gsub("\\..*$", "", df$paramHeader), pmatch, toupper(varnames))
+  # Replace these one at a time (necessary because of .WITH etc)
+  if(any(!is.na(param_match))){
+    param_match <- na.omit(param_match)
+    for(i in 1:length(param_match)){
+      if(is.na(param_match[i])) next
+      df$paramHeader[i] <- gsub(names(param_match)[i], varnames[param_match[i]], df$paramHeader[i])
+    }
+  }
+  if(!any(varnames %in% df$param)){
+    varnames <- unique(model$parameters[["unstandardized"]]$param[model$parameters[["unstandardized"]]$paramHeader == "Means"])
+  }
+  df <- subset(df, df$param %in% varnames)
+  if(is.null(df)){return(NULL)}
+  covariances <- grepl(".WITH$", df$paramHeader)
+  df$param[covariances] <- paste(df$paramHeader[covariances], df$param[covariances], sep = ".")
+  df$paramHeader[covariances] <- "Covariances"
+  df$LatentClass <- as.integer(df$LatentClass)
+  names(df) <- c("Category", "Parameter", "Estimate", "se", "p", "Class")
+  df[!df$p == 999, ]
+}
+
+
+get_palette <- function(x){
+  if(x < 10){
+    switch(max(x-2, 1),
+           c("#E41A1C", "#377EB8", "#4DAF4A"),
+           c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3"),
+           c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00"),
+           c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33"),
+           c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628"),
+           c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF"),
+           c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999")
+    )[1:x]
+  } else {
+    colrs <- grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = T)]
+    c(get_palette(9), sample(colrs, (x-9)))
+  }
+}
+
+

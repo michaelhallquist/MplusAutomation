@@ -52,21 +52,20 @@ faceted plot of profile plots for an object of class 'mplus.model.list'.
 }
 \examples{
 \dontrun{
-createMixtures(classes = 1:4, filename_stem = "cars",
-               model_overall = "wt ON drat;",
-               model_class_specific = "wt;  qsec;",
-               rdata = mtcars,
-               usevariables = c("wt", "qsec", "drat"),
-               OUTPUT = "standardized")
-runModels(replaceOutfile = "modifiedDate")
-cars_results <- readModels(filefilter = "cars")
-plotMixtures(cars_results, rawdata = TRUE)
+res <- createMixtures(classes = 1:2, filename_stem = "cars",
+                      model_overall = "wt ON drat;",
+                      model_class_specific = "wt;  qsec;",
+                      rdata = mtcars,
+                      usevariables = c("wt", "qsec", "drat"),
+                      OUTPUT = "standardized",
+                      run = 1L)
+plotMixtures(res, rawdata = TRUE)
 }
 \dontrun{
-plotMixtures(cars_results, variables = "wt")
+plotMixtures(res, variables = "wt")
 }
 \dontrun{
-plotMixtures(cars_results, coefficients = "stdyx.standardized")
+plotMixtures(res, coefficients = "stdyx.standardized")
 }
 }
 \author{
