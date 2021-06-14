@@ -46,7 +46,6 @@ mixtureSummaryTable <- function(modelList,
                                   "min_prob",
                                   "max_prob"
                                 )) {
-
   modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
   })
@@ -115,6 +114,7 @@ mixtureSummaryTable <- function(modelList,
   # Extract model summaries
   summarytable_keepCols <- unique(c("Filename",
                                     keepCols[which(!keepCols %in% c("min_N", "max_N", "min_prob", "max_prob"))]))
+  summarytable_keepCols <- c(summarytable_keepCols, paste0(summarytable_keepCols, "_Mean"))
   if (length(summarytable_keepCols > 0)) {
     model_summaries <-
       merge(
@@ -128,6 +128,10 @@ mixtureSummaryTable <- function(modelList,
       )
   }
   
+  if(any(!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries))){
+    warning("Returned mean value of: ", paste0(keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)], collapse = ", "))
+    keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)] <- paste0(keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)], "_Mean")
+  }
   model_summaries <-
     model_summaries[order(model_summaries[["Classes"]]),
                     keepCols[which(keepCols %in% names(model_summaries))],
@@ -1421,6 +1425,7 @@ check_mixtures <- function(modelList){
 
 mplus_as_list <- function(x){
   out <- switch(class(x)[1],
+         mplus.model.list = x,
          mplus.model = list(Model_1 = x),
          mplusObject = list(Model_1 = x$results),
          model.list = lapply(x, `[[`, "results"),
@@ -1477,6 +1482,13 @@ one_mplus_model <- function(x){
                         stop("Not a single Mplus model.")
                       }
                     }
+                  }
+                },
+                mplus.model.list = {
+                  if(length(x) == 1){
+                    x
+                  } else {
+                    stop("Not a single Mplus model.")
                   }
                 },
                 stop("Not a single Mplus model.")
@@ -1554,13 +1566,16 @@ as.tidyLPA_model.list <- function(modelList) {
     out$estimates$Classes <- this_class
     
     out$dff <- out$model$savedata
-    out$dff$model_number <- this_model
-    out$dff$classes_number <- this_class
-    out$dff <-
-      out$dff[, c((ncol(out$dff) - 1), ncol(out$dff), 1:(ncol(out$dff) - 2))]
-    if(names(out$dff)[length(names(out$dff))] == "C"){
-      names(out$dff)[length(names(out$dff))] <- "Class"
+    if(!is.null(out[["dff"]])){
+      out$dff$model_number <- this_model
+      out$dff$classes_number <- this_class
+      out$dff <-
+        out$dff[, c((ncol(out$dff) - 1), ncol(out$dff), 1:(ncol(out$dff) - 2))]
+      if(names(out$dff)[length(names(out$dff))] == "C"){
+        names(out$dff)[length(names(out$dff))] <- "Class"
+      }
     }
+    
     #if(simplify) out$model <- NULL
     class(out) <-
       c("tidyProfile.mplus", "tidyProfile", "list")
@@ -1580,17 +1595,19 @@ as.tidyLPA_model.list <- function(modelList) {
 }
 
 calc_fit <- function(model){
-  ll <- model$summaries$LL
-  parameters <- model$summaries$Parameters
-  n <- model$summaries$Observations
-  fits <- c(ifelse(is.null(model$summaries$Entropy), 1, model$summaries$Entropy),
+  modsums <- model[["summaries"]]
+  names(modsums) <- gsub("_Mean$", "", names(modsums))
+  ll <- modsums$LL
+  parameters <- modsums$Parameters
+  n <- modsums$Observations
+  fits <- c(ifelse(is.null(modsums$Entropy), 1, modsums$Entropy),
             tryCatch(range(diag(model$class_counts$classificationProbs.mostLikely)),
                      warning = function(x) {
                        c(NA, NA)
                      }),
             range(model$class_counts$mostLikely$proportion),
-            ifelse(is.null(model$summaries$BLRT_2xLLDiff), NA, model$summaries$BLRT_2xLLDiff),
-            ifelse(is.null(model$summaries$BLRT_PValue), NA, model$summaries$BLRT_PValue)
+            ifelse(is.null(modsums$BLRT_2xLLDiff), NA, modsums$BLRT_2xLLDiff),
+            ifelse(is.null(modsums$BLRT_PValue), NA, modsums$BLRT_PValue)
   )
   
   fits <- c(

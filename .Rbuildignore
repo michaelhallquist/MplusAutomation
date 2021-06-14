@@ -11,3 +11,4 @@ pkg_build
 ^.*\.out$
 ^.*\.dat$
 ^.*\.log$
+^.*\.dgm$
