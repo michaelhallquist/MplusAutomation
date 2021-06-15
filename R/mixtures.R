@@ -112,20 +112,16 @@ mixtureSummaryTable <- function(modelList,
       "min_prob",
       "max_prob")
   # Extract model summaries
-  summarytable_keepCols <- unique(c("Filename",
-                                    keepCols[which(!keepCols %in% c("min_N", "max_N", "min_prob", "max_prob"))]))
+  summarytable_keepCols <- unique(keepCols[which(!keepCols %in% c("min_N", "max_N", "min_prob", "max_prob"))])
   summarytable_keepCols <- c(summarytable_keepCols, paste0(summarytable_keepCols, "_Mean"))
   if (length(summarytable_keepCols > 0)) {
-    model_summaries <-
-      merge(
+    model_summaries <- cbind(
         model_summaries,
         SummaryTable(
           modelList = modelList,
           keepCols = summarytable_keepCols,
           type = "none"
-        ),
-        by = "Filename"
-      )
+        ))
   }
   
   if(any(!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries))){
@@ -1214,12 +1210,11 @@ createMixtures <- function(classes = 1L,
       } else {
         paste(c("data_", filename_stem, ".dat"), collapse = "")
       }
-      cl_mplusmodeler[["modelout"]] <- paste0(paste(
-        c(filename_stem, classes[[class]], "class"), collapse = "_"
-      ), ".inp")
       eval.parent(cl_mplusmodeler)
     })
     class(out) <- c("model.list", class(out))
+    names(out) <- paste0(paste(filename_stem, classes, "class", sep = "_"), ".out")
+    if(length(out) == 1) out <- out[[1]]
     return(out)
   }))
 }
