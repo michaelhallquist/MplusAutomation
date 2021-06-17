@@ -5,6 +5,7 @@
 #'
 #'
 #' @param object An Mplus model object from \code{mplusObject}.#'
+#' @param quiet optional. If \code{TRUE}, show status messages in the console.
 #' @return A vector of variables from the R dataset to use.
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @export
@@ -26,7 +27,7 @@
 #'   autov = TRUE)
 #' example3$usevariables
 #' rm(example1, example2, example3)
-detectVariables <- function(object) {
+detectVariables <- function(object, quiet = TRUE) {
   if (isFALSE(is.null(object$MONTECARLO))) {
     stop("detectVariables() does not work with MONTECARLO models")
   }
@@ -79,14 +80,15 @@ detectVariables <- function(object) {
       }
     }))))
 
-    message("R variables selected automatically as any variable name that\noccurs in the MODEL, VARIABLE, or DEFINE section.")
+    if(!quiet) message("R variables selected automatically as any variable name that\noccurs in the MODEL, VARIABLE, or DEFINE section.")
     usevariables <- unique(v[sapply(v, function(var) any(grepl(var, x = tmpVARIABLE, ignore.case = TRUE)))])
 
     if (isFALSE(grepl("usevariables", object$VARIABLE, ignore.case=TRUE))) {
 
-      message(sprintf("If any issues, suggest explicitly specifying USEVARIABLES.\nA starting point may be:\nUSEVARIABLES = %s;",
-                      paste(usevariables, collapse = " ")))
-
+      if(!quiet){
+        message(sprintf("If any issues, suggest explicitly specifying USEVARIABLES.\nA starting point may be:\nUSEVARIABLES = %s;",
+                        paste(usevariables, collapse = " ")))
+      }
     }
   }
 
@@ -141,7 +143,13 @@ detectVariables <- function(object) {
 #'   the R dataset, if \code{usevariables} is left \code{NULL}.
 #' @param imputed A logical whether the data are multiply imputed (a list).
 #'   Defaults to \code{FALSE}.
-#'
+#' @param dataout the name of the file to output the data to for Mplus.
+#'   If missing, defaults to \code{modelout} changing .inp to .dat.
+#' @param modelout the name of the output file for the model.
+#'   This is the file all the syntax is written to, which becomes the
+#'   Mplus input file. It should end in .inp.  If missing, defaults to
+#'   \code{dataout} changing the extension to .inp.
+#' @param quiet optional. If \code{TRUE}, show status messages in the console.
 #' @return A list of class \code{mplusObject} with elements
 #' \item{TITLE}{The title in Mplus (if defined)}
 #' \item{DATA}{The data section in Mplus (if defined)}
@@ -200,7 +208,7 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
   MONTECARLO = NULL, MODELPOPULATION = NULL, MODELMISSING = NULL, ANALYSIS = NULL,
   MODEL = NULL, MODELINDIRECT = NULL, MODELCONSTRAINT = NULL, MODELTEST = NULL, MODELPRIORS = NULL,
   OUTPUT = NULL, SAVEDATA = NULL, PLOT = NULL,
-  usevariables = NULL, rdata = NULL, autov = TRUE, imputed = FALSE) {
+  usevariables = NULL, rdata = NULL, autov = TRUE, imputed = FALSE, modelout = NULL, dataout = NULL, quiet = TRUE){
 
   charOrNull <- function(x) {is.character(x) || is.null(x)}
   stopifnot(charOrNull(TITLE))
@@ -244,16 +252,17 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
     rdata = rdata,
     imputed = imputed,
     autov = autov)
+  if(!is.null(modelout)) object$modelout <- modelout
+  if(!is.null(dataout)) object$dataout <- dataout
 
   class(object) <- c("mplusObject", "list")
 
   if (isFALSE(is.null(MONTECARLO)) && isTRUE(missing(autov))) {
     object$autov <- autov <- FALSE
   }
-
   if (isTRUE(autov) && isTRUE(is.null(usevariables)) &&
       isFALSE(is.null(rdata)) && isFALSE(is.null(MODEL))) {
-      object$usevariables  <- detectVariables(object)
+      object$usevariables  <- detectVariables(object, quiet = quiet)
   }
 
   i <- duplicated(substr(object$usevariables, start = 1, stop = 8))
@@ -275,8 +284,8 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
 #' replace a given section with the new text.  Alternately, you can add
 #' additional text using \code{~ + "additional stuff"}. Combined these let you
 #' replace or add to a section.
-#'
 #' @param object An object of class mplusObject
+#' @param quiet optional. If \code{TRUE}, show status messages in the console.
 #' @param \dots Additional arguments to pass on
 #' @return An (updated) Mplus model object
 #' @export
@@ -299,7 +308,7 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
 #' # test to make sure . in Mplus code does not cause problems
 #' str(update(example1, ANALYSIS = x, MODEL = ~ . + "wt ON hp*.5;"))
 #' rm(example1, x)
-update.mplusObject <- function(object, ...) {
+update.mplusObject <- function(object, quiet = TRUE, ...) {
 
   dots <- list(...)
   if (isTRUE(length(dots) == 0)) return(object)
@@ -501,6 +510,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'   Passed on to control behavior of \code{\link{runModels}}. Defaults to \code{TRUE}.
 #' @param \ldots additional arguments passed to the
 #'   \code{\link[MplusAutomation]{prepareMplusData}} function.
+#' @param quiet optional. If \code{TRUE}, show status messages in the console.
 #' @return An Mplus model object, with results.
 #'   If \code{run = 1}, returns an invisible list of results from the run of
 #'   the Mplus model (see \code{\link[MplusAutomation]{readModels}} from the
@@ -734,6 +744,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                          check = FALSE, varwarnings = TRUE, Mplus_command="Mplus",
                          writeData = c("ifmissing", "always", "never"),
                          hashfilename = TRUE, killOnFail = TRUE,
+                         quiet = TRUE,
                          ...) {
 
   stopifnot(isTRUE((run %% 1) == 0 && length(run) == 1))
@@ -824,6 +835,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                          imputed = imputed,
                          writeData = writeData,
                          hashfilename = hashfilename,
+                         quiet = quiet,
                          ...)
       } else {
         prepareMplusData(df = data[i, , drop = FALSE],
@@ -831,14 +843,15 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                          filename = dataout, inpfile = tempfile(),
                          writeData = ifelse(boot, "always", writeData),
                          hashfilename = ifelse(boot, FALSE, hashfilename),
+                         quiet = quiet,
                          ...)
       }
     }
 
     runModels(target = modelout, Mplus_command = Mplus_command,
-              killOnFail = killOnFail, logFile=NULL)
+              killOnFail = killOnFail, logFile=NULL, quiet = quiet)
     outfile <- gsub("(^.*)(\\.inp$)", "\\1.out", modelout)
-    results <- readModels(target = outfile)
+    results <- readModels(target = outfile, quiet = quiet)
     if (isFALSE(boot)) {
       if (isFALSE(varwarnings)) rmVarWarnings(outfile)
       return(invisible(results))
@@ -856,7 +869,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
 
   body <- createSyntax(object, dataout2, check=check, imputed = object$imputed)
   writeLines(body, con = modelout, sep = "\n")
-  message("Wrote model to: ", modelout)
+  if(!quiet) message("Wrote model to: ", modelout)
 
   if (isFALSE(simulation)) {
     if (isTRUE(hashfilename) && identical(writeData, "ifmissing")) {
@@ -864,11 +877,11 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
         if (isTRUE(tmp$fileexists)) {
           NULL
         } else {
-          message("Wrote data to: ", dataout2)
+          if(!quiet) message("Wrote data to: ", dataout2)
         }
       }
     } else {
-      message("Wrote data to: ", dataout2)
+      if(!quiet) message("Wrote data to: ", dataout2)
     }
   }
 

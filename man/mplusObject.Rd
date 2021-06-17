@@ -24,7 +24,10 @@ mplusObject(
   usevariables = NULL,
   rdata = NULL,
   autov = TRUE,
-  imputed = FALSE
+  imputed = FALSE,
+  modelout = NULL,
+  dataout = NULL,
+  quiet = TRUE
 )
 }
 \arguments{
@@ -76,6 +79,16 @@ the R dataset, if \code{usevariables} is left \code{NULL}.}
 
 \item{imputed}{A logical whether the data are multiply imputed (a list).
 Defaults to \code{FALSE}.}
+
+\item{modelout}{the name of the output file for the model.
+This is the file all the syntax is written to, which becomes the
+Mplus input file. It should end in .inp.  If missing, defaults to
+\code{dataout} changing the extension to .inp.}
+
+\item{dataout}{the name of the file to output the data to for Mplus.
+If missing, defaults to \code{modelout} changing .inp to .dat.}
+
+\item{quiet}{optional. If \code{TRUE}, show status messages in the console.}
 }
 \value{
 A list of class \code{mplusObject} with elements

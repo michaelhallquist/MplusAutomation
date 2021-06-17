@@ -4,10 +4,12 @@
 \alias{detectVariables}
 \title{Automatically detect variables from an Mplus model object}
 \usage{
-detectVariables(object)
+detectVariables(object, quiet = TRUE)
 }
 \arguments{
 \item{object}{An Mplus model object from \code{mplusObject}.#'}
+
+\item{quiet}{optional. If \code{TRUE}, show status messages in the console.}
 }
 \value{
 A vector of variables from the R dataset to use.

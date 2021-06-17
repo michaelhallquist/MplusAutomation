@@ -4,10 +4,12 @@
 \alias{update.mplusObject}
 \title{Update an Mplus model object}
 \usage{
-\method{update}{mplusObject}(object, ...)
+\method{update}{mplusObject}(object, quiet = TRUE, ...)
 }
 \arguments{
 \item{object}{An object of class mplusObject}
+
+\item{quiet}{optional. If \code{TRUE}, show status messages in the console.}
 
 \item{\dots}{Additional arguments to pass on}
 }
