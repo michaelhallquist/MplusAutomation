@@ -9,7 +9,7 @@ HTMLSummaryTable(
   filename = file.path(getwd(), "Model Comparison.html"),
   keepCols,
   dropCols,
-  sortBy,
+  sortBy = "AICC",
   display = FALSE
 )
 }
@@ -29,7 +29,7 @@ Any column not included in this list will be displayed. By default, \code{dropCo
 Example: \code{c("InputInstructions", "TLI")}}
 
 \item{sortBy}{optional. Field name (as character string) by which to sort the table. Typically an information criterion
-(e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".}
+(e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC". Set to \code{NULL} to avoid sorting the table.}
 
 \item{display}{optional. This parameter specifies whether to display the table in a web
 browser upon creation (\code{TRUE} or \code{FALSE}).}

@@ -4,7 +4,7 @@
 \alias{subsetModelList}
 \title{Subset a list of Mplus model results}
 \usage{
-subsetModelList(modelList, keepCols, dropCols, sortBy)
+subsetModelList(modelList, keepCols, dropCols, sortBy = "AICC")
 }
 \arguments{
 \item{modelList}{A list object of Mplus models}
