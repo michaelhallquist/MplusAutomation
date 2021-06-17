@@ -87,8 +87,10 @@ get_gh5(x, simplify = FALSE, ...)
 \arguments{
 \item{x}{Object from which to extract results.}
 
+\item{element}{Which element of the results to extract.}
+
 \item{simplify}{Logical; should the result be simplified to a vector, matrix
-or higher dimensional array if possible? See \code{\link[sapply]}. Defaults
+or higher dimensional array if possible? See \code{\link{sapply}}. Defaults
 to \code{FALSE}.}
 
 \item{...}{Additional arguments passed to and from functions.}

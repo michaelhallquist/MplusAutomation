@@ -1929,8 +1929,9 @@ create_all_output_fun <- function(filename = "R/mixtures.R"){
 #' @description This function allows users to extract elements of Mplus output
 #' by name from different types of objects returned by \code{MplusAutomation}.
 #' @param x Object from which to extract results.
+#' @param element Which element of the results to extract.
 #' @param simplify Logical; should the result be simplified to a vector, matrix
-#' or higher dimensional array if possible? See \code{\link[sapply]}. Defaults
+#' or higher dimensional array if possible? See \code{\link{sapply}}. Defaults
 #' to \code{FALSE}.
 #' @param ... Additional arguments passed to and from functions.
 #' @return An atomic vector or matrix or list of the same length as X
@@ -1952,29 +1953,29 @@ create_all_output_fun <- function(filename = "R/mixtures.R"){
 #' @export
 get_results <- function(x, element, simplify = FALSE, ...){
   tryCatch({
-  x <- MplusAutomation:::mplus_as_list(x)
-  list_length <- length(x)
-  out <- sapply(x, function(this_element){tryCatch(this_element[[element]], error = function(e){ NULL })}, simplify = simplify)
-  if(simplify & inherits(out, "list")){
-    if(all(sapply(out, inherits, c("data.frame", "matrix"))) & !is.null(names(out))){
-      out <- lapply(1:length(out), function(x){
-        cbind(out[[x]], Model = names(out)[x])
-      })
+    x <- mplus_as_list(x)
+    list_length <- length(x)
+    out <- sapply(x, function(this_element){tryCatch(this_element[[element]], error = function(e){ NULL })}, simplify = simplify)
+    if(simplify & inherits(out, "list")){
+      if(all(sapply(out, inherits, c("data.frame", "matrix"))) & !is.null(names(out))){
+        out <- lapply(1:length(out), function(x){
+          cbind(out[[x]], Model = names(out)[x])
+        })
+        
+        allNms <- unique(unlist(lapply(out, names)))
+        
+        out <- do.call(rbind,
+                       c(lapply(out,
+                                function(x) data.frame(c(x, sapply(setdiff(allNms, names(x)),
+                                                                   function(y) NA)))),
+                         make.row.names=FALSE))
+      }
       
-      allNms <- unique(unlist(lapply(out, names)))
-      
-      out <- do.call(rbind,
-                     c(lapply(out,
-                              function(x) data.frame(c(x, sapply(setdiff(allNms, names(x)),
-                                                                 function(y) NA)))),
-                       make.row.names=FALSE))
     }
-    
-  }
-  if(inherits(out, "list") & list_length == 1){
-    out <- out[[1]]
-  }
-  return(out)
+    if(inherits(out, "list") & list_length == 1){
+      out <- out[[1]]
+    }
+    return(out)
   }, error = function(e){
     return(NULL)
   })
