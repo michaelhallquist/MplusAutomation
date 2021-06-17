@@ -129,7 +129,7 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy = "AICC") {
 #'  unlink("Mplus Run Models.log")
 #'  closeAllConnections()
 #' }
-SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex", "markdown", "none"),
+SummaryTable <- function(modelList, type = c("none", "screen", "popup", "html", "latex", "markdown"),
                          filename = "", keepCols, dropCols, sortBy = "AICC", caption = "",
                          display = FALSE, ..., include.rownames = FALSE) {
   type <- match.arg(type)
