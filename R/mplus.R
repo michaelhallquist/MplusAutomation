@@ -746,7 +746,22 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   simulation <- isFALSE(is.null(object$MONTECARLO))
 
   if (isTRUE(missing(modelout)) && isTRUE(missing(dataout))) {
-    stop("You must specify either modelout or dataout")
+    if(is.null(object[["modelout"]]) & is.null(object[["dataout"]])){
+      stop("You must specify either modelout or dataout")
+    } else {
+      if(!is.null(object[["modelout"]])) {
+        modelout <- object[["modelout"]]
+        if(is.null(object[["dataout"]])){
+          dataout <- gsub("(^.*)(\\.inp$)", "\\1.dat", modelout)
+        }
+      }
+      if(!is.null(object[["dataout"]])) {
+        dataout <- object[["dataout"]]
+        if(is.null(object[["modelout"]])){
+          modelout <- gsub("(.*)(\\..+$)", "\\1.inp", dataout)
+        }
+      }
+    }
   } else if (isTRUE(missing(dataout)) && isFALSE(simulation)) {
     dataout <- gsub("(^.*)(\\.inp$)", "\\1.dat", modelout)
   } else if (isTRUE(missing(modelout))) {
