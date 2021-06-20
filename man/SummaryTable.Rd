@@ -6,7 +6,7 @@
 \usage{
 SummaryTable(
   modelList,
-  type = c("screen", "popup", "html", "latex", "markdown", "none"),
+  type = c("none", "screen", "popup", "html", "latex", "markdown"),
   filename = "",
   keepCols,
   dropCols,
