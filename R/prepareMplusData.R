@@ -578,14 +578,14 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
   }
   
   if (isTRUE(imputed)) {
-    if(!quiet){ 
+    if(isFALSE(quiet)){ 
       message("writing implist to ", impfilename)
       cat(filename, file = impfilename, sep = "\n")
     }
   }
   
   if (identical(writeData, "ifmissing") && isTRUE(allfilesexist)) {
-    if(!quiet){ message(sprintf("File(s) with md5 hash matching data found, using \n%s",
+    if(isFALSE(quiet)){ message(sprintf("File(s) with md5 hash matching data found, using \n%s",
                     paste(filename, collapse = "\n")))}
   } else {
     ## even if writeData = 'ifmissing' if the data are missing, need to write out
