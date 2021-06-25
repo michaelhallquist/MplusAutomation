@@ -46,6 +46,7 @@ mixtureSummaryTable <- function(modelList,
                                   "min_prob",
                                   "max_prob"
                                 )) {
+  if(class(modelList)[1] == "mixture.list") class(modelList) <- class(modelList)[-1]
   modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
   })
@@ -1033,6 +1034,7 @@ plotMixtureDensities <-
 #' @param SAVEDATA Character. Syntax for Mplus' savedata option. Highly
 #' recommended when conducting mixture models. The default option will often be
 #' adequate.
+#' @param quiet optional. If \code{TRUE}, show status messages in the console.
 #' @param ... Additional arguments, passed to \link{mplusObject}, such as syntax
 #' for other Mplus options.
 #' @return None, unless the argument \code{run = 1L} is specified. In that case,
@@ -1070,6 +1072,7 @@ createMixtures <- function(classes = 1L,
                            usevariables = NULL,
                            OUTPUT = "TECH11 TECH14;",
                            SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;",
+                           quiet = TRUE,
                            ...) {
   dots <- list(...)
   cl <- match.call()
@@ -1087,7 +1090,7 @@ createMixtures <- function(classes = 1L,
     cl$SAVEDATA <- NULL
   }
   if (!hasArg(usevariables) & !hasArg("DEFINE")) {
-    message("No usevariables provided, or variables defined. All variables in rdata were used.")
+    if(isFALSE(quiet)) message("No usevariables provided, or variables defined. All variables in rdata were used.")
     cl[["usevariables"]] <- names(rdata)
   }
   if (any(sapply(usevariables, nchar) > 8)) {
@@ -1127,7 +1130,7 @@ createMixtures <- function(classes = 1L,
   cl_mplusoject <- cl[c(1, which(names(cl) %in% c("TITLE", "DATA", "VARIABLE", "DEFINE", "MONTECARLO", "MODELPOPULATION", 
                                                   "MODELMISSING", "ANALYSIS", "MODEL", "MODELINDIRECT", "MODELCONSTRAINT", 
                                                   "MODELTEST", "MODELPRIORS", "OUTPUT", "SAVEDATA", "PLOT", "usevariables", 
-                                                  "rdata", "autov", "imputed")))]
+                                                  "rdata", "autov", "imputed", "quiet")))]
   cl_mplusoject[[1]] <- quote(mplusObject)
   
   base_object <- eval.parent(cl_mplusoject)
@@ -1192,7 +1195,7 @@ createMixtures <- function(classes = 1L,
   # Evaluate models
   # Create mplusModeler call
   cl_mplusmodeler <- cl[c(1, which(names(cl) %in% c("run", "check", "varwarnings", 
-                                                    "Mplus_command", "writeData", "hashfilename", "killOnFail")))]
+                                                    "Mplus_command", "writeData", "hashfilename", "killOnFail", "quiet")))]
   cl_mplusmodeler[[1]] <- quote(mplusModeler)
   
   if(!"run" %in% names(cl_mplusmodeler)) cl_mplusmodeler$run <- 0L
@@ -1210,13 +1213,18 @@ createMixtures <- function(classes = 1L,
       } else {
         paste(c("data_", filename_stem, ".dat"), collapse = "")
       }
+      cl_mplusmodeler[["modelout"]] <- if (is.null(filename_stem)) {
+        paste0(filename_stem, "_class.inp")
+      } else {
+        paste(c(filename_stem, "_", class, "_class.inp"), collapse = "")
+      }
       eval.parent(cl_mplusmodeler)
     })
-    class(out) <- c("model.list", class(out))
+    class(out) <- c("mixture.list", "model.list", class(out))
     names(out) <- paste0(paste(filename_stem, classes, "class", sep = "_"), ".out")
     if(length(out) == 1) out <- out[[1]]
-    return(out)
   }))
+  return(out)
 }
 
 #' Plot latent transition model

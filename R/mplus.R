@@ -214,7 +214,6 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
   usevariables = NULL, rdata = NULL, autov = TRUE, imputed = FALSE,
   quiet = TRUE,
   ...){
-  
   charOrNull <- function(x) {is.character(x) || is.null(x)}
   stopifnot(charOrNull(TITLE))
   stopifnot(charOrNull(DATA))
@@ -728,7 +727,6 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
                          quiet = TRUE,
                          ...) {
   stopifnot(isTRUE((run %% 1) == 0 && length(run) == 1))
-  
   oldSHELL <- Sys.getenv("SHELL")
   Sys.setenv(SHELL = Sys.getenv("COMSPEC"))
   on.exit(Sys.setenv(SHELL = oldSHELL))
