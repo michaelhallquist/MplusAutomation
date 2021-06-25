@@ -119,7 +119,7 @@ mixtureSummaryTable <- function(modelList,
   if (length(summarytable_keepCols > 0)) {
     cl <- match.call()
     cl[[1L]] <- quote(SummaryTable)
-    if(is.null(cl[["sortBy"]])) cl$sortBy <- NULL
+    cl["sortBy"] <- list(NULL)
     if(is.null(cl[["type"]])) cl$type <- "none"
     cl[["modelList"]] <- modelList
     cl[["keepCols"]] <- summarytable_keepCols
@@ -128,14 +128,18 @@ mixtureSummaryTable <- function(modelList,
         model_summaries,
         sumtab)
   }
+  if(!is.null(sortBy)){
+    if(sortBy %in% names(model_summaries)){
+      model_summaries <- model_summaries[order(model_summaries[[sortBy]]), ]
+    }
+  }
   
   if(any(!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries))){
     warning("Returned mean value of: ", paste0(keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)], collapse = ", "))
     keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)] <- paste0(keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)], "_Mean")
   }
   model_summaries <-
-    model_summaries[order(model_summaries[["Classes"]]),
-                    keepCols[which(keepCols %in% names(model_summaries))],
+    model_summaries[, keepCols[which(keepCols %in% names(model_summaries))],
                     drop = FALSE]
   if (any(!(
     c("T11_VLMR_PValue", "T11_LMR_PValue", "BLRT_PValue") %in% names(model_summaries)
@@ -1131,13 +1135,14 @@ createMixtures <- function(classes = 1L,
   n_classes <- length(classes)
   
   # Create mplusObject template
-  cl_mplusoject <- cl[c(1, which(names(cl) %in% c("TITLE", "DATA", "VARIABLE", "DEFINE", "MONTECARLO", "MODELPOPULATION", 
+  cl_mplusobject <- cl[c(1, which(names(cl) %in% c("TITLE", "DATA", "VARIABLE", "DEFINE", "MONTECARLO", "MODELPOPULATION", 
                                                   "MODELMISSING", "ANALYSIS", "MODEL", "MODELINDIRECT", "MODELCONSTRAINT", 
                                                   "MODELTEST", "MODELPRIORS", "OUTPUT", "SAVEDATA", "PLOT", "usevariables", 
                                                   "rdata", "autov", "imputed", "quiet")))]
-  cl_mplusoject[[1]] <- quote(mplusObject)
-  
-  base_object <- eval.parent(cl_mplusoject)
+  cl_mplusobject[[1]] <- quote(mplusObject)
+  if(is.null(cl_mplusobject[["OUTPUT"]])) cl_mplusobject$OUTPUT <- OUTPUT
+  if(is.null(cl_mplusobject[["quiet"]])) cl_mplusobject$quiet <- quiet
+  base_object <- eval.parent(cl_mplusobject)
   
   # Expand template for requested classes
   input_list <- lapply(classes, function(num_classes) {
