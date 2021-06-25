@@ -130,6 +130,12 @@ print.mplusObject <- function(x, ...){
   print(summary(x))
 }
 
+#' @method print mixture.list
+#' @export
+print.mixture.list <- function(x, ...){
+  print(mixtureSummaryTable(x))
+}
+
 #' @method print mplus.model
 #' @export
 print.mplus.model <- print.mplusObject
