@@ -45,8 +45,9 @@ mixtureSummaryTable <- function(modelList,
                                   "max_N",
                                   "min_prob",
                                   "max_prob"
-                                )) {
-  if(class(modelList)[1] == "mixture.list") class(modelList) <- class(modelList)[-1]
+                                ),
+                                sortBy = NULL,
+                                ...) {
   modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
   })
@@ -116,13 +117,16 @@ mixtureSummaryTable <- function(modelList,
   summarytable_keepCols <- unique(keepCols[which(!keepCols %in% c("min_N", "max_N", "min_prob", "max_prob"))])
   summarytable_keepCols <- c(summarytable_keepCols, paste0(summarytable_keepCols, "_Mean"))
   if (length(summarytable_keepCols > 0)) {
+    cl <- match.call()
+    cl[[1L]] <- quote(SummaryTable)
+    if(is.null(cl[["sortBy"]])) cl$sortBy <- NULL
+    if(is.null(cl[["type"]])) cl$type <- "none"
+    cl[["modelList"]] <- modelList
+    cl[["keepCols"]] <- summarytable_keepCols
+    sumtab <- eval.parent(cl)
     model_summaries <- cbind(
         model_summaries,
-        SummaryTable(
-          modelList = modelList,
-          keepCols = summarytable_keepCols,
-          type = "none"
-        ))
+        sumtab)
   }
   
   if(any(!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries))){
@@ -1431,6 +1435,7 @@ mplus_as_list <- function(x){
          mplus.model.list = x,
          mplus.model = list(Model_1 = x),
          mplusObject = list(Model_1 = x$results),
+         mixture.list = lapply(x, `[[`, "results"),
          model.list = lapply(x, `[[`, "results"),
          list = {
            if(all(sapply(x, inherits, what = "mplusObject"))){
