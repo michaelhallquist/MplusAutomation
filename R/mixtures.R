@@ -15,6 +15,11 @@
 #' \code{c("Title", "Classes", "Warnings", "AIC", "BIC", "aBIC","Entropy",
 #' "T11_VLMR_PValue", "T11_LMR_PValue", "BLRT_PValue", "min_N", "max_N",
 #' "min_prob", "max_prob")}.
+#' @param sortBy Field name (as character string) by which to sort the
+#' table. Typically an information criterion (e.g., "AIC" or "BIC") is used to
+#' sort the table. Defaults to "AICC". Set to NULL by default, so the table is
+#' ordered by increasing number of classes.
+#' @param ... Arguments passed to \code{\link{SummaryTable}}.
 #' @return An object of class data.frame.
 #' @author Caspar J. van Lissa
 #' @note This function is partially a wrapper around SummaryTable, with
