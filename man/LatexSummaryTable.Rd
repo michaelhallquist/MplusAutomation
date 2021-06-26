@@ -8,7 +8,7 @@ LatexSummaryTable(
   modelList,
   keepCols,
   dropCols,
-  sortBy = "AICC",
+  sortBy = NULL,
   label = NULL,
   caption = NULL
 )
@@ -26,8 +26,8 @@ Any column not included in this list will be displayed. By default, \code{dropCo
 Example: \code{c("InputInstructions", "TLI")}}
 
 \item{sortBy}{optional. Field name (as character string) by which to sort the table.
-Typically an information criterion (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".
-Set to \code{NULL} to avoid sorting the table.}
+Typically an information criterion (e.g., "AIC" or "BIC") is used to sort the table.
+Defaults to \code{NULL}, which does not sort the table.}
 
 \item{label}{optional. A character string specifying the label for the LaTex table, which can be
 used for referencing the table.}

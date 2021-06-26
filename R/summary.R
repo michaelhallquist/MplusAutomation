@@ -4,12 +4,12 @@
 #' @param modelList A list object of Mplus models
 #' @param keepCols Columns to keep
 #' @param dropCols Columns to drop (use only one of keep/dropCols)
-#' @param sortBy How to sort
+#' @param sortBy How to sort. Defaults to \code{NULL}, which does not sort the list.
 #' @return Extracted and sorted data
 #' @keywords internal
 #' @examples
 #' # make me!!!
-subsetModelList <- function(modelList, keepCols, dropCols, sortBy = "AICC") {
+subsetModelList <- function(modelList, keepCols, dropCols, sortBy = NULL) {
   # only allow keep OR drop.
   if(!missing(keepCols) && !missing(dropCols)) stop("keepCols and dropCols passed to subsetModelList. You must choose one or the other, but not both.")
 
@@ -90,7 +90,8 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy = "AICC") {
 #'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
 #'   Example: \code{c("InputInstructions", "TLI")}
 #' @param sortBy optional. Field name (as character string) by which to sort the table. Typically an information criterion
-#'   (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC". Set to NULL to avoid sorting the table.
+#'   (e.g., "AIC" or "BIC") is used to sort the table.
+#'   Defaults to \code{NULL}, which does not sort the table.
 #' @param caption A character string, the caption to be given to the table.  Currently only
 #'   applies to types \dQuote{html}, \dQuote{latex}, and \dQuote{markdown}.
 #' @param display optional logical (defaults to \code{FALSE}). This parameter specifies whether to display the
@@ -130,7 +131,7 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy = "AICC") {
 #'  closeAllConnections()
 #' }
 SummaryTable <- function(modelList, type = c("none", "screen", "popup", "html", "latex", "markdown"),
-                         filename = "", keepCols, dropCols, sortBy = "AICC", caption = "",
+                         filename = "", keepCols, dropCols, sortBy = NULL, caption = "",
                          display = FALSE, ..., include.rownames = FALSE) {
   type <- match.arg(type)
 
@@ -203,8 +204,8 @@ SummaryTable <- function(modelList, type = c("none", "screen", "popup", "html", 
 #'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
 #'   Example: \code{c("InputInstructions", "TLI")}
 #' @param sortBy Optional. Field name (as character string) by which to sort the table.
-#'   Typically an information criterion (e.g., \dQuote{AIC} or \dQuote{BIC}) is used to sort the table. Defaults to \dQuote{AICC}.
-#'   Set to \code{NULL} to avoid sorting the table.
+#'   Typically an information criterion (e.g., \dQuote{AIC} or \dQuote{BIC}) is used to sort the table.
+#'   Defaults to \code{NULL}, which does not sort the table.
 #' @param font Optional. The font to be used to display the summary table. Defaults to Courier 9.
 #'
 #' @return No value is returned by this function. It is solely used to display the summary table in a separate window.
@@ -214,7 +215,7 @@ SummaryTable <- function(modelList, type = c("none", "screen", "popup", "html", 
 #' @keywords interface
 #' @examples
 #' # make me!!!
-showSummaryTable <- function(modelList, keepCols, dropCols, sortBy = "AICC", font="Courier 9") {
+showSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, font="Courier 9") {
   if (!suppressWarnings(requireNamespace("relimp"))) {
     stop("The relimp package is absent. Interactive folder selection cannot function.")
   }
@@ -240,7 +241,8 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy = "AICC", fon
 #'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
 #'   Example: \code{c("InputInstructions", "TLI")}
 #' @param sortBy optional. Field name (as character string) by which to sort the table. Typically an information criterion
-#'   (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC". Set to \code{NULL} to avoid sorting the table.
+#'   (e.g., "AIC" or "BIC") is used to sort the table. 
+#'   Defaults to \code{NULL}, which does not sort the table.
 #' @param display optional. This parameter specifies whether to display the table in a web
 #'   browser upon creation (\code{TRUE} or \code{FALSE}).
 #' @return No value is returned by this function. It is solely used to create an HTML file containing summary statistics.
@@ -253,7 +255,7 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy = "AICC", fon
 #' @keywords interface
 #' @examples
 #' # make me!!!
-HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy = "AICC", display=FALSE) {
+HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy = NULL, display=FALSE) {
   #create HTML table and write to file.
 
   #ensure that the filename has a .html or .htm at the end
@@ -298,8 +300,8 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
 #'   Example: \code{c("InputInstructions", "TLI")}
 #' @param sortBy optional. Field name (as character string) by which to sort the table.
-#'   Typically an information criterion (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".
-#'   Set to \code{NULL} to avoid sorting the table.
+#'   Typically an information criterion (e.g., "AIC" or "BIC") is used to sort the table.
+#'   Defaults to \code{NULL}, which does not sort the table.
 #' @param label optional. A character string specifying the label for the LaTex table, which can be
 #'   used for referencing the table.
 #' @param caption optional. A character string specifying the caption for the LaTex table.
@@ -313,7 +315,7 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #' @keywords interface
 #' @examples
 #' # make me!!!
-LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy = "AICC", label=NULL, caption=NULL) {
+LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, label=NULL, caption=NULL) {
   #return latex table to caller
 
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)

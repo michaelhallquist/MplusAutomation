@@ -8,7 +8,7 @@ showSummaryTable(
   modelList,
   keepCols,
   dropCols,
-  sortBy = "AICC",
+  sortBy = NULL,
   font = "Courier 9"
 )
 }
@@ -25,8 +25,8 @@ Any column not included in this list will be displayed. By default, \code{dropCo
 Example: \code{c("InputInstructions", "TLI")}}
 
 \item{sortBy}{Optional. Field name (as character string) by which to sort the table.
-Typically an information criterion (e.g., \dQuote{AIC} or \dQuote{BIC}) is used to sort the table. Defaults to \dQuote{AICC}.
-Set to \code{NULL} to avoid sorting the table.}
+Typically an information criterion (e.g., \dQuote{AIC} or \dQuote{BIC}) is used to sort the table.
+Defaults to \code{NULL}, which does not sort the table.}
 
 \item{font}{Optional. The font to be used to display the summary table. Defaults to Courier 9.}
 }
