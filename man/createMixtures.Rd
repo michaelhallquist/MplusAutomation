@@ -13,6 +13,7 @@ createMixtures(
   usevariables = NULL,
   OUTPUT = "TECH11 TECH14;",
   SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;",
+  quiet = TRUE,
   ...
 )
 }
@@ -48,6 +49,8 @@ is required to obtain the VLMR-test; TECH14 is required for the BLR-test.}
 \item{SAVEDATA}{Character. Syntax for Mplus' savedata option. Highly
 recommended when conducting mixture models. The default option will often be
 adequate.}
+
+\item{quiet}{optional. If \code{TRUE}, show status messages in the console.}
 
 \item{...}{Additional arguments, passed to \link{mplusObject}, such as syntax
 for other Mplus options.}

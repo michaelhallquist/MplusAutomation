@@ -4,7 +4,13 @@
 \alias{showSummaryTable}
 \title{Display summary table of Mplus model statistics in separate window}
 \usage{
-showSummaryTable(modelList, keepCols, dropCols, sortBy, font = "Courier 9")
+showSummaryTable(
+  modelList,
+  keepCols,
+  dropCols,
+  sortBy = NULL,
+  font = "Courier 9"
+)
 }
 \arguments{
 \item{modelList}{A list of models (as a \code{data.frame}) returned from the \code{extractModelSummaries} function.}
@@ -19,7 +25,8 @@ Any column not included in this list will be displayed. By default, \code{dropCo
 Example: \code{c("InputInstructions", "TLI")}}
 
 \item{sortBy}{Optional. Field name (as character string) by which to sort the table.
-Typically an information criterion (e.g., \dQuote{AIC} or \dQuote{BIC}) is used to sort the table. Defaults to \dQuote{AICC}.}
+Typically an information criterion (e.g., \dQuote{AIC} or \dQuote{BIC}) is used to sort the table.
+Defaults to \code{NULL}, which does not sort the table.}
 
 \item{font}{Optional. The font to be used to display the summary table. Defaults to Courier 9.}
 }

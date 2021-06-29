@@ -6,11 +6,11 @@
 \usage{
 SummaryTable(
   modelList,
-  type = c("screen", "popup", "html", "latex", "markdown", "none"),
+  type = c("none", "screen", "popup", "html", "latex", "markdown"),
   filename = "",
   keepCols,
   dropCols,
-  sortBy,
+  sortBy = NULL,
   caption = "",
   display = FALSE,
   ...,
@@ -40,7 +40,8 @@ Any column not included in this list will be displayed. By default, \code{dropCo
 Example: \code{c("InputInstructions", "TLI")}}
 
 \item{sortBy}{optional. Field name (as character string) by which to sort the table. Typically an information criterion
-(e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".}
+(e.g., "AIC" or "BIC") is used to sort the table.
+Defaults to \code{NULL}, which does not sort the table.}
 
 \item{caption}{A character string, the caption to be given to the table.  Currently only
 applies to types \dQuote{html}, \dQuote{latex}, and \dQuote{markdown}.}

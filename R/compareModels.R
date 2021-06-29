@@ -87,7 +87,8 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
   # -allsummaries
   
   # defaults to show equal and unequal params
-  
+  m1 <- one_mplus_model(m1)
+  m2 <- one_mplus_model(m2)
   # if a single scalar is passed in with no name, then use that value for param and pvalue diffs
   if (length(equalityMargin) == 1) {
     if (is.null(names(equalityMargin)))

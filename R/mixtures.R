@@ -15,6 +15,11 @@
 #' \code{c("Title", "Classes", "Warnings", "AIC", "BIC", "aBIC","Entropy",
 #' "T11_VLMR_PValue", "T11_LMR_PValue", "BLRT_PValue", "min_N", "max_N",
 #' "min_prob", "max_prob")}.
+#' @param sortBy Field name (as character string) by which to sort the
+#' table. Typically an information criterion (e.g., "AIC" or "BIC") is used to
+#' sort the table. Defaults to "AICC". Set to NULL by default, so the table is
+#' ordered by increasing number of classes.
+#' @param ... Arguments passed to \code{\link{SummaryTable}}.
 #' @return An object of class data.frame.
 #' @author Caspar J. van Lissa
 #' @note This function is partially a wrapper around SummaryTable, with
@@ -45,7 +50,9 @@ mixtureSummaryTable <- function(modelList,
                                   "max_N",
                                   "min_prob",
                                   "max_prob"
-                                )) {
+                                ),
+                                sortBy = NULL,
+                                ...) {
   modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
   })
@@ -112,20 +119,24 @@ mixtureSummaryTable <- function(modelList,
       "min_prob",
       "max_prob")
   # Extract model summaries
-  summarytable_keepCols <- unique(c("Filename",
-                                    keepCols[which(!keepCols %in% c("min_N", "max_N", "min_prob", "max_prob"))]))
+  summarytable_keepCols <- unique(keepCols[which(!keepCols %in% c("min_N", "max_N", "min_prob", "max_prob"))])
   summarytable_keepCols <- c(summarytable_keepCols, paste0(summarytable_keepCols, "_Mean"))
   if (length(summarytable_keepCols > 0)) {
-    model_summaries <-
-      merge(
+    cl <- match.call()
+    cl[[1L]] <- quote(SummaryTable)
+    cl["sortBy"] <- list(NULL)
+    if(is.null(cl[["type"]])) cl$type <- "none"
+    cl[["modelList"]] <- modelList
+    cl[["keepCols"]] <- summarytable_keepCols
+    sumtab <- eval.parent(cl)
+    model_summaries <- cbind(
         model_summaries,
-        SummaryTable(
-          modelList = modelList,
-          keepCols = summarytable_keepCols,
-          type = "none"
-        ),
-        by = "Filename"
-      )
+        sumtab)
+  }
+  if(!is.null(sortBy)){
+    if(sortBy %in% names(model_summaries)){
+      model_summaries <- model_summaries[order(model_summaries[[sortBy]]), ]
+    }
   }
   
   if(any(!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries))){
@@ -133,8 +144,7 @@ mixtureSummaryTable <- function(modelList,
     keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)] <- paste0(keepCols[!keepCols %in% names(model_summaries) & paste0(keepCols, "_Mean") %in% names(model_summaries)], "_Mean")
   }
   model_summaries <-
-    model_summaries[order(model_summaries[["Classes"]]),
-                    keepCols[which(keepCols %in% names(model_summaries))],
+    model_summaries[, keepCols[which(keepCols %in% names(model_summaries))],
                     drop = FALSE]
   if (any(!(
     c("T11_VLMR_PValue", "T11_LMR_PValue", "BLRT_PValue") %in% names(model_summaries)
@@ -1037,6 +1047,7 @@ plotMixtureDensities <-
 #' @param SAVEDATA Character. Syntax for Mplus' savedata option. Highly
 #' recommended when conducting mixture models. The default option will often be
 #' adequate.
+#' @param quiet optional. If \code{TRUE}, show status messages in the console.
 #' @param ... Additional arguments, passed to \link{mplusObject}, such as syntax
 #' for other Mplus options.
 #' @return None, unless the argument \code{run = 1L} is specified. In that case,
@@ -1074,6 +1085,7 @@ createMixtures <- function(classes = 1L,
                            usevariables = NULL,
                            OUTPUT = "TECH11 TECH14;",
                            SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;",
+                           quiet = TRUE,
                            ...) {
   dots <- list(...)
   cl <- match.call()
@@ -1091,7 +1103,7 @@ createMixtures <- function(classes = 1L,
     cl$SAVEDATA <- NULL
   }
   if (!hasArg(usevariables) & !hasArg("DEFINE")) {
-    message("No usevariables provided, or variables defined. All variables in rdata were used.")
+    if(isFALSE(quiet)) message("No usevariables provided, or variables defined. All variables in rdata were used.")
     cl[["usevariables"]] <- names(rdata)
   }
   if (any(sapply(usevariables, nchar) > 8)) {
@@ -1128,13 +1140,14 @@ createMixtures <- function(classes = 1L,
   n_classes <- length(classes)
   
   # Create mplusObject template
-  cl_mplusoject <- cl[c(1, which(names(cl) %in% c("TITLE", "DATA", "VARIABLE", "DEFINE", "MONTECARLO", "MODELPOPULATION", 
+  cl_mplusobject <- cl[c(1, which(names(cl) %in% c("TITLE", "DATA", "VARIABLE", "DEFINE", "MONTECARLO", "MODELPOPULATION", 
                                                   "MODELMISSING", "ANALYSIS", "MODEL", "MODELINDIRECT", "MODELCONSTRAINT", 
                                                   "MODELTEST", "MODELPRIORS", "OUTPUT", "SAVEDATA", "PLOT", "usevariables", 
-                                                  "rdata", "autov", "imputed")))]
-  cl_mplusoject[[1]] <- quote(mplusObject)
-  
-  base_object <- eval.parent(cl_mplusoject)
+                                                  "rdata", "autov", "imputed", "quiet")))]
+  cl_mplusobject[[1]] <- quote(mplusObject)
+  if(is.null(cl_mplusobject[["OUTPUT"]])) cl_mplusobject$OUTPUT <- OUTPUT
+  if(is.null(cl_mplusobject[["quiet"]])) cl_mplusobject$quiet <- quiet
+  base_object <- eval.parent(cl_mplusobject)
   
   # Expand template for requested classes
   input_list <- lapply(classes, function(num_classes) {
@@ -1196,7 +1209,7 @@ createMixtures <- function(classes = 1L,
   # Evaluate models
   # Create mplusModeler call
   cl_mplusmodeler <- cl[c(1, which(names(cl) %in% c("run", "check", "varwarnings", 
-                                                    "Mplus_command", "writeData", "hashfilename", "killOnFail")))]
+                                                    "Mplus_command", "writeData", "hashfilename", "killOnFail", "quiet")))]
   cl_mplusmodeler[[1]] <- quote(mplusModeler)
   
   if(!"run" %in% names(cl_mplusmodeler)) cl_mplusmodeler$run <- 0L
@@ -1214,14 +1227,18 @@ createMixtures <- function(classes = 1L,
       } else {
         paste(c("data_", filename_stem, ".dat"), collapse = "")
       }
-      cl_mplusmodeler[["modelout"]] <- paste0(paste(
-        c(filename_stem, classes[[class]], "class"), collapse = "_"
-      ), ".inp")
+      cl_mplusmodeler[["modelout"]] <- if (is.null(filename_stem)) {
+        paste0(filename_stem, "_class.inp")
+      } else {
+        paste(c(filename_stem, "_", class, "_class.inp"), collapse = "")
+      }
       eval.parent(cl_mplusmodeler)
     })
-    class(out) <- c("model.list", class(out))
-    return(out)
+    class(out) <- c("mixture.list", "model.list", class(out))
+    names(out) <- paste0(paste(filename_stem, classes, "class", sep = "_"), ".out")
+    if(length(out) == 1) out <- out[[1]]
   }))
+  return(out)
 }
 
 #' Plot latent transition model
@@ -1428,6 +1445,7 @@ mplus_as_list <- function(x){
          mplus.model.list = x,
          mplus.model = list(Model_1 = x),
          mplusObject = list(Model_1 = x$results),
+         mixture.list = lapply(x, `[[`, "results"),
          model.list = lapply(x, `[[`, "results"),
          list = {
            if(all(sapply(x, inherits, what = "mplusObject"))){
@@ -1897,3 +1915,367 @@ get_palette <- function(x){
 }
 
 
+# Functions for selecting output elements ---------------------------------
+
+create_all_output_fun <- function(filename = "R/mixtures.R"){
+  txt <- readLines(filename)
+  out <- txt[1:grep("^# Automatically generated functions below here$", txt)]
+  # Prepare lists
+  fun_list <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
+                "invariance_testing", "parameters", "class_counts", "indirect", "mod_indices", "residuals",
+                "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
+                "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "gh5")
+  
+  # Get templates
+  template <- txt[grepl("^#A?[XY]", txt)]
+  template <- mapply(function(st, en){
+    template[st:en]
+  }, st = grep("@export", template), en = c((grep("@export", template)[-1]-1), length(template)))
+  
+  # Replace COND and NAME with different conditionals
+  out <- list()
+  for(i in 1:length(fun_list)){
+    out <- c(out,
+             lapply(template, function(x){
+               gsub("NAME", fun_list[i], x)}))
+  }
+
+  template <- unlist(out)
+  
+  template <- gsub(pattern = "^#X ", replacement = "", template)
+  template <- gsub(pattern = "^#Y ", replacement = "#' ", template)
+  out <- c(txt[1:grep("^# Automatically generated functions below here$", txt)], template)
+  writeLines(out, filename)
+}
+
+#' @title Extract Mplus results
+#' @description This function allows users to extract elements of Mplus output
+#' by name from different types of objects returned by \code{MplusAutomation}.
+#' @param x Object from which to extract results.
+#' @param element Which element of the results to extract.
+#' @param simplify Logical; should the result be simplified to a vector, matrix
+#' or higher dimensional array if possible? See \code{\link{sapply}}. Defaults
+#' to \code{FALSE}.
+#' @param ... Additional arguments passed to and from functions.
+#' @return An atomic vector or matrix or list of the same length as X
+#' (of length n for replicate). If simplification occurs,
+#' the output type is determined from the highest type of the return values in
+#' the hierarchy NULL < raw < logical < integer < double < complex < character <
+#' list < expression, after coercion of pairlists to lists.
+#' @examples
+#' \dontrun{
+#'  test <- mplusObject(MODEL = "mpg ON wt hp;
+#'  wt WITH hp;", rdata = mtcars)
+#'  res <- mplusModeler(test, modelout = "model1.inp", run = 1L)
+#'  get_results(res, "summaries")
+#'  unlink(res$results$input$data$file)
+#'  unlink("model1.inp")
+#'  unlink("model1.out")
+#' }
+#' @rdname get_results
+#' @export
+get_results <- function(x, element, simplify = FALSE, ...){
+  tryCatch({
+    x <- mplus_as_list(x)
+    list_length <- length(x)
+    out <- sapply(x, function(this_element){tryCatch(this_element[[element]], error = function(e){ NULL })}, simplify = simplify)
+    if(simplify & inherits(out, "list")){
+      if(all(sapply(out, inherits, c("data.frame", "matrix"))) & !is.null(names(out))){
+        out <- lapply(1:length(out), function(x){
+          cbind(out[[x]], Model = names(out)[x])
+        })
+        
+        allNms <- unique(unlist(lapply(out, names)))
+        
+        out <- do.call(rbind,
+                       c(lapply(out,
+                                function(x) data.frame(c(x, sapply(setdiff(allNms, names(x)),
+                                                                   function(y) NA)))),
+                         make.row.names=FALSE))
+      }
+      
+    }
+    if(inherits(out, "list") & list_length == 1){
+      out <- out[[1]]
+    }
+    return(out)
+  }, error = function(e){
+    return(NULL)
+  })
+}
+
+# Template function
+#Y @export
+#Y @rdname get_results
+#Y @examples
+#Y out <- get_NAME(res)
+#X get_NAME <- function(x, simplify = FALSE, ...){
+#X   cl <- match.call()
+#X   cl[["element"]] = "NAME"
+#X   cl[[1L]] <- quote(get_results)
+#X   eval.parent(cl)
+#X }
+
+# End template
+
+# Automatically generated functions below here
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_input(res)
+get_input <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "input"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_warn_err(res)
+get_warn_err <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "warn_err"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_data_summary(res)
+get_data_summary <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "data_summary"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_sampstat(res)
+get_sampstat <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "sampstat"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_covariance_coverage(res)
+get_covariance_coverage <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "covariance_coverage"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_summaries(res)
+get_summaries <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "summaries"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_invariance_testing(res)
+get_invariance_testing <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "invariance_testing"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_parameters(res)
+get_parameters <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "parameters"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_class_counts(res)
+get_class_counts <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "class_counts"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_indirect(res)
+get_indirect <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "indirect"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_mod_indices(res)
+get_mod_indices <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "mod_indices"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_residuals(res)
+get_residuals <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "residuals"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_savedata(res)
+get_savedata <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "savedata"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_bparameters(res)
+get_bparameters <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "bparameters"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_tech1(res)
+get_tech1 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "tech1"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_tech3(res)
+get_tech3 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "tech3"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_tech4(res)
+get_tech4 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "tech4"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_tech7(res)
+get_tech7 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "tech7"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_tech8(res)
+get_tech8 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "tech8"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_tech9(res)
+get_tech9 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "tech9"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_tech10(res)
+get_tech10 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "tech10"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_tech12(res)
+get_tech12 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "tech12"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_tech15(res)
+get_tech15 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "tech15"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_fac_score_stats(res)
+get_fac_score_stats <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "fac_score_stats"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_lcCondMeans(res)
+get_lcCondMeans <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "lcCondMeans"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_gh5(res)
+get_gh5 <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "gh5"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}

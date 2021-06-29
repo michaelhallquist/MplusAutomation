@@ -4,7 +4,7 @@
 \alias{subsetModelList}
 \title{Subset a list of Mplus model results}
 \usage{
-subsetModelList(modelList, keepCols, dropCols, sortBy)
+subsetModelList(modelList, keepCols, dropCols, sortBy = NULL)
 }
 \arguments{
 \item{modelList}{A list object of Mplus models}
@@ -13,7 +13,7 @@ subsetModelList(modelList, keepCols, dropCols, sortBy)
 
 \item{dropCols}{Columns to drop (use only one of keep/dropCols)}
 
-\item{sortBy}{How to sort}
+\item{sortBy}{How to sort. Defaults to \code{NULL}, which does not sort the list.}
 }
 \value{
 Extracted and sorted data

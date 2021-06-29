@@ -379,7 +379,8 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'   See details for further information.
 #' @param hashfilename A logical whether or not to add a hash of the raw data to the
 #'   data file name.  Defaults to \code{FALSE} for consistency with previous
-#'   behavior where this feature was not available..
+#'   behavior where this feature was not available.
+#' @param quiet optional. If \code{TRUE}, show status messages in the console.
 #' @return Invisibly returns a character vector of the Mplus input
 #'   syntax. Primarily called for its side effect of creating Mplus
 #'   data files and optionally input files.
@@ -515,7 +516,7 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' }
 prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dropCols=NULL, dummyCode=NULL,
                              interactive=TRUE, overwrite=TRUE, imputed=FALSE,
-                             writeData=c("always", "ifmissing", "never"), hashfilename=FALSE) {
+                             writeData=c("always", "ifmissing", "never"), hashfilename=FALSE, quiet = TRUE) {
   
   checkmate::assert_string(filename, null.ok = TRUE)
   checkmate::assert_subset(writeData, choices = c("always", "ifmissing", "never"),  empty.ok = FALSE)
@@ -577,13 +578,15 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
   }
   
   if (isTRUE(imputed)) {
-    message("writing implist to ", impfilename)
-    cat(filename, file = impfilename, sep = "\n")
+    if(isFALSE(quiet)){ 
+      message("writing implist to ", impfilename)
+      cat(filename, file = impfilename, sep = "\n")
+    }
   }
   
   if (identical(writeData, "ifmissing") && isTRUE(allfilesexist)) {
-    message(sprintf("File(s) with md5 hash matching data found, using \n%s",
-                    paste(filename, collapse = "\n")))
+    if(isFALSE(quiet)){ message(sprintf("File(s) with md5 hash matching data found, using \n%s",
+                    paste(filename, collapse = "\n")))}
   } else {
     ## even if writeData = 'ifmissing' if the data are missing, need to write out
     writeData <- "always"

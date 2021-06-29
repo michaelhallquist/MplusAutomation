@@ -9,7 +9,7 @@ readModels(
   recursive = FALSE,
   filefilter,
   what = "all",
-  quiet = FALSE
+  quiet = TRUE
 )
 }
 \arguments{
@@ -32,7 +32,8 @@ expression syntax.}
 Defaults to \code{"all"}, which will extract all supported output sections.
 See details for additional information.}
 
-\item{quiet}{whether to suppress printing to the screen the file currently being processed. Defaults to FALSE.}
+\item{quiet}{whether to suppress printing to the screen the file currently
+being processed. Defaults to TRUE.}
 }
 \value{
 A list with one mplus.model per file. Each mplus.model object is composed of

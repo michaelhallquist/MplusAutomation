@@ -235,7 +235,7 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #' @param local_tmpdir optional. Linux/Mac for now. If \code{TRUE}, set the TMPDIR environment variable to the
 #'   location of the .inp file prior to execution. This is useful in Monte Carlo studies where many instances of Mplus
 #'   may run in parallel and we wish to avoid collisions in temporary files among processes.
-#'
+#' @param quiet optional. If \code{FALSE}, show status messages in the console.
 #' @return None. Function is used for its side effects (running models).
 #' @author Michael Hallquist
 #' @seealso \code{\link{runModels_Interactive}}
@@ -252,7 +252,7 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #' }
 runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOutput=FALSE,
     replaceOutfile="always", logFile="Mplus Run Models.log", Mplus_command="Mplus", 
-    killOnFail=TRUE, local_tmpdir=FALSE) {
+    killOnFail=TRUE, local_tmpdir=FALSE, quiet = TRUE) {
 
   stopifnot(replaceOutfile %in% c("always", "never", "modifiedDate"))
 
@@ -480,9 +480,8 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
     }
 
     #run the model
-    cat("\nRunning model:", inputSplit$filename, "\n")
-    cat("System command:", command, "\n")
-
+    if(!quiet) cat("\nRunning model:", inputSplit$filename, "\n")
+    if(!quiet) cat("System command:", command, "\n")
     #unix system command does not have show.output.on.console or invisible parameters
     if (isTRUE(.Platform$OS.type == "windows"))	{
       the_output <- system(command, intern = TRUE, invisible=(!showOutput), wait=TRUE)

@@ -13,7 +13,8 @@ runModels(
   logFile = "Mplus Run Models.log",
   Mplus_command = "Mplus",
   killOnFail = TRUE,
-  local_tmpdir = FALSE
+  local_tmpdir = FALSE,
+  quiet = TRUE
 )
 }
 \arguments{
@@ -54,6 +55,8 @@ or where one wants to test different versions of the Mplus program.}
 \item{local_tmpdir}{optional. Linux/Mac for now. If \code{TRUE}, set the TMPDIR environment variable to the
 location of the .inp file prior to execution. This is useful in Monte Carlo studies where many instances of Mplus
 may run in parallel and we wish to avoid collisions in temporary files among processes.}
+
+\item{quiet}{optional. If \code{FALSE}, show status messages in the console.}
 }
 \value{
 None. Function is used for its side effects (running models).

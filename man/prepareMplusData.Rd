@@ -15,7 +15,8 @@ prepareMplusData(
   overwrite = TRUE,
   imputed = FALSE,
   writeData = c("always", "ifmissing", "never"),
-  hashfilename = FALSE
+  hashfilename = FALSE,
+  quiet = TRUE
 )
 }
 \arguments{
@@ -71,7 +72,9 @@ See details for further information.}
 
 \item{hashfilename}{A logical whether or not to add a hash of the raw data to the
 data file name.  Defaults to \code{FALSE} for consistency with previous
-behavior where this feature was not available..}
+behavior where this feature was not available.}
+
+\item{quiet}{optional. If \code{TRUE}, show status messages in the console.}
 }
 \value{
 Invisibly returns a character vector of the Mplus input

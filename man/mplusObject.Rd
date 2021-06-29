@@ -24,7 +24,9 @@ mplusObject(
   usevariables = NULL,
   rdata = NULL,
   autov = TRUE,
-  imputed = FALSE
+  imputed = FALSE,
+  quiet = TRUE,
+  ...
 )
 }
 \arguments{
@@ -76,6 +78,11 @@ the R dataset, if \code{usevariables} is left \code{NULL}.}
 
 \item{imputed}{A logical whether the data are multiply imputed (a list).
 Defaults to \code{FALSE}.}
+
+\item{quiet}{optional. If \code{TRUE}, show status messages in the console.}
+
+\item{...}{Arguments passed on to \code{\link{mplusModeler}} if
+\code{run > 0}.}
 }
 \value{
 A list of class \code{mplusObject} with elements

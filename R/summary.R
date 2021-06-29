@@ -4,13 +4,12 @@
 #' @param modelList A list object of Mplus models
 #' @param keepCols Columns to keep
 #' @param dropCols Columns to drop (use only one of keep/dropCols)
-#' @param sortBy How to sort
+#' @param sortBy How to sort. Defaults to \code{NULL}, which does not sort the list.
 #' @return Extracted and sorted data
 #' @keywords internal
 #' @examples
 #' # make me!!!
-subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
-
+subsetModelList <- function(modelList, keepCols, dropCols, sortBy = NULL) {
   # only allow keep OR drop.
   if(!missing(keepCols) && !missing(dropCols)) stop("keepCols and dropCols passed to subsetModelList. You must choose one or the other, but not both.")
 
@@ -19,60 +18,49 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
   }
 
   # if passed an mplus.model.list from readModels, then just extract summaries for disply
-  if (inherits(modelList, "mplus.model.list")) {
-    modelList <- do.call("rbind.fill", sapply(modelList, "[", "summaries"))
-  } else if (inherits(modelList, "mplus.model")) { #single model (e.g., EFA output with many factor solutions)
-    modelList <- modelList$summaries
-  } else if (inherits(modelList, "mplusObject")) {
-    modelList <- modelList$results$summaries
-  } else if (is.list(modelList) && all(sapply(modelList, inherits, "mplus.model"))) {
-    modelList <- do.call("rbind.fill", lapply(modelList, function(x) x$summaries))
-  } else if (is.list(modelList) && all(sapply(modelList, inherits, "mplusObject"))) {
-    modelList <- do.call("rbind.fill", lapply(modelList, function(x) x$results$summaries))
-  }
-
-  # keep only columns specified by keepCols
-  if (!missing(keepCols) && length(keepCols) > 0) {
-    #check to make sure each column exists if keepCols used
-    summaryNames <- names(modelList)
-    keepCols <- keepCols[keepCols %in% summaryNames]
-
-    if (length(keepCols) == 0) stop("All fields passed as keepCols are missing from data.frame\n  Fields in data.frame are:\n  ",
-      paste(strwrap(paste(summaryNames, collapse=" "), width=80, exdent=4), collapse="\n"))
-    MplusData <- modelList[, keepCols, drop = FALSE]
-  }
-
-  #drop columns specified by dropCols
-  if (!missing(dropCols) && length(dropCols) > 0) {
-    MplusData <- modelList
-    #Process vector of columns to drop
-    for (column in dropCols) {
-      MplusData[[column]] <- NULL
-    }
-
-  }
-
+  MplusData <- mplus_as_list(modelList)
+  MplusData <- do.call("rbind.fill", sapply(MplusData, "[", "summaries"))
+  
   #make a list of non-missing columns
   notMissing <- unlist(lapply(names(MplusData), function(column) {
             if(!all(is.na(MplusData[[column]]))) return(column)
           }))
 
-  #handle cases where sortBy is missing
-  if (missing(sortBy)) {
-    if ("AICC" %in% notMissing) sortBy <- "AICC"
-    else if ("AIC" %in% notMissing) sortBy <- "AIC"
-    else if ("BIC" %in% notMissing) sortBy <- "BIC"
-    else if ("Title" %in% notMissing) sortBy <- "Title"
-    else sortBy <- NA_character_
+  if(!is.null(sortBy)){
+    #handle cases where sortBy is missing
+    if (missing(sortBy)) {
+      if ("AICC" %in% notMissing) sortBy <- "AICC"
+      else if ("AIC" %in% notMissing) sortBy <- "AIC"
+      else if ("BIC" %in% notMissing) sortBy <- "BIC"
+      else if ("Title" %in% notMissing) sortBy <- "Title"
+      else sortBy <- NA_character_
+    }
+    if (!sortBy %in% notMissing) stop("sortBy field: ", sortBy,
+                                      " is not present in the summary data.frame.\n  Check your keepCols and dropCols arguments and the summary data.frame")
+    
+    #sort data set correctly and drop columns where all models are missing
+    #need drop=FALSE to retain as data.frame in case only one column returned
+    MplusData <- MplusData[order(MplusData[[sortBy]]), notMissing, drop = FALSE]
   }
-
-  if (!sortBy %in% notMissing) stop("sortBy field: ", sortBy,
-    " is not present in the summary data.frame.\n  Check your keepCols and dropCols arguments and the summary data.frame")
-
-  #sort data set correctly and drop columns where all models are missing
-  #need drop=FALSE to retain as data.frame in case only one column returned
-  MplusData <- MplusData[order(MplusData[[sortBy]]), notMissing, drop = FALSE]
-
+  # keep only columns specified by keepCols
+  if (!missing(keepCols) && length(keepCols) > 0) {
+    #check to make sure each column exists if keepCols used
+    summaryNames <- names(MplusData)
+    keepCols <- keepCols[keepCols %in% summaryNames]
+    
+    if (length(keepCols) == 0) stop("All fields passed as keepCols are missing from data.frame\n  Fields in data.frame are:\n  ",
+                                    paste(strwrap(paste(summaryNames, collapse=" "), width=80, exdent=4), collapse="\n"))
+    MplusData <- MplusData[, keepCols, drop = FALSE]
+  }
+  
+  #drop columns specified by dropCols
+  if (!missing(dropCols) && length(dropCols) > 0) {
+    #Process vector of columns to drop
+    for (column in dropCols) {
+      MplusData[[column]] <- NULL
+    }
+    
+  }
   return(MplusData)
 }
 
@@ -102,7 +90,8 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
 #'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
 #'   Example: \code{c("InputInstructions", "TLI")}
 #' @param sortBy optional. Field name (as character string) by which to sort the table. Typically an information criterion
-#'   (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".
+#'   (e.g., "AIC" or "BIC") is used to sort the table.
+#'   Defaults to \code{NULL}, which does not sort the table.
 #' @param caption A character string, the caption to be given to the table.  Currently only
 #'   applies to types \dQuote{html}, \dQuote{latex}, and \dQuote{markdown}.
 #' @param display optional logical (defaults to \code{FALSE}). This parameter specifies whether to display the
@@ -141,8 +130,8 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy) {
 #'  unlink("Mplus Run Models.log")
 #'  closeAllConnections()
 #' }
-SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex", "markdown", "none"),
-                         filename = "", keepCols, dropCols, sortBy, caption = "",
+SummaryTable <- function(modelList, type = c("none", "screen", "popup", "html", "latex", "markdown"),
+                         filename = "", keepCols, dropCols, sortBy = NULL, caption = "",
                          display = FALSE, ..., include.rownames = FALSE) {
   type <- match.arg(type)
 
@@ -215,7 +204,8 @@ SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex",
 #'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
 #'   Example: \code{c("InputInstructions", "TLI")}
 #' @param sortBy Optional. Field name (as character string) by which to sort the table.
-#'   Typically an information criterion (e.g., \dQuote{AIC} or \dQuote{BIC}) is used to sort the table. Defaults to \dQuote{AICC}.
+#'   Typically an information criterion (e.g., \dQuote{AIC} or \dQuote{BIC}) is used to sort the table.
+#'   Defaults to \code{NULL}, which does not sort the table.
 #' @param font Optional. The font to be used to display the summary table. Defaults to Courier 9.
 #'
 #' @return No value is returned by this function. It is solely used to display the summary table in a separate window.
@@ -225,7 +215,7 @@ SummaryTable <- function(modelList, type = c("screen", "popup", "html", "latex",
 #' @keywords interface
 #' @examples
 #' # make me!!!
-showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courier 9") {
+showSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, font="Courier 9") {
   if (!suppressWarnings(requireNamespace("relimp"))) {
     stop("The relimp package is absent. Interactive folder selection cannot function.")
   }
@@ -251,7 +241,8 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courie
 #'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
 #'   Example: \code{c("InputInstructions", "TLI")}
 #' @param sortBy optional. Field name (as character string) by which to sort the table. Typically an information criterion
-#'   (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".
+#'   (e.g., "AIC" or "BIC") is used to sort the table. 
+#'   Defaults to \code{NULL}, which does not sort the table.
 #' @param display optional. This parameter specifies whether to display the table in a web
 #'   browser upon creation (\code{TRUE} or \code{FALSE}).
 #' @return No value is returned by this function. It is solely used to create an HTML file containing summary statistics.
@@ -264,7 +255,7 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy, font="Courie
 #' @keywords interface
 #' @examples
 #' # make me!!!
-HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy, display=FALSE) {
+HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy = NULL, display=FALSE) {
   #create HTML table and write to file.
 
   #ensure that the filename has a .html or .htm at the end
@@ -309,7 +300,8 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #'   Any column not included in this list will be displayed. By default, \code{dropCols} is \code{NULL}.
 #'   Example: \code{c("InputInstructions", "TLI")}
 #' @param sortBy optional. Field name (as character string) by which to sort the table.
-#'   Typically an information criterion (e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC"
+#'   Typically an information criterion (e.g., "AIC" or "BIC") is used to sort the table.
+#'   Defaults to \code{NULL}, which does not sort the table.
 #' @param label optional. A character string specifying the label for the LaTex table, which can be
 #'   used for referencing the table.
 #' @param caption optional. A character string specifying the caption for the LaTex table.
@@ -323,7 +315,7 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #' @keywords interface
 #' @examples
 #' # make me!!!
-LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy, label=NULL, caption=NULL) {
+LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, label=NULL, caption=NULL) {
   #return latex table to caller
 
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)

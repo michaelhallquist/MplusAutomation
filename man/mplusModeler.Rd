@@ -15,6 +15,7 @@ mplusModeler(
   writeData = c("ifmissing", "always", "never"),
   hashfilename = TRUE,
   killOnFail = TRUE,
+  quiet = TRUE,
   ...
 )
 }
@@ -60,6 +61,8 @@ which maintains the old behavior by default of \code{FALSE}.}
 
 \item{killOnFail}{A logical whether or not to kill any mplus processes on failure.
 Passed on to control behavior of \code{\link{runModels}}. Defaults to \code{TRUE}.}
+
+\item{quiet}{optional. If \code{TRUE}, show status messages in the console.}
 
 \item{\ldots}{additional arguments passed to the
 \code{\link[MplusAutomation]{prepareMplusData}} function.}

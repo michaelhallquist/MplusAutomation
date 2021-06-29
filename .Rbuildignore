@@ -12,3 +12,4 @@ pkg_build
 ^.*\.dat$
 ^.*\.log$
 ^.*\.dgm$
+^man-roxygen

@@ -19,7 +19,8 @@
 #' @param what a character vector denoting what aspects of Mplus output to extract.
 #'    Defaults to \code{"all"}, which will extract all supported output sections.
 #'    See details for additional information.
-#' @param quiet whether to suppress printing to the screen the file currently being processed. Defaults to FALSE.
+#' @param quiet whether to suppress printing to the screen the file currently
+#' being processed. Defaults to TRUE.
 #'
 #' @details
 #'
@@ -72,7 +73,7 @@
 #'   allOutput <- readModels(
 #'     "C:/Program Files/Mplus/Mplus Examples/User's Guide Examples", recursive=TRUE)
 #' }
-readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", quiet=FALSE) {
+readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", quiet=TRUE) {
   #large wrapper function to read summaries, parameters, and savedata from one or more output files.
 
   ## enforce quiet being logical and length 1 as used in if else statements
