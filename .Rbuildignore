@@ -1,3 +1,6 @@
+.gitignore
+.git
+
 products
 local
 examples
