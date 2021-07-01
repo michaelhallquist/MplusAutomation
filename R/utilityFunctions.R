@@ -1103,3 +1103,281 @@ get_efa_nfactors <- function(headers) {
 
   do.call(cbind, ret)
 }
+
+
+
+#' Change directory
+#'
+#' The function takes a path and changes the current working directory
+#' to the path. If the directory specified in the path does not
+#' currently exist, it will be created.
+#'
+#' The function has been designed to be platform independent,
+#' although it has had limited testing. Path creation is done using
+#' \code{file.path}, the existence of the directory is checked using
+#' \code{file.exists} and the directory created with \code{dir.create}.
+#' Only the first argument, is required.  The other optional arguments
+#' are handy when one wants to create many similar directories with a common base.
+#'
+#' @param base a character string with the base path to the directory. This is required.
+#' @param pre an optional character string with the prefix to add to
+#'   the base path. Non character strings will be coerced to character class.
+#' @param num an optional character string, prefixed by \code{pre}.
+#'   Non character strings will be coerced to character class.
+#' @return NULL, changes the current working directory
+#' @keywords utilities
+#' @export
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
+#' @examples
+#' \dontrun{
+#' # an example just using the base
+#' cd("~/testdir")
+#'
+#' # an example using the optional arguments
+#' base <- "~/testdir"
+#' pre <- "test_"
+#'
+#' cd(base, pre, 1)
+#' cd(base, pre, 2)
+#' }
+cd <- function(base, pre, num) {
+  stopifnot(isTRUE(is.character(base)))
+  if (isFALSE(missing(pre)) && isFALSE(missing(num))) {
+    pre <- as.character(pre)
+    num <- as.character(num)
+    newdir <- file.path(base, paste0(pre, num))
+  } else {
+    newdir <- file.path(base)
+  }
+  if (isFALSE(file.exists(newdir))) {
+    dir.create(newdir)
+  }
+  setwd(newdir)
+  return(invisible(NULL))
+}
+
+#' Read in Mplus Output File from HTML on the Mplus Website
+#'
+#' This is an internal utility function to help with testing MplusAutomation.
+#' On the Mplus website, many output files are included, which are good tests.
+#' However, they are stored in HTML files. This function reads them in,
+#' strips the HTML parts leaving just the output file, and then writes it to
+#' disk and returns the file name, which can be used with \code{readModels()}
+#' for testing.
+#'
+#' @param url The url giving an Mplus output file in HTML format.
+#' @return A character string that is the filename where the output file was written.
+#'   Always a temp file in a temp directory.
+#' @keywords internal
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
+#' @examples
+#' 
+#' MplusAutomation:::htmlout("https://statmodel.com/usersguide/chap3/ex3.1.html")
+htmlout <- function(url) {
+  x <- readLines(url)
+  start <- which(grepl("<PRE>", x, ignore.case = TRUE))
+  end <-  which(grepl("</PRE>", x, ignore.case = TRUE))
+  out <- x[(start + 1L):(end - 1L)]
+  tdir <- tempdir(check = TRUE)
+  fname <- tempfile(pattern = "UserGuide", tmpdir = tempdir(check = TRUE),
+                    fileext = ".out")
+  writeLines(out, con = fname)
+  return(fname)  
+}
+
+
+#' @name OS
+#' @rdname OS
+#'
+#' @title Functions to identify the operating system
+#'
+#' @return A logical value for the is.* functions and a character string for os()
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
+#' @keywords internal
+NULL
+
+#' @rdname OS
+#' @examples
+#'
+#' MplusAutomation:::is.windows()
+is.windows <- function() {
+  if (isTRUE(exists("Sys.info"))) {
+    os <- Sys.info()[["sysname"]]
+  } else {
+    os <- .Platform$OS.type
+  }
+  os <- tolower(os)
+  if (isTRUE(grepl("windows", os))) {
+    TRUE
+  } else {
+    FALSE
+  }
+}
+
+#' @rdname OS
+#' @examples
+#'
+#' MplusAutomation:::is.macos()
+is.macos <- function() {
+  if (isTRUE(exists("Sys.info"))) {
+    os <- Sys.info()[["sysname"]]
+  } else {
+    os <- R.version$os
+  }
+  os <- tolower(os)
+  if (isTRUE(grepl("darwin", os))) {
+    TRUE
+  } else {
+    FALSE
+  }
+}
+
+#' @rdname OS
+#' @examples
+#'
+#' MplusAutomation:::is.linux()
+is.linux <- function() {
+  if (isTRUE(exists("Sys.info"))) {
+    os <- Sys.info()[["sysname"]]
+  } else {
+    os <- R.version$os
+  }
+  os <- tolower(os)
+  if (isTRUE(grepl("linux", os))) {
+    TRUE
+  } else {
+    FALSE
+  }
+}
+
+#' @rdname OS
+#' @examples
+#'
+#' MplusAutomation:::os()
+os <- function() {
+  windows <- is.windows()
+  macos <- is.macos()
+  linux <- is.linux()
+
+  count <- windows + macos + linux
+
+  if (isTRUE(count > 1) || isTRUE(count == 0)) {
+    "unknown"
+  } else if (windows) {
+    "windows"
+  } else if (macos) {
+    "macos"
+  } else if (linux) {
+    "linux"
+  }
+}
+
+#' Detect the location/name of the Mplus command
+#'
+#' This is an utility function to help detect the correct name/path to Mplus.
+#' It tries hard across operating systems to find Mplus and if it cannot find
+#' the full version of Mplus to find a demo version of Mplus.
+#'
+#' It does not require any arguments.
+#'
+#' @return A character string that is the Mplus command possibly the path to the mplus command or an error if it cannot be found.
+#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
+#' @export 
+#' @examples
+#' 
+#' ## if you have Mplus installed, uncomment and run
+#' ## this will give an error if it cannot find Mplus.
+#' ## detectMplus()
+detectMplus <- function() {
+  ostype <- os()
+
+  if (identical(ostype, "windows")) {
+    ## try to find Mplus command on the path
+    suppressWarnings(mplus <- system("where Mplus", intern = TRUE, ignore.stderr = TRUE))
+
+    ## if Mplus command found and is a valid file, then just use "Mplus" as the command
+    if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
+      mplus <- "Mplus"
+    } else {
+      ## if mplus command not found, see if it exists in program files (ie just not on the path)      
+      if (isTRUE(file.exists("C:\\Program Files\\Mplus\\Mplus.exe"))) {
+        ## if mplus in program files just not path, use full path to mplus to run it
+        mplus <- "C:\\Program Files\\Mplus\\Mplus.exe"
+      } else {
+        ## if Mplus not found on path or program files, see if Mplus demo is available
+        suppressWarnings(mplus <- system("where Mpdemo8", intern = TRUE, ignore.stderr = TRUE))
+        ## if Mpdemo8 command found and is a valid file, then just use "Mpdemo8" as the command
+        if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
+          mplus <- "Mpdemo8"
+        } else {
+          if (isTRUE(file.exists("C:\\Program Files\\Mplus Demo\\Mpdemo8.exe"))) {
+            ## if mplus demo in program files just not path, use full path to mplus demo to run it
+            mplus <- "C:\\Program Files\\Mplus Demo\\Mpdemo8.exe"          
+          } else {
+            stop("Mplus and Mpdemo8 not found on the system path or in the 'usual' Program Files location. Ensure Mplus or the Mplus Demo are installed and that the location of the .exe file is on your system path.")            
+          }
+        }
+      }
+    }
+  }
+
+  if (identical(ostype, "macos")) {
+    ## try to find Mplus command on the path
+    suppressWarnings(mplus <- system("which mplus", intern = TRUE))
+
+    ## if Mplus command found and is a valid file, then just use "mplus" as the command
+    if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
+      mplus <- "mplus"
+    } else {
+      if (isTRUE(file.exists("/Applications/Mplus/mplus"))) {
+        mplus <- "/Applications/Mplus/mplus"
+      } else {
+        ## if Mplus not found on path or in applications, see if Mplus demo is available
+        suppressWarnings(mplus <- system("where mpdemo", intern = TRUE))
+        ## if mpdemo command found and is a valid file, then just use "mpdemo" as the command
+        if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
+          mplus <- "mpdemo"
+        } else {
+          if (isTRUE(file.exists("/Applications/MplusDemo/mpdemo"))) {
+            mplus <- "/Applications/MplusDemo/mpdemo"
+          } else {              
+            stop("mplus and mpdemo not found on the system path or in the 'usual' /Applications/Mplus location. Ensure Mplus or the Mplus Demo are installed and that the location of the command is on your system path.")
+          }
+        }
+      }
+    }
+  }
+  
+  if (identical(ostype, "linux")) {
+    ## try to find Mplus command on the path
+    suppressWarnings(mplus <- system("which mplus", intern = TRUE))
+
+    ## if Mplus command found and is a valid file, then just use "mplus" as the command
+    if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
+      mplus <- "mplus"
+    } else {
+      if (isTRUE(dir.exists("/opt/mplus"))) {
+        test <- file.path(
+          list.dirs("/opt/mplus", recursive = FALSE)[1],
+          "mplus")
+        if (isTRUE(file.exists(test))) {
+          mplus <- test
+        } else {
+          ## if Mplus not found on path or opt, see if Mplus demo is available
+          suppressWarnings(mplus <- system("where mpdemo", intern = TRUE))
+          ## if mpdemo command found and is a valid file, then just use "mpdemo" as the command
+          if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
+            mplus <- "mpdemo"
+          } else {
+            stop("mplus and mpdemo not found on the system path or in the 'usual' /opt/mplus/ location. Ensure Mplus or the Mplus Demo are installed and that the location of the command is on your system path.")
+          }
+        }
+      }
+    }
+  }
+
+  if (identical(ostype, "unknown")) {
+    stop("OS Type not known. Cannot auto detect Mplus command name. You must specify it.")
+  }
+  return(mplus)  
+}

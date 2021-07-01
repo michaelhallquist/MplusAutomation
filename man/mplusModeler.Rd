@@ -11,7 +11,7 @@ mplusModeler(
   run = 0L,
   check = FALSE,
   varwarnings = TRUE,
-  Mplus_command = "Mplus",
+  Mplus_command = detectMplus(),
   writeData = c("ifmissing", "always", "never"),
   hashfilename = TRUE,
   killOnFail = TRUE,

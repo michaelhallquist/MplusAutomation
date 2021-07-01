@@ -77,7 +77,7 @@ library(MplusAutomation)
 
 **Note:** Mac users using versions of `R` *prior to* 4.0.0 may experiences crashes if they have not setup
 Tcl/Tk properly within `R`. The default distribution of Tcl/Tk shipped with Mac OS X is not compatible with `R`. Instead, users should download and install the Tcl/Tk distribution 
-[here](https://cran.r-project.org/bin/macosx/tools).
+[here](https://cran.r-project.org/bin/macosx/tools/).
 
 ## Determine the version of `MplusAutomation` on your machine
 
