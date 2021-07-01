@@ -74,7 +74,7 @@ on functions from the MplusAutomation package." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -140,10 +140,11 @@ on functions from the MplusAutomation package.</p>
   run <span class='op'>=</span> <span class='fl'>0L</span>,
   check <span class='op'>=</span> <span class='cn'>FALSE</span>,
   varwarnings <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  Mplus_command <span class='op'>=</span> <span class='st'>"Mplus"</span>,
+  Mplus_command <span class='op'>=</span> <span class='fu'><a href='detectMplus.html'>detectMplus</a></span><span class='op'>(</span><span class='op'>)</span>,
   writeData <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"ifmissing"</span>, <span class='st'>"always"</span>, <span class='st'>"never"</span><span class='op'>)</span>,
   hashfilename <span class='op'>=</span> <span class='cn'>TRUE</span>,
   killOnFail <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
@@ -211,6 +212,10 @@ which maintains the old behavior by default of <code>FALSE</code>.</p></td>
       <th>killOnFail</th>
       <td><p>A logical whether or not to kill any mplus processes on failure.
 Passed on to control behavior of <code><a href='runModels.html'>runModels</a></code>. Defaults to <code>TRUE</code>.</p></td>
+    </tr>
+    <tr>
+      <th>quiet</th>
+      <td><p>optional. If <code>TRUE</code>, show status messages in the console.</p></td>
     </tr>
     <tr>
       <th>...</th>

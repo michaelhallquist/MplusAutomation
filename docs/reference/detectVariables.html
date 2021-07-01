@@ -73,7 +73,7 @@ Mplus model object." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -131,7 +131,7 @@ Mplus model object." />
 Mplus model object.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>detectVariables</span><span class='op'>(</span><span class='va'>object</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>detectVariables</span><span class='op'>(</span><span class='va'>object</span>, quiet <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -139,6 +139,10 @@ Mplus model object.</p>
     <tr>
       <th>object</th>
       <td><p>An Mplus model object from <code>mplusObject</code>.#'</p></td>
+    </tr>
+    <tr>
+      <th>quiet</th>
+      <td><p>optional. If <code>TRUE</code>, show status messages in the console.</p></td>
     </tr>
     </table>
 
@@ -158,18 +162,15 @@ Mplus model object.</p>
   rdata <span class='op'>=</span> <span class='va'>mtcars</span>, autov <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
 <span class='va'>example1</span><span class='op'>$</span><span class='va'>usevariables</span>
 </div><div class='output co'>#&gt; NULL</div><div class='input'><span class='fu'>MplusAutomation</span><span class='fu'>:::</span><span class='fu'>detectVariables</span><span class='op'>(</span><span class='va'>example1</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='output co'>#&gt; [1] "mpg" "wt" </div><div class='input'>
+</div><div class='output co'>#&gt; [1] "mpg" "wt" </div><div class='input'>
 <span class='va'>example2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='mplusObject.html'>mplusObject</a></span><span class='op'>(</span>MODEL <span class='op'>=</span> <span class='st'>"mpg ON wt;"</span>,
   rdata <span class='op'>=</span> <span class='va'>mtcars</span>, autov <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='input'><span class='va'>example2</span><span class='op'>$</span><span class='va'>usevariables</span>
+<span class='va'>example2</span><span class='op'>$</span><span class='va'>usevariables</span>
 </div><div class='output co'>#&gt; [1] "mpg" "wt" </div><div class='input'><span class='va'>example3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>example2</span>,
   MODEL <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='st'>"mpg ON qsec; wt WITH qsec;"</span>,
   autov <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='input'><span class='va'>example3</span><span class='op'>$</span><span class='va'>usevariables</span>
-</div><div class='output co'>#&gt; [1] "mpg"  "wt"   "qsec"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/rm.html'>rm</a></span><span class='op'>(</span><span class='va'>example1</span>, <span class='va'>example2</span>, <span class='va'>example3</span><span class='op'>)</span>
+<span class='va'>example3</span><span class='op'>$</span><span class='va'>usevariables</span>
+</div><div class='output co'>#&gt; [1] "mpg" "wt" </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/rm.html'>rm</a></span><span class='op'>(</span><span class='va'>example1</span>, <span class='va'>example2</span>, <span class='va'>example3</span><span class='op'>)</span>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

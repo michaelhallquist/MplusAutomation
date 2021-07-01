@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Check whether Mplus can be found — mplusAvailable • MplusAutomation</title>
+<title>Functions to identify the operating system — OS • MplusAutomation</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,8 @@
 
 
 
-<meta property="og:title" content="Check whether Mplus can be found — mplusAvailable" />
-<meta property="og:description" content="This is a simple utility to check whether Mplus can be found.
-Returns 0 if Mplus command can be found by the system.
-If silent = FALSE, prints a message to the user
-to help suggest what to do." />
+<meta property="og:title" content="Functions to identify the operating system — OS" />
+<meta property="og:description" content="Functions to identify the operating system" />
 
 
 
@@ -123,44 +120,41 @@ to help suggest what to do." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Check whether Mplus can be found</h1>
+    <h1>Functions to identify the operating system</h1>
     <small class="dont-index">Source: <a href='https://github.com/michaelhallquist/MplusAutomation/blob/master/R/utilityFunctions.R'><code>R/utilityFunctions.R</code></a></small>
-    <div class="hidden name"><code>mplusAvailable.Rd</code></div>
+    <div class="hidden name"><code>OS.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This is a simple utility to check whether Mplus can be found.
-Returns 0 if Mplus command can be found by the system.
-If <code>silent = FALSE</code>, prints a message to the user
-to help suggest what to do.</p>
+    <p>Functions to identify the operating system</p>
     </div>
 
-    <pre class="usage"><span class='fu'>mplusAvailable</span><span class='op'>(</span>silent <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>is.windows</span><span class='op'>(</span><span class='op'>)</span>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>silent</th>
-      <td><p>A logical whether to print a message or not.
-Defaults to <code>TRUE</code> for silent operation.</p></td>
-    </tr>
-    </table>
+<span class='fu'>is.macos</span><span class='op'>(</span><span class='op'>)</span>
+
+<span class='fu'>is.linux</span><span class='op'>(</span><span class='op'>)</span>
+
+<span class='fu'>os</span><span class='op'>(</span><span class='op'>)</span></pre>
+
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The status of finding Mplus. Per unix conventions,
-status 0 indicates Mplus was found (0 problems) and
-status 1 indicates that Mplus was not found.</p>
+    <p>A logical value for the is.* functions and a character string for os()</p>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
-    <p>Joshua Wiley</p>
+    <p>Joshua F. Wiley &lt;jwiley.psych@gmail.com&gt;</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='fu'>mplusAvailable</span><span class='op'>(</span>silent <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='fu'>mplusAvailable</span><span class='op'>(</span>silent <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Mplus is installed and can be found</span></div></pre>
+<span class='fu'>MplusAutomation</span><span class='fu'>:::</span><span class='fu'>is.windows</span><span class='op'>(</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
+<span class='fu'>MplusAutomation</span><span class='fu'>:::</span><span class='fu'>is.macos</span><span class='op'>(</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] FALSE</div><div class='input'>
+<span class='fu'>MplusAutomation</span><span class='fu'>:::</span><span class='fu'>is.linux</span><span class='op'>(</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] FALSE</div><div class='input'>
+<span class='fu'>MplusAutomation</span><span class='fu'>:::</span><span class='fu'>os</span><span class='op'>(</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "windows"</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

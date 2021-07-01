@@ -41,15 +41,10 @@
 
 <meta property="og:title" content="Create syntax for a batch of mixture models — createMixtures" />
 <meta property="og:description" content="Dynamically creates syntax for a batch of mixture models, with intelligent
-defaults. This function is a wrapper around mplusObject, and
-additional arguments can be passed to this function using ....
-In all arguments to mplusObject, a double space (&amp;#8220;  &amp;#8221;) is
-replaced with a newline character. This can be used to obtain nicely
-formatted Mplus syntax.
-In the arguments model_class_specific and SAVEDATA, the
-character string &amp;#8220;{C}&amp;#8221; is substituted with the correct class number.
-The character string &amp;#8220;{filename_stem}&amp;#8221; is substituted with the
-filename stem, for example, to name savedata in line with the input files." />
+defaults. This function is a wrapper around mplusObject and
+mplusModeler, and the respective arguments of those functions can be
+passed on using .... For instance, passing the argument
+run = 1L means that the models will be evaluated and returned." />
 
 
 
@@ -81,7 +76,7 @@ filename stem, for example, to name savedata in line with the input files." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -136,15 +131,10 @@ filename stem, for example, to name savedata in line with the input files." />
 
     <div class="ref-description">
     <p>Dynamically creates syntax for a batch of mixture models, with intelligent
-defaults. This function is a wrapper around <code>mplusObject</code>, and
-additional arguments can be passed to this function using <code>...</code>.
-In all arguments to <code>mplusObject</code>, a double space (&#8220;  &#8221;) is
-replaced with a newline character. This can be used to obtain nicely
-formatted Mplus syntax.
-In the arguments <code>model_class_specific</code> and <code>SAVEDATA</code>, the
-character string &#8220;{C}&#8221; is substituted with the correct class number.
-The character string &#8220;{filename_stem}&#8221; is substituted with the
-filename stem, for example, to name savedata in line with the input files.</p>
+defaults. This function is a wrapper around <code>mplusObject</code> and
+<code>mplusModeler</code>, and the respective arguments of those functions can be
+passed on using <code>...</code>. For instance, passing the argument
+<code>run = 1L</code> means that the models will be evaluated and returned.</p>
     </div>
 
     <pre class="usage"><span class='fu'>createMixtures</span><span class='op'>(</span>
@@ -156,6 +146,7 @@ filename stem, for example, to name savedata in line with the input files.</p>
   usevariables <span class='op'>=</span> <span class='cn'>NULL</span>,
   OUTPUT <span class='op'>=</span> <span class='st'>"TECH11 TECH14;"</span>,
   SAVEDATA <span class='op'>=</span> <span class='st'>"FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;"</span>,
+  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
@@ -211,6 +202,10 @@ recommended when conducting mixture models. The default option will often be
 adequate.</p></td>
     </tr>
     <tr>
+      <th>quiet</th>
+      <td><p>optional. If <code>TRUE</code>, show status messages in the console.</p></td>
+    </tr>
+    <tr>
       <th>...</th>
       <td><p>Additional arguments, passed to <a href='mplusObject.html'>mplusObject</a>, such as syntax
 for other Mplus options.</p></td>
@@ -219,7 +214,18 @@ for other Mplus options.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>None. Function is used for its side effects (generating syntax).</p>
+    <p>None, unless the argument <code>run = 1L</code> is specified. In that case,
+a list with elements of class <code>mplusObject</code> is returned. Otherwise, this
+function is used for its side effects (generating syntax).</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>In the arguments <code>model_class_specific</code> and <code>SAVEDATA</code>, the
+character string &#8220;{C}&#8221; is substituted with the correct class number.
+The character string &#8220;{filename_stem}&#8221; is substituted with the
+filename stem, for example, to name savedata in line with the input files.</p>
+<p>In all arguments to <code>mplusObject</code>, a double space (&#8220;  &#8221;) is
+replaced with a newline character. This can be used to obtain nicely
+formatted Mplus syntax.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='mplusObject.html'>mplusObject</a></code>, <code><a href='mplusModeler.html'>mplusModeler</a></code></p></div>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Check whether Mplus can be found — mplusAvailable • MplusAutomation</title>
+<title>Detect the location/name of the Mplus command — detectMplus • MplusAutomation</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,10 @@
 
 
 
-<meta property="og:title" content="Check whether Mplus can be found — mplusAvailable" />
-<meta property="og:description" content="This is a simple utility to check whether Mplus can be found.
-Returns 0 if Mplus command can be found by the system.
-If silent = FALSE, prints a message to the user
-to help suggest what to do." />
+<meta property="og:title" content="Detect the location/name of the Mplus command — detectMplus" />
+<meta property="og:description" content="This is an utility function to help detect the correct name/path to Mplus.
+It tries hard across operating systems to find Mplus and if it cannot find
+the full version of Mplus to find a demo version of Mplus." />
 
 
 
@@ -123,44 +122,36 @@ to help suggest what to do." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Check whether Mplus can be found</h1>
+    <h1>Detect the location/name of the Mplus command</h1>
     <small class="dont-index">Source: <a href='https://github.com/michaelhallquist/MplusAutomation/blob/master/R/utilityFunctions.R'><code>R/utilityFunctions.R</code></a></small>
-    <div class="hidden name"><code>mplusAvailable.Rd</code></div>
+    <div class="hidden name"><code>detectMplus.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This is a simple utility to check whether Mplus can be found.
-Returns 0 if Mplus command can be found by the system.
-If <code>silent = FALSE</code>, prints a message to the user
-to help suggest what to do.</p>
+    <p>This is an utility function to help detect the correct name/path to Mplus.
+It tries hard across operating systems to find Mplus and if it cannot find
+the full version of Mplus to find a demo version of Mplus.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>mplusAvailable</span><span class='op'>(</span>silent <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>detectMplus</span><span class='op'>(</span><span class='op'>)</span></pre>
 
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>silent</th>
-      <td><p>A logical whether to print a message or not.
-Defaults to <code>TRUE</code> for silent operation.</p></td>
-    </tr>
-    </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The status of finding Mplus. Per unix conventions,
-status 0 indicates Mplus was found (0 problems) and
-status 1 indicates that Mplus was not found.</p>
+    <p>A character string that is the Mplus command possibly the path to the mplus command or an error if it cannot be found.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>It does not require any arguments.</p>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
-    <p>Joshua Wiley</p>
+    <p>Joshua F. Wiley &lt;jwiley.psych@gmail.com&gt;</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='fu'>mplusAvailable</span><span class='op'>(</span>silent <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='fu'>mplusAvailable</span><span class='op'>(</span>silent <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Mplus is installed and can be found</span></div></pre>
+<span class='co'>## if you have Mplus installed, uncomment and run</span>
+<span class='co'>## this will give an error if it cannot find Mplus.</span>
+<span class='co'>## detectMplus()</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

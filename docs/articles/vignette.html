@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -76,13 +76,13 @@
 
       
 
-      </header><script src="vignette_files/header-attrs-2.7/header-attrs.js"></script><div class="row">
+      </header><script src="vignette_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>MplusAutomation Examples</h1>
                         <h4 class="author">Michael N. Hallquist</h4>
             
-            <h4 class="date">2021-02-27</h4>
+            <h4 class="date">2021-07-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/michaelhallquist/MplusAutomation/blob/master/vignettes/vignette.Rmd"><code>vignettes/vignette.Rmd</code></a></small>
       <div class="hidden name"><code>vignette.Rmd</code></div>
@@ -119,7 +119,7 @@
 <a href="#installing-and-loading-the-package" class="anchor"></a>Installing and loading the package</h1>
 <p><strong>Note</strong>: You only need to install the <code>MplusAutomation</code> package <em>once</em> on a given machine. Once you follow these instructions, you can just use <code><a href="https://github.com/michaelhallquist/MplusAutomation">library(MplusAutomation)</a></code> to load the package in future sessions.</p>
 <p>The <code>MplusAutomation</code> package is compatible with <code>R</code> and <code>Mplus</code> on Windows, Mac OS X, and Linux platforms.</p>
-<p>The package was initially built using <code>R</code> 2.15.1 and has been tested with modern versions up through <code>R</code> 4.0.2. To obtain <code>R</code> follow <a href="http://cran.r-project.org/">this link</a>.</p>
+<p>The package was initially built using <code>R</code> 2.15.1 and has been tested with modern versions up through <code>R</code> 4.0.2. To obtain <code>R</code> follow <a href="https://cran.r-project.org/">this link</a>.</p>
 <p>After installing <code>R</code> and launching a new session, type the following at the command line:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"MplusAutomation"</span><span class="op">)</span></code></pre></div>
@@ -127,58 +127,61 @@
 <p>To load the <code>MplusAutomation</code> package so that its functions are available to use, type:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/michaelhallquist/MplusAutomation">MplusAutomation</a></span><span class="op">)</span></code></pre></div>
-<pre><code>## Version:  0.8.1
+<pre><code>## Version:  1.0.0
 ## We work hard to write this free software. Please help us get credit by citing: 
 ## 
 ## Hallquist, M. N. &amp; Wiley, J. F. (2018). MplusAutomation: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus. Structural Equation Modeling, 25, 621-638. doi: 10.1080/10705511.2017.1402334.
 ## 
 ## -- see citation("MplusAutomation").</code></pre>
-<p><strong>Note:</strong> Mac users using versions of <code>R</code> <em>prior to</em> 4.0.0 may experiences crashes if they have not setup Tcl/Tk properly within <code>R</code>. The default distribution of Tcl/Tk shipped with Mac OS X is not compatible with <code>R</code>. Instead, users should download and install the Tcl/Tk distribution <a href="http://cran.r-project.org/bin/macosx/tools">here</a>.</p>
+<p><strong>Note:</strong> Mac users using versions of <code>R</code> <em>prior to</em> 4.0.0 may experiences crashes if they have not setup Tcl/Tk properly within <code>R</code>. The default distribution of Tcl/Tk shipped with Mac OS X is not compatible with <code>R</code>. Instead, users should download and install the Tcl/Tk distribution <a href="https://cran.r-project.org/bin/macosx/tools/">here</a>.</p>
 <div id="determine-the-version-of-mplusautomation-on-your-machine" class="section level2">
 <h2 class="hasAnchor">
 <a href="#determine-the-version-of-mplusautomation-on-your-machine" class="anchor"></a>Determine the version of <code>MplusAutomation</code> on your machine</h2>
 <p>To verify the version of <code>MplusAutomation</code> loaded in your <code>R</code> session, type the following code which should provide a listing of all loaded packages.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## R version 4.0.2 (2020-06-22)
-## Platform: x86_64-apple-darwin17.0 (64-bit)
-## Running under: macOS  10.16
+<pre><code>## R version 4.1.0 (2021-05-18)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19043)
 ## 
 ## Matrix products: default
-## BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
-## LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 ## 
 ## locale:
-## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
 ## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] MplusAutomation_0.8.1
+## [1] MplusAutomation_1.0.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_1.1.0  xfun_0.21         bslib_0.2.4       pander_0.6.3     
-##  [5] purrr_0.3.4       lattice_0.20-41   colorspace_2.0-0  vctrs_0.3.6      
-##  [9] generics_0.1.0    htmltools_0.5.1.1 yaml_2.2.1        rlang_0.4.10     
-## [13] pkgdown_1.6.1     jquerylib_0.1.3   pillar_1.4.7      glue_1.4.2       
-## [17] DBI_1.1.1         gsubfn_0.7        lifecycle_1.0.0   plyr_1.8.6       
-## [21] stringr_1.4.0     munsell_0.5.0     gtable_0.3.0      ragg_1.1.0       
-## [25] coda_0.19-4       memoise_2.0.0     evaluate_0.14     knitr_1.31       
-## [29] fastmap_1.1.0     parallel_4.0.2    fastDummies_1.6.3 proto_1.0.0      
-## [33] Rcpp_1.0.6        xtable_1.8-4      scales_1.1.1      backports_1.2.1  
-## [37] checkmate_2.0.0   cachem_1.0.4      desc_1.2.0        jsonlite_1.7.2   
-## [41] systemfonts_1.0.1 fs_1.5.0          texreg_1.37.5     textshaping_0.3.1
-## [45] ggplot2_3.3.3     digest_0.6.27     stringi_1.5.3     dplyr_1.0.4      
-## [49] grid_4.0.2        rprojroot_2.0.2   tools_4.0.2       magrittr_2.0.1   
-## [53] sass_0.3.1        tibble_3.0.6      crayon_1.4.1      pkgconfig_2.0.3  
-## [57] ellipsis_0.3.1    data.table_1.13.6 assertthat_0.2.1  rmarkdown_2.7    
-## [61] httr_1.4.2        R6_2.5.0          boot_1.3-27       compiler_4.0.2</code></pre>
+##  [1] tidyselect_1.1.1  xfun_0.24         bslib_0.2.5.1     pander_0.6.4     
+##  [5] purrr_0.3.4       lattice_0.20-44   colorspace_2.0-1  vctrs_0.3.8      
+##  [9] generics_0.1.0    htmltools_0.5.1.1 yaml_2.2.1        utf8_1.2.1       
+## [13] rlang_0.4.11      pkgdown_1.6.1     jquerylib_0.1.4   pillar_1.6.1     
+## [17] glue_1.4.2        DBI_1.1.1         gsubfn_0.7        lifecycle_1.0.0  
+## [21] plyr_1.8.6        stringr_1.4.0     munsell_0.5.0     gtable_0.3.0     
+## [25] ragg_1.1.3        coda_0.19-4       memoise_2.0.0     evaluate_0.14    
+## [29] knitr_1.33        fastmap_1.1.0     parallel_4.1.0    fastDummies_1.6.3
+## [33] fansi_0.5.0       proto_1.0.0       Rcpp_1.0.6        xtable_1.8-4     
+## [37] scales_1.1.1      backports_1.2.1   checkmate_2.0.0   cachem_1.0.5     
+## [41] desc_1.3.0        jsonlite_1.7.2    systemfonts_1.0.2 fs_1.5.0         
+## [45] texreg_1.37.5     textshaping_0.3.5 ggplot2_3.3.5     digest_0.6.27    
+## [49] stringi_1.6.2     dplyr_1.0.7       grid_4.1.0        rprojroot_2.0.2  
+## [53] tools_4.1.0       magrittr_2.0.1    sass_0.4.0        tibble_3.1.2     
+## [57] crayon_1.4.1      pkgconfig_2.0.3   ellipsis_0.3.2    data.table_1.14.0
+## [61] assertthat_0.2.1  rmarkdown_2.9     httr_1.4.2        R6_2.5.0         
+## [65] boot_1.3-28       compiler_4.1.0</code></pre>
 </div>
 <div id="updating-the-package-to-the-latest-version" class="section level2">
 <h2 class="hasAnchor">
 <a href="#updating-the-package-to-the-latest-version" class="anchor"></a>Updating the package to the latest version</h2>
-<p>As is conventional for <code>R</code> packages, the latest version of <code>MplusAutomation</code> may be obtained from CRAN using the <code><a href="https://rdrr.io/r/utils/update.packages.html">update.packages()</a></code> function in an <code>R</code> session. As of 2021-02-27, the current version of the package is 0.8.1.</p>
+<p>As is conventional for <code>R</code> packages, the latest version of <code>MplusAutomation</code> may be obtained from CRAN using the <code><a href="https://rdrr.io/r/utils/update.packages.html">update.packages()</a></code> function in an <code>R</code> session. As of 2021-07-01, the current version of the package is 1.0.0.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/update.packages.html">update.packages</a></span><span class="op">(</span>ask<span class="op">=</span><span class="cn">FALSE</span>, checkBuilt<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 </div>
@@ -213,11 +216,9 @@
 ##      3      1
 ##      4      2
 ##      5      3
-## -----</code></pre>
-<pre><code>## The file(s)
-##  'mtcars.dat' 
-## currently exist(s) and will be overwritten</code></pre>
-<pre><code>## TITLE: Your title goes here
+## -----
+## 
+## TITLE: Your title goes here
 ## DATA: FILE = "mtcars.dat";
 ## VARIABLE: 
 ## NAMES = mpg disp hp drat wt qsec vs gear carb cyl_4 cyl_6 cyl_8 am_0 am_1; 
@@ -232,7 +233,7 @@
 <a href="#basic-use-of-runmodels" class="anchor"></a>Basic use of runModels</h2>
 <p>As an example, say that we want to run all of the models used in the Mplus 5.1 Addendum: <a href="http://statmodel.com/download/examples1.pdf" class="uri">http://statmodel.com/download/examples1.pdf</a>. The input files for these are located in: <code>C:\Program Files\Mplus\Mplus Examples\Addendum Examples</code>.</p>
 <p>To run this batch, enter this at the command line:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/runModels.html">runModels</a></span><span class="op">(</span><span class="st">"C:/Program Files/Mplus/Mplus Examples/Addendum Examples"</span><span class="op">)</span></code></pre></div>
 <p>Note that you need to use forward slashes (“/”), not backslashes in the path name. Alternatively, you could use double backslashes (e.g., <code>"C:\\Program Files"</code> etc.).</p>
 </div>
@@ -251,7 +252,7 @@ ComparingLCAvCFA/CFA/1-factor CFA.inp
 ComparingLCAvCFA/CFA/2-factor CFA.inp
 ComparingLCAvCFA/CFA/3-factor CFA.inp</code></pre>
 <p>In this case, all Mplus files for the larger project are housed within a parent directory, <code>ComparingLCAvCFA</code>. To run all models within <code>ComparingLCAvCFA</code>, including models within any subdirectories (including <code>LCA</code> and <code>CFA</code>), use the <code>recursive</code> parameter of <code>runModels</code>.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/runModels.html">runModels</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Analysis/ComparingLCAvCFA"</span>,
   recursive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
@@ -260,13 +261,13 @@ ComparingLCAvCFA/CFA/3-factor CFA.inp</code></pre>
 <h3 class="hasAnchor">
 <a href="#logging-the-outcome-of-runmodels" class="anchor"></a>Logging the outcome of runModels</h3>
 <p>The <code>logFile</code> parameter of <code>runModels</code> allows the user to specify a text file containing the results of <code>runModels</code>. Included in the log file are the parameters passed to the function, the date when the batch started, which models were run (and which were skipped), and any actions taken if the <code>R</code> process was interrupted (e.g., terminating the Mplus process). By default, <code><a href="../reference/runModels.html">runModels()</a></code> will create a log file in the same directory as the models to be run, <code>directory</code>, called <code>Mplus Run Models.log</code>. To change the name or location of this file, specify the <code>logFile</code> parameter, such as in this example:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runModels</span>(</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"C:/Data_Analysis/ComparingLCAvCFA"</span>,</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">recursive=</span><span class="cn">TRUE</span>,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">logFile=</span><span class="st">"C:/CFALCA-Comparison-Log.txt"</span>)<span class="sc">|</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">runModels</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"C:/Data_Analysis/ComparingLCAvCFA"</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">recursive=</span><span class="cn">TRUE</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">logFile=</span><span class="st">"C:/CFALCA-Comparison-Log.txt"</span>)<span class="sc">|</span></span></code></pre></div>
 <p>Here, the file <code>C:/CFALCA-Comparison-Log.txt</code> will be created in the directory <code>C:/</code>.</p>
 <p>To specify that no log file should be created, pass <code>logFile=NULL</code> to <code><a href="../reference/runModels.html">runModels()</a></code>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/runModels.html">runModels</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Analysis/ComparingLCAvCFA"</span>,
   recursive<span class="op">=</span><span class="cn">TRUE</span>,
@@ -277,13 +278,13 @@ ComparingLCAvCFA/CFA/3-factor CFA.inp</code></pre>
 <a href="#skipping-models-with-existing-output-files" class="anchor"></a>Skipping models with existing output files</h3>
 <p>Sometimes it is useful to skip models that have already been run to avoid the computing time associated with running all input files within a directory. The  parameter allows one to specify which models should be re-run, where models that have an output with the same filename as the input file are considered to have been run. By default, <code>replaceOutfile="always"</code>, meaning that all input files will be run, regardless of whether they have a matching output file.</p>
 <p>To skip any model that already has an existing output file, pass <code>replaceOutfile="never"</code> to <code><a href="../reference/runModels.html">runModels()</a></code>, such as in this example:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/runModels.html">runModels</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Analysis/ComparingLCAvCFA"</span>,
   recursive<span class="op">=</span><span class="cn">TRUE</span>,
   replaceOutfile<span class="op">=</span><span class="st">"never"</span><span class="op">)</span></code></pre></div>
 <p>Oftentimes, after a model or group of models has been run, it is necessary to modify some aspects of the parameterization to improve model fit or address estimation problems. In such cases, output files are inspected and the corresponding input files are modified. In such cases, one may only want to run models that have been updated, but not to re-run models that completed successfully. This can be accomplished by passing <code>replaceOutfile="modifiedDate"</code> to <code><a href="../reference/runModels.html">runModels()</a></code>. The <code>"modifiedDate"</code> determines whether there is an existing output file for a given input file. If there is, it checks to see whether the date the input file was modified is <em>newer</em> than the output file. If the input file is newer, then the model is run. Otherwise, it is skipped. Here is an example:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/runModels.html">runModels</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Analysis/ComparingLCAvCFA"</span>,
   recursive<span class="op">=</span><span class="cn">TRUE</span>,
@@ -293,7 +294,7 @@ ComparingLCAvCFA/CFA/3-factor CFA.inp</code></pre>
 <h3 class="hasAnchor">
 <a href="#displaying-r-output-in-the-console" class="anchor"></a>Displaying <code>R</code> output in the console</h3>
 <p>When models are run by the Mplus Windows program (MplusWin.exe), a separate DOS window appears that documents the TECH8 progress of the model, which represents the progress toward maximum-likelihood convergence for the model (including random starts and final stage optimizations for some models). To display the same TECH8 output for models run by <code><a href="../reference/runModels.html">runModels()</a></code>, pass <code>showOutput=TRUE</code> to the <code><a href="../reference/runModels.html">runModels()</a></code> function.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/runModels.html">runModels</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Analysis/ComparingLCAvCFA"</span>,
   recursive<span class="op">=</span><span class="cn">TRUE</span>,
@@ -308,7 +309,7 @@ ComparingLCAvCFA/CFA/3-factor CFA.inp</code></pre>
 <a href="#user-friendly-interface-to-runmodels" class="anchor"></a>User-friendly interface to <code>runModels()</code>
 </h1>
 <p>A wrapper function, <code><a href="../reference/runModels_Interactive.html">runModels_Interactive()</a></code>, is included in the <code>MplusAutomation package</code>, which provides a simple dialog box for specifying which models to run. To start the interface, type the following:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/runModels_Interactive.html">runModels_Interactive</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <p>The picture below documents the appearance of this interface:</p>
 <div class="figure">
@@ -353,7 +354,7 @@ Figure. Example of using runModels() in an interactive graphical interface.
 <code>gh5</code>: a list containing data from the gh5 (graphics) file corresponding to this output. (Requires <code>rhdf5</code> package).</li>
 </ol>
 <p>Basic example:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">allOutput</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readModels.html">readModels</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Files/CFANesting"</span>,
   recursive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>
@@ -373,7 +374,7 @@ Figure. Example of using runModels() in an interactive graphical interface.
 <p>Please note: The preferred way to obtain summary statistics (and other Mplus output) is the <code><a href="../reference/readModels.html">readModels()</a></code> function, which is described above.</p>
 <p>The <code><a href="../reference/extractModelSummaries.html">extractModelSummaries()</a></code> function is designed to extract model summaries from a group of models located within a directory (or nested within subdirectories). This function returns a <code>data.frame</code> containing one row per model, with columns representing several fit statistics. Note that <code>extractModelSummaries</code> can also extract summaries from a single file by simply passing in a file, not a directory, as the <code>target</code>.</p>
 <p>A basic call to the function includes the directory containing output files to be parsed:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mySummaries</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractModelSummaries.html">extractModelSummaries</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Analysis/ComparingLCAvCFA"</span>,
   recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
@@ -387,7 +388,7 @@ Figure. Example of using runModels() in an interactive graphical interface.
 <p>Note that many regular expression in Perl rely on backslashes (\) for defining character classes, escaping certain characters, and so on. In <code>R</code>, backslashes contained in strings must be doubled (i.e., \\).</p>
 <p>Here is an example of filtering only files that match “ex4” followed by any characters Note that the function automatically searches only files with the .out extension, so it isn’t necessary to include .out in the file filter.</p>
 <p>Here is a more complex filter that matches filenames that begin with the digits 1, 2, or 3 (for 1-class, 2-class, or 3-class output files) and also contain the text “Threshold”:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">summaryStats</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractModelSummaries.html">extractModelSummaries</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Analysis/Multiclass Models"</span>,
   filefilter<span class="op">=</span><span class="st">"[123]{1}-class.*Threshold.*"</span><span class="op">)</span></code></pre></div>
@@ -499,13 +500,13 @@ Figure. Example of using runModels() in an interactive graphical interface.
 <a href="#displaying-the-summary-table-on-the-screen" class="anchor"></a>Displaying the summary table on the screen</h2>
 <p>The <code><a href="../reference/showSummaryTable.html">showSummaryTable()</a></code> function is designed to display a summary table of model fit statistics on the screen. The function expects a model list created by <code><a href="../reference/extractModelSummaries.html">extractModelSummaries()</a></code> and allows the user to specify which columns should be included in the table.</p>
 <p>Here is a simple example of using <code><a href="../reference/showSummaryTable.html">showSummaryTable()</a></code> by specifying which columns to keep in the table:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/showSummaryTable.html">showSummaryTable</a></span><span class="op">(</span>
   <span class="va">summaryStats</span>,
   keepCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Title"</span>, <span class="st">"LL"</span>, <span class="st">"AIC"</span>, <span class="st">"BIC"</span>, <span class="st">"CFI"</span><span class="op">)</span>,
   sortBy <span class="op">=</span> <span class="st">"AIC"</span><span class="op">)</span></code></pre></div>
 <p>And another example specifying that all columns in the model list should be displayed <em>except</em> those specified:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/showSummaryTable.html">showSummaryTable</a></span><span class="op">(</span>
   <span class="va">summaryStats</span>,
   dropCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"InputInstructions"</span>, <span class="st">"Observations"</span>, <span class="st">"Parameters"</span><span class="op">)</span>,
@@ -516,7 +517,7 @@ Figure. Example of using runModels() in an interactive graphical interface.
 <a href="#creating-a-summary-table-in-html" class="anchor"></a>Creating a summary table in HTML</h2>
 <p>The <code><a href="../reference/HTMLSummaryTable.html">HTMLSummaryTable()</a></code> function creates an HTML file containing a summary table of model fit statistics. Its syntax is very similar to <code><a href="../reference/showSummaryTable.html">showSummaryTable()</a></code>, including parameters such as <code>dropCols</code>, <code>keepCols</code>, and <code>sortBy</code>. Two parameters distinguish it from other summary functions: <code>filename</code> and <code>display</code>.</p>
 <p>The <code>filename</code> parameter specifies the path and filename of the HTML file to be created. <code>display</code> specifies whether to display the HTML summary table in the web browser after it is created. Here is a simple of using the function:</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/HTMLSummaryTable.html">HTMLSummaryTable</a></span><span class="op">(</span>
   <span class="va">summaryStats</span>,
   filename <span class="op">=</span> <span class="st">"C:/MyModelSummary.html"</span>,
@@ -527,16 +528,16 @@ Figure. Example of using runModels() in an interactive graphical interface.
 <div id="creating-a-summary-table-in-latex" class="section level2">
 <h2 class="hasAnchor">
 <a href="#creating-a-summary-table-in-latex" class="anchor"></a>Creating a summary table in LaTeX</h2>
-<p>One major strength of <code>R</code> is its ability to be interwoven with LaTeX, an advanced typesetting language. The most frequently used approach for combining <code>R</code> and LaTex is Sweave (<a href="http://www.stat.uni-muenchen.de/~leisch/Sweave/" class="uri">http://www.stat.uni-muenchen.de/~leisch/Sweave/</a>), a built-in <code>R</code> function that runs <code>R</code> code embedded in a LaTeX document, thereby permitting the creation of advanced automated reports.</p>
+<p>One major strength of <code>R</code> is its ability to be interwoven with LaTeX, an advanced typesetting language. The most frequently used approach for combining <code>R</code> and LaTex is Sweave (<a href="https://cran.r-project.org/doc/Rnews/Rnews_2002-3.pdf" class="uri">https://cran.r-project.org/doc/Rnews/Rnews_2002-3.pdf</a>), a built-in <code>R</code> function that runs <code>R</code> code embedded in a LaTeX document, thereby permitting the creation of advanced automated reports.</p>
 <p>Mplus model fit summary tables can be formatted in LaTeX using the <code><a href="../reference/LatexSummaryTable.html">LatexSummaryTable()</a></code> function. Unlike <code><a href="../reference/showSummaryTable.html">showSummaryTable()</a></code> and <code><a href="../reference/HTMLSummaryTable.html">HTMLSummaryTable()</a></code>, <code><a href="../reference/LatexSummaryTable.html">LatexSummaryTable()</a></code> returns a value, specifically the LaTeX syntax for the summary table. Here is a simple example of the function</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">myLatexTable</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LatexSummaryTable.html">LatexSummaryTable</a></span><span class="op">(</span>
   <span class="va">summaryStats</span>,
   keepCols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Title"</span>, <span class="st">"BIC"</span>, <span class="st">"Parameters"</span><span class="op">)</span>,
   sortBy <span class="op">=</span> <span class="st">"Parameters"</span>,
   caption <span class="op">=</span> <span class="st">"Comparing CFA vs. LCA according to number of parameters"</span>,
   label<span class="op">=</span><span class="st">"CFALCATab"</span><span class="op">)</span></code></pre></div>
-<p>Note that <code><a href="../reference/LatexSummaryTable.html">LatexSummaryTable()</a></code> supports two distinct parameters relative to other summary table functions: <code>caption()</code> and <code>label()</code>. These allow the user to set the caption and label properties of the table, which are used in LaTex for displaying a caption with the table and for allowing the table to be easily referenced in other parts of document, respectively. See <a href="http://en.wikibooks.org/wiki/LaTeX/Tables#The_table_environment_-_captioning_etc" class="uri">http://en.wikibooks.org/wiki/LaTeX/Tables#The_table_environment_-_captioning_etc</a> for further details about LaTeX tables.</p>
+<p>Note that <code><a href="../reference/LatexSummaryTable.html">LatexSummaryTable()</a></code> supports two distinct parameters relative to other summary table functions: <code>caption()</code> and <code>label()</code>. These allow the user to set the caption and label properties of the table, which are used in LaTex for displaying a caption with the table and for allowing the table to be easily referenced in other parts of document, respectively. See <a href="https://en.wikibooks.org/wiki/LaTeX/Tables#The_table_environment_-_captioning_etc" class="uri">https://en.wikibooks.org/wiki/LaTeX/Tables#The_table_environment_-_captioning_etc</a> for further details about LaTeX tables.</p>
 <p>The LaTeX syntax for a summary table could be included in an Sweave document in the following way:</p>
 <pre><code>&lt;&lt;echo=TRUE, results=tex&gt;&gt;=
 
@@ -571,11 +572,11 @@ BORD9     WITH BORD1 12.427 -0.053  -0.053    -0.222</code></pre>
 <div id="example-extracting-parameters-from-a-single-file" class="section level2">
 <h2 class="hasAnchor">
 <a href="#example-extracting-parameters-from-a-single-file" class="anchor"></a>Example: Extracting parameters from a single file</h2>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">modelResults</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractModelParameters.html">extractModelParameters</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Analysis/Mplus Output.out"</span><span class="op">)</span></code></pre></div>
 <p>The above call will return a list with unstandardized and standardized results (if requested by including OUTPUT: STANDARDIZED) from the Mplus Output.out file. If all standardizations are available in the output, the returned list will have the following elements: <code>unstandardized</code>, <code>stdyx.standardized</code>, <code>stdy.standardized</code>, and <code>std.standardized</code>. Each of these elements is a <code>data.frame</code> containing model results for the relevant section. Such elements may be accessed in using traditional <code>R</code> list operators, such as:</p>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unstandardizedResults</span> <span class="op">&lt;-</span> <span class="va">modelResults</span><span class="op">$</span><span class="va">unstandardized</span>
 
 <span class="co">#equivalently</span>
@@ -594,12 +595,12 @@ ComparingLCAvCFA/CFA/1-factor CFA.out
 ComparingLCAvCFA/CFA/2-factor CFA.out
 ComparingLCAvCFA/CFA/3-factor CFA.out</code></pre>
 <p>Then the following code would extract model parameters for all files in the directory structure, returning each output as a list element.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">allModelParameters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extractModelParameters.html">extractModelParameters</a></span><span class="op">(</span>
   <span class="st">"C:/Data_Analysis/ComparingLCAvCFA"</span>,
   recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p>The names of the returned list elements would be based on the directory and file names of each file (note that spaces, slashes, and the minus sign have been replaced by periods to be compatible with <code>R</code> naming conventions):</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">allModelParameters</span><span class="op">)</span>
 
 <span class="co">## ComparingLCAvCFA.LCA.1.class.LCA.out</span>
@@ -609,7 +610,7 @@ ComparingLCAvCFA/CFA/3-factor CFA.out</code></pre>
 <span class="co">## ComparingLCAvCFA.CFA.2.factor.CFA.out</span>
 <span class="co">## ComparingLCAvCFA.CFA.3.factor.CFA.out</span></code></pre></div>
 <p>So, to extract the STDYX standardized results for the 2-factor CFA, one would access that  as follows:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">TwoFacCFA.STDYX</span> <span class="op">&lt;-</span> <span class="va">allModelParameters</span><span class="op">$</span><span class="va">ComparingLCAvCFA.CFA.2.factor.CFA.out</span><span class="op">$</span><span class="va">stdyx.standardized</span></code></pre></div>
 <div id="extracting-and-combining-model-results-across-files-and-sections" class="section level3">
 <h3 class="hasAnchor">
@@ -617,16 +618,16 @@ ComparingLCAvCFA/CFA/3-factor CFA.out</code></pre>
 <p>Depending on the application, it may be useful to only retain certain sections or to build a single large data.frame from the multi-file list. What follows are a few standard <code>R</code> practices for combining and subsetting data that may be unfamiliar to inexperienced <code>R</code> users. These examples serve to demonstrate how to work with the <code><a href="../reference/extractModelParameters.html">extractModelParameters()</a></code> list flexibly.</p>
 <p><strong>Example: Only retaining unstandardized output</strong></p>
 <p>By default, <code><a href="../reference/extractModelParameters.html">extractModelParameters()</a></code> returns unstandardized and standardized output, where available. To retain only unstandardized results, for example, one could do the following (building on the CFA v. LCA example above):</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">unstandardizedOnly</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">allModelParameters</span>, <span class="st">"["</span>, <span class="st">"unstandardized"</span><span class="op">)</span></code></pre></div>
 <p>Note that the variable names of the <code>unstandardizedOnly</code> list will represent a concatenation of the filename with the unstandardized keyword. For example, the first element will now be named: <code>ComparingLCAvCFA.LCA.1.class.LCA.out.unstandardized</code>. Names can be manually tweaked using the <code>names</code> function. For example, to retain the existing filenames without appending .unstandardized, this would work:</p>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">oldNames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">allModelParameters</span><span class="op">)</span>
 <span class="va">unstandardizedOnly</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="va">allModelParameters</span>, <span class="st">"["</span>, <span class="st">"unstandardized"</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">unstandardizedOnly</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">oldNames</span></code></pre></div>
 <p><strong>Example: Combining multi-file output into a single <code>data.frame</code></strong></p>
 <p>Rather than having a list of model results, where each element represents the parameters from a single file, it may be useful to combine these results into a single data.frame. The following code would accomplish this (assumes the immediately prior code was run):</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">#add the filename as a field in the data.frame (so it's uniquely identified when combined)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">unstandardizedOnly</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">element</span><span class="op">)</span> <span class="op">{</span>
     <span class="va">unstandardizedOnly</span><span class="op">[[</span><span class="va">element</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">filename</span> <span class="op">&lt;&lt;-</span> <span class="va">element</span>
@@ -659,25 +660,25 @@ ComparingLCAvCFA/CFA/3-factor CFA.out</code></pre>
 <p>Now that we have illustrated how to import Mplus model parameter estimates into <code>R</code>, here are just a couple of examples of how useful graphs in  can be developed from <code><a href="../reference/extractModelParameters.html">extractModelParameters()</a></code> data.</p>
 <p><strong>Example: Plotting means and standard errors from a finite mixture model</strong></p>
 <p>The example model to be plotted comes from a finite mixture model with seven continuous indicators of a latent construct, each scaled to zero mean and unit variance. The intention of this plot is to visualize the means and standard error of each indicator across the latent classes.</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(MplusAutomation)</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(ggplot2)</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  modelParams <span class="ot">&lt;-</span> <span class="fu">extractModelParameters</span>(<span class="st">"output_to_plot.out)$unstandardized</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="st">  modelParams &lt;- subset(modelParams,</span></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="st">    paramHeader=="</span>Means<span class="st">" &amp;</span></span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="st">      LatentClass != "</span>Categorical.Latent.Variables<span class="st">",</span></span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="st">    select=c("</span>LatentClass<span class="st">", "</span>param<span class="st">", "</span>est<span class="st">", "</span>se<span class="st">"))</span></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="st">  limits &lt;- aes(ymax = est + se, ymin=est - se)</span></span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="st">    fmmMeanPlot &lt;- ggplot(modelParams, aes(x=param, y=est)) +</span></span>
-<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a><span class="st">        geom_pointrange(limits) +</span></span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a><span class="st">        scale_x_discrete("") +</span></span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="st">        geom_hline(yintercept=0, color="</span>grey50<span class="st">") +</span></span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a><span class="st">        facet_grid(LatentClass ~ .) +</span></span>
-<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a><span class="st">        theme_bw() +</span></span>
-<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a><span class="st">        ylab("</span>Mean Value<span class="st">") +</span></span>
-<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="st">        coord_flip()</span></span>
-<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a><span class="st">    print(fmmMeanPlot)</span></span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(MplusAutomation)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(ggplot2)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  modelParams <span class="ot">&lt;-</span> <span class="fu">extractModelParameters</span>(<span class="st">"output_to_plot.out)$unstandardized</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="st">  modelParams &lt;- subset(modelParams,</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="st">    paramHeader=="</span>Means<span class="st">" &amp;</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="st">      LatentClass != "</span>Categorical.Latent.Variables<span class="st">",</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="st">    select=c("</span>LatentClass<span class="st">", "</span>param<span class="st">", "</span>est<span class="st">", "</span>se<span class="st">"))</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="st">  </span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="st">  limits &lt;- aes(ymax = est + se, ymin=est - se)</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a><span class="st">    fmmMeanPlot &lt;- ggplot(modelParams, aes(x=param, y=est)) +</span></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="st">        geom_pointrange(limits) +</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a><span class="st">        scale_x_discrete("") +</span></span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a><span class="st">        geom_hline(yintercept=0, color="</span>grey50<span class="st">") +</span></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="st">        facet_grid(LatentClass ~ .) +</span></span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a><span class="st">        theme_bw() +</span></span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a><span class="st">        ylab("</span>Mean Value<span class="st">") +</span></span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a><span class="st">        coord_flip()</span></span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a><span class="st">    print(fmmMeanPlot)</span></span></code></pre></div>
 <p>This relatively brief code snippet provides a relatively useful plot of this sort:</p>
 <div class="figure">
 <img src="mplusAutomationFMMPlot.png" alt="Figure. Example of graphing finite mixutre model results from Mplus using ggplot2." width="80%"><p class="caption">
@@ -693,7 +694,7 @@ Figure. Example of graphing finite mixutre model results from Mplus using ggplot
 <p>This function also computes chi-square difference tests for nested models estimated with the ML, MLM, MLR, WLS, or WLSM estimators using the <code>diffTest</code> parameter.</p>
 <p>To use <code><a href="../reference/compareModels.html">compareModels()</a></code>, I recommend using <code><a href="../reference/readModels.html">readModels()</a></code> to extract various fit statistics and parameters from two or more models. You can pass in the results of <code><a href="../reference/extractModelSummaries.html">extractModelSummaries()</a></code> or <code><a href="../reference/extractModelParameters.html">extractModelParameters()</a></code> to <code><a href="../reference/compareModels.html">compareModels()</a></code>, but the output will be limited to summaries or parameters, respectively.</p>
 <p>Here is a brief example of how one might use <code><a href="../reference/compareModels.html">compareModels()</a></code>.</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">parallelModels</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/readModels.html">readModels</a></span><span class="op">(</span><span class="st">"10_14_Harsh_SelfCon_Impul"</span><span class="op">)</span>
 
 <span class="fu"><a href="../reference/compareModels.html">compareModels</a></span><span class="op">(</span><span class="va">parallelModels</span><span class="op">[[</span><span class="st">"backport.from.grand.model.out"</span><span class="op">]</span><span class="op">]</span>,

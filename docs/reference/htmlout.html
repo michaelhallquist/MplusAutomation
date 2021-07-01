@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Check whether Mplus can be found — mplusAvailable • MplusAutomation</title>
+<title>Read in Mplus Output File from HTML on the Mplus Website — htmlout • MplusAutomation</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,13 @@
 
 
 
-<meta property="og:title" content="Check whether Mplus can be found — mplusAvailable" />
-<meta property="og:description" content="This is a simple utility to check whether Mplus can be found.
-Returns 0 if Mplus command can be found by the system.
-If silent = FALSE, prints a message to the user
-to help suggest what to do." />
+<meta property="og:title" content="Read in Mplus Output File from HTML on the Mplus Website — htmlout" />
+<meta property="og:description" content="This is an internal utility function to help with testing MplusAutomation.
+On the Mplus website, many output files are included, which are good tests.
+However, they are stored in HTML files. This function reads them in,
+strips the HTML parts leaving just the output file, and then writes it to
+disk and returns the file name, which can be used with readModels()
+for testing." />
 
 
 
@@ -123,44 +125,43 @@ to help suggest what to do." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Check whether Mplus can be found</h1>
+    <h1>Read in Mplus Output File from HTML on the Mplus Website</h1>
     <small class="dont-index">Source: <a href='https://github.com/michaelhallquist/MplusAutomation/blob/master/R/utilityFunctions.R'><code>R/utilityFunctions.R</code></a></small>
-    <div class="hidden name"><code>mplusAvailable.Rd</code></div>
+    <div class="hidden name"><code>htmlout.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This is a simple utility to check whether Mplus can be found.
-Returns 0 if Mplus command can be found by the system.
-If <code>silent = FALSE</code>, prints a message to the user
-to help suggest what to do.</p>
+    <p>This is an internal utility function to help with testing MplusAutomation.
+On the Mplus website, many output files are included, which are good tests.
+However, they are stored in HTML files. This function reads them in,
+strips the HTML parts leaving just the output file, and then writes it to
+disk and returns the file name, which can be used with <code><a href='readModels.html'>readModels()</a></code>
+for testing.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>mplusAvailable</span><span class='op'>(</span>silent <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>htmlout</span><span class='op'>(</span><span class='va'>url</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>silent</th>
-      <td><p>A logical whether to print a message or not.
-Defaults to <code>TRUE</code> for silent operation.</p></td>
+      <th>url</th>
+      <td><p>The url giving an Mplus output file in HTML format.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The status of finding Mplus. Per unix conventions,
-status 0 indicates Mplus was found (0 problems) and
-status 1 indicates that Mplus was not found.</p>
+    <p>A character string that is the filename where the output file was written.
+  Always a temp file in a temp directory.</p>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
-    <p>Joshua Wiley</p>
+    <p>Joshua F. Wiley &lt;jwiley.psych@gmail.com&gt;</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='fu'>mplusAvailable</span><span class='op'>(</span>silent <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='fu'>mplusAvailable</span><span class='op'>(</span>silent <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>Mplus is installed and can be found</span></div></pre>
+<span class='fu'>MplusAutomation</span><span class='fu'>:::</span><span class='fu'>htmlout</span><span class='op'>(</span><span class='st'>"https://statmodel.com/usersguide/chap3/ex3.1.html"</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; [1] "C:\\Users\\jwile\\AppData\\Local\\Temp\\RtmpSa8yQn\\UserGuide7e9c46ae1aca.out"</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
