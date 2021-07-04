@@ -16,3 +16,8 @@ pkg_build
 ^.*\.log$
 ^.*\.dgm$
 ^man-roxygen
+
+vignettes/README.md
+vignettes/precompile.R
+^vignettes/.*\.orig$
+
