@@ -1,21 +1,12 @@
 ---
-title: "Confirmatory Factor Analysis (CFA) - Continuous"
-author: "TBD"
+title: "CFA"
+author: ""
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{CFA - Continuous}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output: html_document
 ---
 
-```{r cfacont-setup, include = FALSE}
-## this is needed so that figures do not go into a figure subfolder
-knitr::opts_chunk$set(
-  fig.path = ""
-)
-
-library(MplusAutomation)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE, tidy = TRUE)
 ```
 
 Load packages
@@ -32,7 +23,6 @@ library(gt)
 ## Load data example 
 
 DATA SOURCE: This lab exercise utilizes the NCES public-use dataset: Education Longitudinal Study of 2002 (Lauff & Ingels, 2014) [$\color{blue}{\text{See website: nces.ed.gov}}$](https://nces.ed.gov/surveys/els2002/avail_data.asp)
-
 ```{r}
 # Note (Josh): These data subsets can be stored in a designated Git repository & then accessed as a link
 
@@ -82,7 +72,7 @@ tab_options(column_labels.font.weight = "bold")
 ## Make a simple CFA path diagram using package {`DiagrammeR`} 
 ```{r}
 
-# Figure out how to add the covariance arrow 
+# Figure out how to add the covariance arrow
 
 grViz(" digraph CFA_basic {
  
