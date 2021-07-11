@@ -1019,40 +1019,21 @@ separateHyphens <- function(cmd) {
 #' mplusAvailable(silent = TRUE)
 #' mplusAvailable(silent = FALSE)
 mplusAvailable <- function(silent = TRUE) {
-  os <- .Platform$OS.type
-  if (identical(os, "windows")) {
-    res <- system2("where", args = "mplus.exe",
-        stdout = FALSE, stderr = FALSE)
-    note <- paste0(
-        "Mplus is either not installed or could not be found\n",
-        "Try installing Mplus or if Mplus is already installed, \n",
-        "make sure it can be found on your PATH, try\n\n",
-        "Windows 10 and Windows 8:\n",
-        " (1) In Search, search for and then select: System (Control Panel)\n",
-        " (2) Click the Advanced system settings link.\n",
-        " (3) Click Environment Variables ...\n",
-        " (4) In the Edit System Variable (or New System Variable ) window,\n",
-        " (5) specify the value of the PATH environment variable...\n",
-        " (6) Close and reopen R and run:\n\n",
-        "mplusAvailable(silent=FALSE)",
-        "\n")
+  res <- tryCatch(
+    detectMplus(),
+    error = function(e) e)
+
+  if (isTRUE(inherits(res, "error"))) {
+    if (isFALSE(silent)) {
+      message(res$message)
+    }
+    return(1L)
+  } else {
+    if (isFALSE(silent) && isTRUE(is.character(res))) {
+      message(sprintf("The command name for Mplus is\n%s", res))
+    }
+    return(0L)
   }
-  if (identical(os, "unix")) {
-    res <- system2("type", args = "mplus",
-        stdout = FALSE, stderr = FALSE)
-    note <-     paste0(
-        "Mplus is either not installed or could not be found\n",
-        "Try installing Mplus or if it already is installed,\n",
-        "making sure it can be found by adding it to your PATH or adding a symlink\n\n",
-        "To see directories on your PATH, From a terminal, run:\n\n",
-        "echo $PATH",
-        "\n\nthen try something along these lines:\n\n",
-        "sudo ln -s /path/to/mplus/on/your/system /directory/on/your/PATH",
-        "\n")
-  }
-  
-  if (!silent) message(c("Mplus is installed and can be found", note)[res+1])
-  return(invisible(res))
 }
 
 #' Check whether a useable function argument was provided
@@ -1314,7 +1295,20 @@ detectMplus <- function() {
             ## if mplus demo in program files just not path, use full path to mplus demo to run it
             mplus <- "C:\\Program Files\\Mplus Demo\\Mpdemo8.exe"          
           } else {
-            stop("Mplus and Mpdemo8 not found on the system path or in the 'usual' Program Files location. Ensure Mplus or the Mplus Demo are installed and that the location of the .exe file is on your system path.")            
+            note <- paste0(
+              "Mplus and Mpdemo8 are either not installed or could not be found\n",
+              "Try installing Mplus or Mplus Demo. If Mplus or Mplus Demo are already installed, \n",
+              "make sure one can be found on your PATH. The following may help\n\n",
+              "Windows 10:\n",
+              " (1) In Search, search for and then select: System (Control Panel)\n",
+              " (2) Click the Advanced system settings link.\n",
+              " (3) Click Environment Variables ...\n",
+              " (4) In the Edit System Variable (or New System Variable ) window,\n",
+              " (5) specify the value of the PATH environment variable...\n",
+              " (6) Close and reopen R and run:\n\n",
+              "mplusAvailable(silent=FALSE)",
+              "\n")
+            stop(note)
           }
         }
       }
@@ -1369,7 +1363,16 @@ detectMplus <- function() {
           if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
             mplus <- "mpdemo"
           } else {
-            stop("mplus and mpdemo not found on the system path or in the 'usual' /opt/mplus/ location. Ensure Mplus or the Mplus Demo are installed and that the location of the command is on your system path.")
+            note <- paste0(
+              "Mplus is either not installed or could not be found\n",
+              "Try installing Mplus or if it already is installed,\n",
+              "making sure it can be found by adding it to your PATH or adding a symlink\n\n",
+              "To see directories on your PATH, From a terminal, run:\n\n",
+              "echo $PATH",
+              "\n\nthen try something along these lines:\n\n",
+              "sudo ln -s /path/to/mplus/on/your/system /directory/on/your/PATH",
+              "\n")
+            stop(note)
           }
         }
       }
