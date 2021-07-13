@@ -372,7 +372,8 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
       gh5fname <- sub("^(.*)\\.out$", "\\1.gh5", curfile, ignore.case=TRUE, perl=TRUE)
       if (isTRUE(file.exists(gh5fname))) {
         if (isTRUE(requireNamespace("rhdf5", quietly = TRUE))) {
-          gh5 <- rhdf5::h5dump(file=gh5fname, recursive=TRUE, load=TRUE)
+          gh5 <- tryCatch({rhdf5::h5dump(file=gh5fname, recursive=TRUE, load=TRUE)},
+                          error = function(e) { NULL })
         } else {
           warning(paste(c("Unable to read gh5 file because rhdf5 package not installed.\n",
                           "To install, in an R session, type:\n",
