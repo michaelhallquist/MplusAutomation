@@ -374,6 +374,17 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
         if (isTRUE(requireNamespace("rhdf5", quietly = TRUE))) {
           gh5 <- tryCatch({rhdf5::h5dump(file=gh5fname, recursive=TRUE, load=TRUE)},
                           error = function(e) { NULL })
+          
+          # The h5dump error seems to occur in some rhdf5 versions when h5dump is used on
+          # a file with a non-standard file extension (as opposed to the canonical .h5).
+          # Thus, attempt a file extension workaround.
+          if (is.null(gh5[1L])) {
+            tmp_h5 <- tempfile(fileext=".h5")
+            file.copy(gh5fname, to=tmp_h5)
+            gh5 <- tryCatch({rhdf5::h5dump(file=tmp_h5, recursive=TRUE, load=TRUE)},
+                            error = function(e) { NULL })
+            unlink(tmp_h5) #cleanup temp
+          }
         } else {
           warning(paste(c("Unable to read gh5 file because rhdf5 package not installed.\n",
                           "To install, in an R session, type:\n",
