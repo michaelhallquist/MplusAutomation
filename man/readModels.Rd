@@ -67,6 +67,7 @@ a single mplus.model object, not a list of files. Specific elements are:
   \item{fac_score_stats}{factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section}
   \item{lcCondMeans}{conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models}
   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)}
+  \item{output}{The entire, raw output file.}
 }
 \description{
 Extracts information from one or more Mplus output files, including fit statistics and parameters.
@@ -81,7 +82,8 @@ as a character vector from the following options:
 c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
      "parameters", "class_counts", "indirect", "mod_indices", "residuals",
      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-     "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
+     "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
+     "output")
 }
 \examples{
 \dontrun{

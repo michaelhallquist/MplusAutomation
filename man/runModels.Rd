@@ -11,7 +11,7 @@ runModels(
   showOutput = FALSE,
   replaceOutfile = "always",
   logFile = "Mplus Run Models.log",
-  Mplus_command = "Mplus",
+  Mplus_command = detectMplus(),
   killOnFail = TRUE,
   local_tmpdir = FALSE,
   quiet = TRUE

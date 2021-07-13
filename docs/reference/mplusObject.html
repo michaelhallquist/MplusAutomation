@@ -76,7 +76,7 @@ for the update function." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -157,7 +157,9 @@ for the <code>update</code> function.</p>
   usevariables <span class='op'>=</span> <span class='cn'>NULL</span>,
   rdata <span class='op'>=</span> <span class='cn'>NULL</span>,
   autov <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  imputed <span class='op'>=</span> <span class='cn'>FALSE</span>
+  imputed <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -252,6 +254,15 @@ the R dataset, if <code>usevariables</code> is left <code>NULL</code>.</p></td>
       <td><p>A logical whether the data are multiply imputed (a list).
 Defaults to <code>FALSE</code>.</p></td>
     </tr>
+    <tr>
+      <th>quiet</th>
+      <td><p>optional. If <code>TRUE</code>, show status messages in the console.</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Arguments passed on to <code><a href='mplusModeler.html'>mplusModeler</a></code> if
+<code>run &gt; 0</code>.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -335,14 +346,13 @@ estimator, all you have to do is change it in the model object once, and re run 
 #&gt;   ..$ gear: num [1:32] 4 4 4 3 3 3 3 4 4 4 ...
 #&gt;   ..$ carb: num [1:32] 4 4 1 1 2 1 4 2 2 4 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/rm.html'>rm</a></span><span class='op'>(</span><span class='va'>example1</span><span class='op'>)</span>
 
 <span class='co'># R figures out the variables automagically, with a message</span>
 <span class='va'>example2</span> <span class='op'>&lt;-</span> <span class='fu'>mplusObject</span><span class='op'>(</span>MODEL <span class='op'>=</span> <span class='st'>"mpg ON wt;"</span>,
   rdata <span class='op'>=</span> <span class='va'>mtcars</span>, autov <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>example2</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>example2</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; List of 21
 #&gt;  $ TITLE          : NULL
 #&gt;  $ DATA           : NULL
@@ -375,7 +385,7 @@ estimator, all you have to do is change it in the model object once, and re run 
 #&gt;   ..$ gear: num [1:32] 4 4 4 3 3 3 3 4 4 4 ...
 #&gt;   ..$ carb: num [1:32] 4 4 1 1 2 1 4 2 2 4 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/rm.html'>rm</a></span><span class='op'>(</span><span class='va'>example2</span><span class='op'>)</span>
 
 <span class='co'># R can also try to figure out a list of variables when</span>
@@ -383,8 +393,7 @@ estimator, all you have to do is change it in the model object once, and re run 
 <span class='co'># between the first and last one will be included</span>
 <span class='va'>example3</span> <span class='op'>&lt;-</span> <span class='fu'>mplusObject</span><span class='op'>(</span>MODEL <span class='op'>=</span> <span class='st'>"mpg ON wt-vs;"</span>,
   rdata <span class='op'>=</span> <span class='va'>mtcars</span>, autov <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>example3</span><span class='op'>)</span>
+<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>example3</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; List of 21
 #&gt;  $ TITLE          : NULL
 #&gt;  $ DATA           : NULL
@@ -417,7 +426,7 @@ estimator, all you have to do is change it in the model object once, and re run 
 #&gt;   ..$ gear: num [1:32] 4 4 4 3 3 3 3 4 4 4 ...
 #&gt;   ..$ carb: num [1:32] 4 4 1 1 2 1 4 2 2 4 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/rm.html'>rm</a></span><span class='op'>(</span><span class='va'>example3</span><span class='op'>)</span>
 
 <span class='co'># R warns if the first 8 characters of a (used) variable name are not unique</span>
@@ -425,8 +434,7 @@ estimator, all you have to do is change it in the model object once, and re run 
 <span class='va'>example4</span> <span class='op'>&lt;-</span> <span class='fu'>mplusObject</span><span class='op'>(</span>MODEL <span class='op'>=</span> <span class='st'>"basename_01 ON basename_02;"</span>,
   rdata <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/data.frame.html'>data.frame</a></span><span class='op'>(</span>basename_01 <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span>, basename_02 <span class='op'>=</span> <span class='fl'>5</span><span class='op'>:</span><span class='fl'>1</span><span class='op'>)</span>,
   autov <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='output co'>#&gt; <span class='message'>The following variables are not unique in the first 8 characters:</span>
+</div><div class='output co'>#&gt; <span class='message'>The following variables are not unique in the first 8 characters:</span>
 #&gt; <span class='message'> basename_02</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/rm.html'>rm</a></span><span class='op'>(</span><span class='va'>example4</span><span class='op'>)</span>
 </div></pre>
   </div>

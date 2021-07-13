@@ -74,7 +74,7 @@ these into a list object, with one element per output file identified." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -138,7 +138,7 @@ these into a list object, with one element per output file identified.</p>
   recursive <span class='op'>=</span> <span class='cn'>FALSE</span>,
   <span class='va'>filefilter</span>,
   what <span class='op'>=</span> <span class='st'>"all"</span>,
-  quiet <span class='op'>=</span> <span class='cn'>FALSE</span>
+  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -173,7 +173,8 @@ See details for additional information.</p></td>
     </tr>
     <tr>
       <th>quiet</th>
-      <td><p>whether to suppress printing to the screen the file currently being processed. Defaults to FALSE.</p></td>
+      <td><p>whether to suppress printing to the screen the file currently
+being processed. Defaults to TRUE.</p></td>
     </tr>
     </table>
 
@@ -210,6 +211,7 @@ a single mplus.model object, not a list of files. Specific elements are:</p>
   <dt>fac_score_stats</dt><dd><p>factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section</p></dd>
   <dt>lcCondMeans</dt><dd><p>conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models</p></dd>
   <dt>gh5</dt><dd><p>a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)</p></dd>
+  <dt>output</dt><dd><p>The entire, raw output file.</p></dd>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
@@ -219,7 +221,8 @@ as a character vector from the following options:</p>
 <p>c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
      "parameters", "class_counts", "indirect", "mod_indices", "residuals",
      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-     "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5")</p>
+     "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
+     "output")</p>
     <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
 
     <p>Michael Hallquist</p>

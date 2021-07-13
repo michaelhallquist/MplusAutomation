@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -76,13 +76,13 @@
 
       
 
-      </header><script src="vignette_files/header-attrs-2.7/header-attrs.js"></script><div class="row">
+      </header><script src="vignette_files/header-attrs-2.9/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>MplusAutomation Examples</h1>
                         <h4 class="author">Michael N. Hallquist</h4>
             
-            <h4 class="date">2021-02-27</h4>
+            <h4 class="date">2021-07-01</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/michaelhallquist/MplusAutomation/blob/master/vignettes/vignette.Rmd"><code>vignettes/vignette.Rmd</code></a></small>
       <div class="hidden name"><code>vignette.Rmd</code></div>
@@ -119,7 +119,7 @@
 <a href="#installing-and-loading-the-package" class="anchor"></a>Installing and loading the package</h1>
 <p><strong>Note</strong>: You only need to install the <code>MplusAutomation</code> package <em>once</em> on a given machine. Once you follow these instructions, you can just use <code><a href="https://github.com/michaelhallquist/MplusAutomation">library(MplusAutomation)</a></code> to load the package in future sessions.</p>
 <p>The <code>MplusAutomation</code> package is compatible with <code>R</code> and <code>Mplus</code> on Windows, Mac OS X, and Linux platforms.</p>
-<p>The package was initially built using <code>R</code> 2.15.1 and has been tested with modern versions up through <code>R</code> 4.0.2. To obtain <code>R</code> follow <a href="http://cran.r-project.org/">this link</a>.</p>
+<p>The package was initially built using <code>R</code> 2.15.1 and has been tested with modern versions up through <code>R</code> 4.0.2. To obtain <code>R</code> follow <a href="https://cran.r-project.org/">this link</a>.</p>
 <p>After installing <code>R</code> and launching a new session, type the following at the command line:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"MplusAutomation"</span><span class="op">)</span></code></pre></div>
@@ -127,58 +127,61 @@
 <p>To load the <code>MplusAutomation</code> package so that its functions are available to use, type:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/michaelhallquist/MplusAutomation">MplusAutomation</a></span><span class="op">)</span></code></pre></div>
-<pre><code>## Version:  0.8.1
+<pre><code>## Version:  1.0.0
 ## We work hard to write this free software. Please help us get credit by citing: 
 ## 
 ## Hallquist, M. N. &amp; Wiley, J. F. (2018). MplusAutomation: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus. Structural Equation Modeling, 25, 621-638. doi: 10.1080/10705511.2017.1402334.
 ## 
 ## -- see citation("MplusAutomation").</code></pre>
-<p><strong>Note:</strong> Mac users using versions of <code>R</code> <em>prior to</em> 4.0.0 may experiences crashes if they have not setup Tcl/Tk properly within <code>R</code>. The default distribution of Tcl/Tk shipped with Mac OS X is not compatible with <code>R</code>. Instead, users should download and install the Tcl/Tk distribution <a href="http://cran.r-project.org/bin/macosx/tools">here</a>.</p>
+<p><strong>Note:</strong> Mac users using versions of <code>R</code> <em>prior to</em> 4.0.0 may experiences crashes if they have not setup Tcl/Tk properly within <code>R</code>. The default distribution of Tcl/Tk shipped with Mac OS X is not compatible with <code>R</code>. Instead, users should download and install the Tcl/Tk distribution <a href="https://cran.r-project.org/bin/macosx/tools/">here</a>.</p>
 <div id="determine-the-version-of-mplusautomation-on-your-machine" class="section level2">
 <h2 class="hasAnchor">
 <a href="#determine-the-version-of-mplusautomation-on-your-machine" class="anchor"></a>Determine the version of <code>MplusAutomation</code> on your machine</h2>
 <p>To verify the version of <code>MplusAutomation</code> loaded in your <code>R</code> session, type the following code which should provide a listing of all loaded packages.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
-<pre><code>## R version 4.0.2 (2020-06-22)
-## Platform: x86_64-apple-darwin17.0 (64-bit)
-## Running under: macOS  10.16
+<pre><code>## R version 4.1.0 (2021-05-18)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19043)
 ## 
 ## Matrix products: default
-## BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
-## LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
 ## 
 ## locale:
-## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
 ## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] MplusAutomation_0.8.1
+## [1] MplusAutomation_1.0.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_1.1.0  xfun_0.21         bslib_0.2.4       pander_0.6.3     
-##  [5] purrr_0.3.4       lattice_0.20-41   colorspace_2.0-0  vctrs_0.3.6      
-##  [9] generics_0.1.0    htmltools_0.5.1.1 yaml_2.2.1        rlang_0.4.10     
-## [13] pkgdown_1.6.1     jquerylib_0.1.3   pillar_1.4.7      glue_1.4.2       
-## [17] DBI_1.1.1         gsubfn_0.7        lifecycle_1.0.0   plyr_1.8.6       
-## [21] stringr_1.4.0     munsell_0.5.0     gtable_0.3.0      ragg_1.1.0       
-## [25] coda_0.19-4       memoise_2.0.0     evaluate_0.14     knitr_1.31       
-## [29] fastmap_1.1.0     parallel_4.0.2    fastDummies_1.6.3 proto_1.0.0      
-## [33] Rcpp_1.0.6        xtable_1.8-4      scales_1.1.1      backports_1.2.1  
-## [37] checkmate_2.0.0   cachem_1.0.4      desc_1.2.0        jsonlite_1.7.2   
-## [41] systemfonts_1.0.1 fs_1.5.0          texreg_1.37.5     textshaping_0.3.1
-## [45] ggplot2_3.3.3     digest_0.6.27     stringi_1.5.3     dplyr_1.0.4      
-## [49] grid_4.0.2        rprojroot_2.0.2   tools_4.0.2       magrittr_2.0.1   
-## [53] sass_0.3.1        tibble_3.0.6      crayon_1.4.1      pkgconfig_2.0.3  
-## [57] ellipsis_0.3.1    data.table_1.13.6 assertthat_0.2.1  rmarkdown_2.7    
-## [61] httr_1.4.2        R6_2.5.0          boot_1.3-27       compiler_4.0.2</code></pre>
+##  [1] tidyselect_1.1.1  xfun_0.24         bslib_0.2.5.1     pander_0.6.4     
+##  [5] purrr_0.3.4       lattice_0.20-44   colorspace_2.0-1  vctrs_0.3.8      
+##  [9] generics_0.1.0    htmltools_0.5.1.1 yaml_2.2.1        utf8_1.2.1       
+## [13] rlang_0.4.11      pkgdown_1.6.1     jquerylib_0.1.4   pillar_1.6.1     
+## [17] glue_1.4.2        DBI_1.1.1         gsubfn_0.7        lifecycle_1.0.0  
+## [21] plyr_1.8.6        stringr_1.4.0     munsell_0.5.0     gtable_0.3.0     
+## [25] ragg_1.1.3        coda_0.19-4       memoise_2.0.0     evaluate_0.14    
+## [29] knitr_1.33        fastmap_1.1.0     parallel_4.1.0    fastDummies_1.6.3
+## [33] fansi_0.5.0       proto_1.0.0       Rcpp_1.0.6        xtable_1.8-4     
+## [37] scales_1.1.1      backports_1.2.1   checkmate_2.0.0   cachem_1.0.5     
+## [41] desc_1.3.0        jsonlite_1.7.2    systemfonts_1.0.2 fs_1.5.0         
+## [45] texreg_1.37.5     textshaping_0.3.5 ggplot2_3.3.5     digest_0.6.27    
+## [49] stringi_1.6.2     dplyr_1.0.7       grid_4.1.0        rprojroot_2.0.2  
+## [53] tools_4.1.0       magrittr_2.0.1    sass_0.4.0        tibble_3.1.2     
+## [57] crayon_1.4.1      pkgconfig_2.0.3   ellipsis_0.3.2    data.table_1.14.0
+## [61] assertthat_0.2.1  rmarkdown_2.9     httr_1.4.2        R6_2.5.0         
+## [65] boot_1.3-28       compiler_4.1.0</code></pre>
 </div>
 <div id="updating-the-package-to-the-latest-version" class="section level2">
 <h2 class="hasAnchor">
 <a href="#updating-the-package-to-the-latest-version" class="anchor"></a>Updating the package to the latest version</h2>
-<p>As is conventional for <code>R</code> packages, the latest version of <code>MplusAutomation</code> may be obtained from CRAN using the <code><a href="https://rdrr.io/r/utils/update.packages.html">update.packages()</a></code> function in an <code>R</code> session. As of 2021-02-27, the current version of the package is 0.8.1.</p>
+<p>As is conventional for <code>R</code> packages, the latest version of <code>MplusAutomation</code> may be obtained from CRAN using the <code><a href="https://rdrr.io/r/utils/update.packages.html">update.packages()</a></code> function in an <code>R</code> session. As of 2021-07-01, the current version of the package is 1.0.0.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/update.packages.html">update.packages</a></span><span class="op">(</span>ask<span class="op">=</span><span class="cn">FALSE</span>, checkBuilt<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 </div>
@@ -527,7 +530,7 @@ Figure. Example of using runModels() in an interactive graphical interface.
 <div id="creating-a-summary-table-in-latex" class="section level2">
 <h2 class="hasAnchor">
 <a href="#creating-a-summary-table-in-latex" class="anchor"></a>Creating a summary table in LaTeX</h2>
-<p>One major strength of <code>R</code> is its ability to be interwoven with LaTeX, an advanced typesetting language. The most frequently used approach for combining <code>R</code> and LaTex is Sweave (<a href="http://www.stat.uni-muenchen.de/~leisch/Sweave/" class="uri">http://www.stat.uni-muenchen.de/~leisch/Sweave/</a>), a built-in <code>R</code> function that runs <code>R</code> code embedded in a LaTeX document, thereby permitting the creation of advanced automated reports.</p>
+<p>One major strength of <code>R</code> is its ability to be interwoven with LaTeX, an advanced typesetting language. The most frequently used approach for combining <code>R</code> and LaTex is Sweave (<a href="https://cran.r-project.org/doc/Rnews/Rnews_2002-3.pdf" class="uri">https://cran.r-project.org/doc/Rnews/Rnews_2002-3.pdf</a>), a built-in <code>R</code> function that runs <code>R</code> code embedded in a LaTeX document, thereby permitting the creation of advanced automated reports.</p>
 <p>Mplus model fit summary tables can be formatted in LaTeX using the <code><a href="../reference/LatexSummaryTable.html">LatexSummaryTable()</a></code> function. Unlike <code><a href="../reference/showSummaryTable.html">showSummaryTable()</a></code> and <code><a href="../reference/HTMLSummaryTable.html">HTMLSummaryTable()</a></code>, <code><a href="../reference/LatexSummaryTable.html">LatexSummaryTable()</a></code> returns a value, specifically the LaTeX syntax for the summary table. Here is a simple example of the function</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">myLatexTable</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LatexSummaryTable.html">LatexSummaryTable</a></span><span class="op">(</span>
@@ -536,7 +539,7 @@ Figure. Example of using runModels() in an interactive graphical interface.
   sortBy <span class="op">=</span> <span class="st">"Parameters"</span>,
   caption <span class="op">=</span> <span class="st">"Comparing CFA vs. LCA according to number of parameters"</span>,
   label<span class="op">=</span><span class="st">"CFALCATab"</span><span class="op">)</span></code></pre></div>
-<p>Note that <code><a href="../reference/LatexSummaryTable.html">LatexSummaryTable()</a></code> supports two distinct parameters relative to other summary table functions: <code>caption()</code> and <code>label()</code>. These allow the user to set the caption and label properties of the table, which are used in LaTex for displaying a caption with the table and for allowing the table to be easily referenced in other parts of document, respectively. See <a href="http://en.wikibooks.org/wiki/LaTeX/Tables#The_table_environment_-_captioning_etc" class="uri">http://en.wikibooks.org/wiki/LaTeX/Tables#The_table_environment_-_captioning_etc</a> for further details about LaTeX tables.</p>
+<p>Note that <code><a href="../reference/LatexSummaryTable.html">LatexSummaryTable()</a></code> supports two distinct parameters relative to other summary table functions: <code>caption()</code> and <code>label()</code>. These allow the user to set the caption and label properties of the table, which are used in LaTex for displaying a caption with the table and for allowing the table to be easily referenced in other parts of document, respectively. See <a href="https://en.wikibooks.org/wiki/LaTeX/Tables#The_table_environment_-_captioning_etc" class="uri">https://en.wikibooks.org/wiki/LaTeX/Tables#The_table_environment_-_captioning_etc</a> for further details about LaTeX tables.</p>
 <p>The LaTeX syntax for a summary table could be included in an Sweave document in the following way:</p>
 <pre><code>&lt;&lt;echo=TRUE, results=tex&gt;&gt;=
 

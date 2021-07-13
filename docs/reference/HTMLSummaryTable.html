@@ -74,7 +74,7 @@ but these are customizable using the keepCols and dropCols parameters." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -138,7 +138,7 @@ but these are customizable using the <code>keepCols</code> and <code>dropCols</c
   filename <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/file.path.html'>file.path</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/getwd.html'>getwd</a></span><span class='op'>(</span><span class='op'>)</span>, <span class='st'>"Model Comparison.html"</span><span class='op'>)</span>,
   <span class='va'>keepCols</span>,
   <span class='va'>dropCols</span>,
-  <span class='va'>sortBy</span>,
+  sortBy <span class='op'>=</span> <span class='cn'>NULL</span>,
   display <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
@@ -170,7 +170,8 @@ Example: <code><a href='https://rdrr.io/r/base/c.html'>c("InputInstructions", "T
     <tr>
       <th>sortBy</th>
       <td><p>optional. Field name (as character string) by which to sort the table. Typically an information criterion
-(e.g., "AIC" or "BIC") is used to sort the table. Defaults to "AICC".</p></td>
+(e.g., "AIC" or "BIC") is used to sort the table. 
+Defaults to <code>NULL</code>, which does not sort the table.</p></td>
     </tr>
     <tr>
       <th>display</th>

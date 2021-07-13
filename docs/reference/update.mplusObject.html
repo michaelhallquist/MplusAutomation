@@ -78,7 +78,7 @@ replace or add to a section." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -142,7 +142,7 @@ replace or add to a section.</p>
     </div>
 
     <pre class="usage"><span class='co'># S3 method for mplusObject</span>
-<span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>object</span>, <span class='va'>...</span><span class='op'>)</span></pre>
+<span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>object</span>, quiet <span class='op'>=</span> <span class='cn'>TRUE</span>, <span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -150,6 +150,10 @@ replace or add to a section.</p>
     <tr>
       <th>object</th>
       <td><p>An object of class mplusObject</p></td>
+    </tr>
+    <tr>
+      <th>quiet</th>
+      <td><p>optional. If <code>TRUE</code>, show status messages in the console.</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -169,8 +173,7 @@ replace or add to a section.</p>
   usevariables <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"mpg"</span>, <span class='st'>"hp"</span><span class='op'>)</span>, rdata <span class='op'>=</span> <span class='va'>mtcars</span><span class='op'>)</span>
 <span class='va'>x</span> <span class='op'>&lt;-</span> <span class='op'>~</span> <span class='st'>"ESTIMATOR = ML;"</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>example1</span>, rdata <span class='op'>=</span> <span class='va'>iris</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='output co'>#&gt; List of 21
+</div><div class='output co'>#&gt; List of 21
 #&gt;  $ TITLE          : NULL
 #&gt;  $ DATA           : NULL
 #&gt;  $ VARIABLE       : NULL
@@ -188,7 +191,7 @@ replace or add to a section.</p>
 #&gt;  $ SAVEDATA       : NULL
 #&gt;  $ PLOT           : NULL
 #&gt;  $ results        : NULL
-#&gt;  $ usevariables   : chr(0) 
+#&gt;  $ usevariables   : chr [1:2] "mpg" "hp"
 #&gt;  $ rdata          :'data.frame':	150 obs. of  5 variables:
 #&gt;   ..$ Sepal.Length: num [1:150] 5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
 #&gt;   ..$ Sepal.Width : num [1:150] 3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
@@ -196,10 +199,9 @@ replace or add to a section.</p>
 #&gt;   ..$ Petal.Width : num [1:150] 0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
 #&gt;   ..$ Species     : Factor w/ 3 levels "setosa","versicolor",..: 1 1 1 1 1 1 1 1 1 1 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>example1</span>, ANALYSIS <span class='op'>=</span> <span class='va'>x</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='output co'>#&gt; List of 21
+</div><div class='output co'>#&gt; List of 21
 #&gt;  $ TITLE          : NULL
 #&gt;  $ DATA           : NULL
 #&gt;  $ VARIABLE       : NULL
@@ -217,7 +219,7 @@ replace or add to a section.</p>
 #&gt;  $ SAVEDATA       : NULL
 #&gt;  $ PLOT           : NULL
 #&gt;  $ results        : NULL
-#&gt;  $ usevariables   : chr [1:2] "mpg" "wt"
+#&gt;  $ usevariables   : chr [1:2] "mpg" "hp"
 #&gt;  $ rdata          :'data.frame':	32 obs. of  11 variables:
 #&gt;   ..$ mpg : num [1:32] 21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
 #&gt;   ..$ cyl : num [1:32] 6 6 4 6 8 6 8 4 4 6 ...
@@ -231,10 +233,9 @@ replace or add to a section.</p>
 #&gt;   ..$ gear: num [1:32] 4 4 4 3 3 3 3 4 4 4 ...
 #&gt;   ..$ carb: num [1:32] 4 4 1 1 2 1 4 2 2 4 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>example1</span>, MODEL <span class='op'>=</span> <span class='op'>~</span> <span class='st'>"wt ON hp;"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='output co'>#&gt; List of 21
+</div><div class='output co'>#&gt; List of 21
 #&gt;  $ TITLE          : NULL
 #&gt;  $ DATA           : NULL
 #&gt;  $ VARIABLE       : NULL
@@ -252,7 +253,7 @@ replace or add to a section.</p>
 #&gt;  $ SAVEDATA       : NULL
 #&gt;  $ PLOT           : NULL
 #&gt;  $ results        : NULL
-#&gt;  $ usevariables   : chr [1:2] "hp" "wt"
+#&gt;  $ usevariables   : chr [1:2] "mpg" "hp"
 #&gt;  $ rdata          :'data.frame':	32 obs. of  11 variables:
 #&gt;   ..$ mpg : num [1:32] 21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
 #&gt;   ..$ cyl : num [1:32] 6 6 4 6 8 6 8 4 4 6 ...
@@ -266,10 +267,9 @@ replace or add to a section.</p>
 #&gt;   ..$ gear: num [1:32] 4 4 4 3 3 3 3 4 4 4 ...
 #&gt;   ..$ carb: num [1:32] 4 4 1 1 2 1 4 2 2 4 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>example1</span>, MODEL <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='st'>"wt ON hp;"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='output co'>#&gt; List of 21
+</div><div class='output co'>#&gt; List of 21
 #&gt;  $ TITLE          : NULL
 #&gt;  $ DATA           : NULL
 #&gt;  $ VARIABLE       : NULL
@@ -287,7 +287,7 @@ replace or add to a section.</p>
 #&gt;  $ SAVEDATA       : NULL
 #&gt;  $ PLOT           : NULL
 #&gt;  $ results        : NULL
-#&gt;  $ usevariables   : chr [1:3] "mpg" "hp" "wt"
+#&gt;  $ usevariables   : chr [1:2] "mpg" "hp"
 #&gt;  $ rdata          :'data.frame':	32 obs. of  11 variables:
 #&gt;   ..$ mpg : num [1:32] 21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
 #&gt;   ..$ cyl : num [1:32] 6 6 4 6 8 6 8 4 4 6 ...
@@ -301,10 +301,9 @@ replace or add to a section.</p>
 #&gt;   ..$ gear: num [1:32] 4 4 4 3 3 3 3 4 4 4 ...
 #&gt;   ..$ carb: num [1:32] 4 4 1 1 2 1 4 2 2 4 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>example1</span>, ANALYSIS <span class='op'>=</span> <span class='va'>x</span>, MODEL <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='st'>"wt ON hp;"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='output co'>#&gt; List of 21
+</div><div class='output co'>#&gt; List of 21
 #&gt;  $ TITLE          : NULL
 #&gt;  $ DATA           : NULL
 #&gt;  $ VARIABLE       : NULL
@@ -322,7 +321,7 @@ replace or add to a section.</p>
 #&gt;  $ SAVEDATA       : NULL
 #&gt;  $ PLOT           : NULL
 #&gt;  $ results        : NULL
-#&gt;  $ usevariables   : chr [1:3] "mpg" "hp" "wt"
+#&gt;  $ usevariables   : chr [1:2] "mpg" "hp"
 #&gt;  $ rdata          :'data.frame':	32 obs. of  11 variables:
 #&gt;   ..$ mpg : num [1:32] 21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
 #&gt;   ..$ cyl : num [1:32] 6 6 4 6 8 6 8 4 4 6 ...
@@ -336,7 +335,7 @@ replace or add to a section.</p>
 #&gt;   ..$ gear: num [1:32] 4 4 4 3 3 3 3 4 4 4 ...
 #&gt;   ..$ carb: num [1:32] 4 4 1 1 2 1 4 2 2 4 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'>
 <span class='co'>## check that use variables can be updated &amp; over ridden</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>example1</span>, usevariables <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"mpg"</span>, <span class='st'>"hp"</span>, <span class='st'>"cyl"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
@@ -372,12 +371,11 @@ replace or add to a section.</p>
 #&gt;   ..$ gear: num [1:32] 4 4 4 3 3 3 3 4 4 4 ...
 #&gt;   ..$ carb: num [1:32] 4 4 1 1 2 1 4 2 2 4 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'>
 <span class='co'># test to make sure . in Mplus code does not cause problems</span>
 <span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/stats/update.html'>update</a></span><span class='op'>(</span><span class='va'>example1</span>, ANALYSIS <span class='op'>=</span> <span class='va'>x</span>, MODEL <span class='op'>=</span> <span class='op'>~</span> <span class='va'>.</span> <span class='op'>+</span> <span class='st'>"wt ON hp*.5;"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>R variables selected automatically as any variable name that</span>
-#&gt; <span class='message'>occurs in the MODEL, VARIABLE, or DEFINE section.</span></div><div class='output co'>#&gt; List of 21
+</div><div class='output co'>#&gt; List of 21
 #&gt;  $ TITLE          : NULL
 #&gt;  $ DATA           : NULL
 #&gt;  $ VARIABLE       : NULL
@@ -395,7 +393,7 @@ replace or add to a section.</p>
 #&gt;  $ SAVEDATA       : NULL
 #&gt;  $ PLOT           : NULL
 #&gt;  $ results        : NULL
-#&gt;  $ usevariables   : chr [1:3] "mpg" "hp" "wt"
+#&gt;  $ usevariables   : chr [1:2] "mpg" "hp"
 #&gt;  $ rdata          :'data.frame':	32 obs. of  11 variables:
 #&gt;   ..$ mpg : num [1:32] 21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
 #&gt;   ..$ cyl : num [1:32] 6 6 4 6 8 6 8 4 4 6 ...
@@ -409,7 +407,7 @@ replace or add to a section.</p>
 #&gt;   ..$ gear: num [1:32] 4 4 4 3 3 3 3 4 4 4 ...
 #&gt;   ..$ carb: num [1:32] 4 4 1 1 2 1 4 2 2 4 ...
 #&gt;  $ imputed        : logi FALSE
-#&gt;  $ autov          : logi TRUE
+#&gt;  $ quiet          : logi TRUE
 #&gt;  - attr(*, "class")= chr [1:2] "mplusObject" "list"</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/rm.html'>rm</a></span><span class='op'>(</span><span class='va'>example1</span>, <span class='va'>x</span><span class='op'>)</span>
 </div></pre>
   </div>

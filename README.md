@@ -39,7 +39,7 @@ Examples
 
 You can find a detailed example of how to use the `MplusAutomation`
 package in the
-[vignette](https://github.com/michaelhallquist/MplusAutomation/blob/master/inst/doc/Vignette.pdf)
+[vignette](https://michaelhallquist.github.io/MplusAutomation/articles/vignette.html)
 .
 
 Here is an example of using the package to run a simple path model using

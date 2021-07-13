@@ -277,7 +277,7 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
   
   dots <- list(...)
   
-  if(isFALSE(is.null(dots[["run"]]))){
+  if(isFALSE(is.null(dots[["run"]]))) {
     if(isTRUE(dots[["run"]] > 0L)){
       
       mplusmodeler_args <- names(dots)[names(dots) %in% c("dataout", "modelout", "run", "check", "varwarnings", 
@@ -289,8 +289,8 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
       return(eval.parent(cl_mplusmodeler))
     }
   } else {
-    if(!is.null(dots[["modelout"]])) object[["modelout"]] <- dots[["modelout"]]
-    if(!is.null(dots[["dataout"]])) object[["dataout"]] <- dots[["dataout"]]
+    if(isFALSE(is.null(dots[["modelout"]]))) object[["modelout"]] <- dots[["modelout"]]
+    if(isFALSE(is.null(dots[["dataout"]]))) object[["dataout"]] <- dots[["dataout"]]
     return(object)
   }
 }
@@ -721,7 +721,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #'  unlink("Mplus Run Models.log")
 #' }
 mplusModeler <- function(object, dataout, modelout, run = 0L,
-                         check = FALSE, varwarnings = TRUE, Mplus_command="Mplus",
+                         check = FALSE, varwarnings = TRUE, Mplus_command = detectMplus(),
                          writeData = c("ifmissing", "always", "never"),
                          hashfilename = TRUE, killOnFail = TRUE,
                          quiet = TRUE,
@@ -815,7 +815,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
         prepareMplusData(df = data,
                          keepCols = object$usevariables,
                          filename = dataout,
-                         inpfile = tempfile(),
+                         inpfile = tempfile(tmpdir = tempdir(check = TRUE)),
                          imputed = imputed,
                          writeData = writeData,
                          hashfilename = hashfilename,
@@ -824,7 +824,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
       } else {
         prepareMplusData(df = data[i, , drop = FALSE],
                          keepCols = object$usevariables,
-                         filename = dataout, inpfile = tempfile(),
+                         filename = dataout, inpfile = tempfile(tmpdir = tempdir(check = TRUE)),
                          writeData = ifelse(boot, "always", writeData),
                          hashfilename = ifelse(boot, FALSE, hashfilename),
                          quiet = quiet,
@@ -1354,54 +1354,4 @@ rmVarWarnings <- function(file) {
   } else {
     return("Could not access file")
   }
-}
-
-#' Change directory
-#'
-#' The function takes a path and changes the current working directory
-#' to the path. If the directory specified in the path does not
-#' currently exist, it will be created.
-#'
-#' The function has been designed to be platform independent,
-#' although it has had limited testing. Path creation is done using
-#' \code{file.path}, the existence of the directory is checked using
-#' \code{file.exists} and the directory created with \code{dir.create}.
-#' Only the first argument, is required.  The other optional arguments
-#' are handy when one wants to create many similar directories with a common base.
-#'
-#' @param base a character string with the base path to the directory. This is required.
-#' @param pre an optional character string with the prefix to add to
-#'   the base path. Non character strings will be coerced to character class.
-#' @param num an optional character string, prefixed by \code{pre}.
-#'   Non character strings will be coerced to character class.
-#' @return NULL, changes the current working directory
-#' @keywords utilities
-#' @export
-#' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
-#' @examples
-#' \dontrun{
-#' # an example just using the base
-#' cd("~/testdir")
-#'
-#' # an example using the optional arguments
-#' base <- "~/testdir"
-#' pre <- "test_"
-#'
-#' cd(base, pre, 1)
-#' cd(base, pre, 2)
-#' }
-cd <- function(base, pre, num) {
-  stopifnot(isTRUE(is.character(base)))
-  if (isFALSE(missing(pre)) && isFALSE(missing(num))) {
-    pre <- as.character(pre)
-    num <- as.character(num)
-    newdir <- file.path(base, paste0(pre, num))
-  } else {
-    newdir <- file.path(base)
-  }
-  if (isFALSE(file.exists(newdir))) {
-    dir.create(newdir)
-  }
-  setwd(newdir)
-  return(invisible(NULL))
 }

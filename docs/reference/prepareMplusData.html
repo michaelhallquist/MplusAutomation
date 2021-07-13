@@ -77,7 +77,7 @@ is printed to the console or optionally to an input file." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -150,7 +150,8 @@ is printed to the console or optionally to an input file.</p>
   overwrite <span class='op'>=</span> <span class='cn'>TRUE</span>,
   imputed <span class='op'>=</span> <span class='cn'>FALSE</span>,
   writeData <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"always"</span>, <span class='st'>"ifmissing"</span>, <span class='st'>"never"</span><span class='op'>)</span>,
-  hashfilename <span class='op'>=</span> <span class='cn'>FALSE</span>
+  hashfilename <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -230,7 +231,11 @@ See details for further information.</p></td>
       <th>hashfilename</th>
       <td><p>A logical whether or not to add a hash of the raw data to the
 data file name.  Defaults to <code>FALSE</code> for consistency with previous
-behavior where this feature was not available..</p></td>
+behavior where this feature was not available.</p></td>
+    </tr>
+    <tr>
+      <th>quiet</th>
+      <td><p>optional. If <code>TRUE</code>, show status messages in the console.</p></td>
     </tr>
     </table>
 

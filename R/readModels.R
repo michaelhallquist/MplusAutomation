@@ -31,7 +31,8 @@
 #' c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
 #'      "parameters", "class_counts", "indirect", "mod_indices", "residuals",
 #'      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-#'      "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5")
+#'      "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
+#'      "output")
 #'
 #'
 #' @return A list with one mplus.model per file. Each mplus.model object is composed of
@@ -65,6 +66,7 @@
 #'   \item{fac_score_stats}{factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section}
 #'   \item{lcCondMeans}{conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models}
 #'   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)}
+#'   \item{output}{The entire, raw output file.}
 #' @author Michael Hallquist
 #' @keywords interface
 #' @export
@@ -81,7 +83,8 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
   allsections <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
       "invariance_testing", "parameters", "class_counts", "indirect", "mod_indices", "residuals",
       "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-      "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "gh5")
+      "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "gh5",
+      "output")
 
   if (isTRUE(what[1L] == "all")) {
     what <- allsections
@@ -381,6 +384,10 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
       allFiles[[listID]]$gh5 <- gh5
     }
 
+    if (isTRUE("output" %in% what)) {
+      allFiles[[listID]]$output <- rawtext
+    }
+    
   }
 
   if (identical(length(outfiles), 1L)) {

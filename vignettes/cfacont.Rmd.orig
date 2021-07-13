@@ -1,0 +1,35 @@
+---
+title: "Confirmatory Factor Analysis (CFA) - Continuous"
+author: "TBD"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CFA - Continuous}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r cfacont-setup, include = FALSE}
+## this is needed so that figures do not go into a figure subfolder
+knitr::opts_chunk$set(
+  fig.path = ""
+)
+
+library(MplusAutomation)
+```
+
+## Data
+
+```{r cfacont-data}
+
+## TODO data steps here
+
+``` 
+
+EXAMPLE of a plot.
+
+```{r cfacont-scatterplot}
+
+plot(1:12)
+
+```

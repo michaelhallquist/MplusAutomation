@@ -1,3 +1,17 @@
+Version 1.0.0
+ - notice:      Most functions are now quiet by default. Functions now print less messages/output to the console during regular runs. This can be changed using the new quiet argument available (e.g., in readModels(), mplusModeler(), etc.). Thanks to cjvanlissa for the pull request.
+ - notice:      The default of SummaryTable() is now "none", to prevent accidental printing to console. Thanks to cjvanlissa for the pull request.
+ - feature:     There are now more informative error message for mplusObject() without results section. Thanks to cjvanlissa for the pull request.
+ - feature:     Add methods for mixturesummarytable for all types of MplusAutomation output. Thanks to cjvanlissa for the pull request.
+ - feature:     Pass arguments for mplusObject() and mplusModeler(), specified through createMixtures(), on so that users can fully customize these calls. Thanks to cjvanlissa for the pull request.
+ - feature:     prepareMplusData() now handles multiply imputed data. Thanks to cjvanlissa for the pull request.
+ - feature:     mplusObject() gains arguments modelout and dataout, which makes it easier to create a list of model objects. Thanks to cjvanlissa for the pull request.
+ - feature:     There are new convenience functions, get_*() to extract all first-level results from mplusObjects(). Thanks to cjvanlissa for the pull request.
+ - feature:     Table sorting is more robust and there is a new argument, sortBy = NULL to avoid sorting. Thanks to cjvanlissa for the pull request.
+ - feature:     Unit testing has been added to check that a variety of Mplus User Guide examples are read in correctly.
+ - feature:     readModels() now returns the entire raw output file. This means that R objects from Mplus can be saved and contain all needed output. Mplus text input/output files do not need to be kept for a complete record. The raw output file is stored in the $output list element.
+ - feature:     MplusAutomation now tries harder to find an Mplus (or Mplus Demo as a fallback) command in an OS independent way thanks to new function detectMplus(). This takes over the default Mplus_command argument in runModels() and mplusModeler(), which should mean it works more often, on more platforms, without users needing to specify the command/path to Mplus.
+ 
 Version 0.8-1
  - feature:     prepareMplusData can create dummy codes for categorical variables using the dummyCode argument
  - bugfix:      handle extraction of parameters from mixture model outputs in Mplus 8.6 (new top-level sections)
@@ -66,7 +80,7 @@ Version 0.7-1
 - bugfix:       Support different format of MODEL INDIRECT direct effects in v8
 
 Version 0.7
-- notice:       extractModelSummaries and extractModelParameters are deprecated in favor of readModels. These will be removed in future.
+- notice:       extractModelSummaries and extractModelParameters are deprecated in favor of readModels. These will be removed in the future.
 - feature:      prepareMplusData() and mplusModeler() now have option to not write data, thanks to sda030
 - feature:      mplusObject(), mplusModeler(), update(), and createSyntax() all now accommodate monte carlo simulations in Mplus
 - feature:      New methods for the confint() function to extract and format confidence intervals. This also allows confidence intervals with the texreg package

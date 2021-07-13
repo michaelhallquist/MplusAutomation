@@ -73,7 +73,7 @@ single directory or nested within subdirectories." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">MplusAutomation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.8.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -138,9 +138,10 @@ single directory or nested within subdirectories.</p>
   showOutput <span class='op'>=</span> <span class='cn'>FALSE</span>,
   replaceOutfile <span class='op'>=</span> <span class='st'>"always"</span>,
   logFile <span class='op'>=</span> <span class='st'>"Mplus Run Models.log"</span>,
-  Mplus_command <span class='op'>=</span> <span class='st'>"Mplus"</span>,
+  Mplus_command <span class='op'>=</span> <span class='fu'><a href='detectMplus.html'>detectMplus</a></span><span class='op'>(</span><span class='op'>)</span>,
   killOnFail <span class='op'>=</span> <span class='cn'>TRUE</span>,
-  local_tmpdir <span class='op'>=</span> <span class='cn'>FALSE</span>
+  local_tmpdir <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  quiet <span class='op'>=</span> <span class='cn'>TRUE</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -201,6 +202,10 @@ or where one wants to test different versions of the Mplus program.</p></td>
       <td><p>optional. Linux/Mac for now. If <code>TRUE</code>, set the TMPDIR environment variable to the
 location of the .inp file prior to execution. This is useful in Monte Carlo studies where many instances of Mplus
 may run in parallel and we wish to avoid collisions in temporary files among processes.</p></td>
+    </tr>
+    <tr>
+      <th>quiet</th>
+      <td><p>optional. If <code>FALSE</code>, show status messages in the console.</p></td>
     </tr>
     </table>
 
