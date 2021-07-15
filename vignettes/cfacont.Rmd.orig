@@ -18,23 +18,19 @@ knitr::opts_chunk$set(
 library(MplusAutomation)
 ```
 
-Load packages
+## Load packages
 ```{r}
+
 library(MplusAutomation)
-library(tidyverse)
-library(here)
-library(semPlot)
-library(DiagrammeR)
-library(gtsummary)
-library(gt)
+library(tidyverse);library(here);library(gt) # For tidiness & tables. 
+library(semPlot);library(DiagrammeR) # For creating path diagrams.
+
 ```
 
 ## Load data example 
 
 DATA SOURCE: This lab exercise utilizes the NCES public-use dataset: Education Longitudinal Study of 2002 (Lauff & Ingels, 2014) [$\color{blue}{\text{See website: nces.ed.gov}}$](https://nces.ed.gov/surveys/els2002/avail_data.asp)
-
 ```{r}
-# Note (Josh): These data subsets can be stored in a designated Git repository & then accessed as a link
 
 cfa_data <- read_csv("https://garberadamc.github.io/project-site/data/els_sub5_data.csv")
 
@@ -42,10 +38,6 @@ cfa_data <- read_csv("https://garberadamc.github.io/project-site/data/els_sub5_d
 
 ## Prepare `data.frame` for analysis (select & reorder columns)
 ```{r}
-
-# Note (Josh): A question of style is how much we emphasize the specific applied example.
-# For example in details like naming of objects (i.e., "school_trouble"). 
-# Depends on primary learning objective & audience I guess.
 
 school_trouble <- cfa_data %>% 
   select(stolen, t_hurt, p_fight, hit, damaged, bullied,  # factor 1 (indicators)
@@ -82,9 +74,12 @@ tab_options(column_labels.font.weight = "bold")
 ## Make a simple CFA path diagram using package {`DiagrammeR`} 
 ```{r}
 
-# Figure out how to add the covariance arrow 
+# WORKING VERSION: Having trouble controlling 'edge' behavior & 'layout' arrangement.
+# I tried everything I could find in their documentation. =
 
-grViz(" digraph CFA_basic {
+grViz(" digraph cfa_model {
+
+ graph [layout = dot, overlap = true]
  
  node [shape=box]
  stolen t_hurt p_fight hit damaged bullied safe disrupt gangs rac_fght;
@@ -95,20 +90,19 @@ grViz(" digraph CFA_basic {
  edge []
  factor1 -> {stolen t_hurt p_fight hit damaged bullied}
  factor2 -> {safe disrupt gangs rac_fght}
-}")
+ factor1 -> factor2 [dir = both, color = red]
+ }")
 
 ```
 
 
-## Estimate CFA model 
-```{r, eval=FALSE}
+## Estimate CFA model 1 with default Unit Loading Identification (ULI)
+```{r}
 
-# Note (Josh): Where should we store models & figures for reading back in? 
-# I believe the combination of MplusAutomation + RProjects + here() is 
-# important for organization purposes but may be hard to demonstrate in this context.
-
-cfa_m0  <- mplusObject(
-  TITLE = "CFA model0 - LAB 8 mimic models", 
+cfa_m1  <- mplusObject(
+  
+  TITLE = "CFA - ULI", 
+  
   VARIABLE = 
     "usevar = stolen-rac_fght;", 
   
@@ -120,28 +114,146 @@ cfa_m0  <- mplusObject(
   
      factor2 BY safe disrupt gangs rac_fght;" ,
   
-  PLOT = "type = plot3;",
-  OUTPUT = "sampstat standardized residual modindices (3.84);",
+  PLOT = 
+    "type = plot3;",
   
-  usevariables = colnames(mimic_data), 
-  rdata = mimic_data)
+  OUTPUT = 
+    "sampstat standardized residual modindices (3.84);",
+  
+  usevariables = colnames(school_trouble), 
+  rdata = school_trouble)
 
-cfa_m0_fit <- mplusModeler(cfa_m0, 
-                            dataout=here("cfa_mplus", "cfa_data.dat"),
-                            modelout=here("cfa_mplus", "cfa_model.inp"),
-                            check=TRUE, run = TRUE, hashfilename = FALSE)
+cfa_m1_fit <- mplusModeler(cfa_m1, 
+              dataout = here("vignettes","cfa_mplus","cfa_data.dat"),
+              modelout = here("vignettes","cfa_mplus","cfa_m1_uli.inp"),
+              check=TRUE, run = TRUE, hashfilename = FALSE)
 ```
 
-## Read in CFA model into R environment
-```{r, eval=FALSE}
-
-cfa_output <- readModels(here("cfa_mplus", "lab8_cfa_model0.out"))
-
-```
 
 ## Create a path diagram with `semPlot` package
-```{r, eval=FALSE}
+```{r}
 
-semPaths(cfa_output)
+semPaths(cfa_m1_fit$results)
 
+```
+
+## Example CFA results summary 
+
+**NOTE:** Results are for illustration purposes & should not be interpreted literally:
+
+A confirmatory factor analysis (CFA) model was used to explore the factor structure of ten items related to school safety and climate from the Education Longitudinal Study of 2002 (Lauff & Ingels, 2014). A two-factor CFA model was fit to the data with the first six items loading onto `factor1` and the next four items loading onto `factor2`.
+
+The two-factor CFA model had a total of 31 parameter estimates and was found to have adequate to marginal model fit. The chi-square test result was found to be significant, $\chi^2 = 121.46, df = 34, p< .001$. All other fit indices fell close to or within the criteria commonly recommeded in the literature, RMSEA = 0.06, 90% CI [0.048, 0.071], CFI = .898, TLI = .865, SRMR = .043 (Table 1). 
+
+The factor loadings for the CFA model solution had a range of .37 - .68 which represents item fit ranging from below satisfactory fit to adequate item fit. The two factors were found to have a correlation of -.35. The factor loadings for the ten items and factor correlation can be seen in Table 2. 
+
+***
+
+## Create table summarizing model fit
+```{r}
+
+# NOTE for Josh: My regular expression knowledge is limited: 
+# Do you know a more elegant way to combine and format RMSEA and 90% CI range in a single column?
+# This is not necessary but makes table look tidier.
+
+model_fit <- LatexSummaryTable(cfa_m1_fit,
+  keepCols=c("Title", "Parameters", "LL","ChiSqM_Value","ChiSqM_DF", "ChiSqM_PValue",
+             "RMSEA_Estimate","RMSEA_90CI_LB","RMSEA_90CI_UB",
+             "CFI", "TLI","SRMR")) %>% 
+  mutate(RMSEA_90CI_LB = str_pad(RMSEA_90CI_LB, width=6, side="left", pad="("),
+         RMSEA_90CI_UB = str_pad(RMSEA_90CI_UB, width=6, side="right", pad=")")) %>% 
+  unite(CI, RMSEA_90CI_LB:RMSEA_90CI_UB, sep=", ", remove = TRUE) %>% 
+  unite(RMSEA, RMSEA_Estimate:CI, sep=" ", remove = TRUE)
+  
+model_fit %>%
+  gt() %>% 
+  tab_header(
+    title = md("**Table 1**"),
+    subtitle = md("*Standardized Factor Loading and Factor Correlation Estimates*")) %>%
+  cols_label(
+    Title = "Model",
+    Parameters = md("Par"),
+    LL = md("*LL*"),
+    ChiSqM_Value = md("Chi^2"),
+    ChiSqM_PValue = md("*p-value*"),
+    ChiSqM_DF = md("*df*"),
+    RMSEA = "RMSEA (90% CI)" ) %>% 
+  tab_options(column_labels.font.weight = "bold") %>%
+  fmt(c(6), fns = function(x) ifelse(x<0.001,"<.001", scales::number(x, accuracy = 0.01)))
+  
+```
+
+## Create table of CFA loading estimates
+```{r}
+
+# NOTE for Josh: Which style should we use to access the parameters? 
+# *** for consistency ***
+
+# Alternative # loadings_stdyx <- cfa_m1_fit[["results"]][["parameters"]][["stdyx.standardized"]]
+
+loadings_stdyx <- cfa_m1_fit$results$parameters$stdyx.standardized %>% 
+  filter(grepl("FACTOR",paramHeader)) %>%
+  select(param,est,se) %>% 
+  mutate(param = str_replace(param, "FACTOR1", "F1 with F2"),
+         param = str_to_title(param))
+
+loadings_stdyx %>%
+  gt() %>% 
+  tab_header(
+    title = md("**Table 2**"),
+    subtitle = md("*Summary of Model Fit Statistics*")) %>%
+  cols_label(param = "Item", est = "Loading", se = "SE") %>%
+  tab_row_group(group = "Factor 1", rows = 1:6) %>%
+  tab_row_group(group = "Factor 2", rows = 7:10) %>%
+  tab_row_group(group = "Factor Correlation", rows = 11) %>%
+  row_group_order(groups = c("Factor 1","Factor 2","Factor Correlation")) %>% 
+  tab_options(column_labels.font.weight = "bold")
+
+```
+
+
+
+## Estimate CFA model (UVI; Unit Variance Identification)
+```{r}
+
+cfa_m2  <- mplusObject(
+  
+  TITLE = "CFA - Unit Variance Identification", 
+  
+  VARIABLE = 
+    "usevar = stolen-rac_fght;", 
+  
+  ANALYSIS = 
+    "estimator = mlr;",
+  
+  MODEL = 
+    "!!! estimate first variable loading & fix variance at 1 !!!
+     
+     factor1 by stolen* t_hurt p_fight hit damaged bullied;
+     factor1@1;
+  
+     factor2 BY safe* disrupt gangs rac_fght;
+     factor2@1;",
+  
+  PLOT = 
+    "type = plot3;",
+  
+  OUTPUT = 
+    "sampstat standardized residual modindices (3.84);",
+  
+  usevariables = colnames(school_trouble), 
+  rdata = school_trouble)
+
+cfa_m2_fit <- mplusModeler(cfa_m1, 
+              dataout = here("vignettes","cfa_mplus","cfa_data.dat"),
+              modelout = here("vignettes","cfa_mplus","cfa_m2_uvi.inp"),
+              check=TRUE, run = TRUE, hashfilename = FALSE)
+```
+
+```{r}
+semPaths(cfa_m2_fit$results, "std", intercepts=FALSE,
+         fixedStyle = c(1),
+         fade = FALSE,
+         color= list(lat = c("light blue"," light pink")),
+)
 ```
