@@ -1,3 +1,6 @@
+DEVEL
+ - bugfix:      fixed a bug in handling multiply imputed data introduced in 1.0.0 
+
 Version 1.0.0
  - notice:      Most functions are now quiet by default. Functions now print less messages/output to the console during regular runs. This can be changed using the new quiet argument available (e.g., in readModels(), mplusModeler(), etc.). Thanks to cjvanlissa for the pull request.
  - notice:      The default of SummaryTable() is now "none", to prevent accidental printing to console. Thanks to cjvanlissa for the pull request.

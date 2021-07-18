@@ -580,8 +580,8 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
   if (isTRUE(imputed)) {
     if(isFALSE(quiet)){ 
       message("writing implist to ", impfilename)
-      cat(filename, file = impfilename, sep = "\n")
     }
+    cat(filename, file = impfilename, sep = "\n")
   }
   
   if (identical(writeData, "ifmissing") && isTRUE(allfilesexist)) {
