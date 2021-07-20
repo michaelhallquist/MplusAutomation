@@ -1,7 +1,6 @@
 ---
-title: "CFA"
-author: ''
-date: "`r Sys.Date()`"
+title: "Confirmatory Factor Analysis in MplusAutomation"
+author: 'Adam Garber, Joshua Wiley'
 output:
   pdf_document: default
   html_document: default
@@ -11,7 +10,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE)
 ```
 
-## Load packages
+### Load packages
 ```{r}
 
 library(MplusAutomation)
@@ -20,16 +19,16 @@ library(semPlot);library(DiagrammeR) # For creating path diagrams.
 
 ```
 
-## Load data example 
+### Load data example 
 
-DATA SOURCE: This lab exercise utilizes the NCES public-use dataset: Education Longitudinal Study of 2002 (Lauff & Ingels, 2014) [$\color{blue}{\text{See website: nces.ed.gov}}$](https://nces.ed.gov/surveys/els2002/avail_data.asp)
+**Data source.** This tutorial utilizes the NCES public-use data called the Education Longitudinal Study of 2002 (Lauff & Ingels, 2014) This data can be found on the [$\color{blue}{\text{NCES website}}$](https://nces.ed.gov/surveys/els2002/avail_data.asp). Note that all examples used are for purposes of illustration only and are not intended to be interpreted substantively.
 ```{r}
 
 cfa_data <- read_csv("https://garberadamc.github.io/project-site/data/els_sub5_data.csv")
 
 ```
 
-## Prepare `data.frame` for analysis (select & reorder columns)
+### Prepare `data.frame` for analysis (select & reorder columns)
 ```{r}
 
 school_trouble <- cfa_data %>% 
@@ -38,9 +37,8 @@ school_trouble <- cfa_data %>%
 
 ```
 
-## Look at variables for CFA example
+### Look at variables for CFA example
 ```{r, echo=FALSE}
-# CODE HIDDEN
 tribble(
 ~"Name", ~" Variable Description", 
 #----------|-------------|,
@@ -57,18 +55,16 @@ tribble(
 gt() %>% 
 tab_header(
 title = md("**Applied Example: School Trouble**"), subtitle = md("&nbsp;")) %>%
-tab_source_note(source_note = md("Data Source: **Educational Longitudinal Study (ELS; 2002).**")) %>%
 tab_row_group(group = "Factor 1", rows = 1:6) %>%
 tab_row_group(group = "Factor 2", rows = 7:10) %>%
 row_group_order(groups = c("Factor 1","Factor 2")) %>% 
 tab_options(column_labels.font.weight = "bold")
 ```
 
-## Make a simple CFA path diagram using package {`DiagrammeR`} 
-```{r}
+\newpage
 
-# WORKING VERSION: Having trouble controlling 'edge' behavior & 'layout' arrangement.
-# I tried everything I could find in their documentation. =
+### Make a simple CFA path diagram using package {`DiagrammeR`} 
+```{r}
 
 grViz(" digraph cfa_model {
 
@@ -88,8 +84,9 @@ grViz(" digraph cfa_model {
 
 ```
 
+\newpage
 
-## Estimate CFA model 1 with default Unit Loading Identification (ULI)
+### Estimate CFA model 1 with default Unit Loading Identification (ULI)
 ```{r}
 
 cfa_m1  <- mplusObject(
@@ -122,17 +119,16 @@ cfa_m1_fit <- mplusModeler(cfa_m1,
               check=TRUE, run = TRUE, hashfilename = FALSE)
 ```
 
+\newpage
 
-## Create a path diagram with `semPlot` package
+### Create a path diagram with `semPlot` package
 ```{r}
 
 semPaths(cfa_m1_fit$results)
 
 ```
 
-## Example CFA results summary 
-
-**NOTE:** Results are for illustration purposes & should not be interpreted literally:
+### Example CFA results summary 
 
 A confirmatory factor analysis (CFA) model was used to explore the factor structure of ten items related to school safety and climate from the Education Longitudinal Study of 2002 (Lauff & Ingels, 2014). A two-factor CFA model was fit to the data with the first six items loading onto `factor1` and the next four items loading onto `factor2`.
 
@@ -142,15 +138,14 @@ The factor loadings for the CFA model solution had a range of .37 - .68 which re
 
 ***
 
-## Create table summarizing model fit
+\newpage
+
+### Create table summarizing model fit
 ```{r}
 
-# NOTE for Josh: My regular expression knowledge is limited: 
-# Do you know a more elegant way to combine and format RMSEA and 90% CI range in a single column?
-# This is not necessary but makes table look tidier.
-
 model_fit <- LatexSummaryTable(cfa_m1_fit,
-  keepCols=c("Title", "Parameters", "LL","ChiSqM_Value","ChiSqM_DF", "ChiSqM_PValue",
+  keepCols=c("Title", "Parameters", "LL",
+             "ChiSqM_Value","ChiSqM_DF", "ChiSqM_PValue",
              "RMSEA_Estimate","RMSEA_90CI_LB","RMSEA_90CI_UB",
              "CFI", "TLI","SRMR")) %>% 
   mutate(RMSEA_90CI_LB = str_pad(RMSEA_90CI_LB, width=6, side="left", pad="("),
@@ -176,13 +171,10 @@ model_fit %>%
   
 ```
 
-## Create table of CFA loading estimates
+\newpage
+
+### Create table of CFA loading estimates
 ```{r}
-
-# NOTE for Josh: Which style should we use to access the parameters? 
-# *** for consistency ***
-
-# Alternative # loadings_stdyx <- cfa_m1_fit[["results"]][["parameters"]][["stdyx.standardized"]]
 
 loadings_stdyx <- cfa_m1_fit$results$parameters$stdyx.standardized %>% 
   filter(grepl("FACTOR",paramHeader)) %>%
@@ -204,9 +196,9 @@ loadings_stdyx %>%
 
 ```
 
+\newpage
 
-
-## Estimate CFA model (UVI; Unit Variance Identification)
+### Estimate CFA model (UVI; Unit Variance Identification)
 ```{r}
 
 cfa_m2  <- mplusObject(
@@ -243,6 +235,9 @@ cfa_m2_fit <- mplusModeler(cfa_m1,
               check=TRUE, run = TRUE, hashfilename = FALSE)
 ```
 
+\newpage
+
+### Create a path diagram including parameter estimates
 ```{r}
 semPaths(cfa_m2_fit$results, "std", intercepts=FALSE,
          fixedStyle = c(1),
