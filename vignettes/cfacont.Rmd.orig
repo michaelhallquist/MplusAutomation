@@ -1,6 +1,6 @@
 ---
-title: "Confirmatory Factor Analysis (CFA) - Continuous"
-author: "TBD"
+title: "Confirmatory Factor Analysis in MplusAutomation"
+author: "Adam Garber, Joshua Wiley"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
