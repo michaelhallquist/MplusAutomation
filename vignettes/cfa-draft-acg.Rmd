@@ -1,21 +1,13 @@
 ---
 title: "Confirmatory Factor Analysis in MplusAutomation"
-author: "Adam Garber, Joshua Wiley"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{CFA - Continuous}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+author: 'Adam Garber, Joshua Wiley'
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-```{r cfacont-setup, include = FALSE}
-## this is needed so that figures do not go into a figure subfolder
-knitr::opts_chunk$set(
-  fig.path = ""
-)
-
-library(MplusAutomation)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, message = FALSE, warning = FALSE)
 ```
 
 ### Load packages
@@ -253,3 +245,7 @@ semPaths(cfa_m2_fit$results, "std", intercepts=FALSE,
          color= list(lat = c("light blue"," light pink")),
 )
 ```
+
+
+
+
