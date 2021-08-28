@@ -2444,7 +2444,6 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE, 
 }
 
 #EXTRACT DATA SUMMARY SECTION
-#NB. This does not support three-level output yet!
 
 #' Function to extract the SUMMARY OF DATA section from Mplus outputs
 #'
@@ -2459,8 +2458,17 @@ extractDataSummary <- function(outfiletext, filename) {
     return(empty)
   }
   
+  #detect three-level outputs, which have 2 cluster size sections, ICCs, etc.
+  clus_check <- grepl("Number of [^\\s]+ clusters", dataSummarySection, perl=TRUE)
+  is_three_level <- any(clus_check)
+  if (isTRUE(is_three_level)) { 
+    level_names <- sub(".*Number of ([^\\s]+) clusters.*", "\\1", dataSummarySection[clus_check]) 
+  }
+  
   #detect groups
-  multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", dataSummarySection, ignore.case=TRUE, perl=TRUE) #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
+  #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
+  multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", dataSummarySection, ignore.case=TRUE, perl=TRUE) 
+
   if (length(multipleGroupMatches) > 0L) {
     groupNames <- sub("^\\s*Group (\\w+)(?:\\s+\\(\\d+\\))*\\s*$", "\\1", dataSummarySection[multipleGroupMatches], perl=TRUE)
     toparse <- list() #divide into a list by group
@@ -2478,56 +2486,92 @@ extractDataSummary <- function(outfiletext, filename) {
   }
   
   summaries <- c()
-  iccs <- c()
+  iccs <- list()
+  
   for (section in toparse) {
-    summaries <- rbind(summaries, data.frame(
+    if (isTRUE(is_three_level)) {
+      summaries <- rbind(summaries, data.frame(
+        NClusters_1 = extractValue(pattern=paste("^\\s*Number of", level_names[1], "clusters\\s*"), section, filename, type="int"),
+        NClusters_2 = extractValue(pattern=paste("^\\s*Number of", level_names[2], "clusters\\s*"), section, filename, type="int"),
+        NMissPatterns = extractValue(pattern="^\\s*Number of missing data patterns\\s*", section, filename, type="int"),
+        AvgClusterSize_1 = extractValue(pattern=paste("^\\s*Average cluster size for", level_names[1], "level\\s*"), section, filename, type="dec"),
+        AvgClusterSize_2 = extractValue(pattern=paste("^\\s*Average cluster size for", level_names[2], "level\\s*"), section, filename, type="dec"),
+        Group=attr(section, "group.name")
+      ))
+      
+      names(summaries)[names(summaries)=="NClusters_1"] <- paste0("NClusters_", level_names[1])
+      names(summaries)[names(summaries)=="NClusters_2"] <- paste0("NClusters_", level_names[2])
+      names(summaries)[names(summaries)=="AvgClusterSize_1"] <- paste0("AvgClusterSize_", level_names[1])
+      names(summaries)[names(summaries)=="AvgClusterSize_2"] <- paste0("AvgClusterSize_", level_names[2])
+    } else {
+      summaries <- rbind(summaries, data.frame(
         NClusters = extractValue(pattern="^\\s*Number of clusters\\s*", section, filename, type="int"),
         NMissPatterns = extractValue(pattern="^\\s*Number of missing data patterns\\s*", section, filename, type="int"),
         AvgClusterSize = extractValue(pattern="^\\s*Average cluster size\\s*", section, filename, type="dec"),
         Group=attr(section, "group.name")
       ))
+    }
     
     #parse icc
     icc_start <- grep("^\\s*Estimated Intraclass Correlations for the Y Variables( for [\\w\\._]+ level)*\\s*$", section, perl=TRUE)
-    
-    iccout <- c()
     if (length(icc_start) > 0L) {
-      to_parse <- trimSpace(section[(icc_start+1):length(section)]) #this assumes nothing comes afterwards in the section
-      #problem: there is an unknown number of columns in this output. Example:
-      #
-      #           Intraclass              Intraclass              Intraclass
-      #Variable  Correlation   Variable  Correlation   Variable  Correlation
-      #Q22          0.173      Q38          0.320      Q39          0.127
-      #Q40          0.270
+      if (is_three_level && length(icc_start) == 2L) {
+        level_names <- sub(".*for the Y Variables for ([^\\s]+) level.*", "\\1", section[icc_start], perl=TRUE)
+        sections_to_parse <- list(
+          trimSpace(section[(icc_start[1]+1):(icc_start[2]-3)]), #-3 to chop off preceding Average cluster size section
+          trimSpace(section[(icc_start[2]+1):length(section)])
+        )
+        names(sections_to_parse) <- level_names
+      } else {
+        sections_to_parse <- list(l2=trimSpace(section[(icc_start[1]+1):length(section)])) #this assumes nothing comes afterwards in the section
+      }
       
-      #solution: variables are always odd positions, correlations are always even
-      
-      repeat_line <- grep("(\\s*Variable\\s+Correlation\\s*)+", to_parse)
-      if (length(repeat_line) == 1L) {
-        #x <- to_parse[repeat_line] #not needed with odd/even solution
-        #nrepeats <- length(regmatches(x, gregexpr("g", x)))
+      for (ss in seq_along(sections_to_parse)) {
+        iccout <- c()
+        section_name <- names(sections_to_parse)[ss]
+        this_section <- sections_to_parse[[ss]]
+        #problem: there is an unknown number of columns in this output. Example:
+        #
+        #           Intraclass              Intraclass              Intraclass
+        #Variable  Correlation   Variable  Correlation   Variable  Correlation
+        #Q22          0.173      Q38          0.320      Q39          0.127
+        #Q40          0.270
         
-        icc_values <- strsplit(to_parse[(repeat_line+1):length(to_parse)], "\\s+")
-        for (ss in icc_values) {
-          if (length(ss) > 0L) {
-            positions <- 1:length(ss)
-            vars <- ss[positions[positions %% 2 != 0]]
-            vals <- ss[positions[positions %% 2 == 0]]
-            iccout <- rbind(iccout, data.frame(variable=vars, ICC=as.numeric(vals), stringsAsFactors=FALSE))
-          }          
+        #solution: variables are always odd positions, correlations are always even
+        
+        repeat_line <- grep("(\\s*Variable\\s+Correlation\\s*)+", this_section)
+        if (length(repeat_line) == 1L) {
+          #x <- this_section[repeat_line] #not needed with odd/even solution
+          #nrepeats <- length(regmatches(x, gregexpr("g", x)))
+          
+          icc_values <- strsplit(this_section[(repeat_line+1):length(this_section)], "\\s+")
+          for (ss in icc_values) {
+            if (length(ss) > 0L) {
+              positions <- 1:length(ss)
+              vars <- ss[positions[positions %% 2 != 0]]
+              vals <- ss[positions[positions %% 2 == 0]]
+              iccout <- rbind(iccout, data.frame(variable=vars, ICC=as.numeric(vals), stringsAsFactors=FALSE))
+            }          
+          }
+          
+          
+          iccout$Group <- attr(section, "group.name")
+          iccs[[section_name]] <- rbind(iccs[[section_name]], iccout)
         }
-        
-        iccout$Group <- attr(section, "group.name")
-        iccs <- rbind(iccs, iccout)
-      }      
-    }        
+      }
+    }
   }
   
   #trim out "all" in single group case
   if (length(multipleGroupMatches) == 0L) {
     summaries$Group <- NULL
-    iccs$Group <- NULL    
+    iccs <- lapply(iccs, function(ii) {
+      ii$Group <- NULL
+      return(ii)
+    })
   }
+  if (length(iccs) == 1L) iccs <- iccs[[1]] #for two-level models don't nest ICCs
+  
   retlist <- list(overall=summaries, ICCs=iccs) 
   class(retlist) <- c("mplus.data_summary", "list")
   return(retlist)   

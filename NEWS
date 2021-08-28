@@ -1,5 +1,6 @@
 DEVEL
  - bugfix:      fixed a bug in handling multiply imputed data introduced in 1.0.0 
+ - bugfix:      In readModels, $data_summary now contains cluster-level information for THREELEVEL models. Fixes Github Issue #18.
 
 Version 1.0.0
  - notice:      Most functions are now quiet by default. Functions now print less messages/output to the console during regular runs. This can be changed using the new quiet argument available (e.g., in readModels(), mplusModeler(), etc.). Thanks to cjvanlissa for the pull request.
