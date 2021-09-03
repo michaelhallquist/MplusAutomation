@@ -53,6 +53,11 @@ mixtureSummaryTable <- function(modelList,
                                 ),
                                 sortBy = NULL,
                                 ...) {
+  if(all(sapply(modelList, function(x){grepl("mixture", tolower(x$ANALYSIS))}))){
+    if(all(sapply(modelList, function(x){ is.null(x[["results"]])}))){
+      return(cat("These mixture models have not yet been evaluated. Add `run = 1L` to your function call to do so."))
+    }
+  }
   modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
   })
@@ -1212,7 +1217,7 @@ createMixtures <- function(classes = 1L,
                                                     "Mplus_command", "writeData", "hashfilename", "killOnFail", "quiet")))]
   cl_mplusmodeler[[1]] <- quote(mplusModeler)
   
-  if(!"run" %in% names(cl_mplusmodeler)) cl_mplusmodeler$run <- 0L
+  if(!"run" %in% names(cl_mplusmodeler)) cl_mplusmodeler$run <- 1L
   if(!"check" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["check"]] <- FALSE
   if(!"varwarnings" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["varwarnings"]] <- TRUE
   if(!"Mplus_command" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["Mplus_command"]] <- "Mplus"
