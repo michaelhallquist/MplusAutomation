@@ -176,14 +176,14 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
       if (any(grepl("Specific indirect\\s+\\d+", esection, perl=TRUE))) { #numbered subsections
         specSection <- trimSpace(getMultilineSection("Specific indirect(\\s+\\d+)*", esection, curfile, allowMultiple=TRUE))
         
-        #specSection is now a matches x match-lines matrix with the headers dumped (which is useful)
-        #flatten into a vector so that parsing below proceeds as usual
-        specSection <- as.vector(specSection)
+        #specSection is now a list of matches, where each element is a match-lines vector with the headers dumped (which is useful)
+        #flatten this into a vector so that parsing below proceeds as usual
+        if (is.list(specSection)) { specSection <- unlist(specSection) }
         
         #N.B. The parser below depends on the first line of the section being blank to demarcate the first effect.
         #  The new format, however, starts with Specific indirect 1, then goes straight to the effect.
         #  Thus, add a blank line to the section before proceeding
-        specSection <- c("", specSection)
+        if (specSection[1L] != "") specSection <- c("", specSection)
       } else { #single section
         specSection <- trimSpace(getMultilineSection("Specific indirect", esection, curfile))
       }
