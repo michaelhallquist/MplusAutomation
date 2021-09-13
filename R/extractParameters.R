@@ -135,35 +135,45 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
    
     splitParams <- strsplit(paramsToParse, "\\s+", perl=TRUE)
 
+    # Handle undefined parameter values (I've only seen these in R-SQUARE second column so far)    
+    if (columnNames[2L] == "est") {
+      splitParams <- lapply(splitParams, function(x) {
+        if (length(x) >= 2L && grepl("undefined", x[2L], ignore.case = TRUE)) { 
+          x <- c(x[1L], rep("NA_real_", length(columnNames) - 1)) #Fill in NAs for undefined params
+        }
+        return(x)
+      })
+    }
+    
     #for the Significance column in 7-column Mplus output, it may be missing for a chunk (all n.s./not tested), or for a given row.
     #Handle this condition here by adding FALSE for missing 7th column and converting * to TRUE.
     if (length(columnNames) == 7L && columnNames[7L] == "sig") {
       splitParams <- lapply(splitParams, function(col) {
-            lcol <- length(col)
-            if (lcol == 6L) { col[7L] <- "FALSE"
-            } else if (lcol == 7L && col[7L] == "*") { col[7L] <- "TRUE"
-            } else if (lcol != 0) { warning("Unknown columns found for 7-column BAYES format") }
-            return(col)
-
-          })
+        lcol <- length(col)
+        if (lcol == 6L) { col[7L] <- "FALSE"
+        } else if (lcol == 7L && col[7L] == "*") { col[7L] <- "TRUE"
+        } else if (lcol != 0) { warning("Unknown columns found for 7-column BAYES format") }
+        return(col)
+        
+      })
     }
-
+    
     #handle case of missing scale factors for non-categorical variables and residual variance in R-SQUARE output 
     if (length(columnNames) == 6L && (columnNames[6L] == "scale_f" || columnNames[6L] == "resid_var")) {
       splitParams <- lapply(splitParams, function(col) {
-            lcol <- length(col)
-            if (lcol == 5L) { col[6L] <- "NA_real_" } #NA-fill variables without a scale factor or residual variance
-            return(col)
-          })
+        lcol <- length(col)
+        if (lcol == 5L) { col[6L] <- "NA_real_" } #NA-fill variables without a scale factor or residual variance
+        return(col)
+      })
     }
     
     #similar problem for 3-column R-SQUARE output with missing residual variances or scale factors
     if (length(columnNames) == 3L && columnNames[3L] %in% c("resid_var", "scale_f")) {
       splitParams <- lapply(splitParams, function(col) {
-            lcol <- length(col)
-            if (lcol == 2L) { col[3L] <- "NA_real_" } #NA-fill variables without a residual variance
-            return(col)
-          })
+        lcol <- length(col)
+        if (lcol == 2L) { col[3L] <- "NA_real_" } #NA-fill variables without a residual variance
+        return(col)
+      })
     }
     
     #rbind the split list as a data.frame
@@ -171,13 +181,13 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
 
     #for each column, convert to numeric if it is. Otherwise, return as character
     parsedParams <- data.frame(lapply(parsedParams, function(col) {
-              #a bit convoluted, but we want to test for a purely numeric string by using a regexp that only allows numbers, periods, and the minus sign
-              #then sum the number of matches > 0 (i.e., where a number was found).
-              #if the sum is the same as the length of the column, then all elements are purely numeric.
-              if (all(col %in% c("TRUE", "FALSE"))) return(as.logical(col)) #True/False significance check above
-              else if (sum(sapply(gregexpr("^(NA_real_|[\\d\\.-]+)$", col, perl=TRUE), "[", 1) > 0) == length(col)) return(suppressWarnings(as.numeric(col)))
-              else return(as.character(col))
-            }), stringsAsFactors=FALSE)
+      #a bit convoluted, but we want to test for a purely numeric string by using a regexp that only allows numbers, periods, and the minus sign
+      #then sum the number of matches > 0 (i.e., where a number was found).
+      #if the sum is the same as the length of the column, then all elements are purely numeric.
+      if (all(col %in% c("TRUE", "FALSE"))) return(as.logical(col)) #True/False significance check above
+      else if (sum(sapply(gregexpr("^(NA_real_|[\\d\\.-]+)$", col, perl=TRUE), "[", 1) > 0) == length(col)) return(suppressWarnings(as.numeric(col)))
+      else return(as.character(col))
+    }), stringsAsFactors=FALSE)
 
 
     #use the column names detected in extractParameters_1section
