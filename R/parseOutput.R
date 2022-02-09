@@ -2465,6 +2465,13 @@ extractDataSummary <- function(outfiletext, filename) {
     level_names <- sub(".*Number of ([^\\s]+) clusters.*", "\\1", dataSummarySection[clus_check]) 
   }
   
+  # cross-classified outputs have subsections
+  cross_check <- grepl("Cluster information for [^\\s]+", dataSummarySection, perl = TRUE)
+  is_cross_classified <- any(cross_check)
+  if (isTRUE(is_cross_classified)) {
+    level_names <- sub(".*Cluster information for ([^\\s]+).*", "\\1", dataSummarySection[cross_check]) 
+  }
+  
   #detect groups
   #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
   multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", dataSummarySection, ignore.case=TRUE, perl=TRUE) 
@@ -2503,6 +2510,24 @@ extractDataSummary <- function(outfiletext, filename) {
       names(summaries)[names(summaries)=="NClusters_2"] <- paste0("NClusters_", level_names[2])
       names(summaries)[names(summaries)=="AvgClusterSize_1"] <- paste0("AvgClusterSize_", level_names[1])
       names(summaries)[names(summaries)=="AvgClusterSize_2"] <- paste0("AvgClusterSize_", level_names[2])
+    } else if (isTRUE(is_cross_classified)) {
+      # for now, not 
+      sum_list <- list()
+      crossclass_sections <- getMultilineSection("Cluster information for .*", dataSummarySection, filename, allowMultiple=TRUE)
+      stopifnot(length(crossclass_sections) == length(level_names))
+      for (ll in seq_along(level_names)) {
+        sum_list[[paste0("NClusters_", level_names[ll])]] <- extractValue(pattern=paste("^\\s*Number of clusters\\s*"), crossclass_sections[[ll]], filename, type="int")
+        clus_size_section <- getMultilineSection("^\\s*Size \\(s\\)\\s+Cluster ID with Size s\\s*$", crossclass_sections[[ll]], allowMultiple = TRUE)
+        for (ii in seq_along(clus_size_section)) {
+          clus_nums <- unlist(strsplit(trimSpace(clus_size_section), "\\s+"))
+          clus_nums <- clus_nums[clus_nums != ""] # make sure any blanks are skipped (trimSpace should generally get them)
+          sum_list[[paste0("ClusterSize_", level_names[ll], "_", ii)]] <- as.integer(clus_nums[1L])
+          
+          # pull out IDs for each cluster size
+          sum_list[[paste0("ClusterSize_", level_names[ll], "_", ii, "_IDs")]] <- paste(clus_nums[2L:length(clus_nums)], collapse=",")
+        }
+      }
+      summaries <- rbind(summaries, as.data.frame(sum_list))
     } else {
       summaries <- rbind(summaries, data.frame(
         NClusters = extractValue(pattern="^\\s*Number of clusters\\s*", section, filename, type="int"),
