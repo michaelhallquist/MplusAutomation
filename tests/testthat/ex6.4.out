@@ -1,0 +1,398 @@
+Mplus VERSION 8
+MUTHEN & MUTHEN
+04/10/2017   4:41 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a CFA with censored
+  	and count factor indicators
+  DATA:	FILE IS ex5.4.dat;
+  VARIABLE:	NAMES ARE u4-u6 y1-y3;
+  	CENSORED ARE y1-y3 (a);
+  	COUNT ARE u4-u6;
+  MODEL:	f1 BY y1-y3;
+  	f2 BY u4-u6;
+  OUTPUT:	TECH1 TECH8;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a CFA with censored
+and count factor indicators
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Censored
+   Y1          Y2          Y3
+
+  Count
+   U4          U5          U6
+
+Continuous latent variables
+   F1          F2
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                    STANDARD
+  Number of integration points                                  15
+  Dimensions of numerical integration                            2
+  Adaptive quadrature                                           ON
+Cholesky                                                        ON
+
+Input data file(s)
+  ex5.4.dat
+Input data format  FREE
+
+
+SUMMARY OF CENSORED LIMITS
+
+      Y1                10.000
+      Y2                10.000
+      Y3                10.000
+
+
+COUNT PROPORTION OF ZERO, MINIMUM AND MAXIMUM VALUES
+
+      U4          0.210         0        35
+      U5          0.240         0        25
+      U6          0.238         0        25
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       16
+
+Loglikelihood
+
+          H0 Value                       -4424.258
+          H0 Scaling Correction Factor      1.0136
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    8880.517
+          Bayesian (BIC)                  8947.950
+          Sample-Size Adjusted BIC        8897.165
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1                 1.000      0.000    999.000    999.000
+    Y2                 1.000      0.037     27.004      0.000
+    Y3                 0.986      0.038     25.845      0.000
+
+ F2       BY
+    U4                 1.000      0.000    999.000    999.000
+    U5                 0.998      0.047     21.136      0.000
+    U6                 1.048      0.062     16.780      0.000
+
+ F2       WITH
+    F1                 0.057      0.041      1.384      0.166
+
+ Intercepts
+    U4                 0.584      0.054     10.829      0.000
+    U5                 0.588      0.055     10.726      0.000
+    U6                 0.575      0.056     10.263      0.000
+    Y1                 8.027      0.044    183.807      0.000
+    Y2                 8.046      0.043    185.688      0.000
+    Y3                 7.993      0.044    183.449      0.000
+
+ Variances
+    F1                 0.761      0.054     14.073      0.000
+    F2                 0.733      0.081      9.057      0.000
+
+ Residual Variances
+    Y1                 0.192      0.019     10.350      0.000
+    Y2                 0.178      0.019      9.506      0.000
+    Y3                 0.209      0.020     10.476      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.344E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              U4#1          U4            U5#1          U5            U6#1
+              ________      ________      ________      ________      ________
+                    0             1             0             2             0
+
+
+           NU
+              U6            Y1#1          Y1            Y2#1          Y2
+              ________      ________      ________      ________      ________
+                    3             0             4             0             5
+
+
+           NU
+              Y3#1          Y3
+              ________      ________
+                    0             6
+
+
+           LAMBDA
+              F1            F2
+              ________      ________
+ U4#1               0             0
+ U4                 0             0
+ U5#1               0             0
+ U5                 0             7
+ U6#1               0             0
+ U6                 0             8
+ Y1#1               0             0
+ Y1                 0             0
+ Y2#1               0             0
+ Y2                 9             0
+ Y3#1               0             0
+ Y3                10             0
+
+
+           THETA
+              U4#1          U4            U5#1          U5            U6#1
+              ________      ________      ________      ________      ________
+ U4#1               0
+ U4                 0             0
+ U5#1               0             0             0
+ U5                 0             0             0             0
+ U6#1               0             0             0             0             0
+ U6                 0             0             0             0             0
+ Y1#1               0             0             0             0             0
+ Y1                 0             0             0             0             0
+ Y2#1               0             0             0             0             0
+ Y2                 0             0             0             0             0
+ Y3#1               0             0             0             0             0
+ Y3                 0             0             0             0             0
+
+
+           THETA
+              U6            Y1#1          Y1            Y2#1          Y2
+              ________      ________      ________      ________      ________
+ U6                 0
+ Y1#1               0             0
+ Y1                 0             0            11
+ Y2#1               0             0             0             0
+ Y2                 0             0             0             0            12
+ Y3#1               0             0             0             0             0
+ Y3                 0             0             0             0             0
+
+
+           THETA
+              Y3#1          Y3
+              ________      ________
+ Y3#1               0
+ Y3                 0            13
+
+
+           ALPHA
+              F1            F2
+              ________      ________
+                    0             0
+
+
+           BETA
+              F1            F2
+              ________      ________
+ F1                 0             0
+ F2                 0             0
+
+
+           PSI
+              F1            F2
+              ________      ________
+ F1                14
+ F2                15            16
+
+
+     STARTING VALUES
+
+
+           NU
+              U4#1          U4            U5#1          U5            U6#1
+              ________      ________      ________      ________      ________
+              -20.000         1.709       -20.000         1.687       -20.000
+
+
+           NU
+              U6            Y1#1          Y1            Y2#1          Y2
+              ________      ________      ________      ________      ________
+                1.765       -20.000         8.023       -20.000         8.042
+
+
+           NU
+              Y3#1          Y3
+              ________      ________
+              -20.000         7.989
+
+
+           LAMBDA
+              F1            F2
+              ________      ________
+ U4#1           0.000         0.000
+ U4             0.000         1.000
+ U5#1           0.000         0.000
+ U5             0.000         1.000
+ U6#1           0.000         0.000
+ U6             0.000         1.000
+ Y1#1           0.000         0.000
+ Y1             1.000         0.000
+ Y2#1           0.000         0.000
+ Y2             1.000         0.000
+ Y3#1           0.000         0.000
+ Y3             1.000         0.000
+
+
+           THETA
+              U4#1          U4            U5#1          U5            U6#1
+              ________      ________      ________      ________      ________
+ U4#1           0.000
+ U4             0.000         0.000
+ U5#1           0.000         0.000         0.000
+ U5             0.000         0.000         0.000         0.000
+ U6#1           0.000         0.000         0.000         0.000         0.000
+ U6             0.000         0.000         0.000         0.000         0.000
+ Y1#1           0.000         0.000         0.000         0.000         0.000
+ Y1             0.000         0.000         0.000         0.000         0.000
+ Y2#1           0.000         0.000         0.000         0.000         0.000
+ Y2             0.000         0.000         0.000         0.000         0.000
+ Y3#1           0.000         0.000         0.000         0.000         0.000
+ Y3             0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              U6            Y1#1          Y1            Y2#1          Y2
+              ________      ________      ________      ________      ________
+ U6             0.000
+ Y1#1           0.000         0.000
+ Y1             0.000         0.000         0.468
+ Y2#1           0.000         0.000         0.000         0.000
+ Y2             0.000         0.000         0.000         0.000         0.460
+ Y3#1           0.000         0.000         0.000         0.000         0.000
+ Y3             0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              Y3#1          Y3
+              ________      ________
+ Y3#1           0.000
+ Y3             0.000         0.464
+
+
+           ALPHA
+              F1            F2
+              ________      ________
+                0.000         0.000
+
+
+           BETA
+              F1            F2
+              ________      ________
+ F1             0.000         0.000
+ F2             0.000         0.000
+
+
+           PSI
+              F1            F2
+              ________      ________
+ F1             0.050
+ F2             0.000         0.050
+
+
+TECHNICAL 8 OUTPUT
+
+
+   E STEP  ITER  LOGLIKELIHOOD    ABS CHANGE   REL CHANGE  ALGORITHM
+              1 -0.65690824D+04    0.0000000    0.0000000  EM
+              2 -0.63061388D+04  262.9435747    0.0400274  FS
+              3 -0.59788863D+04  327.2525311    0.0518943  FS
+              4 -0.56664952D+04  312.3910382    0.0522490  FS
+              5 -0.53790605D+04  287.4347631    0.0507253  FS
+              6 -0.51206255D+04  258.4349500    0.0480446  FS
+              7 -0.48965107D+04  224.1147961    0.0437671  FS
+              8 -0.47127476D+04  183.7630853    0.0375294  FS
+              9 -0.45755838D+04  137.1638504    0.0291049  FS
+             10 -0.44886275D+04   86.9563001    0.0190044  FS
+             11 -0.44464570D+04   42.1705167    0.0093950  FS
+             12 -0.44315079D+04   14.9490970    0.0033620  FS
+             13 -0.44266652D+04    4.8426635    0.0010928  FS
+             14 -0.44249753D+04    1.6899422    0.0003818  FS
+             15 -0.44244413D+04    0.5339868    0.0001207  FS
+             16 -0.44243004D+04    0.1409175    0.0000318  FS
+             17 -0.44242675D+04    0.0328974    0.0000074  FS
+             18 -0.44242602D+04    0.0072254    0.0000016  FS
+             19 -0.44242587D+04    0.0015443    0.0000003  FS
+             20 -0.44242584D+04    0.0003250    0.0000001  FS
+
+
+     Beginning Time:  04:41:45
+        Ending Time:  04:41:47
+       Elapsed Time:  00:00:02
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2017 Muthen & Muthen

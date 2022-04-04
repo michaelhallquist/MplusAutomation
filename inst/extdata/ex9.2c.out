@@ -1,0 +1,188 @@
+Mplus VERSION 8
+MUTHEN & MUTHEN
+04/10/2017   5:03 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a two-level
+  	regression analysis for a continuous
+  	dependent variable with a random slope and a latent covariate
+  DATA:   FILE = ex9.2c.dat;
+  VARIABLE:	NAMES = y x w clus;
+  	BETWEEN = w;
+  	CLUSTER = clus;
+  ANALYSIS:	TYPE = TWOLEVEL RANDOM;
+  MODEL:
+  	%WITHIN%	
+   	s | y ON x;		
+  	%BETWEEN%	
+  	y s ON w x;
+  	y WITH s;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a two-level
+regression analysis for a continuous
+dependent variable with a random slope and a latent covariate
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        1000
+
+Number of dependent variables                                    1
+Number of independent variables                                  2
+Number of continuous latent variables                            1
+
+Observed dependent variables
+
+  Continuous
+   Y
+
+Observed independent variables
+   X           W
+
+Continuous latent variables
+   S
+
+Variables with special functions
+
+  Cluster variable      CLUS
+
+  Between variables
+   W
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Maximum number of iterations                                   100
+Convergence criterion                                    0.100D-05
+Maximum number of EM iterations                                500
+Convergence criteria for the EM algorithm
+  Loglikelihood change                                   0.100D-02
+  Relative loglikelihood change                          0.100D-05
+  Derivative                                             0.100D-03
+Minimum variance                                         0.100D-03
+Maximum number of steepest descent iterations                   20
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+
+Input data file(s)
+  ex9.2c.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of clusters                        110
+
+     Average cluster size        9.091
+
+     Estimated Intraclass Correlations for the Y Variables
+
+                Intraclass              Intraclass
+     Variable  Correlation   Variable  Correlation
+
+     Y            0.626
+
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y                     2.045       1.000      -4.224    0.10%      -0.163      1.203      1.828
+            1000.000       7.046       2.558      17.676    0.10%       2.467      3.887
+     X                    -0.095      -0.056      -3.654    0.10%      -1.113     -0.368     -0.092
+            1000.000       1.401      -0.311       3.140    0.10%       0.212      0.923
+     W                    -0.106      -0.067      -2.364    0.91%      -0.879     -0.365     -0.079
+             110.000       0.808       0.110       2.177    0.91%       0.124      0.513
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       10
+
+Loglikelihood
+
+          H0 Value                       -3088.493
+          H0 Scaling Correction Factor      0.9978
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    6196.986
+          Bayesian (BIC)                  6246.063
+          Sample-Size Adjusted BIC        6214.303
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Within Level
+
+ Residual Variances
+    Y                  1.026      0.052     19.706      0.000
+
+Between Level
+
+ S          ON
+    W                  0.569      0.094      6.087      0.000
+    X                  0.315      0.180      1.752      0.080
+
+ Y          ON
+    W                  1.186      0.113     10.453      0.000
+    X                  1.024      0.217      4.719      0.000
+
+ Y        WITH
+    S                  0.268      0.061      4.392      0.000
+
+ Intercepts
+    Y                  2.087      0.083     25.173      0.000
+    S                  1.017      0.071     14.415      0.000
+
+ Residual Variances
+    Y                  0.483      0.098      4.950      0.000
+    S                  0.368      0.056      6.547      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.112E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  05:03:49
+        Ending Time:  05:03:49
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2017 Muthen & Muthen

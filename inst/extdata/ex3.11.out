@@ -1,0 +1,177 @@
+Mplus VERSION 8
+MUTHEN & MUTHEN
+04/10/2017   4:39 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a path analysis
+  	with continuous dependent variables
+  DATA:	FILE IS ex3.11.dat;
+  VARIABLE:	NAMES ARE y1-y3 x1-x3;
+  MODEL:	y1 y2 ON x1 x2 x3;
+  	y3 ON y1 y2 x2;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a path analysis
+with continuous dependent variables
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    3
+Number of independent variables                                  3
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2          Y3
+
+Observed independent variables
+   X1          X2          X3
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex3.11.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                   -1.108       0.018     -13.766    0.20%      -4.787     -2.157     -1.159
+             500.000      17.433      -0.193       9.631    0.20%      -0.237      2.613
+     Y2                    0.027       0.121     -11.928    0.20%      -3.564     -0.944     -0.067
+             500.000      17.103       0.033      14.188    0.20%       1.021      3.350
+     Y3                    0.499      -0.009     -15.069    0.20%      -4.398     -1.203      0.419
+             500.000      31.757      -0.383      16.217    0.20%       1.996      5.386
+     X1                    0.046       0.006      -3.268    0.20%      -0.875     -0.207      0.030
+             500.000       1.143       0.311       3.468    0.20%       0.358      0.873
+     X2                   -0.027      -0.152      -2.818    0.20%      -0.986     -0.221      0.093
+             500.000       1.066      -0.277       2.993    0.20%       0.341      0.820
+     X3                   -0.012       0.034      -3.229    0.20%      -0.798     -0.270     -0.038
+             500.000       1.074       0.285       3.252    0.20%       0.219      0.851
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       15
+
+Loglikelihood
+
+          H0 Value                       -2364.002
+          H1 Value                       -2363.623
+
+Information Criteria
+
+          Akaike (AIC)                    4758.004
+          Bayesian (BIC)                  4821.223
+          Sample-Size Adjusted BIC        4773.612
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              0.757
+          Degrees of Freedom                     3
+          P-Value                           0.8598
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.040
+          Probability RMSEA <= .05           0.972
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.002
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           4107.449
+          Degrees of Freedom                    12
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.001
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ Y1       ON
+    X1                 0.992      0.043     22.979      0.000
+    X2                 2.001      0.045     44.618      0.000
+    X3                 3.052      0.045     68.274      0.000
+
+ Y2       ON
+    X1                 2.935      0.050     59.002      0.000
+    X2                 1.992      0.052     38.556      0.000
+    X3                 1.023      0.051     19.869      0.000
+
+ Y3       ON
+    Y1                 0.507      0.020     25.491      0.000
+    Y2                 0.746      0.020     37.914      0.000
+    X2                 1.046      0.072     14.540      0.000
+
+ Intercepts
+    Y1                -1.064      0.046    -23.059      0.000
+    Y2                -0.042      0.053     -0.784      0.433
+    Y3                 1.068      0.063     17.093      0.000
+
+ Residual Variances
+    Y1                 1.061      0.067     15.811      0.000
+    Y2                 1.408      0.089     15.811      0.000
+    Y3                 1.717      0.109     15.811      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.979E-02
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  04:39:37
+        Ending Time:  04:39:37
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2017 Muthen & Muthen

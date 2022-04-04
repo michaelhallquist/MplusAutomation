@@ -26,3 +26,9 @@ products
 *.out
 *.log
 *.dgm
+!inst/extdata/*.out
+!inst/extdata/*.csv
+!tests/testthast/*.csv
+!tests/testthast/*.out
+!tests/testthat/*.out
+!tests/testthat/*.csv
