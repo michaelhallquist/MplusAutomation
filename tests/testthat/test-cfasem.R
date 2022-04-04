@@ -1,10 +1,10 @@
 #t <- readLines(testthat::test_path("ex5_1.out")))
 test_that("temp",
           {
-            expect_true(file.exists(testthat::test_path("testthat/ex5_1.out")))
+            expect_true(file.exists(testthat::test_path("ex5_1.out")))
           })
 test_that("Mplus User Guide 5.1 - CFA with continuous indicators results can be read in", {
-  m <- readModels(target = testthat::test_path("testthat/ex5_1.out"))
+  m <- readModels(target = testthat::test_path("ex5_1.out"))
   b <- coef(m, params = "loading")
   expect_equal(b$est[1], 1.000)
   expect_equal(b$se[1], 0.000)
