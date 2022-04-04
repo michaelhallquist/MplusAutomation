@@ -1,0 +1,311 @@
+Mplus VERSION 8
+MUTHEN & MUTHEN
+04/10/2017   4:42 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of an N=1 time series analysis
+      with a univariate first-order autoregressive AR(1) model
+      for a continuous dependent variable
+  DATA:	FILE = ex6.23.dat;
+  VARIABLE:	NAMES = y;
+  	LAGGED = y(1);
+  ANALYSIS:	ESTIMATOR = BAYES;
+  	PROCESSORS = 2;
+  	BITERATIONS = (2000);
+  MODEL:	y ON y&1;
+  OUTPUT:	TECH1 TECH8;
+  PLOT:	TYPE = PLOT3;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of an N=1 time series analysis
+with a univariate first-order autoregressive AR(1) model
+for a continuous dependent variable
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         100
+
+Number of dependent variables                                    1
+Number of independent variables                                  1
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Continuous
+   Y
+
+Observed independent variables
+   Y&1
+
+
+Estimator                                                    BAYES
+Specifications for Bayesian Estimation
+  Point estimate                                            MEDIAN
+  Number of Markov chain Monte Carlo (MCMC) chains               2
+  Random seed for the first chain                                0
+  Starting value information                           UNPERTURBED
+  Treatment of categorical mediator                         LATENT
+  Algorithm used for Markov chain Monte Carlo           GIBBS(PX1)
+  Convergence criterion                                  0.500D-01
+  Maximum number of iterations                               50000
+  K-th iteration used for thinning                               1
+
+Input data file(s)
+  ex6.23.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+     Number of missing data patterns             2
+
+
+     PROPORTION OF DATA PRESENT
+
+
+           Covariance Coverage
+              Y
+              ________
+ Y              1.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y                     0.534      -0.035      -2.006    1.00%      -0.372      0.224      0.612
+             100.000       1.117      -0.429       2.989    1.00%       0.814      1.463
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+     USE THE FBITERATIONS OPTION TO INCREASE THE NUMBER OF ITERATIONS BY A FACTOR
+     OF AT LEAST TWO TO CHECK CONVERGENCE AND THAT THE PSR VALUE DOES NOT INCREASE.
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                               3
+
+Information Criteria
+
+          Deviance (DIC)                          298.426
+          Estimated Number of Parameters (pD)       3.101
+
+
+
+MODEL RESULTS
+
+                                Posterior  One-Tailed         95% C.I.
+                    Estimate       S.D.      P-Value   Lower 2.5%  Upper 2.5%  Significance
+
+ Y          ON
+    Y&1                0.171       0.104      0.058      -0.044       0.363
+
+ Intercepts
+    Y                  0.449       0.121      0.000       0.203       0.689      *
+
+ Residual Variances
+    Y                  1.137       0.168      0.000       0.877       1.529      *
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              Y             Y&1
+              ________      ________
+                    0             0
+
+
+           LAMBDA
+              Y             Y&1
+              ________      ________
+ Y                  0             0
+ Y&1                0             0
+
+
+           THETA
+              Y             Y&1
+              ________      ________
+ Y                  0
+ Y&1                0             0
+
+
+           ALPHA
+              Y             Y&1
+              ________      ________
+                    1             0
+
+
+           BETA
+              Y             Y&1
+              ________      ________
+ Y                  0             2
+ Y&1                0             0
+
+
+           PSI
+              Y             Y&1
+              ________      ________
+ Y                  3
+ Y&1                0             0
+
+
+     STARTING VALUES
+
+
+           NU
+              Y             Y&1
+              ________      ________
+                0.000         0.000
+
+
+           LAMBDA
+              Y             Y&1
+              ________      ________
+ Y              1.000         0.000
+ Y&1            0.000         1.000
+
+
+           THETA
+              Y             Y&1
+              ________      ________
+ Y              0.000
+ Y&1            0.000         0.000
+
+
+           ALPHA
+              Y             Y&1
+              ________      ________
+                0.534         0.000
+
+
+           BETA
+              Y             Y&1
+              ________      ________
+ Y              0.000         0.000
+ Y&1            0.000         0.000
+
+
+           PSI
+              Y             Y&1
+              ________      ________
+ Y              0.559
+ Y&1            0.000         0.533
+
+
+
+     PRIORS FOR ALL PARAMETERS            PRIOR MEAN      PRIOR VARIANCE     PRIOR STD. DEV.
+
+     Parameter 1~N(0.000,infinity)           0.0000            infinity            infinity
+     Parameter 2~N(0.000,infinity)           0.0000            infinity            infinity
+     Parameter 3~IG(-1.000,0.000)          infinity            infinity            infinity
+
+
+TECHNICAL 8 OUTPUT
+
+
+
+     Kolmogorov-Smirnov comparing posterior distributions across chains 1 and 2 using 100 draws.
+
+
+
+
+
+     Parameter   KS Statistic P-value
+     Parameter 2    0.1400    0.2606
+     Parameter 1    0.1200    0.4431
+     Parameter 3    0.1000    0.6766
+
+
+
+     Simulated prior distributions
+
+     Parameter       Prior Mean  Prior Variance  Prior Std. Dev.
+
+
+     Parameter 1 Improper Prior
+     Parameter 2 Improper Prior
+     Parameter 3 Improper Prior
+
+
+   TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION
+
+     CHAIN    BSEED
+     1        0
+     2        285380
+
+                     POTENTIAL       PARAMETER WITH
+     ITERATION    SCALE REDUCTION      HIGHEST PSR
+     100              1.006               3
+     200              1.003               3
+     300              1.000               1
+     400              1.003               1
+     500              1.000               1
+     600              1.000               1
+     700              1.001               2
+     800              1.006               2
+     900              1.003               2
+     1000             1.001               2
+     1100             1.000               1
+     1200             1.000               1
+     1300             1.000               1
+     1400             1.000               1
+     1500             1.000               1
+     1600             1.001               2
+     1700             1.000               1
+     1800             1.000               1
+     1900             1.000               3
+     2000             1.000               3
+
+
+PLOT INFORMATION
+
+The following plots are available:
+
+  Histograms (sample values)
+  Scatterplots (sample values)
+  Time series plots (sample values, ACF, PACF)
+  Bayesian posterior parameter distributions
+  Bayesian posterior parameter trace plots
+  Bayesian autocorrelation plots
+
+     Beginning Time:  04:42:49
+        Ending Time:  04:42:49
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2017 Muthen & Muthen

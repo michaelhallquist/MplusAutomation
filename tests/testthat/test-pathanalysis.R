@@ -1,5 +1,5 @@
 test_that("Mplus User Guide 3.1 - linear regression results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap3/ex3.1.html"))
+  m <- readModels(target = system.file("extdata", "ex3.1.out", package = "MplusAutomation"))
   b <- coef(m, params = "expectation")
   expect_equal(b$est, 0.511)
   expect_equal(b$se, 0.043)
@@ -7,7 +7,7 @@ test_that("Mplus User Guide 3.1 - linear regression results can be read in", {
 })
 
 test_that("Mplus User Guide 3.4 - probit regression results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap3/ex3.4.html"))
+  m <- readModels(target = system.file("extdata", "ex3.4.out", package = "MplusAutomation"))
   b <- coef(m, params = "expectation")
   expect_equal(b$est, 0.984)
   expect_equal(b$se, 0.119)
@@ -15,7 +15,7 @@ test_that("Mplus User Guide 3.4 - probit regression results can be read in", {
 })
 
 test_that("Mplus User Guide 3.5 - logistic regression results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap3/ex3.5.html"))
+  m <- readModels(target = system.file("extdata", "ex3.5.out", package = "MplusAutomation"))
   b <- coef(m, params = "expectation")
   expect_equal(b$est, 1.026)
   expect_equal(b$se, 0.137)
@@ -24,7 +24,7 @@ test_that("Mplus User Guide 3.5 - logistic regression results can be read in", {
 
 
 test_that("Mplus User Guide 3.6 - multinomial logistic regression results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap3/ex3.6.html"))
+  m <- readModels(target = system.file("extdata", "ex3.6.out", package = "MplusAutomation"))
   b <- coef(m, params = "expectation")
   expect_equal(b$est[1], -0.749)
   expect_equal(b$se[1], 0.158)
@@ -33,7 +33,7 @@ test_that("Mplus User Guide 3.6 - multinomial logistic regression results can be
 
 
 test_that("Mplus User Guide 3.7 - poisson regression results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap3/ex3.7.html"))
+  m <- readModels(target = system.file("extdata", "ex3.7.out", package = "MplusAutomation"))
   b <- coef(m, params = "expectation")
   expect_equal(b$est, 1.026)
   expect_equal(b$se, .030)
@@ -42,7 +42,7 @@ test_that("Mplus User Guide 3.7 - poisson regression results can be read in", {
 
 
 test_that("Mplus User Guide 3.11 - continuous path analysis results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap3/ex3.11.html"))
+  m <- readModels(target = system.file("extdata", "ex3.11.out", package = "MplusAutomation"))
   b <- coef(m, params = "expectation")
   expect_equal(b$est[1], -1.064)
   expect_equal(b$se[1], 0.046)
@@ -50,7 +50,7 @@ test_that("Mplus User Guide 3.11 - continuous path analysis results can be read 
 })
 
 test_that("Mplus User Guide 3.16 - path analysis with bootstrapping results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap3/ex3.16.html"))
+  m <- readModels(target = system.file("extdata", "ex3.16.out", package = "MplusAutomation"))
   b <- coef(m, params = "expectation")
   expect_equal(b$est[1], -1.064)
   expect_equal(b$se[1], 0.046)
@@ -61,7 +61,7 @@ test_that("Mplus User Guide 3.16 - path analysis with bootstrapping results can 
 })
 
 test_that("Mplus User Guide 3.18 - Bayesian moderated mediation results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap3/ex3.18.html"))
+  m <- readModels(target = system.file("extdata", "ex3.18.out", package = "MplusAutomation"))
   b <- coef(m, params = "expectation")
   expect_equal(b$est[1], -0.134)
   expect_equal(b$se[1], 0.087)

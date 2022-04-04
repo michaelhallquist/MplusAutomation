@@ -1,0 +1,185 @@
+Mplus VERSION 8
+MUTHEN & MUTHEN
+04/10/2017   4:41 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a CFA with
+  	continuous factor indicators
+  DATA:	FILE IS ex5.1.dat;
+  VARIABLE:	NAMES ARE y1-y6;
+  MODEL:	f1 BY y1-y3;
+  	f2 BY y4-y6;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a CFA with
+continuous factor indicators
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2          Y3          Y4          Y5          Y6
+
+Continuous latent variables
+   F1          F2
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex5.1.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                   -0.022      -0.050      -3.958    0.20%      -1.236     -0.395     -0.039
+             500.000       1.971      -0.363       3.588    0.20%       0.328      1.240
+     Y2                    0.026      -0.139      -5.193    0.20%      -1.096     -0.321      0.044
+             500.000       1.949       0.107       3.703    0.20%       0.385      1.211
+     Y3                    0.035       0.169      -3.907    0.20%      -1.138     -0.398     -0.060
+             500.000       1.953      -0.135       4.159    0.20%       0.303      1.173
+     Y4                   -0.022      -0.016      -4.546    0.20%      -1.111     -0.405     -0.068
+             500.000       2.050       0.246       4.289    0.20%       0.300      1.125
+     Y5                   -0.016      -0.037      -3.733    0.20%      -1.152     -0.374     -0.008
+             500.000       1.706      -0.095       4.150    0.20%       0.354      1.069
+     Y6                    0.048       0.213      -3.418    0.20%      -1.078     -0.375      0.018
+             500.000       1.679      -0.028       4.107    0.20%       0.273      1.138
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       19
+
+Loglikelihood
+
+          H0 Value                       -4906.609
+          H1 Value                       -4904.661
+
+Information Criteria
+
+          Akaike (AIC)                    9851.218
+          Bayesian (BIC)                  9931.295
+          Sample-Size Adjusted BIC        9870.988
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              3.896
+          Degrees of Freedom                     8
+          P-Value                           0.8664
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.027
+          Probability RMSEA <= .05           0.995
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.013
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            596.921
+          Degrees of Freedom                    15
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.014
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1                 1.000      0.000    999.000    999.000
+    Y2                 1.126      0.099     11.368      0.000
+    Y3                 1.019      0.089     11.482      0.000
+
+ F2       BY
+    Y4                 1.000      0.000    999.000    999.000
+    Y5                 1.059      0.129      8.199      0.000
+    Y6                 0.897      0.105      8.531      0.000
+
+ F2       WITH
+    F1                -0.030      0.052     -0.582      0.560
+
+ Intercepts
+    Y1                -0.022      0.063     -0.354      0.723
+    Y2                 0.026      0.062      0.410      0.682
+    Y3                 0.035      0.062      0.555      0.579
+    Y4                -0.022      0.064     -0.350      0.726
+    Y5                -0.016      0.058     -0.271      0.786
+    Y6                 0.048      0.058      0.824      0.410
+
+ Variances
+    F1                 0.907      0.125      7.254      0.000
+    F2                 0.760      0.133      5.734      0.000
+
+ Residual Variances
+    Y1                 1.064      0.096     11.120      0.000
+    Y2                 0.798      0.100      7.972      0.000
+    Y3                 1.010      0.095     10.597      0.000
+    Y4                 1.290      0.119     10.871      0.000
+    Y5                 0.854      0.111      7.710      0.000
+    Y6                 1.066      0.097     11.024      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.409E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  04:41:32
+        Ending Time:  04:41:32
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2017 Muthen & Muthen

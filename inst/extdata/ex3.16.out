@@ -1,0 +1,256 @@
+Mplus VERSION 8
+MUTHEN & MUTHEN
+04/10/2017   4:39 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a path analysis
+  	with continuous dependent variables,
+  	bootstrapped standard errors, indirect
+  	effects, and non-symmetric bootstrap confidence intervals
+  DATA:	FILE IS ex3.11.dat;
+  VARIABLE:	NAMES ARE y1-y3 x1-x3;
+  ANALYSIS:	BOOTSTRAP = 1000;
+  MODEL:	y1 y2 ON x1 x2 x3;
+  	y3 ON y1 y2 x2;
+  MODEL INDIRECT:
+  	y3 IND y1 x1;
+  	y3 IND y2 x1;
+  OUTPUT:	CINTERVAL (BOOTSTRAP);
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a path analysis
+with continuous dependent variables,
+bootstrapped standard errors, indirect
+effects, and non-symmetric bootstrap confidence intervals
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    3
+Number of independent variables                                  3
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2          Y3
+
+Observed independent variables
+   X1          X2          X3
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Number of bootstrap draws
+    Requested                                                 1000
+    Completed                                                 1000
+
+Input data file(s)
+  ex3.11.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                   -1.108       0.018     -13.766    0.20%      -4.787     -2.157     -1.159
+             500.000      17.433      -0.193       9.631    0.20%      -0.237      2.613
+     Y2                    0.027       0.121     -11.928    0.20%      -3.564     -0.944     -0.067
+             500.000      17.103       0.033      14.188    0.20%       1.021      3.350
+     Y3                    0.499      -0.009     -15.069    0.20%      -4.398     -1.203      0.419
+             500.000      31.757      -0.383      16.217    0.20%       1.996      5.386
+     X1                    0.046       0.006      -3.268    0.20%      -0.875     -0.207      0.030
+             500.000       1.143       0.311       3.468    0.20%       0.358      0.873
+     X2                   -0.027      -0.152      -2.818    0.20%      -0.986     -0.221      0.093
+             500.000       1.066      -0.277       2.993    0.20%       0.341      0.820
+     X3                   -0.012       0.034      -3.229    0.20%      -0.798     -0.270     -0.038
+             500.000       1.074       0.285       3.252    0.20%       0.219      0.851
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       15
+
+Loglikelihood
+
+          H0 Value                       -2364.002
+          H1 Value                       -2363.623
+
+Information Criteria
+
+          Akaike (AIC)                    4758.004
+          Bayesian (BIC)                  4821.223
+          Sample-Size Adjusted BIC        4773.612
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              0.757
+          Degrees of Freedom                     3
+          P-Value                           0.8598
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.040
+          Probability RMSEA <= .05           0.972
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.002
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           4107.449
+          Degrees of Freedom                    12
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.001
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ Y1       ON
+    X1                 0.992      0.044     22.604      0.000
+    X2                 2.001      0.044     45.674      0.000
+    X3                 3.052      0.039     77.579      0.000
+
+ Y2       ON
+    X1                 2.935      0.049     59.386      0.000
+    X2                 1.992      0.051     38.834      0.000
+    X3                 1.023      0.049     20.699      0.000
+
+ Y3       ON
+    Y1                 0.507      0.020     25.724      0.000
+    Y2                 0.746      0.019     39.779      0.000
+    X2                 1.046      0.076     13.737      0.000
+
+ Intercepts
+    Y1                -1.064      0.046    -23.272      0.000
+    Y2                -0.042      0.052     -0.798      0.425
+    Y3                 1.068      0.063     16.995      0.000
+
+ Residual Variances
+    Y1                 1.061      0.068     15.537      0.000
+    Y2                 1.408      0.082     17.258      0.000
+    Y3                 1.717      0.114     15.039      0.000
+
+
+TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS
+
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Effects from X1 to Y3
+
+  Sum of indirect      2.691      0.063     42.390      0.000
+
+  Specific indirect
+
+    Y3
+    Y1
+    X1                 0.503      0.030     17.000      0.000
+
+    Y3
+    Y2
+    X1                 2.188      0.065     33.852      0.000
+
+
+
+CONFIDENCE INTERVALS OF MODEL RESULTS
+
+                  Lower .5%  Lower 2.5%    Lower 5%    Estimate    Upper 5%  Upper 2.5%   Upper .5%
+
+ Y1       ON
+    X1               0.892       0.907       0.915       0.992       1.063       1.075       1.102
+    X2               1.892       1.918       1.932       2.001       2.077       2.091       2.122
+    X3               2.949       2.976       2.990       3.052       3.118       3.133       3.160
+
+ Y2       ON
+    X1               2.798       2.834       2.851       2.935       3.013       3.029       3.053
+    X2               1.836       1.889       1.908       1.992       2.070       2.095       2.126
+    X3               0.889       0.926       0.943       1.023       1.105       1.123       1.156
+
+ Y3       ON
+    Y1               0.455       0.468       0.473       0.507       0.539       0.544       0.554
+    Y2               0.696       0.708       0.713       0.746       0.773       0.780       0.794
+    X2               0.862       0.906       0.923       1.046       1.172       1.204       1.245
+
+ Intercepts
+    Y1              -1.179      -1.150      -1.137      -1.064      -0.988      -0.969      -0.933
+    Y2              -0.170      -0.139      -0.124      -0.042       0.043       0.060       0.097
+    Y3               0.892       0.956       0.971       1.068       1.174       1.201       1.237
+
+ Residual Variances
+    Y1               0.884       0.924       0.943       1.061       1.168       1.186       1.239
+    Y2               1.188       1.237       1.262       1.408       1.531       1.555       1.595
+    Y3               1.421       1.478       1.511       1.717       1.892       1.940       1.983
+
+
+CONFIDENCE INTERVALS OF TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS
+
+
+                  Lower .5%  Lower 2.5%    Lower 5%    Estimate    Upper 5%  Upper 2.5%   Upper .5%
+
+Effects from X1 to Y3
+
+  Sum of indirect    2.524       2.567       2.587       2.691       2.795       2.813       2.838
+
+  Specific indirect
+
+    Y3
+    Y1
+    X1               0.430       0.445       0.452       0.503       0.550       0.558       0.579
+
+    Y3
+    Y2
+    X1               2.024       2.054       2.075       2.188       2.287       2.310       2.360
+
+
+
+     Beginning Time:  04:39:37
+        Ending Time:  04:39:38
+       Elapsed Time:  00:00:01
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2017 Muthen & Muthen

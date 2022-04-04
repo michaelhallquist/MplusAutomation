@@ -1,0 +1,185 @@
+Mplus VERSION 8
+MUTHEN & MUTHEN
+04/10/2017   4:41 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a CFA with
+  	categorical factor indicators
+  DATA:	FILE IS ex5.2.dat;
+  VARIABLE:	NAMES ARE u1-u6;
+  	CATEGORICAL ARE u1-u6;
+  MODEL:	f1 BY u1-u3;
+  	f2 BY u4-u6;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a CFA with
+categorical factor indicators
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Binary and ordered categorical (ordinal)
+   U1          U2          U3          U4          U5          U6
+
+Continuous latent variables
+   F1          F2
+
+
+Estimator                                                    WLSMV
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Parameterization                                             DELTA
+Link                                                        PROBIT
+
+Input data file(s)
+  ex5.2.dat
+
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    U1
+      Category 1    0.504          252.000
+      Category 2    0.496          248.000
+    U2
+      Category 1    0.506          253.000
+      Category 2    0.494          247.000
+    U3
+      Category 1    0.496          248.000
+      Category 2    0.504          252.000
+    U4
+      Category 1    0.524          262.000
+      Category 2    0.476          238.000
+    U5
+      Category 1    0.508          254.000
+      Category 2    0.492          246.000
+    U6
+      Category 1    0.510          255.000
+      Category 2    0.490          245.000
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       13
+
+Chi-Square Test of Model Fit
+
+          Value                              5.482*
+          Degrees of Freedom                     8
+          P-Value                           0.7051
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.040
+          Probability RMSEA <= .05           0.983
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.002
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           2808.627
+          Degrees of Freedom                    15
+          P-Value                           0.0000
+
+WRMR (Weighted Root Mean Square Residual)
+
+          Value                              0.342
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    U1                 1.000      0.000    999.000    999.000
+    U2                 1.067      0.043     24.661      0.000
+    U3                 1.001      0.039     25.913      0.000
+
+ F2       BY
+    U4                 1.000      0.000    999.000    999.000
+    U5                 1.109      0.054     20.482      0.000
+    U6                 1.030      0.047     21.988      0.000
+
+ F2       WITH
+    F1                -0.021      0.049     -0.432      0.666
+
+ Thresholds
+    U1$1               0.010      0.056      0.179      0.858
+    U2$1               0.015      0.056      0.268      0.788
+    U3$1              -0.010      0.056     -0.179      0.858
+    U4$1               0.060      0.056      1.073      0.283
+    U5$1               0.020      0.056      0.358      0.721
+    U6$1               0.025      0.056      0.447      0.655
+
+ Variances
+    F1                 0.800      0.046     17.439      0.000
+    F2                 0.736      0.052     14.099      0.000
+
+
+R-SQUARE
+
+    Observed                   Residual
+    Variable        Estimate   Variance
+
+    U1                 0.800      0.200
+    U2                 0.912      0.088
+    U3                 0.802      0.198
+    U4                 0.736      0.264
+    U5                 0.906      0.094
+    U6                 0.781      0.219
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.200E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  04:41:38
+        Ending Time:  04:41:38
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2017 Muthen & Muthen
