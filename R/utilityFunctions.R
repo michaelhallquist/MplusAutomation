@@ -646,7 +646,7 @@ getOutFileList <- function(target, recursive=FALSE, filefilter) {
   
   #determine whether target is a file or a directory
   if (file.exists(target)) {
-    if (file.info(target)$isdir == TRUE) {
+    if (isTRUE(file.info(target)$isdir)) {
       
       #obtain list of all files in the specified directory
       filelist <- list.files(path=target, recursive=recursive, full.names=TRUE)
@@ -669,7 +669,7 @@ getOutFileList <- function(target, recursive=FALSE, filefilter) {
       outfiles <- target
     }
   }
-  else stop("Specified target does not exist.\n  Target: ", target)
+  else stop("Specified target does not exist.\n  Target: ", normalizePath(target))
   
   if (length(outfiles) == 0) {
     warning("No output files detected in this directory.")
@@ -1153,7 +1153,8 @@ cd <- function(base, pre, num) {
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @examples
 #' 
-#' MplusAutomation:::htmlout("https://statmodel.com/usersguide/chap3/ex3.1.html")
+#' MplusAutomation:::htmlout(
+#' system.file("extdata", "ex3.1.html", package = "MplusAutomation"))
 htmlout <- function(url) {
   x <- readLines(url)
   start <- which(grepl("<PRE>", x, ignore.case = TRUE))

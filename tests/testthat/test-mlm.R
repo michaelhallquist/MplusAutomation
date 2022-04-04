@@ -1,5 +1,5 @@
 test_that("Mplus User Guide 9.2c - Multilevel regression with random effect results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap9/ex9.2c.html"))
+  m <- readModels(target = "ex9.2c.out")
   b <- coef(m, params = "regression")
   expect_equal(b$est[1], 0.569)
   expect_equal(b$se[1], 0.094)
@@ -8,7 +8,7 @@ test_that("Mplus User Guide 9.2c - Multilevel regression with random effect resu
 
 
 test_that("Mplus User Guide 9.31 - Bayesian Multilevel time series AR(1) results can be read in", {
-  m <- readModels(target = htmlout("https://statmodel.com/usersguide/chap9/ex9.31.html"))
+  m <- readModels(target = "ex9.31.out")
   b <- coef(m, params = "regression")
   expect_equal(b$est[1], 0.120)
   expect_equal(b$se[1], 0.016)
