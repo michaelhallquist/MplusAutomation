@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   4:39 AM
+10/21/2021  10:45 PM
 
 INPUT INSTRUCTIONS
 
@@ -135,21 +135,33 @@ MODEL RESULTS
     U1$1               1.026      0.137      7.492      0.000
 
 
-LOGISTIC REGRESSION ODDS RATIO RESULTS
-
- U1         ON
-    X1                 2.921
-    X3                 6.288
-
-
 QUALITY OF NUMERICAL RESULTS
 
      Condition Number for the Information Matrix              0.314E+00
        (ratio of smallest to largest eigenvalue)
 
 
-     Beginning Time:  04:39:40
-        Ending Time:  04:39:40
+RESULTS IN PROBABILITY SCALE
+
+                    Estimate
+
+ U1
+    Category 1         0.654
+    Category 2         0.346
+
+
+LOGISTIC REGRESSION ODDS RATIO RESULTS
+
+                                                95% C.I.
+                    Estimate       S.E.  Lower 2.5% Upper 2.5%
+
+ U1         ON
+    X1                 2.921      0.417      2.207      3.864
+    X3                 6.288      1.129      4.423      8.939
+
+
+     Beginning Time:  22:45:56
+        Ending Time:  22:45:56
        Elapsed Time:  00:00:00
 
 
@@ -163,4 +175,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

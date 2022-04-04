@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   4:41 AM
+10/21/2021  10:48 PM
 
 INPUT INSTRUCTIONS
 
@@ -279,7 +279,82 @@ MODEL RESULTS
     F                  1.000      0.000    999.000    999.000
 
 
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.392E-04
+       (ratio of smallest to largest eigenvalue)
+
+
+RESULTS IN PROBABILITY SCALE
+
+                    Estimate
+
+ U1
+    Category 1         0.475
+    Category 2         0.525
+ U2
+    Category 1         0.463
+    Category 2         0.537
+ U3
+    Category 1         0.459
+    Category 2         0.541
+ U4
+    Category 1         0.462
+    Category 2         0.538
+ U5
+    Category 1         0.465
+    Category 2         0.535
+ U6
+    Category 1         0.459
+    Category 2         0.541
+ U7
+    Category 1         0.471
+    Category 2         0.529
+ U8
+    Category 1         0.465
+    Category 2         0.535
+ U9
+    Category 1         0.461
+    Category 2         0.539
+ U10
+    Category 1         0.459
+    Category 2         0.541
+ U11
+    Category 1         0.460
+    Category 2         0.540
+ U12
+    Category 1         0.461
+    Category 2         0.539
+ U13
+    Category 1         0.460
+    Category 2         0.540
+ U14
+    Category 1         0.459
+    Category 2         0.541
+ U15
+    Category 1         0.459
+    Category 2         0.541
+ U16
+    Category 1         0.450
+    Category 2         0.550
+ U17
+    Category 1         0.460
+    Category 2         0.540
+ U18
+    Category 1         0.459
+    Category 2         0.541
+ U19
+    Category 1         0.461
+    Category 2         0.539
+ U20
+    Category 1         0.460
+    Category 2         0.540
+
+
 IRT PARAMETERIZATION
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
 
  Item Discriminations
 
@@ -373,12 +448,6 @@ IRT PARAMETERIZATION
 
  Variances
     F                  1.000      0.000      0.000      1.000
-
-
-QUALITY OF NUMERICAL RESULTS
-
-     Condition Number for the Information Matrix              0.392E-04
-       (ratio of smallest to largest eigenvalue)
 
 
 TECHNICAL 1 OUTPUT
@@ -816,34 +885,34 @@ TECHNICAL 8 OUTPUT
               2 -0.13466945D+06   63.3995315    0.0004706  EM
               3 -0.13463786D+06   31.5906440    0.0002346  EM
               4 -0.13462890D+06    8.9668688    0.0000666  EM
-              5 -0.13461153D+06   17.3651086    0.0001290  EM
-              6 -0.13460421D+06    7.3213520    0.0000544  EM
-              7 -0.13460112D+06    3.0883836    0.0000229  EM
-              8 -0.13460000D+06    1.1226557    0.0000083  EM
-              9 -0.13459952D+06    0.4835437    0.0000036  EM
-             10 -0.13459923D+06    0.2811248    0.0000021  EM
-             11 -0.13459906D+06    0.1761047    0.0000013  EM
-             12 -0.13459894D+06    0.1169909    0.0000009  EM
-             13 -0.13459886D+06    0.0816495    0.0000006  EM
-             14 -0.13459880D+06    0.0593469    0.0000004  EM
-             15 -0.13459876D+06    0.0445667    0.0000003  EM
-             16 -0.13459872D+06    0.0343326    0.0000003  EM
-             17 -0.13459869D+06    0.0269693    0.0000002  EM
-             18 -0.13459867D+06    0.0214974    0.0000002  EM
-             19 -0.13459866D+06    0.0173223    0.0000001  EM
-             20 -0.13459864D+06    0.0140695    0.0000001  EM
-             21 -0.13459863D+06    0.0114942    0.0000001  EM
-             22 -0.13459862D+06    0.0094303    0.0000001  EM
-             23 -0.13459861D+06    0.0077610    0.0000001  EM
-             24 -0.13459861D+06    0.0064016    0.0000000  EM
-             25 -0.13459860D+06    0.0052891    0.0000000  EM
-             26 -0.13459860D+06    0.0043752    0.0000000  EM
-             27 -0.13459859D+06    0.0036224    0.0000000  EM
+              5 -0.13461153D+06   17.3650979    0.0001290  EM
+              6 -0.13460421D+06    7.3214201    0.0000544  EM
+              7 -0.13460112D+06    3.0882931    0.0000229  EM
+              8 -0.13460000D+06    1.1226625    0.0000083  EM
+              9 -0.13459952D+06    0.4835464    0.0000036  EM
+             10 -0.13459923D+06    0.2811296    0.0000021  EM
+             11 -0.13459906D+06    0.1761088    0.0000013  EM
+             12 -0.13459894D+06    0.1169940    0.0000009  EM
+             13 -0.13459886D+06    0.0816520    0.0000006  EM
+             14 -0.13459880D+06    0.0593487    0.0000004  EM
+             15 -0.13459876D+06    0.0445681    0.0000003  EM
+             16 -0.13459872D+06    0.0343337    0.0000003  EM
+             17 -0.13459869D+06    0.0269702    0.0000002  EM
+             18 -0.13459867D+06    0.0214981    0.0000002  EM
+             19 -0.13459866D+06    0.0173229    0.0000001  EM
+             20 -0.13459864D+06    0.0140700    0.0000001  EM
+             21 -0.13459863D+06    0.0114946    0.0000001  EM
+             22 -0.13459862D+06    0.0094306    0.0000001  EM
+             23 -0.13459861D+06    0.0077612    0.0000001  EM
+             24 -0.13459861D+06    0.0064018    0.0000000  EM
+             25 -0.13459860D+06    0.0052893    0.0000000  EM
+             26 -0.13459860D+06    0.0043754    0.0000000  EM
+             27 -0.13459859D+06    0.0036225    0.0000000  EM
              28 -0.13459859D+06    0.0030010    0.0000000  EM
-             29 -0.13459859D+06    0.0024872    0.0000000  EM
-             30 -0.13459859D+06    0.0020620    0.0000000  EM
+             29 -0.13459859D+06    0.0024873    0.0000000  EM
+             30 -0.13459859D+06    0.0020621    0.0000000  EM
              31 -0.13459858D+06    0.0017098    0.0000000  EM
-             32 -0.13459858D+06    0.0014178    0.0000000  EM
+             32 -0.13459858D+06    0.0014179    0.0000000  EM
              33 -0.13459858D+06    0.0011757    0.0000000  EM
              34 -0.13459858D+06    0.0009749    0.0000000  EM
 
@@ -885,9 +954,9 @@ The following plots are available:
   Information curves
   Latent variable distribution plots
 
-     Beginning Time:  04:41:57
-        Ending Time:  04:42:36
-       Elapsed Time:  00:00:39
+     Beginning Time:  22:48:13
+        Ending Time:  22:48:49
+       Elapsed Time:  00:00:36
 
 
 
@@ -900,4 +969,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

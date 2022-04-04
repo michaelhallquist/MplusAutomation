@@ -323,7 +323,7 @@ mplusObject <- function(TITLE = NULL, DATA = NULL, VARIABLE = NULL, DEFINE = NUL
 #' str(update(example1, MODEL = ~ . + "wt ON hp;"))
 #' str(update(example1, ANALYSIS = x, MODEL = ~ . + "wt ON hp;"))
 #'
-#' ## check that use variables can be updated & over ridden
+#' ## check that use variables can be updated & overridden
 #' str(update(example1, usevariables = c("mpg", "hp", "cyl")))
 #'
 #' # test to make sure . in Mplus code does not cause problems

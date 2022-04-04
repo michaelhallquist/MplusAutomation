@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   5:03 AM
+10/21/2021  11:05 PM
 
 INPUT INSTRUCTIONS
 
@@ -21,7 +21,12 @@ INPUT INSTRUCTIONS
 
 
 
-INPUT READING TERMINATED NORMALLY
+*** WARNING in MODEL command
+  In the MODEL command, the predictor variable on the WITHIN level refers to the whole observed
+  variable.  To use the latent within-level part, use ESTIMATOR=BAYES in the ANALYSIS command.
+  This applies to the following statement(s):
+    S | Y ON X
+   1 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
 
 
 
@@ -170,8 +175,8 @@ QUALITY OF NUMERICAL RESULTS
        (ratio of smallest to largest eigenvalue)
 
 
-     Beginning Time:  05:03:49
-        Ending Time:  05:03:49
+     Beginning Time:  23:05:46
+        Ending Time:  23:05:46
        Elapsed Time:  00:00:00
 
 
@@ -185,4 +190,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

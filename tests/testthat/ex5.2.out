@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   4:41 AM
+10/21/2021  10:47 PM
 
 INPUT INSTRUCTIONS
 
@@ -103,7 +103,7 @@ RMSEA (Root Mean Square Error Of Approximation)
 CFI/TLI
 
           CFI                                1.000
-          TLI                                1.002
+          TLI                                1.000
 
 Chi-Square Test of Model Fit for the Baseline Model
 
@@ -111,9 +111,13 @@ Chi-Square Test of Model Fit for the Baseline Model
           Degrees of Freedom                    15
           P-Value                           0.0000
 
-WRMR (Weighted Root Mean Square Residual)
+SRMR (Standardized Root Mean Square Residual)
 
-          Value                              0.342
+          Value                              0.021
+
+Optimum Function Value for Weighted Least-Squares Estimator
+
+          Value                     0.24587142D-02
 
 
 
@@ -148,6 +152,12 @@ MODEL RESULTS
     F2                 0.736      0.052     14.099      0.000
 
 
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.200E-01
+       (ratio of smallest to largest eigenvalue)
+
+
 R-SQUARE
 
     Observed                   Residual
@@ -161,14 +171,8 @@ R-SQUARE
     U6                 0.781      0.219
 
 
-QUALITY OF NUMERICAL RESULTS
-
-     Condition Number for the Information Matrix              0.200E-01
-       (ratio of smallest to largest eigenvalue)
-
-
-     Beginning Time:  04:41:38
-        Ending Time:  04:41:38
+     Beginning Time:  22:47:54
+        Ending Time:  22:47:54
        Elapsed Time:  00:00:00
 
 
@@ -182,4 +186,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

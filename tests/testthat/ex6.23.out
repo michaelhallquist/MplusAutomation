@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   4:42 AM
+10/21/2021  10:49 PM
 
 INPUT INSTRUCTIONS
 
@@ -51,7 +51,6 @@ Specifications for Bayesian Estimation
   Number of Markov chain Monte Carlo (MCMC) chains               2
   Random seed for the first chain                                0
   Starting value information                           UNPERTURBED
-  Treatment of categorical mediator                         LATENT
   Algorithm used for Markov chain Monte Carlo           GIBBS(PX1)
   Convergence criterion                                  0.500D-01
   Maximum number of iterations                               50000
@@ -228,30 +227,6 @@ TECHNICAL 1 OUTPUT
 TECHNICAL 8 OUTPUT
 
 
-
-     Kolmogorov-Smirnov comparing posterior distributions across chains 1 and 2 using 100 draws.
-
-
-
-
-
-     Parameter   KS Statistic P-value
-     Parameter 2    0.1400    0.2606
-     Parameter 1    0.1200    0.4431
-     Parameter 3    0.1000    0.6766
-
-
-
-     Simulated prior distributions
-
-     Parameter       Prior Mean  Prior Variance  Prior Std. Dev.
-
-
-     Parameter 1 Improper Prior
-     Parameter 2 Improper Prior
-     Parameter 3 Improper Prior
-
-
    TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION
 
      CHAIN    BSEED
@@ -293,8 +268,8 @@ The following plots are available:
   Bayesian posterior parameter trace plots
   Bayesian autocorrelation plots
 
-     Beginning Time:  04:42:49
-        Ending Time:  04:42:49
+     Beginning Time:  22:49:01
+        Ending Time:  22:49:01
        Elapsed Time:  00:00:00
 
 
@@ -308,4 +283,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

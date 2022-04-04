@@ -440,7 +440,7 @@ regular expression string. If you're unfamiliar with regular expressions in Perl
 I suggest these two websites:
 
 * http://www.pcre.org/pcre.txt
-* http://www.regular-expressions.info/
+* https://www.regular-expressions.info/
 
 Note that many regular expression in Perl rely on backslashes (\\) for
 defining character classes, escaping certain characters, and so on. In `R`, backslashes contained

@@ -1153,10 +1153,15 @@ cd <- function(base, pre, num) {
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @examples
 #' 
-#' MplusAutomation:::htmlout(
-#' system.file("extdata", "ex3.1.html", package = "MplusAutomation"))
+#' MplusAutomation:::htmlout("https://statmodel.com/usersguide/chap3/ex3.1.html")
 htmlout <- function(url) {
-  x <- readLines(url)
+  x <- tryCatch(readLines(url, warn = FALSE), error=function(e) { return(NULL) })
+  
+  # fail gracefully on URL read error, per CRAN guidelines
+  if (is.null(x)) { 
+    message("Cannot load Mplus output from html file: ", url)
+    return(NA_character_)
+  }
   start <- which(grepl("<PRE>", x, ignore.case = TRUE))
   end <-  which(grepl("</PRE>", x, ignore.case = TRUE))
   out <- x[(start + 1L):(end - 1L)]

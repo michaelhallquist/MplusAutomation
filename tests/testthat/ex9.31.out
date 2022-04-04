@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   5:06 AM
+10/21/2021  11:07 PM
 
 INPUT INSTRUCTIONS
 
@@ -83,7 +83,6 @@ Specifications for Bayesian Estimation
   Number of Markov chain Monte Carlo (MCMC) chains               2
   Random seed for the first chain                                0
   Starting value information                           UNPERTURBED
-  Treatment of categorical mediator                         LATENT
   Algorithm used for Markov chain Monte Carlo           GIBBS(PX1)
   Convergence criterion                                  0.500D-01
   Maximum number of iterations                               50000
@@ -510,68 +509,6 @@ TECHNICAL 1 OUTPUT
 TECHNICAL 8 OUTPUT
 
 
-
-     Kolmogorov-Smirnov comparing posterior distributions across chains 1 and 2 using 100 draws.
-
-
-
-
-
-     Parameter   KS Statistic P-value
-     Parameter 11    0.1400    0.2606
-     Parameter 22    0.1100    0.5560
-     Parameter 12    0.1000    0.6766
-     Parameter 2    0.1000    0.6766
-     Parameter 10    0.0700    0.9610
-     Parameter 8    0.0600    0.9921
-     Parameter 9    0.0600    0.9921
-     Parameter 15    0.0500    0.9995
-     Parameter 20    0.0500    0.9995
-     Parameter 4    0.0400    1.0000
-     Parameter 7    0.0300    1.0000
-     Parameter 17    0.0200    1.0000
-     Parameter 3    0.0200    1.0000
-     Parameter 21    0.0200    1.0000
-     Parameter 14    0.0100    1.0000
-     Parameter 18    0.0100    1.0000
-     Parameter 1    0.0100    1.0000
-     Parameter 5    0.0100    1.0000
-     Parameter 6    0.0100    1.0000
-     Parameter 13    0.0000    1.0000
-     Parameter 16    0.0000    1.0000
-     Parameter 19    0.0000    1.0000
-
-
-
-     Simulated prior distributions
-
-     Parameter       Prior Mean  Prior Variance  Prior Std. Dev.
-
-
-     Parameter 1 Improper Prior
-     Parameter 2 Improper Prior
-     Parameter 3 Improper Prior
-     Parameter 4 Improper Prior
-     Parameter 5 Improper Prior
-     Parameter 6 Improper Prior
-     Parameter 7 Improper Prior
-     Parameter 8 Improper Prior
-     Parameter 9 Improper Prior
-     Parameter 10 Improper Prior
-     Parameter 11 Improper Prior
-     Parameter 12 Improper Prior
-     Parameter 13 Improper Prior
-     Parameter 14 Improper Prior
-     Parameter 15 Improper Prior
-     Parameter 16 Improper Prior
-     Parameter 17 Improper Prior
-     Parameter 18 Improper Prior
-     Parameter 19 Improper Prior
-     Parameter 20 Improper Prior
-     Parameter 21 Improper Prior
-     Parameter 22 Improper Prior
-
-
    TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION
 
      CHAIN    BSEED
@@ -611,13 +548,14 @@ The following plots are available:
   Between-level histograms (sample values, sample means/variances)
   Between-level scatterplots (sample values, sample means/variances)
   Time series plots (sample values, ACF, PACF)
+  Histogram of subjects per time point
   Bayesian posterior parameter distributions
   Bayesian posterior parameter trace plots
   Bayesian autocorrelation plots
 
-     Beginning Time:  05:06:54
-        Ending Time:  05:07:19
-       Elapsed Time:  00:00:25
+     Beginning Time:  23:07:24
+        Ending Time:  23:07:37
+       Elapsed Time:  00:00:13
 
 
 
@@ -630,4 +568,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

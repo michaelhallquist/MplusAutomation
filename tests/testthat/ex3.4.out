@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   4:39 AM
+10/21/2021  10:45 PM
 
 INPUT INSTRUCTIONS
 
@@ -111,9 +111,13 @@ Chi-Square Test of Model Fit for the Baseline Model
           Degrees of Freedom                     2
           P-Value                           0.0000
 
-WRMR (Weighted Root Mean Square Residual)
+SRMR (Standardized Root Mean Square Residual)
 
-          Value                              0.001
+          Value                              0.000
+
+Optimum Function Value for Weighted Least-Squares Estimator
+
+          Value                     0.59857825D-08
 
 
 
@@ -130,6 +134,12 @@ MODEL RESULTS
     U1$1               0.984      0.119      8.299      0.000
 
 
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.427E+00
+       (ratio of smallest to largest eigenvalue)
+
+
 R-SQUARE
 
     Observed                   Residual
@@ -138,14 +148,8 @@ R-SQUARE
     U1                 0.877      1.000
 
 
-QUALITY OF NUMERICAL RESULTS
-
-     Condition Number for the Information Matrix              0.427E+00
-       (ratio of smallest to largest eigenvalue)
-
-
-     Beginning Time:  04:39:40
-        Ending Time:  04:39:40
+     Beginning Time:  22:45:56
+        Ending Time:  22:45:56
        Elapsed Time:  00:00:00
 
 
@@ -159,4 +163,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

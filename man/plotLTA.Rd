@@ -48,8 +48,8 @@ with thicker/darker edges representing greater probability.
 }
 \examples{
 \dontrun{
-data <- read.table("http://statmodel.com/usersguide/chap8/ex8.13.dat")[,c(1:10)]
-names(data) <- c("u11", "u12", "u13", "u14", "u15", "u21", "u22", "u23", "u24", "u25")
+mydat <- read.csv(
+system.file("extdata", "ex8.13.csv", package = "MplusAutomation"))
 createMixtures(
 classes = 2,
 filename_stem = "dating",
@@ -58,7 +58,7 @@ model_class_specific = c(
 "[u11$1] (a{C});  [u12$1] (b{C});  [u13$1] (c{C});  [u14$1] (d{C});  [u15$1] (e{C});",
 "[u21$1] (a{C});  [u22$1] (b{C});  [u23$1] (c{C});  [u24$1] (d{C});  [u25$1] (e{C});"
 ),
-rdata = data,
+rdata = mydat,
 ANALYSIS = "PROCESSORS IS 2;  LRTSTARTS (0 0 40 20);  PARAMETERIZATION = PROBABILITY;",
 VARIABLE = "CATEGORICAL = u11-u15 u21-u25;"
 )

@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   4:39 AM
+10/21/2021  10:45 PM
 
 INPUT INSTRUCTIONS
 
@@ -56,7 +56,6 @@ Specifications for Bayesian Estimation
   Number of Markov chain Monte Carlo (MCMC) chains               2
   Random seed for the first chain                                0
   Starting value information                           UNPERTURBED
-  Treatment of categorical mediator                         LATENT
   Algorithm used for Markov chain Monte Carlo           GIBBS(PX1)
   Convergence criterion                                  0.500D-01
   Maximum number of iterations                               50000
@@ -113,6 +112,20 @@ Information Criteria
           Deviance (DIC)                          745.265
           Estimated Number of Parameters (pD)       9.913
           Bayesian (BIC)                          775.413
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.179
+          90 Percent C.I.                    0.000  0.296
+          Probability RMSEA <= .05           0.083
+
+CFI/TLI
+
+          CFI                                0.930
+          90 Percent C.I.                    0.806  1.000
+
+          TLI                                0.548
+          90 Percent C.I.                    0.000  1.000
 
 
 
@@ -287,48 +300,6 @@ TECHNICAL 1 OUTPUT
 
 
 TECHNICAL 8 OUTPUT
-
-
-
-     Kolmogorov-Smirnov comparing posterior distributions across chains 1 and 2 using 100 draws.
-
-
-
-
-
-     Parameter   KS Statistic P-value
-     Parameter 1    0.2100    0.0205
-     Parameter 7    0.1500    0.1930
-     Parameter 10    0.1200    0.4431
-     Parameter 4    0.1200    0.4431
-     Parameter 8    0.1000    0.6766
-     Parameter 11    0.1000    0.6766
-     Parameter 3    0.0800    0.8938
-     Parameter 6    0.0600    0.9921
-     Parameter 2    0.0600    0.9921
-     Parameter 5    0.0400    1.0000
-     Parameter 9    0.0300    1.0000
-     Parameter 12    0.0000    1.0000
-
-
-
-     Simulated prior distributions
-
-     Parameter       Prior Mean  Prior Variance  Prior Std. Dev.
-
-
-     Parameter 1 Improper Prior
-     Parameter 2 Improper Prior
-     Parameter 3 Improper Prior
-     Parameter 4 Improper Prior
-     Parameter 5 Improper Prior
-     Parameter 6 Improper Prior
-     Parameter 7 Improper Prior
-     Parameter 8 Improper Prior
-     Parameter 9 Improper Prior
-     Parameter 10 Improper Prior
-     Parameter 11 Not available
-     Parameter 12 Not available
 
 
    TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION
@@ -653,8 +624,8 @@ The following plots are available:
   Bayesian posterior predictive checking scatterplots
   Bayesian posterior predictive checking distribution plots
 
-     Beginning Time:  04:39:38
-        Ending Time:  04:39:39
+     Beginning Time:  22:45:55
+        Ending Time:  22:45:56
        Elapsed Time:  00:00:01
 
 
@@ -668,4 +639,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

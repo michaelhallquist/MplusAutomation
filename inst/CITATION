@@ -6,14 +6,14 @@ citEntry(entry = "Article",
                    person(c("Joshua", "F."), "Wiley")),
   journal      = "Structural Equation Modeling",
   year         = "2018",
-  pages        = "1--18",
+  pages        = "621--638",
   doi          = "10.1080/10705511.2017.1402334",
   url          = "https://www.tandfonline.com/doi/full/10.1080/10705511.2017.1402334",
 
   textVersion  =
   paste("Hallquist, M. N. & Wiley, J. F. (2018).",
         "MplusAutomation: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus",
-        "Structural Equation Modeling, 1-18.",
+        "Structural Equation Modeling, 25, 621-638.",
         "doi: 10.1080/10705511.2017.1402334.")
   )
 

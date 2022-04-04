@@ -4,6 +4,10 @@ author: 'Adam Garber, Joshua Wiley'
 output:
   pdf_document: default
   html_document: default
+vignette: >
+  %\VignetteIndexEntry{Confirmatory Factor Analysis in MplusAutomation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -55,8 +59,8 @@ tribble(
 gt() %>% 
 tab_header(
 title = md("**Applied Example: School Trouble**"), subtitle = md("&nbsp;")) %>%
-tab_row_group(group = "Factor 1", rows = 1:6) %>%
-tab_row_group(group = "Factor 2", rows = 7:10) %>%
+tab_row_group(label = "Factor 1", rows = 1:6) %>%
+tab_row_group(label = "Factor 2", rows = 7:10) %>%
 row_group_order(groups = c("Factor 1","Factor 2")) %>% 
 tab_options(column_labels.font.weight = "bold")
 ```
@@ -188,9 +192,9 @@ loadings_stdyx %>%
     title = md("**Table 2**"),
     subtitle = md("*Summary of Model Fit Statistics*")) %>%
   cols_label(param = "Item", est = "Loading", se = "SE") %>%
-  tab_row_group(group = "Factor 1", rows = 1:6) %>%
-  tab_row_group(group = "Factor 2", rows = 7:10) %>%
-  tab_row_group(group = "Factor Correlation", rows = 11) %>%
+  tab_row_group(label = "Factor 1", rows = 1:6) %>%
+  tab_row_group(label = "Factor 2", rows = 7:10) %>%
+  tab_row_group(label = "Factor Correlation", rows = 11) %>%
   row_group_order(groups = c("Factor 1","Factor 2","Factor Correlation")) %>% 
   tab_options(column_labels.font.weight = "bold")
 

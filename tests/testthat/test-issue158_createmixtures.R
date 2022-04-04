@@ -9,7 +9,9 @@
 
 
 test_that("createmixtures works", {
+  skip_on_cran()
   expect_error({
     out <- createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
-    suppressWarnings(print(out))}, NA)
+    suppressWarnings(print(out))
+  }, NA)
 })

@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   4:41 AM
+10/21/2021  10:47 PM
 
 INPUT INSTRUCTIONS
 
@@ -69,7 +69,6 @@ Specifications for Bayesian Estimation
   Number of Markov chain Monte Carlo (MCMC) chains               2
   Random seed for the first chain                                0
   Starting value information                           UNPERTURBED
-  Treatment of categorical mediator                         LATENT
   Algorithm used for Markov chain Monte Carlo           GIBBS(PX1)
   Convergence criterion                                  0.500D-01
   Maximum number of iterations                               50000
@@ -142,6 +141,20 @@ Parameters (pD) From Each Group
      Group 8 (8)             0.581 (-21.182, 19.890)       3850.192        16.652
      Group 9 (9)             0.762 (-23.745, 10.004)       3585.590        15.784
      Group 10 (10)           0.453 (-16.327, 23.361)       3563.922        15.990
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.010
+          90 Percent C.I.                    0.000  0.041
+          Probability RMSEA <= .05           0.994
+
+CFI/TLI
+
+          CFI                                1.000
+          90 Percent C.I.                    0.995  1.000
+
+          TLI                                1.000
+          90 Percent C.I.                    0.993  1.000
 
 
 
@@ -2750,483 +2763,6 @@ TECHNICAL 1 OUTPUT
 TECHNICAL 8 OUTPUT
 
 
-
-     Kolmogorov-Smirnov comparing posterior distributions across chains 1 and 2 using 100 draws.
-
-
-
-
-
-     Parameter   KS Statistic P-value
-     Parameter 66    0.3100    0.0001
-
-     THE KOLMOGOROV-SMIRNOV DISTRIBUTION TEST FOR PARAMETER 66 HAS A P-VALUE 0.0001,
-     INDICATING DISCREPANT POSTERIOR DISTRIBUTIONS IN THE DIFFERENT MCMC CHAINS.
-     THIS MAY INDICATE NON-CONVERGENCE DUE TO AN INSUFFICIENT NUMBER OF MCMC ITERATIONS OR IT MAY
-     INDICATE A NON-IDENTIFIED MODEL. SPECIFY A LARGER NUMBER OF MCMC ITERATIONS USING THE FBITER
-     OPTION OF THE ANALYSIS COMMAND TO INVESTIGATE THE PROBLEM.
-
-     Parameter 188    0.3100    0.0001
-     Parameter 136    0.3000    0.0002
-     Parameter 9    0.3000    0.0002
-     Parameter 213    0.3000    0.0002
-     Parameter 168    0.2900    0.0003
-     Parameter 32    0.2800    0.0006
-     Parameter 157    0.2800    0.0006
-     Parameter 20    0.2800    0.0006
-     Parameter 116    0.2800    0.0006
-     Parameter 121    0.2800    0.0006
-     Parameter 190    0.2700    0.0010
-     Parameter 208    0.2700    0.0010
-     Parameter 123    0.2700    0.0010
-     Parameter 25    0.2700    0.0010
-     Parameter 6    0.2700    0.0010
-     Parameter 124    0.2600    0.0018
-     Parameter 67    0.2600    0.0018
-     Parameter 147    0.2500    0.0030
-     Parameter 97    0.2500    0.0030
-     Parameter 211    0.2500    0.0030
-     Parameter 77    0.2500    0.0030
-     Parameter 158    0.2500    0.0030
-     Parameter 21    0.2500    0.0030
-     Parameter 93    0.2500    0.0030
-     Parameter 50    0.2500    0.0030
-     Parameter 52    0.2500    0.0030
-     Parameter 39    0.2400    0.0050
-     Parameter 95    0.2400    0.0050
-     Parameter 96    0.2400    0.0050
-     Parameter 159    0.2400    0.0050
-     Parameter 135    0.2400    0.0050
-     Parameter 182    0.2400    0.0050
-     Parameter 141    0.2300    0.0082
-     Parameter 144    0.2300    0.0082
-     Parameter 1    0.2300    0.0082
-     Parameter 11    0.2300    0.0082
-     Parameter 2    0.2300    0.0082
-     Parameter 142    0.2300    0.0082
-     Parameter 19    0.2300    0.0082
-     Parameter 180    0.2300    0.0082
-     Parameter 192    0.2300    0.0082
-     Parameter 139    0.2300    0.0082
-     Parameter 167    0.2300    0.0082
-     Parameter 120    0.2300    0.0082
-     Parameter 74    0.2200    0.0131
-     Parameter 75    0.2200    0.0131
-     Parameter 80    0.2200    0.0131
-     Parameter 163    0.2200    0.0131
-     Parameter 94    0.2200    0.0131
-     Parameter 24    0.2200    0.0131
-     Parameter 51    0.2200    0.0131
-     Parameter 119    0.2200    0.0131
-     Parameter 72    0.2200    0.0131
-     Parameter 53    0.2200    0.0131
-     Parameter 111    0.2200    0.0131
-     Parameter 189    0.2200    0.0131
-     Parameter 4    0.2100    0.0205
-     Parameter 73    0.2100    0.0205
-     Parameter 7    0.2100    0.0205
-     Parameter 134    0.2100    0.0205
-     Parameter 76    0.2100    0.0205
-     Parameter 170    0.2100    0.0205
-     Parameter 100    0.2100    0.0205
-     Parameter 3    0.2100    0.0205
-     Parameter 140    0.2000    0.0314
-     Parameter 146    0.2000    0.0314
-     Parameter 43    0.2000    0.0314
-     Parameter 89    0.2000    0.0314
-     Parameter 179    0.2000    0.0314
-     Parameter 193    0.2000    0.0314
-     Parameter 122    0.2000    0.0314
-     Parameter 42    0.2000    0.0314
-     Parameter 31    0.2000    0.0314
-     Parameter 70    0.1900    0.0470
-     Parameter 145    0.1900    0.0470
-     Parameter 162    0.1900    0.0470
-     Parameter 166    0.1900    0.0470
-     Parameter 10    0.1900    0.0470
-     Parameter 98    0.1900    0.0470
-     Parameter 214    0.1900    0.0470
-     Parameter 27    0.1900    0.0470
-     Parameter 28    0.1900    0.0470
-     Parameter 156    0.1900    0.0470
-     Parameter 169    0.1900    0.0470
-     Parameter 30    0.1900    0.0470
-     Parameter 165    0.1900    0.0470
-     Parameter 68    0.1800    0.0691
-     Parameter 69    0.1800    0.0691
-     Parameter 143    0.1800    0.0691
-     Parameter 47    0.1800    0.0691
-     Parameter 99    0.1800    0.0691
-     Parameter 12    0.1800    0.0691
-     Parameter 210    0.1800    0.0691
-     Parameter 54    0.1800    0.0691
-     Parameter 112    0.1800    0.0691
-     Parameter 118    0.1800    0.0691
-     Parameter 88    0.1800    0.0691
-     Parameter 161    0.1800    0.0691
-     Parameter 125    0.1800    0.0691
-     Parameter 126    0.1800    0.0691
-     Parameter 174    0.1700    0.0994
-     Parameter 49    0.1700    0.0994
-     Parameter 203    0.1700    0.0994
-     Parameter 204    0.1700    0.0994
-     Parameter 209    0.1700    0.0994
-     Parameter 26    0.1700    0.0994
-     Parameter 29    0.1700    0.0994
-     Parameter 212    0.1700    0.0994
-     Parameter 137    0.1700    0.0994
-     Parameter 181    0.1700    0.0994
-     Parameter 113    0.1700    0.0994
-     Parameter 138    0.1600    0.1400
-     Parameter 148    0.1600    0.1400
-     Parameter 81    0.1600    0.1400
-     Parameter 44    0.1600    0.1400
-     Parameter 90    0.1600    0.1400
-     Parameter 5    0.1600    0.1400
-     Parameter 164    0.1600    0.1400
-     Parameter 205    0.1600    0.1400
-     Parameter 216    0.1600    0.1400
-     Parameter 57    0.1600    0.1400
-     Parameter 149    0.1600    0.1400
-     Parameter 8    0.1500    0.1930
-     Parameter 101    0.1500    0.1930
-     Parameter 185    0.1500    0.1930
-     Parameter 18    0.1500    0.1930
-     Parameter 79    0.1500    0.1930
-     Parameter 48    0.1500    0.1930
-     Parameter 103    0.1500    0.1930
-     Parameter 115    0.1500    0.1930
-     Parameter 23    0.1500    0.1930
-     Parameter 191    0.1400    0.2606
-     Parameter 71    0.1400    0.2606
-     Parameter 160    0.1400    0.2606
-     Parameter 55    0.1400    0.2606
-     Parameter 187    0.1400    0.2606
-     Parameter 102    0.1400    0.2606
-     Parameter 194    0.1400    0.2606
-     Parameter 58    0.1400    0.2606
-     Parameter 78    0.1300    0.3439
-     Parameter 184    0.1300    0.3439
-     Parameter 92    0.1300    0.3439
-     Parameter 109    0.1300    0.3439
-     Parameter 56    0.1300    0.3439
-     Parameter 117    0.1300    0.3439
-     Parameter 46    0.1300    0.3439
-     Parameter 127    0.1300    0.3439
-     Parameter 17    0.1200    0.4431
-     Parameter 154    0.1200    0.4431
-     Parameter 217    0.1200    0.4431
-     Parameter 132    0.1200    0.4431
-     Parameter 86    0.1200    0.4431
-     Parameter 22    0.1200    0.4431
-     Parameter 207    0.1200    0.4431
-     Parameter 197    0.1100    0.5560
-     Parameter 186    0.1100    0.5560
-     Parameter 215    0.1100    0.5560
-     Parameter 226    0.1100    0.5560
-     Parameter 107    0.1100    0.5560
-     Parameter 150    0.1100    0.5560
-     Parameter 91    0.1100    0.5560
-     Parameter 220    0.1100    0.5560
-     Parameter 110    0.1000    0.6766
-     Parameter 202    0.1000    0.6766
-     Parameter 36    0.1000    0.6766
-     Parameter 195    0.1000    0.6766
-     Parameter 196    0.0900    0.7942
-     Parameter 104    0.0900    0.7942
-     Parameter 133    0.0900    0.7942
-     Parameter 183    0.0900    0.7942
-     Parameter 175    0.0900    0.7942
-     Parameter 65    0.0900    0.7942
-     Parameter 171    0.0900    0.7942
-     Parameter 201    0.0900    0.7942
-     Parameter 131    0.0900    0.7942
-     Parameter 33    0.0900    0.7942
-     Parameter 34    0.0900    0.7942
-     Parameter 225    0.0800    0.8938
-     Parameter 177    0.0800    0.8938
-     Parameter 85    0.0800    0.8938
-     Parameter 114    0.0800    0.8938
-     Parameter 62    0.0800    0.8938
-     Parameter 155    0.0800    0.8938
-     Parameter 37    0.0800    0.8938
-     Parameter 200    0.0800    0.8938
-     Parameter 106    0.0800    0.8938
-     Parameter 173    0.0800    0.8938
-     Parameter 38    0.0700    0.9610
-     Parameter 222    0.0700    0.9610
-     Parameter 13    0.0700    0.9610
-     Parameter 41    0.0700    0.9610
-     Parameter 84    0.0700    0.9610
-     Parameter 108    0.0700    0.9610
-     Parameter 16    0.0700    0.9610
-     Parameter 218    0.0700    0.9610
-     Parameter 35    0.0600    0.9921
-     Parameter 59    0.0600    0.9921
-     Parameter 151    0.0600    0.9921
-     Parameter 83    0.0600    0.9921
-     Parameter 206    0.0600    0.9921
-     Parameter 45    0.0600    0.9921
-     Parameter 87    0.0600    0.9921
-     Parameter 172    0.0600    0.9921
-     Parameter 130    0.0600    0.9921
-     Parameter 153    0.0500    0.9995
-     Parameter 152    0.0500    0.9995
-     Parameter 128    0.0500    0.9995
-     Parameter 63    0.0500    0.9995
-     Parameter 14    0.0500    0.9995
-     Parameter 219    0.0500    0.9995
-     Parameter 64    0.0500    0.9995
-     Parameter 176    0.0500    0.9995
-     Parameter 40    0.0500    0.9995
-     Parameter 198    0.0500    0.9995
-     Parameter 105    0.0400    1.0000
-     Parameter 221    0.0400    1.0000
-     Parameter 224    0.0400    1.0000
-     Parameter 61    0.0400    1.0000
-     Parameter 129    0.0400    1.0000
-     Parameter 82    0.0400    1.0000
-     Parameter 223    0.0400    1.0000
-     Parameter 199    0.0300    1.0000
-     Parameter 60    0.0300    1.0000
-     Parameter 178    0.0300    1.0000
-     Parameter 15    0.0200    1.0000
-
-
-
-     Simulated prior distributions
-
-     Parameter       Prior Mean  Prior Variance  Prior Std. Dev.
-
-
-     Parameter 1         0.0019          0.0054          0.0737
-     Parameter 2         0.0022          0.0060          0.0774
-     Parameter 3         0.0012          0.0055          0.0742
-     Parameter 4        -0.0010          0.0061          0.0779
-     Parameter 5         0.0002          0.0061          0.0779
-     Parameter 6        -0.0072          0.0059          0.0769
-     Parameter 7         0.0017          0.0054          0.0738
-     Parameter 8         0.0008          0.0054          0.0738
-     Parameter 9         0.0009          0.0051          0.0716
-     Parameter 10         0.0002          0.0055          0.0742
-     Parameter 11         0.0006          0.0054          0.0738
-     Parameter 12        -0.0038          0.0053          0.0726
-     Parameter 13 Improper Prior
-     Parameter 14 Improper Prior
-     Parameter 15 Improper Prior
-     Parameter 16 Improper Prior
-     Parameter 17 Improper Prior
-     Parameter 18 Improper Prior
-     Parameter 19 Improper Prior
-     Parameter 20 Improper Prior
-     Parameter 21 Improper Prior
-     Parameter 22 Improper Prior
-     Parameter 23 Improper Prior
-     Parameter 24        -0.0004          0.0052          0.0719
-     Parameter 25         0.0001          0.0055          0.0741
-     Parameter 26        -0.0016          0.0056          0.0747
-     Parameter 27        -0.0009          0.0059          0.0770
-     Parameter 28        -0.0008          0.0056          0.0747
-     Parameter 29        -0.0044          0.0055          0.0742
-     Parameter 30         0.0000          0.0056          0.0748
-     Parameter 31        -0.0009          0.0055          0.0739
-     Parameter 32        -0.0003          0.0051          0.0718
-     Parameter 33        -0.0020          0.0052          0.0720
-     Parameter 34        -0.0030          0.0057          0.0758
-     Parameter 35        -0.0025          0.0053          0.0730
-     Parameter 36 Improper Prior
-     Parameter 37 Improper Prior
-     Parameter 38 Improper Prior
-     Parameter 39 Improper Prior
-     Parameter 40 Improper Prior
-     Parameter 41 Improper Prior
-     Parameter 42 Improper Prior
-     Parameter 43 Improper Prior
-     Parameter 44 Improper Prior
-     Parameter 45 Improper Prior
-     Parameter 46 Improper Prior
-     Parameter 47        -0.0005          0.0056          0.0750
-     Parameter 48        -0.0016          0.0051          0.0717
-     Parameter 49         0.0009          0.0056          0.0747
-     Parameter 50         0.0037          0.0054          0.0737
-     Parameter 51         0.0004          0.0055          0.0744
-     Parameter 52        -0.0011          0.0050          0.0708
-     Parameter 53         0.0011          0.0052          0.0722
-     Parameter 54         0.0001          0.0057          0.0753
-     Parameter 55         0.0020          0.0059          0.0767
-     Parameter 56        -0.0014          0.0057          0.0756
-     Parameter 57         0.0009          0.0058          0.0763
-     Parameter 58        -0.0017          0.0060          0.0777
-     Parameter 59 Improper Prior
-     Parameter 60 Improper Prior
-     Parameter 61 Improper Prior
-     Parameter 62 Improper Prior
-     Parameter 63 Improper Prior
-     Parameter 64 Improper Prior
-     Parameter 65 Improper Prior
-     Parameter 66 Improper Prior
-     Parameter 67 Improper Prior
-     Parameter 68 Improper Prior
-     Parameter 69 Improper Prior
-     Parameter 70        -0.0053          0.0056          0.0751
-     Parameter 71         0.0022          0.0055          0.0740
-     Parameter 72         0.0029          0.0055          0.0744
-     Parameter 73         0.0015          0.0052          0.0721
-     Parameter 74        -0.0033          0.0057          0.0758
-     Parameter 75        -0.0008          0.0057          0.0752
-     Parameter 76         0.0016          0.0053          0.0730
-     Parameter 77         0.0024          0.0057          0.0756
-     Parameter 78         0.0019          0.0055          0.0744
-     Parameter 79        -0.0026          0.0057          0.0753
-     Parameter 80         0.0053          0.0056          0.0751
-     Parameter 81         0.0028          0.0054          0.0732
-     Parameter 82 Improper Prior
-     Parameter 83 Improper Prior
-     Parameter 84 Improper Prior
-     Parameter 85 Improper Prior
-     Parameter 86 Improper Prior
-     Parameter 87 Improper Prior
-     Parameter 88 Improper Prior
-     Parameter 89 Improper Prior
-     Parameter 90 Improper Prior
-     Parameter 91 Improper Prior
-     Parameter 92 Improper Prior
-     Parameter 93         0.0006          0.0054          0.0737
-     Parameter 94         0.0002          0.0057          0.0753
-     Parameter 95         0.0018          0.0060          0.0777
-     Parameter 96        -0.0012          0.0055          0.0743
-     Parameter 97         0.0046          0.0058          0.0764
-     Parameter 98         0.0002          0.0057          0.0755
-     Parameter 99         0.0001          0.0053          0.0728
-     Parameter 100         0.0019          0.0058          0.0762
-     Parameter 101        -0.0014          0.0052          0.0720
-     Parameter 102         0.0014          0.0054          0.0735
-     Parameter 103        -0.0002          0.0060          0.0773
-     Parameter 104        -0.0012          0.0055          0.0742
-     Parameter 105 Improper Prior
-     Parameter 106 Improper Prior
-     Parameter 107 Improper Prior
-     Parameter 108 Improper Prior
-     Parameter 109 Improper Prior
-     Parameter 110 Improper Prior
-     Parameter 111 Improper Prior
-     Parameter 112 Improper Prior
-     Parameter 113 Improper Prior
-     Parameter 114 Improper Prior
-     Parameter 115 Improper Prior
-     Parameter 116        -0.0003          0.0056          0.0746
-     Parameter 117        -0.0003          0.0054          0.0733
-     Parameter 118         0.0020          0.0053          0.0726
-     Parameter 119         0.0009          0.0055          0.0741
-     Parameter 120        -0.0037          0.0059          0.0770
-     Parameter 121         0.0028          0.0059          0.0768
-     Parameter 122         0.0043          0.0051          0.0715
-     Parameter 123         0.0016          0.0055          0.0742
-     Parameter 124         0.0065          0.0054          0.0734
-     Parameter 125        -0.0024          0.0053          0.0729
-     Parameter 126         0.0033          0.0060          0.0777
-     Parameter 127         0.0024          0.0051          0.0713
-     Parameter 128 Improper Prior
-     Parameter 129 Improper Prior
-     Parameter 130 Improper Prior
-     Parameter 131 Improper Prior
-     Parameter 132 Improper Prior
-     Parameter 133 Improper Prior
-     Parameter 134 Improper Prior
-     Parameter 135 Improper Prior
-     Parameter 136 Improper Prior
-     Parameter 137 Improper Prior
-     Parameter 138 Improper Prior
-     Parameter 139        -0.0013          0.0055          0.0743
-     Parameter 140        -0.0059          0.0054          0.0733
-     Parameter 141        -0.0018          0.0054          0.0735
-     Parameter 142         0.0021          0.0050          0.0710
-     Parameter 143         0.0035          0.0054          0.0732
-     Parameter 144         0.0007          0.0055          0.0743
-     Parameter 145         0.0046          0.0054          0.0734
-     Parameter 146        -0.0021          0.0052          0.0724
-     Parameter 147        -0.0008          0.0055          0.0742
-     Parameter 148        -0.0005          0.0061          0.0782
-     Parameter 149         0.0000          0.0060          0.0778
-     Parameter 150        -0.0023          0.0054          0.0738
-     Parameter 151 Improper Prior
-     Parameter 152 Improper Prior
-     Parameter 153 Improper Prior
-     Parameter 154 Improper Prior
-     Parameter 155 Improper Prior
-     Parameter 156 Improper Prior
-     Parameter 157 Improper Prior
-     Parameter 158 Improper Prior
-     Parameter 159 Improper Prior
-     Parameter 160 Improper Prior
-     Parameter 161 Improper Prior
-     Parameter 162        -0.0039          0.0056          0.0748
-     Parameter 163         0.0030          0.0056          0.0751
-     Parameter 164        -0.0014          0.0053          0.0727
-     Parameter 165         0.0046          0.0057          0.0756
-     Parameter 166         0.0002          0.0059          0.0768
-     Parameter 167        -0.0012          0.0050          0.0705
-     Parameter 168        -0.0060          0.0057          0.0754
-     Parameter 169         0.0007          0.0059          0.0768
-     Parameter 170        -0.0007          0.0056          0.0749
-     Parameter 171        -0.0035          0.0056          0.0747
-     Parameter 172         0.0036          0.0059          0.0767
-     Parameter 173         0.0014          0.0059          0.0771
-     Parameter 174 Improper Prior
-     Parameter 175 Improper Prior
-     Parameter 176 Improper Prior
-     Parameter 177 Improper Prior
-     Parameter 178 Improper Prior
-     Parameter 179 Improper Prior
-     Parameter 180 Improper Prior
-     Parameter 181 Improper Prior
-     Parameter 182 Improper Prior
-     Parameter 183 Improper Prior
-     Parameter 184 Improper Prior
-     Parameter 185        -0.0003          0.0054          0.0733
-     Parameter 186        -0.0023          0.0053          0.0731
-     Parameter 187         0.0000          0.0056          0.0748
-     Parameter 188         0.0028          0.0054          0.0736
-     Parameter 189         0.0012          0.0056          0.0747
-     Parameter 190         0.0011          0.0056          0.0749
-     Parameter 191        -0.0037          0.0059          0.0765
-     Parameter 192         0.0031          0.0059          0.0770
-     Parameter 193         0.0004          0.0051          0.0715
-     Parameter 194        -0.0016          0.0057          0.0756
-     Parameter 195         0.0030          0.0057          0.0757
-     Parameter 196         0.0016          0.0054          0.0735
-     Parameter 197 Improper Prior
-     Parameter 198 Improper Prior
-     Parameter 199 Improper Prior
-     Parameter 200 Improper Prior
-     Parameter 201 Improper Prior
-     Parameter 202 Improper Prior
-     Parameter 203 Improper Prior
-     Parameter 204 Improper Prior
-     Parameter 205 Improper Prior
-     Parameter 206 Improper Prior
-     Parameter 207 Improper Prior
-     Parameter 208         0.0022          0.0058          0.0763
-     Parameter 209        -0.0028          0.0056          0.0752
-     Parameter 210        -0.0011          0.0054          0.0732
-     Parameter 211         0.0015          0.0055          0.0741
-     Parameter 212         0.0029          0.0054          0.0733
-     Parameter 213        -0.0003          0.0051          0.0714
-     Parameter 214         0.0007          0.0056          0.0749
-     Parameter 215        -0.0029          0.0057          0.0756
-     Parameter 216        -0.0010          0.0055          0.0742
-     Parameter 217         0.0027          0.0056          0.0747
-     Parameter 218         0.0007          0.0058          0.0765
-     Parameter 219         0.0041          0.0058          0.0763
-     Parameter 220 Improper Prior
-     Parameter 221 Improper Prior
-     Parameter 222 Improper Prior
-     Parameter 223 Improper Prior
-     Parameter 224 Improper Prior
-     Parameter 225 Improper Prior
-     Parameter 226 Improper Prior
-
-
    TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION
 
      CHAIN    BSEED
@@ -3266,8 +2802,8 @@ The following plots are available:
   Bayesian posterior predictive checking scatterplots
   Bayesian posterior predictive checking distribution plots
 
-     Beginning Time:  04:41:42
-        Ending Time:  04:41:45
+     Beginning Time:  22:47:58
+        Ending Time:  22:48:01
        Elapsed Time:  00:00:03
 
 
@@ -3281,4 +2817,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

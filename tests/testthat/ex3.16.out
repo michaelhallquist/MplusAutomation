@@ -1,6 +1,6 @@
-Mplus VERSION 8
+Mplus VERSION 8.7 (Mac)
 MUTHEN & MUTHEN
-04/10/2017   4:39 AM
+10/21/2021  10:45 PM
 
 INPUT INSTRUCTIONS
 
@@ -120,7 +120,7 @@ RMSEA (Root Mean Square Error Of Approximation)
 CFI/TLI
 
           CFI                                1.000
-          TLI                                1.002
+          TLI                                1.000
 
 Chi-Square Test of Model Fit for the Baseline Model
 
@@ -175,12 +175,12 @@ Effects from X1 to Y3
 
   Sum of indirect      2.691      0.063     42.390      0.000
 
-  Specific indirect
-
+  Specific indirect 1
     Y3
     Y1
     X1                 0.503      0.030     17.000      0.000
 
+  Specific indirect 2
     Y3
     Y2
     X1                 2.188      0.065     33.852      0.000
@@ -226,21 +226,21 @@ Effects from X1 to Y3
 
   Sum of indirect    2.524       2.567       2.587       2.691       2.795       2.813       2.838
 
-  Specific indirect
-
+  Specific indirect 1
     Y3
     Y1
     X1               0.430       0.445       0.452       0.503       0.550       0.558       0.579
 
+  Specific indirect 2
     Y3
     Y2
     X1               2.024       2.054       2.075       2.188       2.287       2.310       2.360
 
 
 
-     Beginning Time:  04:39:37
-        Ending Time:  04:39:38
-       Elapsed Time:  00:00:01
+     Beginning Time:  22:45:54
+        Ending Time:  22:45:54
+       Elapsed Time:  00:00:00
 
 
 
@@ -253,4 +253,4 @@ Fax: (310) 391-8971
 Web: www.StatModel.com
 Support: Support@StatModel.com
 
-Copyright (c) 1998-2017 Muthen & Muthen
+Copyright (c) 1998-2021 Muthen & Muthen

@@ -10,9 +10,6 @@ pkg_build
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
-^.*\.inp$
-^.*\.out$
-^.*\.dat$
 ^.*\.log$
 ^.*\.dgm$
 ^man-roxygen
@@ -20,4 +17,6 @@ pkg_build
 vignettes/README.md
 vignettes/precompile.R
 ^vignettes/.*\.orig$
-
+^vignettes/.*\.inp$
+^vignettes/.*\.out$
+^vignettes/.*\.dat$
