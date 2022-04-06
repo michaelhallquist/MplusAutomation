@@ -1293,6 +1293,7 @@ detectMplus <- function() {
       } else {
         ## if Mplus not found on path or program files, see if Mplus demo is available
         suppressWarnings(mplus <- system("where Mpdemo8", intern = TRUE, ignore.stderr = TRUE))
+
         ## if Mpdemo8 command found and is a valid file, then just use "Mpdemo8" as the command
         if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
           mplus <- "Mpdemo8"
@@ -1323,7 +1324,7 @@ detectMplus <- function() {
 
   if (identical(ostype, "macos")) {
     ## try to find Mplus command on the path
-    suppressWarnings(mplus <- system("which mplus", intern = TRUE))
+    suppressWarnings(mplus <- system("which mplus", intern = TRUE, ignore.stderr = TRUE))
 
     ## if Mplus command found and is a valid file, then just use "mplus" as the command
     if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
@@ -1333,7 +1334,7 @@ detectMplus <- function() {
         mplus <- "/Applications/Mplus/mplus"
       } else {
         ## if Mplus not found on path or in applications, see if Mplus demo is available
-        suppressWarnings(mplus <- system("where mpdemo", intern = TRUE))
+        suppressWarnings(mplus <- system("which mpdemo", intern = TRUE, ignore.stderr = TRUE))
         ## if mpdemo command found and is a valid file, then just use "mpdemo" as the command
         if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
           mplus <- "mpdemo"
@@ -1349,44 +1350,56 @@ detectMplus <- function() {
   }
   
   if (identical(ostype, "linux")) {
+    failure_note <- paste0(
+      "Mplus is either not installed or could not be found\n",
+      "Try installing Mplus or if it already is installed,\n",
+      "making sure it can be found by adding it to your PATH or adding a symlink\n\n",
+      "To see directories on your PATH, From a terminal, run:\n\n",
+      "  echo $PATH",
+      "\n\nthen try something along these lines:\n\n",
+      "  sudo ln -s /path/to/mplus/on/your/system /directory/on/your/PATH",
+      "\n"
+    )
+
+    mplus_found <- FALSE
+
     ## try to find Mplus command on the path
-    suppressWarnings(mplus <- system("which mplus", intern = TRUE))
+    suppressWarnings(mplus <- system("which mplus", intern = TRUE, ignore.stderr = TRUE))
 
     ## if Mplus command found and is a valid file, then just use "mplus" as the command
     if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
       mplus <- "mplus"
+      mplus_found <- TRUE
     } else {
       if (isTRUE(dir.exists("/opt/mplus"))) {
         test <- file.path(
-          list.dirs("/opt/mplus", recursive = FALSE)[1],
-          "mplus")
+          list.dirs("/opt/mplus", recursive = FALSE)[1], # Linux installation defaults to /opt/mplus/<version_num>
+          "mplus"
+        )
         if (isTRUE(file.exists(test))) {
           mplus <- test
-        } else {
+          mplus_found <- TRUE
+        }
+      } else {
           ## if Mplus not found on path or opt, see if Mplus demo is available
-          suppressWarnings(mplus <- system("where mpdemo", intern = TRUE))
+          suppressWarnings(mplus <- system("which mpdemo", intern = TRUE, ignore.stderr = TRUE))
+
           ## if mpdemo command found and is a valid file, then just use "mpdemo" as the command
           if (isTRUE(length(mplus) > 0) && isTRUE(file.exists(mplus))) {
             mplus <- "mpdemo"
-          } else {
-            note <- paste0(
-              "Mplus is either not installed or could not be found\n",
-              "Try installing Mplus or if it already is installed,\n",
-              "making sure it can be found by adding it to your PATH or adding a symlink\n\n",
-              "To see directories on your PATH, From a terminal, run:\n\n",
-              "echo $PATH",
-              "\n\nthen try something along these lines:\n\n",
-              "sudo ln -s /path/to/mplus/on/your/system /directory/on/your/PATH",
-              "\n")
-            stop(note)
+            mplus_found <- TRUE
           }
-        }
       }
+    }
+
+    if (isFALSE(mplus_found)) {
+      stop(failure_note)
     }
   }
 
   if (identical(ostype, "unknown")) {
     stop("OS Type not known. Cannot auto detect Mplus command name. You must specify it.")
   }
+
   return(mplus)  
 }
