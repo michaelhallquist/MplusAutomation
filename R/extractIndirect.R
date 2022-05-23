@@ -71,7 +71,6 @@ extractIndirect <- function(outfiletext, curfile) {
 #' @return An mplus.indirect object (inherits list) containing $overall and $specific 
 #' @keywords internal
 extractIndirect_section <- function(indirectSection, curfile, sectionType) {
-  
   columnNames <- detectColumnNames(curfile, trimSpace(indirectSection[1:50]), sectionType) #assume that column headers are somewhere in the first 50 lines
   columnNames[1] <- "outcome" #rename param -> outcome for clarity
   
@@ -111,7 +110,7 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
         names(totalLine) <- columnNames; totalLine$summary <- "Total"; totalLine$outcome <- NULL
       }
       
-      totalIndirectLine <- trimSpace(grep("(Indirect|(Total|Sum of) indirect)\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE))
+      totalIndirectLine <- trimSpace(grep("(Indirect|(Total|Sum of) indirect)\\s+[\\-0-9\\.]+.*$", esection, ignore.case=FALSE, perl=TRUE, value=TRUE))
       if (length(totalIndirectLine) > 0L) {
         totalIndirectLine <- as.list(strsplit(totalIndirectLine, "\\s+", perl=TRUE)[[1]])
         if (paste(unlist(totalIndirectLine[1:3]), collapse=" ") == "Sum of indirect") { #mplus v6 output? Not sure what generates sum versus total
