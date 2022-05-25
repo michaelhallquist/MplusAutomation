@@ -107,6 +107,11 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
       totalLine <- trimSpace(grep("Total\\s+[\\-0-9\\.]+.*$", esection, ignore.case=TRUE, perl=TRUE, value=TRUE))
       if (length(totalLine) > 0L) {
         totalLine <- as.list(strsplit(totalLine, "\\s+", perl=TRUE)[[1]])
+        if(length(totalLine) == (length(columnNames)-1)){
+          if(tail(columnNames, 1) == "sig"){
+            totalLine[[length(columnNames)]] <- ""
+          }
+        }
         names(totalLine) <- columnNames; totalLine$summary <- "Total"; totalLine$outcome <- NULL
       }
       
@@ -123,6 +128,11 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
           totalIndirectLine <- totalIndirectLine[-1]
           hname <- "Indirect"
         } else { stop("Unable to parse header from total indirect line: ", totalIndirectLine)}
+        if(tail(columnNames, 1) == "sig"){
+          if(length(totalIndirectLine) == length(columnNames)-2){
+            totalIndirectLine[[(length(columnNames)-1)]] <- ""
+          }
+        }
         names(totalIndirectLine) <- columnNames[-1]; #don't include "outcome" from columnNames since this is added en masse to summaries below
         totalIndirectLine$summary <- hname #relabel according to Mplus output
       }
@@ -132,12 +142,22 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
       if (length(directLine) > 0L) {
         direct <- as.list(strsplit(directLine, "\\s+", perl=TRUE)[[1]])
         direct <- direct[-2] #drop 'line' element for matching column names
+        if(length(direct) == (length(columnNames)-1)){
+          if(tail(columnNames, 1) == "sig"){
+            direct[[length(columnNames)]] <- ""
+          }
+        }
         names(direct) <- columnNames; direct$summary <- "Direct"; direct$outcome <- NULL
       } else {
         directSection <- strsplit(trimSpace(getMultilineSection("Direct", esection, curfile)), "\\s+")
         useful <- which(sapply(directSection, length) > 1L)
         if (length(useful) == 1L) {
           direct <- as.list(directSection[[useful]])
+          if(length(direct) == (length(columnNames)-1)){
+            if(tail(columnNames, 1) == "sig"){
+              direct[[length(columnNames)]] <- ""
+            }
+          }
           names(direct) <- columnNames
           direct$summary <- "Direct"; direct$outcome <- NULL
         } else {
@@ -205,6 +225,11 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
           #if (length(toparse) < 2L) { next } #double blank line problem
           outcome <- toparse[1] #first variable is the "outcome" (i.e., the variable furthest downstream) (X IND Y)
           source <- strsplit(toparse[length(toparse)], "\\s+")[[1]] #this should always be the earliest variable in the chain; it should have the statistics on it
+          if(length(source) == (length(columnNames)-1)){
+            if(tail(columnNames, 1) == "sig"){
+              source[[length(columnNames)]] <- ""
+            }
+          }
           names(source) <- columnNames
           names(source)[1] <- "pred" #for specific effects, the first column of source is actually the predictor, not outcome (bit of a kludge here)
           source <- as.data.frame(as.list(source), stringAsFactors=FALSE)
