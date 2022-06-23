@@ -256,7 +256,8 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
     col_factor <- vapply(df, is.factor, FUN.VALUE = NA)
     col_character <- vapply(df, is.character, FUN.VALUE = NA)
     
-    col_class <- vapply(df, function (x) { class(x)[[1]] }, FUN.VALUE = NA_character_)
+    col_class <- vapply(df, function (x) { class(x)[[1]] }, FUN.VALUE = NA_character_) # Use the first class in case of multi-class columns (e.g., c("ordered", "factor")
+    col_class[col_class == "ordered"] <- "factor" # Ensure that ordered also pass
     
     ok_cols <- col_logical | col_numeric | col_factor | col_character
     
