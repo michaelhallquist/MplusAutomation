@@ -1,3 +1,7 @@
+Version 1.1.1
+ - bugfix:      fixed a bug in reading indirect effects
+ - patch:       multi-class columns are now treated as their first class in prepareMplusData()
+
 Version 1.1.0
  - bugfix:      fixed a bug in handling multiply imputed data introduced in 1.0.0 
  - bugfix:      In readModels, $data_summary now contains cluster-level information for THREELEVEL models. Fixes Github Issue #18.
