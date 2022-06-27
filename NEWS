@@ -1,5 +1,4 @@
 Version 1.1.1
- - bugfix:      fixed a bug in reading indirect effects
  - patch:       multi-class columns are now treated as their first class in prepareMplusData()
 
 Version 1.1.0
