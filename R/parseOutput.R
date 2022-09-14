@@ -1487,7 +1487,7 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
   
   matchlines <- attr(covcoverageSubsections, "matchlines")
   
-  if (length(covcoverageSubsections) == 0 || is.na(covcoverageSubsections)) { #See UG ex9.7.out
+  if (length(covcoverageSubsections) == 0 || all(is.na(covcoverageSubsections))) { #See UG ex9.7.out
     message("No PROPORTION OF DATA PRESENT sections found within COVARIANCE COVERAGE OF DATA output.")
     return(covcoverageList)
   } else if (length(covcoverageSubsections) > 1) {
