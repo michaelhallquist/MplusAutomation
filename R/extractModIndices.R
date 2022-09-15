@@ -77,8 +77,7 @@ extractModIndices_1file <- function(outfiletext, filename) {
 
   MISection <- gsub("(^\\s+|\\s+$)", "", MISection, perl=TRUE)
   columnNames <- detectColumnNames(filename, MISection, "mod_indices")
-
-  if (is.na(columnNames) || is.null(columnNames)) stop("Missing column names for mod indices.\n  ", filename)
+  if (all(is.na(columnNames)) || is.null(columnNames)) stop("Missing column names for mod indices.\n  ", filename)
 
   #support multiple group output
   multipleGroupMatches <- grep("^\\s*Group \\w+\\s*$", MISection, ignore.case=TRUE, perl=TRUE)
