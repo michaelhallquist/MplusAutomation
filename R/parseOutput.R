@@ -507,7 +507,6 @@ divideIntoFields <- function(section.text, required) {
 #' @examples
 #' # make me!!!
 extractWarningsErrors_1file <- function(outfiletext, filename, input) {
-  
   warnerr <- list(warnings = list(), errors = list())
   class(warnerr$errors) <- c("mplus.errors", "list")
   class(warnerr$warnings) <- c("mplus.warnings", "list")
@@ -525,6 +524,15 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
   startInputWarnErr <- attr(input, "end.line") + 1L #first eligible line is after input section
   endInputWarnErr <- grep("^\\s*(INPUT READING TERMINATED NORMALLY|\\*\\*\\* WARNING.*|\\d+ (?:ERROR|WARNING)\\(S\\) FOUND IN THE INPUT INSTRUCTIONS|\\*\\*\\* ERROR.*)\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
   
+
+# Check for fatal errors --------------------------------------------------
+
+  fatalerror <- grep("FATAL ERROR", outfiletext, fixed = T)
+  if(isTRUE(length(fatalerror) > 0)){
+    if(fatalerror > tail(endInputWarnErr, 1)){
+      endInputWarnErr <- c(endInputWarnErr, length(outfiletext))
+    }
+  }
   w <- 1 #counters for warnings and errors lists
   e <- 1
   
@@ -534,10 +542,10 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
     #To identify input warnings/errors section, need to go to first blank line after the final warning or error. (look in next 100 lines)
     lastWarn <- endInputWarnErr[length(endInputWarnErr)]
     blank <- which(outfiletext[lastWarn:(lastWarn + 100 )] == "")[1L] + lastWarn - 1
-    
+    if(is.na(blank)) blank <- length(outfiletext)+1
     warnerrtext <- outfiletext[startInputWarnErr[1L]:(blank-1)]
     
-    lines <- friendlyGregexpr("^\\s*(\\*\\*\\* WARNING|\\*\\*\\* ERROR).*\\s*$", warnerrtext, perl=TRUE)
+    lines <- friendlyGregexpr("^\\s*(\\*\\*\\* WARNING|\\*\\*\\* ERROR|\\*\\*\\* FATAL ERROR).*\\s*$", warnerrtext, perl=TRUE)
     
     if (!is.null(lines)) {
       for (l in 1:nrow(lines)) {
@@ -550,7 +558,7 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
         if (substr(lines[l,"tag"], 1, 11) == "*** WARNING") {
           warnerr$warnings[[w]] <- warn.err.body
           w <- w + 1
-        } else if (substr(lines[l,"tag"], 1, 9) == "*** ERROR") {
+        } else if ((substr(lines[l,"tag"], 1, 9) == "*** ERROR") | (grepl("FATAL ERROR", lines[l,"tag"], fixed = TRUE))) {
           warnerr$errors[[e]] <- warn.err.body
           splittag <- strsplit(lines[l,"tag"], "\\s+", perl=TRUE)[[1L]]
           if (length(splittag) > 3L && splittag[3L] == "in") {
