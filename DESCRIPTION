@@ -41,7 +41,8 @@ Imports:
     data.table,
     rlang,
     fastDummies,
-    checkmate
+    checkmate,
+    reshape2
 Suggests:
     rhdf5,
     tcltk,
