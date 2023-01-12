@@ -1875,7 +1875,7 @@ extractTech10 <- function(outfiletext, filename) {
         bivarFitStats <- rbind(bivarFitStats, c(vars, lastPearson, m[3]))
       }
     }
-    else {
+    else if (grepl("^\\s+Category \\d+\\s+Category \\d+", bivarFit[l], perl = TRUE)) {
       values <- unlist(strsplit(trimSpace(bivarFit[l]), "\\s{2,}", perl = TRUE))
       
       bivarFitData[mPos,] <-c(vars,values)
