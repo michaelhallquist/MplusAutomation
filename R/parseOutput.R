@@ -1884,7 +1884,8 @@ extractTech10 <- function(outfiletext, filename) {
   rownames(bivarFitData) <- NULL
   
   names(bivarFitStats) <- c("var1", "var2", "stat", "value")
-  bivarFitStats <- dcast(bivarFitStats, var1 + var2 ~ stat)
+  bivarFitStats <- reshape(bivarFitStats, idvar = c("var1", "var2"), timevar = "stat", direction = "wide"
+                           , varying = c("Pearson", "Log-Liklihood", "Significant"))
   
   tech10List$bivar_model_fit_info <- bivarFitData
   tech10List$bivar_stats <- bivarFitStats
