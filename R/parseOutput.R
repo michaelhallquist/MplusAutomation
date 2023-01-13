@@ -1848,16 +1848,22 @@ extractTech10 <- function(outfiletext, filename) {
   # Skip header lines
   bivarFit <- bivarFit[6:length(bivarFit)]
   
-  var.lines <- c(grep("^\\s{5}\\S", bivarFit), length(bivarFit))
+  # Find the lines numbers with the variable name pairs
+  #  (and add location for the end of text, for the ldply below)
+  var.lines <- c(grep("^\\s{5}\\S{1,8}\\s+\\S{1,8}", bivarFit), length(bivarFit))
 
+  # Iterate over each set of variable pairs to extract values
   res <- ldply(1:(length(var.lines)-1), function(i) {
+    # Get start and end line numbers for this pair
     v.line <- var.lines[i]
     end <- var.lines[i+1] - 1
     
+    # Split the var names into a vector
     vars <- unlist(strsplit(trimSpace(bivarFit[v.line]), "\\s+", perl = TRUE))
     
     lines.idxs <- (v.line+1):end
     
+    # Parse remaining lines for this variable pair
     ldply(lines.idxs, function(line) {
       if (grepl("^\\s+Category \\d+\\s+Category \\d+", bivarFit[line], perl = TRUE)) {
         vals <- unlist(strsplit(trimSpace(bivarFit[line]), "\\s{2,}", perl = TRUE))
@@ -1877,6 +1883,7 @@ extractTech10 <- function(outfiletext, filename) {
     })
   })
   
+  # Split out the "summary" lines from the bivariate data
   bivarFitData <- res[res$V3 != "Summary",]
   bivarFitStats <- res[res$V3 == "Summary", c("V1", "V2", "V4", "V5")]
   
