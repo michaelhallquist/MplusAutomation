@@ -9,3 +9,9 @@ test_that("Mplus User Guide 7.3 - LCA results can be read in (tech10 error)", {
   expect_equal(m$summaries$LL, -965.244)
   expect_equal(m$tech10, list())
 })
+
+test_that("Mplus User Guide 7.3 - LCA results can be read in (older Mplus version)", {
+  m <- readModels(target = testthat::test_path("ex7.3_old.out"))
+  expect_equal(m$summaries$LL, -965.244)
+  expect_equal(m$tech10, list())
+})
