@@ -1895,7 +1895,7 @@ extractTech10 <- function(outfiletext, filename) {
                            , varying = c("Pearson", "Log-Liklihood", "Significant"))
   
   tech10List$bivar_model_fit_info <- bivarFitData
-  tech10List$bivar_stats <- bivarFitStats
+  tech10List$bivar_chi_square <- bivarFitStats
   
   return(tech10List)
   
