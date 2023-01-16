@@ -1893,6 +1893,8 @@ extractTech10 <- function(outfiletext, filename) {
   names(bivarFitStats) <- c("var1", "var2", "stat", "value")
   bivarFitStats <- reshape(bivarFitStats, idvar = c("var1", "var2"), timevar = "stat", direction = "wide"
                            , varying = c("Pearson", "Log-Liklihood", "Significant"))
+  rownames(bivarFitStats) <- NULL
+  attr(bivarFitStats, "reshapeWide") <- NULL
   
   tech10List$bivar_model_fit_info <- bivarFitData
   tech10List$bivar_chi_square <- bivarFitStats
