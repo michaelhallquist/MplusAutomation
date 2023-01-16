@@ -1845,58 +1845,59 @@ extractTech10 <- function(outfiletext, filename) {
   
   if (is.null(bivarFit)) return(tech10List) 
   
-  # Build data structures
-  bivarFitData <- matrix(nrow=length(bivarFit), ncol=7)
-  bivarFitStats <- matrix(nrow=0, ncol=4)
-  
   # Skip header lines
   bivarFit <- bivarFit[6:length(bivarFit)]
+  
+  # Find the lines numbers with the variable name pairs
+  #  (and add location for the end of text, for the ldply below)
+  var.lines <- c(grep("^\\s{5}\\S{1,8}\\s+\\S{1,8}", bivarFit), length(bivarFit))
 
-  vars <- NULL
-  lastPearson <- NULL
-  mPos <- 1
+  # Iterate over each set of variable pairs to extract values
+  res <- ldply(1:(length(var.lines)-1), function(i) {
+    # Get start and end line numbers for this pair
+    v.line <- var.lines[i]
+    end <- var.lines[i+1] - 1
     
-  for (l in 1:length(bivarFit)) {
-    if (grepl("^\\s*$", bivarFit[l], perl = TRUE)) { next }
+    # Split the var names into a vector
+    vars <- unlist(strsplit(trimSpace(bivarFit[v.line]), "\\s+", perl = TRUE))
     
-    if (grepl("^\\s{5}\\S", bivarFit[l], perl = TRUE)) {
-      # Parse new vars line
-      vars <- unlist(strsplit(trimSpace(bivarFit[l]), "\\s+", perl = TRUE))
-    }
-    else if (grepl("Bivariate (Pearson|Log-Likelihood) Chi-Square", bivarFit[l], perl = TRUE)) {
-      if (grepl("Overall", bivarFit[l], perl = TRUE)) { next } # Skip 'overall' values
-      
-      m <- unlist(regmatches(bivarFit[l], regexec("Bivariate (Pearson|Log-Likelihood) Chi-Square\\s+(\\S+)", bivarFit[l], perl = TRUE)))
-      
-      if (m[2] == 'Pearson') {
-        lastPearson <- m[3]
+    lines.idxs <- (v.line+1):end
+    
+    # Parse remaining lines for this variable pair
+    ldply(lines.idxs, function(line) {
+      if (grepl("^\\s+Category \\d+\\s+Category \\d+", bivarFit[line], perl = TRUE)) {
+        vals <- unlist(strsplit(trimSpace(bivarFit[line]), "\\s{2,}", perl = TRUE))
+        
+        c(vars, vals)
       }
-      else {
-        bivarFitStats <- rbind(bivarFitStats, c(vars, lastPearson, m[3]))
+      else if (grepl("^\\s+Bivariate (Pearson|Log-Likelihood) Chi-Square", bivarFit[line], perl = TRUE)) {
+        m <- unlist(regmatches(bivarFit[line], regexec("Bivariate (Pearson|Log-Likelihood) Chi-Square\\s+(\\S+)", bivarFit[line], perl = TRUE)))
+        
+        c(vars, "Summary", m[2:3], NA, NA)
       }
-    }
-    else {
-      values <- unlist(strsplit(trimSpace(bivarFit[l]), "\\s{2,}", perl = TRUE))
-      
-      bivarFitData[mPos,] <-c(vars,values)
-      mPos <- mPos + 1
-    }
-  }
+      else if (grepl("^\\s+Number of Significant Standardized Residuals", bivarFit[line], perl = TRUE)) {
+        m <- unlist(regmatches(bivarFit[line], regexec("Number of Significant Standardized Residuals\\s+(\\S+)", bivarFit[line], perl = TRUE)))
+        
+        c(vars, "Summary", "Significant", m[2], NA, NA)
+      }      
+    })
+  })
   
-  # Remove empty rows, and convert to data.frame
-  bivarFitData <- bivarFitData[rowSums(is.na(bivarFitData)) != ncol(bivarFitData),]
-  bivarFitData <- as.data.frame( bivarFitData, stringsAsFactors = FALSE )
-  names(bivarFitData) <- c("var1", "var2", "cat1", "cat2", "h0", "h1", "z")
+  # Split out the "summary" lines from the bivariate data
+  bivarFitData <- res[res$V3 != "Summary",]
+  bivarFitStats <- res[res$V3 == "Summary", c("V1", "V2", "V4", "V5")]
   
-  # Fix data types
-  bivarFitData[,c("h0", "h1", "z")] <- as.numeric(unlist(bivarFitData[,c("h0", "h1", "z")]))
+  names(bivarFitData) <- c("var1", "var2", "cat1", "cat2", "h1", "h0", "z")
+  rownames(bivarFitData) <- NULL
   
-  bivarFitStats <- setNames(data.frame(bivarFitStats, stringsAsFactors = FALSE), c("var1","var2","pearson","log-likelihood"))
-  bivarFitStats[,c("pearson","log-likelihood")] <- as.numeric(unlist(bivarFitStats[,c("pearson","log-likelihood")]))
+  names(bivarFitStats) <- c("var1", "var2", "stat", "value")
+  bivarFitStats <- reshape(bivarFitStats, idvar = c("var1", "var2"), timevar = "stat", direction = "wide"
+                           , varying = c("Pearson", "Log-Liklihood", "Significant"))
+  rownames(bivarFitStats) <- NULL
+  attr(bivarFitStats, "reshapeWide") <- NULL
   
   tech10List$bivar_model_fit_info <- bivarFitData
   tech10List$bivar_chi_square <- bivarFitStats
-  
   
   return(tech10List)
   
