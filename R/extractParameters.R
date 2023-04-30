@@ -497,6 +497,28 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     if (!is.null(unstandardizedSection)) {
       allSections <- appendListElements(allSections, extractParameters_1section(filename, unstandardizedSection, "unstandardized"))
     }
+    
+    alt.undstandardized <- getSection("^ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION$", outfiletext)
+    
+    if (!is.null(alt.undstandardized)) {
+      header.idx <- c(grep("Parameterization using Reference Class (\\d+)", alt.undstandardized), length(alt.undstandardized))
+      
+      alt.params <- llply(1:(length(header.idx)-1), function(i) {
+        start.line <- header.idx[[i]]
+        end.line <- header.idx[[i+1]]-1
+        
+        alt.section <- c(alt.undstandardized[1:4], alt.undstandardized[start.line:end.line])
+        
+        res <- extractParameters_1section(filename, alt.section, "alt")
+        
+        res[[1]]
+        
+      })
+      
+      names(alt.params) <- paste0("ref.cat.", 1:(length(header.idx)-1))
+      
+      allSections$unstandardized.alt <- alt.params
+    }
   }
   
   standardizedSection <- getSection("^STANDARDIZED MODEL RESULTS$", outfiletext)
@@ -632,7 +654,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
   }
 
   # cleaner equivalent of above
-  listOrder <- c("unstandardized", "r2", "ci.unstandardized",
+  listOrder <- c("unstandardized", "unstandardized.alt", "r2", "ci.unstandardized",
       "irt.parameterization", "probability.scale",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",

@@ -54,3 +54,11 @@ test_that("Mplus User Guide 7.3 - LCA results can be read in (older Mplus versio
     check.names = F
   ))
 })
+
+# Output file obtained from running code from:
+#  https://github.com/garberadamc/SEM-Lab9
+test_that("Test LCA manual 3rd step", {
+  m <- readModels(target = testthat::test_path("lca_man_3step.out"))
+  expect_equal(nrow(m$parameters$unstandardized.alt$ref.cat.1), 6)
+  expect_equal(m$parameters$unstandardized.alt$ref.cat.1$est[[1]], 0.294)
+})
