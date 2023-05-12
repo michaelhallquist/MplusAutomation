@@ -1,0 +1,515 @@
+Mplus VERSION 8.9 (Linux)
+MUTHEN & MUTHEN
+04/30/2023   2:32 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE:
+  Step3 - 3step LSAY - Lab9
+  DATA:
+  FILE = "/home/sam/work/SEM-Lab9/3step_mplus/Step3_3step_LSAY.dat";
+
+  VARIABLE:
+  NAMES = ENJOY USEFUL LOGICAL JOB ADULT FEMALE MATHG12 CPROB1 CPROB2 CPROB3 CPROB4 N;
+   MISSING=.;
+   nominal=N;
+    usevar = n;
+    missing are all (999);
+    classes = c(4);
+
+    usevar = female mathg12;
+  ANALYSIS:
+  estimator = mlr;
+    type = mixture;
+    starts = 0;
+  MODEL:
+  %OVERALL%
+
+  C on female;      ! covariate as predictor of C
+
+     %C#1%
+  [n#1@7.784];
+  [n#2@4.199];
+  [n#3@5.312];
+
+  [mathg12](m1);    ! conditional distal mean
+  mathg12;          ! conditional distal variance (freely estimated)
+
+  %C#2%
+  [n#1@-2.228];
+  [n#2@1.087];
+  [n#3@-6.772];
+
+  [mathg12](m2);
+  mathg12;
+
+  %C#3%
+  [n#1@4.387];
+  [n#2@-0.53];
+  [n#3@6.07];
+
+  [mathg12](m3);
+  mathg12;
+
+  %C#4%
+  [n#1@-7];
+  [n#2@-3.236];
+  [n#3@-3.631];
+
+  [mathg12](m4);
+  mathg12;
+  MODEL CONSTRAINT:
+  New (diff12 diff13 diff23
+      diff14 diff24 diff34);
+
+      diff12 = m1-m2;  ! test pairwise distal mean differences
+      diff13 = m1-m3;
+      diff23 = m2-m3;
+      diff14 = m1-m4;
+      diff24 = m2-m4;
+      diff34 = m3-m4;
+  MODEL TEST:
+       ! omnibus test of distal means
+      m1=m2;
+      m2=m3;
+      m3=m4;
+
+
+
+*** WARNING in MODEL command
+  Variable is uncorrelated with all other variables within class:  MATHG12
+*** WARNING in MODEL command
+  At least one variable is uncorrelated with all other variables within class.
+  Check that this is what is intended.
+   2 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+
+Step3 - 3step LSAY - Lab9
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        3061
+
+Number of dependent variables                                    2
+Number of independent variables                                  1
+Number of continuous latent variables                            0
+Number of categorical latent variables                           1
+
+Observed dependent variables
+
+  Continuous
+   MATHG12
+
+  Unordered categorical (nominal)
+   N
+
+Observed independent variables
+   FEMALE
+
+Categorical latent variables
+   C
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-06
+    Relative loglikelihood change                        0.100D-06
+    Derivative                                           0.100D-05
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+
+Input data file(s)
+  /home/sam/work/SEM-Lab9/3step_mplus/Step3_3step_LSAY.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             2
+     Number of y missing data patterns           2
+     Number of u missing data patterns           0
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              MATHG12       FEMALE
+              ________      ________
+ MATHG12        0.377
+ FEMALE         0.377         1.000
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    N
+      Category 1    0.282          863.000
+      Category 2    0.203          621.000
+      Category 3    0.197          604.000
+      Category 4    0.318          973.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     MATHG12              68.742      -0.377      27.010    0.09%      56.290     66.030     69.470
+            1155.000     224.451      -0.377      99.300    0.43%      73.460     81.780
+     FEMALE                0.481       0.075       0.000   51.88%       0.000      0.000      0.000
+            3061.000       0.250      -1.994       1.000   48.12%       1.000      1.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       14
+
+Loglikelihood
+
+          H0 Value                       -8904.174
+          H0 Scaling Correction Factor      0.9890
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                   17836.347
+          Bayesian (BIC)                 17920.718
+          Sample-Size Adjusted BIC       17876.235
+            (n* = (n + 2) / 24)
+
+Wald Test of Parameter Constraints
+
+          Value                             15.714
+          Degrees of Freedom                     3
+          P-Value                           0.0013
+
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON THE ESTIMATED MODEL
+
+    Latent
+   Classes
+
+       1        827.92240          0.27047
+       2        783.15628          0.25585
+       3        619.53141          0.20240
+       4        830.38992          0.27128
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON ESTIMATED POSTERIOR PROBABILITIES
+
+    Latent
+   Classes
+
+       1        827.92319          0.27047
+       2        783.15383          0.25585
+       3        619.53079          0.20239
+       4        830.39220          0.27128
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP
+
+Class Counts and Proportions
+
+    Latent
+   Classes
+
+       1              863          0.28193
+       2              621          0.20287
+       3              604          0.19732
+       4              973          0.31787
+
+
+CLASSIFICATION QUALITY
+
+     Entropy                         0.672
+
+
+Average Latent Class Probabilities for Most Likely Latent Class Membership (Row)
+by Latent Class (Column)
+
+           1        2        3        4
+
+    1   0.862    0.024    0.113    0.001
+    2   0.033    0.916    0.001    0.049
+    3   0.104    0.000    0.861    0.034
+    4   0.000    0.198    0.001    0.800
+
+
+Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+           1        2        3        4
+
+    1   0.899    0.025    0.076    0.000
+    2   0.027    0.726    0.000    0.247
+    3   0.157    0.001    0.840    0.002
+    4   0.001    0.037    0.025    0.937
+
+
+Logits for the Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+              1        2        3        4
+
+    1      7.786    4.204    5.317    0.000
+    2     -2.224    1.080   -6.779    0.000
+    3      4.391   -0.534    6.067    0.000
+    4     -6.998   -3.233   -3.630    0.000
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Latent Class 1
+
+ Means
+    MATHG12           72.166      1.189     60.681      0.000
+
+ Means
+    N#1                7.784      0.000    999.000    999.000
+    N#2                4.199      0.000    999.000    999.000
+    N#3                5.312      0.000    999.000    999.000
+
+ Variances
+    MATHG12          212.416     25.600      8.298      0.000
+
+Latent Class 2
+
+ Means
+    MATHG12           65.768      1.227     53.611      0.000
+
+ Means
+    N#1               -2.228      0.000    999.000    999.000
+    N#2                1.087      0.000    999.000    999.000
+    N#3               -6.772      0.000    999.000    999.000
+
+ Variances
+    MATHG12          228.752     19.088     11.984      0.000
+
+Latent Class 3
+
+ Means
+    MATHG12           67.905      1.399     48.532      0.000
+
+ Means
+    N#1                4.387      0.000    999.000    999.000
+    N#2               -0.530      0.000    999.000    999.000
+    N#3                6.070      0.000    999.000    999.000
+
+ Variances
+    MATHG12          243.909     22.798     10.699      0.000
+
+Latent Class 4
+
+ Means
+    MATHG12           68.434      1.195     57.257      0.000
+
+ Means
+    N#1               -7.000      0.000    999.000    999.000
+    N#2               -3.236      0.000    999.000    999.000
+    N#3               -3.631      0.000    999.000    999.000
+
+ Variances
+    MATHG12          195.322     20.631      9.467      0.000
+
+Categorical Latent Variables
+
+ C#1        ON
+    FEMALE            -0.862      0.121     -7.156      0.000
+
+ C#2        ON
+    FEMALE            -0.569      0.145     -3.919      0.000
+
+ C#3        ON
+    FEMALE            -0.603      0.134     -4.502      0.000
+
+ Intercepts
+    C#1                0.427      0.087      4.919      0.000
+    C#2                0.246      0.109      2.260      0.024
+    C#3                0.027      0.099      0.277      0.782
+
+New/Additional Parameters
+    DIFF12             6.398      1.826      3.503      0.000
+    DIFF13             4.261      2.228      1.912      0.056
+    DIFF23            -2.137      1.783     -1.198      0.231
+    DIFF14             3.732      1.619      2.305      0.021
+    DIFF24            -2.666      2.078     -1.283      0.200
+    DIFF34            -0.529      1.908     -0.277      0.782
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.589E-03
+       (ratio of smallest to largest eigenvalue)
+
+
+LOGISTIC REGRESSION ODDS RATIO RESULTS
+
+                                                95% C.I.
+                    Estimate       S.E.  Lower 2.5% Upper 2.5%
+
+Categorical Latent Variables
+
+ C#1      ON
+    FEMALE             0.422      0.051      0.333      0.535
+
+ C#2      ON
+    FEMALE             0.566      0.082      0.426      0.753
+
+ C#3      ON
+    FEMALE             0.547      0.073      0.421      0.711
+
+
+ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Parameterization using Reference Class 1
+
+ C#2      ON
+    FEMALE             0.294      0.127      2.313      0.021
+
+ C#3      ON
+    FEMALE             0.259      0.144      1.803      0.071
+
+ C#4      ON
+    FEMALE             0.862      0.121      7.156      0.000
+
+ Intercepts
+    C#2               -0.181      0.083     -2.190      0.029
+    C#3               -0.400      0.093     -4.279      0.000
+    C#4               -0.427      0.087     -4.919      0.000
+
+Parameterization using Reference Class 2
+
+ C#1      ON
+    FEMALE            -0.294      0.127     -2.313      0.021
+
+ C#3      ON
+    FEMALE            -0.035      0.131     -0.265      0.791
+
+ C#4      ON
+    FEMALE             0.569      0.145      3.919      0.000
+
+ Intercepts
+    C#1                0.181      0.083      2.190      0.029
+    C#3               -0.218      0.089     -2.461      0.014
+    C#4               -0.246      0.109     -2.260      0.024
+
+Parameterization using Reference Class 3
+
+ C#1      ON
+    FEMALE            -0.259      0.144     -1.803      0.071
+
+ C#2      ON
+    FEMALE             0.035      0.131      0.265      0.791
+
+ C#4      ON
+    FEMALE             0.603      0.134      4.502      0.000
+
+ Intercepts
+    C#1                0.400      0.093      4.279      0.000
+    C#2                0.218      0.089      2.461      0.014
+    C#4               -0.027      0.099     -0.277      0.782
+
+
+ODDS RATIO FOR THE ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION
+
+                                                95% C.I.
+                    Estimate       S.E.  Lower 2.5% Upper 2.5%
+
+Parameterization using Reference Class 1
+
+ C#2      ON
+    FEMALE             1.341      0.170      1.046      1.720
+
+ C#3      ON
+    FEMALE             1.295      0.186      0.978      1.716
+
+ C#4      ON
+    FEMALE             2.368      0.285      1.870      2.999
+
+Parameterization using Reference Class 2
+
+ C#1      ON
+    FEMALE             0.746      0.095      0.581      0.956
+
+ C#3      ON
+    FEMALE             0.966      0.126      0.747      1.248
+
+ C#4      ON
+    FEMALE             1.766      0.256      1.329      2.347
+
+Parameterization using Reference Class 3
+
+ C#1      ON
+    FEMALE             0.772      0.111      0.583      1.023
+
+ C#2      ON
+    FEMALE             1.035      0.136      0.801      1.338
+
+ C#4      ON
+    FEMALE             1.828      0.245      1.406      2.378
+
+
+     Beginning Time:  14:32:18
+        Ending Time:  14:32:19
+       Elapsed Time:  00:00:01
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2023 Muthen & Muthen
