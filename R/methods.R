@@ -76,7 +76,7 @@ summary.mplusObject <- function(object, verbose=FALSE, ...) {
       cat(sprintf("Number of obs: %s, number of (free) parameters: %s \n\n",
                   x$Observations, x$Parameters))
       
-      if(!is.null(x[["ChiSqM_DF"]])){
+      if(!(is.null(x[["ChiSqM_DF"]]) | is.null(x[["ChiSqM_Value"]]) | is.null(x[["ChiSqM_PValue"]]))){
         cat(with(x, sprintf("Model: Chi2(df = %s) = %s, p = %s \n",
                             ChiSqM_DF, ChiSqM_Value, ChiSqM_PValue)))
       }
