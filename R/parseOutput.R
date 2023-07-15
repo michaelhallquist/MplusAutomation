@@ -947,9 +947,9 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   
   #calculate adjusted AIC per Burnham & Anderson(2004), which is better than AIC for non-nested model selection
   #handle AICC calculation, requires AIC, Parameters, and observations
-  if (!is.null(arglist$Parameters) && !is.na(arglist$Parameters) &&
-    !is.null(arglist$AIC) && !is.na(arglist$AIC) &&
-    !is.null(arglist$Observations) && !is.na(arglist$Observations)) {
+  if (!is.null(arglist$Parameters) && !all(is.na(arglist$Parameters)) &&
+    !is.null(arglist$AIC) && !all(is.na(arglist$AIC)) &&
+    !is.null(arglist$Observations) && !all(is.na(arglist$Observations))) {
     arglist$AICC <- arglist$AIC + (2*arglist$Parameters*(arglist$Parameters+1))/(arglist$Observations-arglist$Parameters-1)
   } else {
     arglist$AICC <- NA_real_
@@ -2060,10 +2060,10 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   
   countlist <- list()
   
-  if (is.null(summaries) || missing(summaries) || summaries$NCategoricalLatentVars==1 || is.na(summaries$NCategoricalLatentVars)) {
+  if (is.null(summaries) || missing(summaries) || isTRUE(summaries$NCategoricalLatentVars[1L]==1) || all(is.na(summaries$NCategoricalLatentVars))) {
     #Starting in Mplus v7.3 and above, formatting of the class counts appears to have changed...
     #Capture the alternatives here
-    if (is.null(summaries) || missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
+    if (is.null(summaries) || missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version[1L]) < 7.3) {
       modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$", outfiletext)
       ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$", outfiletext)
       mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)

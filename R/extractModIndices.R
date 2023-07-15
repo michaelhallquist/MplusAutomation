@@ -26,10 +26,10 @@ extractModIndices_1chunk <- function(chunk, columnNames, filename) {
     #in the on/by section, the on comes first with a trailing / and no data, followed by the by line with the MI data
     #check for this and propagate data from subsequent row to this row
     if (length(thisLine) < numCols && length(thisLine) >= 4 &&
-        thisLine[4] == "/" &&
+        thisLine[4L] == "/" &&
         length(nextLine) > 4 &&
-        nextLine[1] == thisLine[3] && #var1 of ON line corresponds to var2 of BY line
-        nextLine[3] == thisLine[1] #var2 of ON line corresponds to var1 of BY line
+        nextLine[1L] == thisLine[3L] && #var1 of ON line corresponds to var2 of BY line
+        nextLine[3L] == thisLine[1L] #var2 of ON line corresponds to var1 of BY line
         ) {
       splitParams[[line]][4:length(nextLine)] <- nextLine[4:length(nextLine)]
     } else if (length(thisLine) < numCols && substr(thisLine[1], 1, 1) == "[") {
