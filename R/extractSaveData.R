@@ -100,6 +100,9 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
   listVars <- c("saveFile", "fileVarNames", "fileVarFormats", "fileVarWidths", "bayesFile", "bayesVarNames",
       "tech3File", "tech4File", "covFile", "sampleFile", "estimatesFile")
   l_ply(listVars, assign, value=NA_character_, envir=environment())
+  
+  # NULL bparameters iterations if not available (needs to be NULL instead of NA since the return is a data.frame)
+  bayesIterDetails <- NULL
 
   #in Mplus v7, "Save file" comes before "Order and format of variables"
   #new approach: process the savedata output more sequentially
@@ -191,7 +194,6 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
     bayesFileStart <- grep("^\\s*Save file\\s*$", bparametersSection, ignore.case=TRUE, perl=TRUE)
 
     if (length(bayesFileStart > 0)) {
-
       bayesFile <- trimSpace(bparametersSection[bayesFileStart+1])
       paramOrderStart <- grep("^\\s*Order of parameters saved\\s*$", bparametersSection, ignore.case=TRUE, perl=TRUE)
       paramOrderSection <- sapply(bparametersSection[(paramOrderStart+2):length(bparametersSection)], trimSpace, USE.NAMES=FALSE) #trim leading/trailing spaces and skip "Order of parameters" line and the subsequent blank line
@@ -217,7 +219,22 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
       bayesVarNames <- gsub("\\[", "MEAN", bayesVarNames, perl=TRUE)
       bayesVarNames <- gsub("\\s*\\]\\s*", "", bayesVarNames, perl=TRUE)
       bayesVarNames <- gsub("\\s+", ".", bayesVarNames, perl=TRUE)
-
+      
+      # figure out if there additional draws from the posterior, typically for factor score estimation
+      convergenceLine <- grep("Convergence iterations", bparametersSection)
+      
+      if (length(convergenceLine) == 1L) {
+        nextBlankLine <- which(bparametersSection[convergenceLine:length(bparametersSection)] == "")
+        iterLines <- bparametersSection[convergenceLine:(convergenceLine + nextBlankLine - 2)]
+        bayesIterDetails <- data.frame()
+        for (ii in seq_along(iterLines)) {
+          iterType <- sub("\\s*(.*) iterations .*", "\\1", iterLines[ii])
+          iterType <- tolower(gsub("\\s", ".", iterType))
+          iterStart <- as.numeric(sub(".*iterations\\s*([0-9]+)-[0-9]+", "\\1", iterLines[ii]))
+          iterEnd <- as.numeric(sub(".*iterations\\s*[0-9]+-([0-9]+)", "\\1", iterLines[ii]))
+          bayesIterDetails <- rbind(bayesIterDetails, data.frame(type=iterType, start=iterStart, end=iterEnd))
+        }
+      }
     }
 
     linesParsed <- c(linesParsed, attr(bparametersSection, "lines"))
@@ -304,8 +321,9 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
   #return the file information as a list
   #N.B. Would like to shift return to "saveFile", but need to update everywhere and note deprecation in changelog
 
+  #bayesVarTypes=bayesVarTypes,
   return(list(fileName=saveFile, fileVarNames=fileVarNames, fileVarFormats=fileVarFormats, fileVarWidths=fileVarWidths,
-          bayesFile=bayesFile, bayesVarNames=bayesVarNames, tech3File=tech3File, tech4File=tech4File)) #bayesVarTypes=bayesVarTypes,
+          bayesFile=bayesFile, bayesVarNames=bayesVarNames, bayesIterDetails=bayesIterDetails, tech3File=tech3File, tech4File=tech4File))
 }
 
 #' Load an analysis dataset from the SAVEDATA command into an R data.frame
@@ -427,7 +445,7 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
   bp <- l_getSavedata_readRawFile(outfile, outfiletext, format="free", fileName=fileInfo[["bayesFile"]], varNames=fileInfo[["bayesVarNames"]])
   
   if (is.null(bp)) return(NULL)
-
+  
   #for(i in 1:nrow(bp)) {
   #  if (i > 1 && bp$Chain.number[i] != bp$Chain.number[i-1]) cat(i, " ", bp$Chain.number[i], "\n")
   #}
@@ -441,14 +459,37 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
   if (!"Chain.number" %in% names(bp)) {
     warning("Chain number not in bparameters file. Assuming 1 chain.")
     bp$Chain.number <- 1
-  } else {
-    #sort by chain number
-    bp <- bp[sort.list(bp[,"Chain.number"]),]
   }
 
   #number of chains
   nchains <- max(bp[,"Chain.number"])
 
+  # separate out the convergence iterations from other iterations (e.g., factor score computation)
+  additional_iterations <- list() # tagged on after splitting and parsing convergence iterations
+  if (!is.null(fileInfo[["bayesIterDetails"]])) {
+    c_row <- which(fileInfo$bayesIterDetails == "convergence")
+    if (length(c_row) == 1L) {
+      # the length of convergence iterations will be nchains * ndraws
+      offset <- fileInfo$bayesIterDetails$end[c_row]*(nchains - 1)
+      
+      # since we have nchains * ndraws for convergence, we need to add the offset to cover the difference
+      other_iter <- fileInfo$bayesIterDetails[-c_row,,drop=FALSE]
+      other_iter$start <- other_iter$start + offset
+      other_iter$end <- other_iter$end + offset
+      if (nrow(other_iter) > 0L) {
+        for (ii in seq_len(nrow(other_iter))) {
+          additional_iterations[[other_iter$type[ii]]] <- bp[other_iter$start[ii]:other_iter$end[ii],,drop=FALSE]
+        }
+      }
+      
+      # subset the main object down to just convergence draws
+      bp <- bp[fileInfo$bayesIterDetails$start[c_row]:(fileInfo$bayesIterDetails$end[c_row]*nchains),,drop=FALSE]
+    }
+  }
+  
+  #sort by chain number for separate burn-in and valid draws
+  bp <- bp[sort.list(bp[,"Chain.number"]),]
+  
   #Each section contains two halves (burn-in and valid draws)
   nsections <- 2*nchains
 
@@ -473,8 +514,13 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
     bp.split <- lapply(split(bp[,sapply(bp, is.numeric)], list(bp$Burnin)), mcmc)
   }
 
-  if(discardBurnin) {
+  # Small logical inconsistency introduced here with additional iterations (e.g., factor scores)
+  # Even if we discard the burn-in, should we also discard any other iterations? The discard is intended
+  # to drop the return to a data.frame/mcmc object, not a list, so I'm sticking with that for now.
+  if (discardBurnin) {
     bp.split <- bp.split[["valid_draw"]]
+  } else {
+    bp.split <- c(bp.split, additional_iterations)
   }
   
   class(bp.split) <- c(class(bp.split), "mplus.bparameters")

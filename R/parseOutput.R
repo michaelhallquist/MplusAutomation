@@ -714,6 +714,7 @@ extractInput_1file <- function(outfiletext, filename) {
   input$variable <- divideIntoFields(input$variable)
   input$analysis <- divideIntoFields(input$analysis)
   input$montecarlo <- divideIntoFields(input$montecarlo)
+  input$savedata <- divideIntoFields(input$savedata)
   
   
   attr(input, "start.line") <- startInput

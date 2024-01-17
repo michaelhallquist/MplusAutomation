@@ -1,6 +1,7 @@
 Version 1.1.1
+ - bugfix:      handle bparameters files that have additional iterations, usually from factor scores. Fixes Github Issue #138
  - patch:       multi-class columns are now treated as their first class in prepareMplusData()
- - patch:       extract alternative parameterizations of categorical latent variables (thanks to sam-crawley for the pull request)
+ - feature:     extract alternative parameterizations of categorical latent variables (thanks to sam-crawley for the pull request)
 
 Version 1.1.0
  - bugfix:      fixed a bug in handling multiply imputed data introduced in 1.0.0 
