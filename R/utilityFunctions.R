@@ -192,7 +192,6 @@ testBParamCompoundConstraint <- function(bparams, test) {
 #' @examples
 #' ## make me
 friendlyGregexpr <- function(pattern, charvector, perl=TRUE) {
-  #require(plyr)
   #now create data frame documenting the start and end of all tags
   #rather than ldply, need a usual loop to track element number (in cases where charvector is a vector)
   regexpMatches <- gregexpr(pattern, charvector, perl=perl)

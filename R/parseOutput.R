@@ -1063,20 +1063,6 @@ extractModelSummaries <- function(target=getwd(), recursive=FALSE, filefilter) {
 }
 
 
-#' Add header to saved data
-#'
-#' Description
-#'
-#' @param outfile The output file
-#' @param director The current working directory by default
-#' @return NULL
-#' @keywords internal
-#' @examples
-#' # make me!!!
-addHeaderToSavedata <- function(outfile, directory=getwd()) {
-  
-}
-
 #' Helper subfunction to extract one section of OUTPUT: RESIDUALS
 #' Can be called multiple times, as in the case of invariance testing
 #' 

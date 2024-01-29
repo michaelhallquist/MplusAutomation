@@ -10,8 +10,7 @@
   parm,
   level = 0.95,
   type = c("un", "std", "stdy", "stdyx"),
-  params = c("regression", "loading", "undirected", "expectation", "variability",
-    "new"),
+  params = c("regression", "loading", "undirected", "expectation", "variability", "new"),
   ...
 )
 

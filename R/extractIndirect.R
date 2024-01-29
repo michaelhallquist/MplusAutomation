@@ -5,7 +5,7 @@
 #' The base structure of each is a list containing $overall and $specific effects (as data.frames)
 #'
 #' @param outfiletext a character vector containing the indirect effects output section returned by getSection 
-#' @param curFile the name of the current output file being parsed
+#' @param curfile the name of the current output file being parsed
 #' @return An mplus.indirect object (inherits list) containing $overall and $specific 
 #' @keywords internal
 extractIndirect <- function(outfiletext, curfile) {
@@ -67,7 +67,7 @@ extractIndirect <- function(outfiletext, curfile) {
 #' It returns a list composed of $overall and $specific effects
 #'
 #' @param indirectSection a character vector containing the indirect effects for a specific section (e.g., stdyx)  
-#' @param curFile the name of the current output file being parsed
+#' @param curfile the name of the current output file being parsed
 #' @return An mplus.indirect object (inherits list) containing $overall and $specific 
 #' @keywords internal
 extractIndirect_section <- function(indirectSection, curfile, sectionType) {

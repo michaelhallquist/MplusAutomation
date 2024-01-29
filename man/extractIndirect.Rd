@@ -9,7 +9,7 @@ extractIndirect(outfiletext, curfile)
 \arguments{
 \item{outfiletext}{a character vector containing the indirect effects output section returned by getSection}
 
-\item{curFile}{the name of the current output file being parsed}
+\item{curfile}{the name of the current output file being parsed}
 }
 \value{
 An mplus.indirect object (inherits list) containing $overall and $specific

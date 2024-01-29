@@ -7,7 +7,7 @@
 graphModel(model)
 }
 \arguments{
-\item{The}{model}
+\item{model}{The model}
 }
 \value{
 a dot model

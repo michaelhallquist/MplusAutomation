@@ -6,8 +6,7 @@
 \usage{
 paramExtract(
   x,
-  params = c("regression", "loading", "undirected", "expectation", "variability",
-    "new")
+  params = c("regression", "loading", "undirected", "expectation", "variability", "new")
 )
 }
 \arguments{

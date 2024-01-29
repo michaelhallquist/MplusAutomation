@@ -187,7 +187,7 @@ connectNodes <- function(dotModel, node1, node2, connectionType) {
 #'
 #' To do: add details
 #'
-#' @param The model
+#' @param model The model
 #' @return a dot model
 #' @keywords internal
 graphModel <- function(model) {

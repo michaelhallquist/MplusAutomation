@@ -1,0 +1,168 @@
+Mplus VERSION 8.9 (Linux)
+MUTHEN & MUTHEN
+02/21/2023  10:31 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a censored-inflated
+          regression for a censored dependent
+          variable with two covariates
+  DATA:	FILE IS ex3.3.dat;
+  VARIABLE:	NAMES ARE y1 x1 x3;
+  	CENSORED ARE y1 (bi);
+  MODEL:	y1 ON x1 x3;
+  	y1#1 ON x1 x3;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a censored-inflated
+regression for a censored dependent
+variable with two covariates
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    1
+Number of independent variables                                  2
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Censored
+   Y1
+
+Observed independent variables
+   X1          X3
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                    STANDARD
+  Number of integration points                                  15
+  Dimensions of numerical integration                            0
+  Adaptive quadrature                                           ON
+Cholesky                                                       OFF
+
+Input data file(s)
+  ex3.3.dat
+Input data format  FREE
+
+
+SUMMARY OF CENSORED LIMITS
+
+      Y1                 0.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     X1                    0.000      -0.035      -3.139    0.20%      -0.842     -0.239     -0.016
+             500.000       1.041       0.091       3.252    0.20%       0.254      0.887
+     X3                   -0.067      -0.060      -3.145    0.20%      -0.870     -0.304     -0.034
+             500.000       0.960       0.073       2.857    0.20%       0.205      0.741
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        7
+
+Loglikelihood
+
+          H0 Value                        -501.525
+          H0 Scaling Correction Factor      0.9922
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    1017.051
+          Bayesian (BIC)                  1046.553
+          Sample-Size Adjusted BIC        1024.335
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ Y1         ON
+    X1                 1.204      0.089     13.500      0.000
+    X3                 0.595      0.093      6.425      0.000
+
+ Y1#1       ON
+    X1                 0.338      0.215      1.574      0.116
+    X3                 1.183      0.240      4.935      0.000
+
+ Intercepts
+    Y1#1              -0.838      0.276     -3.043      0.002
+    Y1                 0.664      0.118      5.633      0.000
+
+ Residual Variances
+    Y1                 1.156      0.155      7.448      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.211E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  22:31:54
+        Ending Time:  22:31:54
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2023 Muthen & Muthen

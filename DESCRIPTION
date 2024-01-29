@@ -1,8 +1,8 @@
 Package: MplusAutomation
 Type: Package
 Title: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus
-Version: 1.1.0
-Date: 2022-04-04
+Version: 1.1.1
+Date: 2024-01-27
 Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     email = "michael.hallquist@gmail.com"),
     person("Joshua", "Wiley", role = "aut",
@@ -52,6 +52,6 @@ Suggests:
 LazyLoad: yes
 LazyData: yes
 VignetteBuilder: knitr
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Encoding: UTF-8
 Config/testthat/edition: 3
