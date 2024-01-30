@@ -1,7 +1,6 @@
 # ch3 - regression and path analysis
 mv <- "8.9"
 
-
 test_that("Ch 3: Example 3.1 - Linear Regression", {
   m <- readModels(target = get_mplus_file("ch3/ex3.1.out", mplus_version=mv))
   b <- coef(m, params = "regression")

@@ -39,7 +39,6 @@ Imports:
     parallel,
     ggplot2,
     data.table,
-    rlang,
     fastDummies,
     checkmate
 Suggests:

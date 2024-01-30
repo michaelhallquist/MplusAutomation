@@ -1,7 +1,11 @@
 Version 1.1.1
- - bugfix:      handle bparameters files that have additional iterations, usually from factor scores. Fixes Github Issue #138
- - patch:       multi-class columns are now treated as their first class in prepareMplusData()
+ - feature:     multi-class columns are now treated as their first class in prepareMplusData()
  - feature:     extract alternative parameterizations of categorical latent variables (thanks to sam-crawley for the pull request)
+ - bugfix:      handle bparameters files that have additional iterations, usually from factor scores. Fixes Github Issue #138
+ - bugfix:      use detectMplus() inside createMixtures to avoid assumptions about location
+ - bugfix:      various updates to avoid length > 1 logical test failures in R 4.3+
+ - bugfix:      documentation updates to usage sections to correct CRAN concerns
+ - notice:      removed rlang import dependency
 
 Version 1.1.0
  - bugfix:      fixed a bug in handling multiply imputed data introduced in 1.0.0 

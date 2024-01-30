@@ -1092,6 +1092,8 @@ createMixtures <- function(classes = 1L,
                            SAVEDATA = "FILE IS {filename_stem}_{C}.dat;  SAVE = cprobabilities;",
                            quiet = TRUE,
                            ...) {
+  
+
   dots <- list(...)
   cl <- match.call()
   cl[c("classes", "filename_stem", "model_overall", "model_class_specific")] <- NULL
@@ -1220,7 +1222,7 @@ createMixtures <- function(classes = 1L,
   if(!"run" %in% names(cl_mplusmodeler)) cl_mplusmodeler$run <- 1L
   if(!"check" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["check"]] <- FALSE
   if(!"varwarnings" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["varwarnings"]] <- TRUE
-  if(!"Mplus_command" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["Mplus_command"]] <- "Mplus"
+  if(!"Mplus_command" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["Mplus_command"]] <- detectMplus()
   if(!"writeData" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["writeData"]] <- "ifmissing"
   if(!"hashfilename" %in% names(cl_mplusmodeler)) cl_mplusmodeler[["hashfilename"]] <- TRUE
   
@@ -1237,6 +1239,7 @@ createMixtures <- function(classes = 1L,
       } else {
         paste(c(filename_stem, "_", class, "_class.inp"), collapse = "")
       }
+      
       eval.parent(cl_mplusmodeler)
     })
     class(out) <- c("mixture.list", "model.list", class(out))

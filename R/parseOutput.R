@@ -466,14 +466,14 @@ divideIntoFields <- function(section.text, required) {
     #thus, split on spaces and assume that first element is lhs, drop second element if IS/ARE/=, and assume remainder is rhs
     
     #but if user uses equals sign, then spaces will not always be present (e.g., usevariables=x1-x10)
-    if ( (leadingEquals <- regexpr("^\\s*[A-Za-z]+[A-Za-z_-]*\\s*(=)", cmd[1L], perl=TRUE))[1L] > 0) {
+    if ( (leadingEquals <- regexpr("^\\s*[A-Za-z]+[A-Za-z_\\-\\d]*\\s*(=)", cmd[1L], perl=TRUE))[1L] > 0) {
       cmdName <- trimSpace(substr(cmd[1L], 1, attr(leadingEquals, "capture.start") - 1))
       cmdArgs <- trimSpace(substr(cmd[1L], attr(leadingEquals, "capture.start") + 1, nchar(cmd[1L])))
     } else {
       cmd.spacesplit <- strsplit(trimSpace(cmd[1L]), "\\s+", perl=TRUE)[[1L]]
       
       if (length(cmd.spacesplit) < 2L) {
-        #for future: make room for this function to prase things like just TECH13 (no rhs)
+        #for future: make room for this function to parse things like just TECH13 (no rhs)
       } else {
         cmdName <- trimSpace(cmd.spacesplit[1L])
         if (length(cmd.spacesplit) > 2L && tolower(cmd.spacesplit[2L]) %in% c("is", "are")) {

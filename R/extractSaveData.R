@@ -69,7 +69,6 @@ getSavedata_Fileinfo <- function(outfile) {
 #' \item{tech3File}{A character vector of the tech 3 output.}
 #' \item{tech4File}{A character vector of the tech 4 output.}
 #' @importFrom gsubfn strapply
-#' @importFrom rlang flatten
 #' @seealso \code{\link{getSavedata_Data}}
 #' @examples
 #' # make me!
@@ -267,8 +266,6 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
 
   orderFormat.text <- getMultilineSection("Order and format of variables", savedataSection, outfile, allowMultiple=FALSE)
 
-  #getSection("^\\s*Order and format of variables\\s*$", savedataSection, sectionStarts)
-
   if (!is.na(orderFormat.text[1L])) {
     variablesToParse <- orderFormat.text[orderFormat.text != ""]
     
@@ -283,16 +280,17 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
     #In this approach, the last element will be the format.
     varsSplit <- strsplit(trimSpace(variablesToParse), "\\s+")
     
-    #use flatten to remove the nested lists that result from the inner lapply over imputations
-    varsSplit <- rlang::flatten(lapply(1:length(varsSplit), function(x) {
+    # Use rlang::flatten to remove the nested lists that result from the inner lapply over imputations
+    # 2024: removed rlang::flatten in favor of inner unlist. Cannot find case where this was important
+    varsSplit <- lapply(1:length(varsSplit), function(x) {
         vname <- varsSplit[[x]]
         if (x %in% which_imp) {
           #replicate the variable for each imputation
-          return(lapply(1:nimp, function(i) { c(vname[1:(length(vname)-1)], sprintf("I_%03d", i), vname[length(vname)]) }))
+          return(unlist(lapply(1:nimp, function(i) { c(vname[1:(length(vname)-1)], sprintf("I_%03d", i), vname[length(vname)]) })))
         } else {
           return(vname)
         }
-      }))
+      })
     
     fileVarNames <- sapply(varsSplit, function(x) { paste(x[1:(length(x) - 1)], collapse=".") })
     fileVarFormats <- sapply(varsSplit, function(x) { x[length(x)] }) #last element
