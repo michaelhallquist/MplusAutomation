@@ -426,6 +426,7 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 
   if (isFALSE(simulation) && isFALSE(missing(filename))) {
     dFile <- paste0("FILE = \"", filename, "\";\n")
+    dFile <- trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', dFile)) # wrap at > 75 chars for long filenames
     if (isTRUE(imputed)) {
       dFile <- paste0(dFile, "TYPE = IMPUTATION;\n")
     }

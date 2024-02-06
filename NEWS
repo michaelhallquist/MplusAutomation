@@ -1,3 +1,6 @@
+Version 1.1.2
+ - bugfix:      Break file paths > 90 chars in prepareMplusData and mplusModeler to avoid line length errors
+
 Version 1.1.1
  - feature:     multi-class columns are now treated as their first class in prepareMplusData()
  - feature:     extract alternative parameterizations of categorical latent variables (thanks to sam-crawley for the pull request)

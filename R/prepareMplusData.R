@@ -632,16 +632,17 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
     }
   }
   
+  # use gsub on filename to force wrap at 75 chars, breaking on spaces or slashes
   if (isTRUE(imputed)) {
     syntax <- c(
       "TITLE: Your title goes here\n",
-      DATA <- paste0("DATA: FILE = \"", impfilename, "\";\n", "TYPE = IMPUTATION;\n"),
+      DATA <- paste0("DATA:\n  FILE = \"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', impfilename)), "\";\n", "TYPE = IMPUTATION;\n"),
       "VARIABLE: \n", createVarSyntax(df[[1]]), "MISSING=.;\n")
     
   } else {
     syntax <- c(
       "TITLE: Your title goes here\n",
-      DATA <- paste0("DATA: FILE = \"", filename, "\";\n"),
+      DATA <- paste0("DATA:\n  FILE = \"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', filename)), "\";\n"),
       "VARIABLE: \n", createVarSyntax(df), "MISSING=.;\n")
   }
   
