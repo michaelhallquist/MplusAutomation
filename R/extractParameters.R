@@ -686,7 +686,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
   return(allSections)
 }
 
-#' Extract model parameters from MODEL RESULTS section.
+#' (DEPRECATED) Extract model parameters from MODEL RESULTS section.
 #'
 #' Extracts the model parameters from the MODEL RESULTS section of one or more Mplus output files.
 #' If a particular output file has more than one results section (unstandardized, stdyx, stdy, and/or std),
@@ -771,8 +771,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
 #'
 #' @author Michael Hallquist
 #' @seealso \code{\link{extractModelSummaries}}
-#' @export
-#' @keywords interface
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #' ex3.14 <- extractModelParameters(

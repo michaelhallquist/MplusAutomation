@@ -2,7 +2,7 @@
 % Please edit documentation in R/extractModIndices.R
 \name{extractModIndices}
 \alias{extractModIndices}
-\title{Extract model modification indices.}
+\title{(DEPRECATED) Extract model modification indices.}
 \usage{
 extractModIndices(target = getwd(), recursive = FALSE, filefilter)
 }
@@ -58,4 +58,4 @@ ex3.14 <- extractModIndices(
 \author{
 Michael Hallquist
 }
-\keyword{interface}
+\keyword{internal}

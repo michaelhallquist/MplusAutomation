@@ -2,7 +2,7 @@
 % Please edit documentation in R/extractParameters.R
 \name{extractModelParameters}
 \alias{extractModelParameters}
-\title{Extract model parameters from MODEL RESULTS section.}
+\title{(DEPRECATED) Extract model parameters from MODEL RESULTS section.}
 \usage{
 extractModelParameters(
   target = getwd(),
@@ -111,4 +111,4 @@ ex3.14 <- extractModelParameters(
 \author{
 Michael Hallquist
 }
-\keyword{interface}
+\keyword{internal}

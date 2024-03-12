@@ -54,7 +54,7 @@ these instructions, you can just use `library(MplusAutomation)` to load the pack
 The `MplusAutomation` package is compatible with `R` and `Mplus` on Windows, Mac OS X, and Linux platforms.
 
 The package was initially built using `R` 2.15.1 and has been tested with modern versions
-up through `R` 4.0.2. To obtain `R` follow [this link](https://cran.r-project.org/).
+up through `R` 4.3.2. To obtain `R` follow [this link](https://cran.r-project.org/).
 
 After installing `R` and launching a new session, type the following at the command line:
 
@@ -337,11 +337,8 @@ syntax above should suffice.
 
 The `readModels()` function provides a single method for extracting
 all available information (that MplusAutomation currently handles) 
-from one or more output files. This is the preferred method for information
-from Mplus output files. More specifically, this function provides a wrapper
-around four other user-accessible functions: `extractModelSummaries`,
-`extractModelParameters`, `extractModIndices`, and
-`getSavedata_Data`. The `readModels()` function also uses 
+from one or more output files. This is the preferred method for extracting information
+from Mplus output files. The `readModels()` function also uses 
 a number of additional functions not accessible to the user to read output
 such as TECH1, TECH3, TECH4, TECH9, and RESIDUALS. The `readModels()` function
 extracts model summaries, parameters, modification indices, and saved data
@@ -353,30 +350,47 @@ several sub-elements, depending on the information in the output
 file. Elements of an `mplus.model` object include: 
 
 
-1. `summaries`: model summary statistics
-2. `parameters`: model parameter estimates
-3. `class_counts`: class counts and proportions for models that
+1. `input`: Mplus input syntax parsed into a list by major section
+2. `warnings`: Syntax and estimation warnings as a list
+3. `errors`: Syntax and estimation errors as a list
+4. `data_summary`: Output of SUMMARY OF DATA section, including cluster sizes and ICCs
+5. `sampstat`: Sample statistics provided by OUTPUT: SAMPSTAT, if specified
+6. `covariance_coverage`: Covariance coverage matrix for checking missingness patterns
+7. `summaries`: model summary statistics
+8. `parameters`: model parameter estimates
+9. `class_counts`: class counts and proportions for models that
   include a categorical latent variable. 
-4. `mod_indices`: model modification indices
-5. `savedata_info`: information about SAVEDATA output corresponding to this model
-6. `savedata`: `data.frame` corresponding to SAVEDATA: FILE = ...
-7. `bparameters`: an `mcmc.list` object containing the draws from the
+10. `indirect`: Output of MODEL INDIRECT if available in output. Contains `$overall` and 
+  `$specific` data.frames for each indirect effect section
+11. `mod_indices`: model modification indices
+12. `residuals`: a list containing relevant information from OUTPUT:
+   RESIDUALS. 
+13. `savedata_info`: information about SAVEDATA output corresponding to this model
+14. `savedata`: `data.frame` corresponding to SAVEDATA: FILE = ...
+15. `bparameters`: an `mcmc.list` object containing the draws from the
   MCMC chains for a Bayesian model that uses the SAVEDATA: BPARAMETERS
   command 
-8. `residuals`: a list containing relevant information from OUTPUT:
-   RESIDUALS. 
-9. `tech1`: a list containing parameter specification and starting
-   values from OUTPUT: TECH1. 
-10. `tech3`: a list containing parameter covariance and correlation
-    matrices from OUTPUT: TECH3. 
-11. `tech4`: a list containing means, covariances, and correlations
-    for latent variables from OUTPUT: TECH4. 
-12. `tech9`: a list containing error messages for each replication of
+16. `tech1`: a list containing parameter specification and starting
+  values from OUTPUT: TECH1. 
+17. `tech3`: a list containing parameter covariance and correlation
+  matrices from OUTPUT: TECH3. 
+18. `tech4`: a list containing means, covariances, and correlations
+  for latent variables from OUTPUT: TECH4. 
+19. `tech7`: a list containing sample statistics for each latent class from OUTPUT: TECH7
+20. `tech8`: a list containing optimization history of the model. Currently only supports
+  potential scale reduction in BAYES. OUTPUT: TECH8
+21. `tech9`: a list containing error messages for each replication of
   a Monte Carlo simulation study from OUTPUT: TECH9. 
-13. `lcCondMeans`: conditional latent class means, obtained using
+22. `tech10`: a list containing model fit information from OUTPUT: TECH10
+23. `tech12`: a list containing observed versus estimated sample statistics for 
+  TYPE=MIXTURE analyses from OUTPUT: TECH12
+24. fac_score_stats: factor score mean, correlation, and covariance structure from
+  SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section
+25. `lcCondMeans`: conditional latent class means, obtained using
   auxiliary(e) syntax in latent class models 
-14. `gh5`: a list containing data from the gh5 (graphics) file
+26. `gh5`: a list containing data from the gh5 (graphics) file
   corresponding to this output. (Requires `rhdf5` package).
+27. `output`: The entire output file as text
 
 Basic example:
 
@@ -539,7 +553,7 @@ or as a LaTex-formatted table (` LatexSummaryTable()` ).
 ## Displaying the summary table on the screen
 
 The ` showSummaryTable()`  function is designed to display a summary table of model fit statistics on the screen.
-The function expects a model list created by ` extractModelSummaries()`  and allows the user to specify which
+The function expects a model list created by ` readModels()`  and allows the user to specify which
 columns should be included in the table.
 
 Here is a simple example of using `showSummaryTable()` by specifying which columns to keep in the table:
@@ -636,9 +650,9 @@ See the Sweave manual for more details about combining LaTeX with `R`.
 
 # Extracting model modification indices
 
-The `extractModIndices()` function extracts the model modification indices from
+The `readModels()` function extracts the model modification indices from
 the MODEL MODIFICATION INDICES sections of one or more Mplus output files. It is up to the user to request
-modification indices using OUTPUT: MODINDICES, and for some models, such indices are not available (as noted
+modification indices using OUTPUT: MODINDICES, and for some models, such indices are not available, as noted
 in the WARNINGS section of the Mplus output.
 
 Model modification indices are returned as a data.frame of the form:
@@ -651,6 +665,16 @@ BORD9     WITH BORD1 12.427 -0.053  -0.053    -0.222
 
 These columns follow the conventions used in Mplus where EPC refers to the expected parameter change
 if the designated relationship is estimated.
+
+To obtain the modification indices, use `readModels()` and access the `$mod_indices` element:
+
+
+```{r, eval=FALSE, echo=TRUE}
+
+my_model <- readModels("~/Mplus_Test.out")
+my_model$mod_indices
+
+```
 
 # Extracting model parameters
 

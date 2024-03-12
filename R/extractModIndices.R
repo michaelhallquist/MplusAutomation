@@ -123,7 +123,7 @@ extractModIndices_1file <- function(outfiletext, filename) {
   return(allSectionMI)
 }
 
-#' Extract model modification indices.
+#' (DEPRECATED) Extract model modification indices.
 #'
 #' Extracts the model modification indices from the MODEL MODIFICATION INDICES section of one
 #' or more Mplus output files. If the \code{target} is a directory, all .out files therein will be parsed
@@ -160,9 +160,8 @@ extractModIndices_1file <- function(outfiletext, filename) {
 #'   \item{StdYX_EPC}{The EPC value standardized using the variances of the continuous latent
 #'     variables as well as the variances of the background and/or outcome variables.}
 #' @author Michael Hallquist
-#' @export
 #' @seealso \code{\link{readModels}}, \code{\link{extractModelSummaries}}, \code{\link{extractModelParameters}}
-#' @keywords interface
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #' ex3.14 <- extractModIndices(

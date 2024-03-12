@@ -976,7 +976,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   return(arglist)
 }
 
-#' Extract summary statistics from a single output file or from a group of Mplus models within a directory
+#' (DEPRECATED) Extract summary statistics from a single output file or from a group of Mplus models within a directory
 #'
 #' Parses a group of Mplus model output files (.out extension) for model fit statistics.
 #' At this time, the details extracted are fixed and include: \code{Filename, InputInstructions, Title, Estimator,
@@ -1048,8 +1048,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #'
 #' @author Michael Hallquist
 #' @seealso \code{\link{regex}}, \code{\link{runModels}}, \code{\link{readModels}}
-#' @keywords interface
-#' @export
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #'   allExamples <- extractModelSummaries(

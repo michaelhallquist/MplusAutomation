@@ -40,4 +40,4 @@ Bayesian Parameters (BPARAMETERS) file.
 \author{
 Michael Hallquist
 }
-\keyword{interface}
+\keyword{internal}

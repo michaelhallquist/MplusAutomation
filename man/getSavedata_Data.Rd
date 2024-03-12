@@ -34,4 +34,4 @@ and loads the dataset accordingly.
 \author{
 Michael Hallquist
 }
-\keyword{interface}
+\keyword{internal}

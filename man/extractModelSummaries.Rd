@@ -2,7 +2,7 @@
 % Please edit documentation in R/parseOutput.R
 \name{extractModelSummaries}
 \alias{extractModelSummaries}
-\title{Extract summary statistics from a single output file or from a group of Mplus models within a directory}
+\title{(DEPRECATED) Extract summary statistics from a single output file or from a group of Mplus models within a directory}
 \usage{
 extractModelSummaries(target = getwd(), recursive = FALSE, filefilter)
 }
@@ -91,4 +91,4 @@ infrastructure is in place to allow for user-specified selection of summary stat
 \author{
 Michael Hallquist
 }
-\keyword{interface}
+\keyword{internal}

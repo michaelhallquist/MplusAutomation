@@ -39,12 +39,6 @@
 #'   or \code{\link{LatexSummaryTable}} (returns a LaTex-formatted table of
 #'   summary statistics).
 #'
-#' Deprecated: To extract raw data created by the SAVEDATA command (e.g., class membership probabilities
-#'   or factor scores), see \code{\link{getSavedata_Data}}.
-#'
-#' Deprecated: To extract unstandardized or standardized parameter estimates from a single output file,
-#'   see \code{\link{extractModelParameters}}.
-#'
 #' Detailed model fit and parameter comparisons between two models can be obtained using
 #'   \code{\link{compareModels}}.
 #'

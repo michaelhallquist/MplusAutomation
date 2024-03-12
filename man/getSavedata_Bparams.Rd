@@ -43,4 +43,4 @@ and loads the dataset accordingly.
 \author{
 Michael Hallquist, Florian Boeing-Messing
 }
-\keyword{interface}
+\keyword{internal}

@@ -17,3 +17,4 @@ list of parsed EFA parameters
 \description{
 Extract the model parameters from an EFA Mplus model output
 }
+\keyword{internal}

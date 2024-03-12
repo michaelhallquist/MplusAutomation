@@ -12,20 +12,20 @@
 subsetModelList <- function(modelList, keepCols, dropCols, sortBy = NULL) {
   # only allow keep OR drop.
   if(!missing(keepCols) && !missing(dropCols)) stop("keepCols and dropCols passed to subsetModelList. You must choose one or the other, but not both.")
-
+  
   if(missing(keepCols) && missing(dropCols)) {
     keepCols <- c("Title", "LL", "Parameters", "AIC", "AICC", "BIC", "RMSEA_Estimate")
   }
-
-  # if passed an mplus.model.list from readModels, then just extract summaries for disply
+  
+  # if passed an mplus.model.list from readModels, then just extract summaries for display
   MplusData <- mplus_as_list(modelList)
   MplusData <- do.call("rbind.fill", sapply(MplusData, "[", "summaries"))
   
   #make a list of non-missing columns
   notMissing <- unlist(lapply(names(MplusData), function(column) {
-            if(!all(is.na(MplusData[[column]]))) return(column)
-          }))
-
+    if(!all(is.na(MplusData[[column]]))) return(column)
+  }))
+  
   if(!is.null(sortBy)){
     #handle cases where sortBy is missing
     if (missing(sortBy)) {
@@ -134,20 +134,20 @@ SummaryTable <- function(modelList, type = c("none", "screen", "popup", "html", 
                          filename = "", keepCols, dropCols, sortBy = NULL, caption = "",
                          display = FALSE, ..., include.rownames = FALSE) {
   type <- match.arg(type)
-
+  
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
-
+  
   if (!include.rownames) {
     rownames(MplusData) <- NULL
   }
-
+  
   if (nzchar(filename)) {
     if (length(grep("[\\/]", filename)) == 0) {
       #Filename does not contain a path. Therefore, add the working directory
       filename <- file.path(getwd(), filename)
     }
   }
-
+  
   switch(type,
          none = return(MplusData),
          screen = print(MplusData),
@@ -156,31 +156,31 @@ SummaryTable <- function(modelList, type = c("none", "screen", "popup", "html", 
              stop("The relimp package is absent. Interactive folder selection cannot function.")
            }
            relimp::showData(MplusData,
-                    placement = "+30+30",
-                    maxwidth = 150,
-                    maxheight = 50,
-                    rownumbers = include.rownames,
-                    title = "Mplus Summary Table", ...)
+                            placement = "+30+30",
+                            maxwidth = 150,
+                            maxheight = 50,
+                            rownumbers = include.rownames,
+                            title = "Mplus Summary Table", ...)
          },
          html = print(xtable(MplusData, caption = caption),
-             type = "html",
-             file = filename,
-             include.rownames = include.rownames,
-             NA.string = ".", ...),
+                      type = "html",
+                      file = filename,
+                      include.rownames = include.rownames,
+                      NA.string = ".", ...),
          latex = print(xtable(MplusData, caption = caption),
-             type = "latex",
-             file = filename,
-             include.rownames = include.rownames,
-             NA.string = ".", ...),
+                       type = "latex",
+                       file = filename,
+                       include.rownames = include.rownames,
+                       NA.string = ".", ...),
          markdown = pander(MplusData,
-             caption = caption,
-             ...)
+                           caption = caption,
+                           ...)
   )
-
+  
   if (display && type %in% c("html", "latex")) {
     shell.exec(paste0("file:///", filename))
   }
-
+  
   return(invisible(MplusData))
 }
 
@@ -219,7 +219,7 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, font=
   if (!suppressWarnings(requireNamespace("relimp"))) {
     stop("The relimp package is absent. Interactive folder selection cannot function.")
   }
-
+  
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
   relimp::showData(MplusData, font=font, placement="+30+30", maxwidth=150, maxheight=50, rownumbers=FALSE, title="Mplus Summary Table")
 }
@@ -257,31 +257,31 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, font=
 #' # make me!!!
 HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy = NULL, display=FALSE) {
   #create HTML table and write to file.
-
+  
   #ensure that the filename has a .html or .htm at the end
   if (!length(grep(".*\\.htm[l]*", filename)) > 0) {
     filename <- paste0(filename, ".html")
   }
-
+  
   if (length(grep("[\\/]", filename)) == 0) {
     #Filename does not contain a path. Therefore, add the working directory
     filename <- file.path(getwd(), filename)
   }
-
+  
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
-
+  
   print(x=xtable(MplusData),
-      type="html",
-      file=filename,
-      include.rownames = FALSE,
-      NA.string = "."
+        type="html",
+        file=filename,
+        include.rownames = FALSE,
+        NA.string = "."
   )
-
+  
   if (display) {
     #load table in browser
     shell.exec(paste0("file:///", filename))
   }
-
+  
 }
 
 #' Display summary table of Mplus model statistics in separate window
@@ -317,9 +317,9 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #' # make me!!!
 LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, label=NULL, caption=NULL) {
   #return latex table to caller
-
+  
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
-
+  
   return(xtable(MplusData, label=label, caption=caption))
 }
 

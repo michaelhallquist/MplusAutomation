@@ -3,6 +3,7 @@
 #' @param outfiletext character vector of Mplus output file being processed
 #' @param filename name of the output file
 #' @return list of parsed EFA parameters
+#' @keywords internal
 extractEFAparameters <- function(outfiletext, filename) {
   
   #get pre-parsed header lines so that we demarcate the section boundaries properly
