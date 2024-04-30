@@ -1,4 +1,5 @@
-Version 1.1.3 (DEVELOPMENT)
+Version 1.2 (DEVELOPMENT)
+ - feature:     New submitModels function supports asynchronous submission of Mplus models on high-performance clusters using slurm or torque
  - notice:      Package namespace has been cleaned up to remove long-deprecated functions including extractModelSummaries, extractModelParameters, and extractModIndices.
 
 Version 1.1.2

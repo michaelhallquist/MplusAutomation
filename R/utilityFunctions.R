@@ -685,20 +685,20 @@ getOutFileList <- function(target, recursive=FALSE, filefilter) {
 #' This is a helper function to split path into path and filename.
 #' Code adapted from R.utils filePath command.
 #'
-#' @param abspath A character string of the file path
+#' @param filepath A character string of the file path
 #' @return A list with elements for the directory, filename,
 #'   and absolute path.
 #' @keywords internal
 #' @examples
-#' # make me!!!
-splitFilePath <- function(abspath, normalize=FALSE) {
-  if (!is.character(abspath)) stop("Path not a character string")
-  if (nchar(abspath) < 1 || is.na(abspath)) stop("Path is missing or of zero length")
+#'   splitFilePath("dir1/subdir1/mplus1.inp")
+splitFilePath <- function(filepath, normalize=FALSE) {
+  if (!is.character(filepath)) stop("Path not a character string")
+  if (nchar(filepath) < 1 || is.na(filepath)) stop("Path is missing or of zero length")
   
   #trailing slash screws up file.exists call on Windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
-  abspath <- sub("(\\\\|/)?$", "", abspath, perl=TRUE)
+  filepath <- sub("(\\\\|/)?$", "", filepath, perl=TRUE)
   
-  components <- strsplit(abspath, split="[\\/]")[[1]]
+  components <- strsplit(filepath, split="[\\/]")[[1]]
   lcom <- length(components)
   
   stopifnot(lcom > 0)
@@ -715,7 +715,7 @@ splitFilePath <- function(abspath, normalize=FALSE) {
     dirpart <- do.call("file.path", as.list(components))
     
     #if path begins with C:, /, ~/, //, or \\, then treat as absolute
-    if (grepl("^([A-Z]{1}:|~/|/|//|\\\\)+.*$", dirpart, perl=TRUE)) { absolute <- TRUE }
+    if (grepl("^([A-Z]{1}:|~/|/|//|\\\\)+.*$", dirpart, perl=TRUE)) absolute <- TRUE
     
     if (normalize) { #convert to absolute path
       dirpart <- normalizePath(dirpart)

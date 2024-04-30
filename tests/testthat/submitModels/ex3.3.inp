@@ -1,0 +1,12 @@
+! memgb 4
+! time 6:00:00
+! processors 1
+! #SBATCH -A hallquist
+TITLE:	this is an example of a censored-inflated
+        regression for a censored dependent
+        variable with two covariates
+DATA:	FILE IS ex3.3.dat;
+VARIABLE:	NAMES ARE y1 x1 x3;
+	CENSORED ARE y1 (bi);
+MODEL:	y1 ON x1 x3;
+	y1#1 ON x1 x3;

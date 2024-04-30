@@ -256,50 +256,6 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
 
   stopifnot(replaceOutfile %in% c("always", "never", "modifiedDate"))
 
-  #helper subfunction to crawl over the target vector, determine if it is a file or folder,
-  #then locate all .inp files, and convert them to absolute paths
-  convert_to_filelist <- function(target, filefilter=NULL, recursive=FALSE) {
-    filelist <- c()
-    for (tt in target) {
-      fi <- file.info(tt)
-      if (isTRUE(is.na(fi$size))) { stop("Cannot find target: ", tt) } #do not tolerate missing files or folders
-        
-      if (isTRUE(fi$isdir)) {
-        #folder
-        ## remove trailing slash, which generates file.exists error on windows: https://bugs.r-project.org/bugzilla/show_bug.cgi?id=14721
-        directory <- sub("(\\\\|/)?$", "", tt, perl=TRUE)
-        ## however, trailing slash is needed if at root of a drive on Windows
-        if (is.windows() && isTRUE(grepl("^[a-zA-Z]:$", directory))) {
-          directory <- paste0(directory, "/")
-        }
-        
-        if (isFALSE(file.exists(directory))) { stop("runModels cannot find directory: ", directory) }
-        
-        #list files in the current directory
-        this_set <- list.files(path=directory, recursive=recursive, pattern=".*\\.inp?$", full.names = TRUE)
-        filelist <- c(filelist, this_set)
-      } else {
-        #element is a file
-        #check file extension
-        if (!grepl(".*\\.inp?$", tt, perl=TRUE)) {
-          warning("Target: ", tt, "does not appear to be an .inp file. Ignoring it.")
-          next
-        } else {
-          if (isFALSE(file.exists(tt))) { stop("runModels cannot find input file: ", tt) }
-          
-          filelist <- c(filelist, tt)
-        }
-      }
-    }
-    
-    #apply user filter, if requested
-    if (!is.null(filefilter)) { filelist <- grep(filefilter, filelist, perl=TRUE, value=TRUE) } 
-    
-    #normalize paths to convert everything to absolute
-    filelist <- normalizePath(filelist)
-    return(filelist)
-  }
-  
   #Use of ~/ home directory doesn't play well with call to sh later.
   if (grepl("^~/", Mplus_command, perl=TRUE)) { Mplus_command <- normalizePath(Mplus_command) }
   
@@ -391,10 +347,12 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
   on.exit(exitRun())
 
   #find all inp files in each element of target and return a single vector of absolute paths to inp files
-  inpfiles <- convert_to_filelist(target, filefilter, recursive)
+  inp_files <- convert_to_filelist(target, filefilter, recursive)
+
+  if(isTRUE(length(inp_files) < 1)) stop("No Mplus input files detected in the provided target: ", paste(target, collapse=", "))
 
   #find .out files corresponding to each .inp file  
-  outfiles <- unlist(lapply(inpfiles, function(x) {
+  outfiles <- unlist(lapply(inp_files, function(x) {
     if (file.exists(otest <- sub("\\.inp?$", ".out", x))) {
       return(otest)
     } else {
@@ -402,31 +360,29 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
     }
   }))
   
-  if(isTRUE(length(inpfiles) < 1)) stop("No Mplus input files detected in the provided target: ", paste(target, collapse=", "))
-
   dropOutExtensions <- sapply(outfiles, function(x) {
     if (isTRUE(nchar(x) >= 4)) return(tolower(substr(x, 1, (nchar(x)-4))))
   })
   
-  for (i in 1:length(inpfiles)) {
+  for (i in seq_along(inp_files)) {
 
     if (isFALSE(replaceOutfile == "always")) {
       #if there is a match in the outfiles for this input file, then decide whether to skip
-      if (isTRUE(tolower(sub("\\.inp?$", "", inpfiles[i], perl=TRUE)) %in% dropOutExtensions)) {
+      if (isTRUE(tolower(sub("\\.inp?$", "", inp_files[i], perl=TRUE)) %in% dropOutExtensions)) {
 
         if (isTRUE(replaceOutfile == "modifiedDate")) {
           #if check date is true, then the output file must exist and it must be
           #older than the input file to re-run
-          inpmtime <- file.info(inpfiles[i])$mtime
+          inpmtime <- file.info(inp_files[i])$mtime
 
           #need to locate the exact outfile match
-          matchPos <- grep(tolower(substr(inpfiles[i], 1, (nchar(inpfiles[i]) - 4))), dropOutExtensions)
+          matchPos <- grep(tolower(substr(inp_files[i], 1, (nchar(inp_files[i]) - 4))), dropOutExtensions)
           if (isTRUE(length(matchPos) < 1)) warning("Could not locate matching outfile")
           outmtime <- file.info(outfiles[matchPos[1]])$mtime
 
           if (isTRUE(inpmtime <= outmtime)) {
             if (isTRUE(isLogOpen())) {
-              writeLines(paste("Skipping model because output file is newer than input file:", inpfiles[i]), logTarget)
+              writeLines(paste("Skipping model because output file is newer than input file:", inp_files[i]), logTarget)
               flush(logTarget)
             }
             next
@@ -434,7 +390,7 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
         }
         else if (isTRUE(replaceOutfile == "never")) {
           if (isTRUE(isLogOpen())) {
-            writeLines(paste("Skipping model because output file already exists for:", inpfiles[i]), logTarget)
+            writeLines(paste("Skipping model because output file already exists for:", inp_files[i]), logTarget)
             flush(logTarget)
           }
           next
@@ -443,9 +399,9 @@ runModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL, showOu
     }
 
     #split input file into one element per directory (e.g., "dir1/dir2/mytest.inp" becomes a 3-element vector
-    inputSplit <- splitFilePath(inpfiles[i], normalize=TRUE)
+    inputSplit <- splitFilePath(inp_files[i], normalize=TRUE)
 
-    cur_inpfile <- inpfiles[i] #tmp var used in case of attempt to kill current job
+    cur_inpfile <- inp_files[i] #tmp var used in case of attempt to kill current job
 
     #navigate to working directory in DOS using cd command so that Mplus finds the appropriate files (support rel paths)
     #switched over to use relative filename because of problems in Mplus via Wine misinterpreting absolute paths due to forward slashes.

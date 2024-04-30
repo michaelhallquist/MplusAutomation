@@ -1,0 +1,12 @@
+! memgb 4
+! time 4:00:00
+! processors 1
+! #SBATCH -A hallquist
+TITLE:	this is an example of a censored 
+        regression for a censored dependent
+        variable with two covariates
+DATA:	FILE IS ex3.2.dat;
+VARIABLE:	NAMES ARE y1 x1 x3;
+	CENSORED ARE y1 (b);
+ANALYSIS:	ESTIMATOR = MLR;
+MODEL:	y1 ON x1 x3;

@@ -4,10 +4,10 @@
 \alias{splitFilePath}
 \title{Split File and Path into Separate Parts}
 \usage{
-splitFilePath(abspath, normalize = FALSE)
+splitFilePath(filepath, normalize = FALSE)
 }
 \arguments{
-\item{abspath}{A character string of the file path}
+\item{filepath}{A character string of the file path}
 }
 \value{
 A list with elements for the directory, filename,
@@ -18,6 +18,6 @@ This is a helper function to split path into path and filename.
 Code adapted from R.utils filePath command.
 }
 \examples{
-# make me!!!
+  splitFilePath("dir1/subdir1/mplus1.inp")
 }
 \keyword{internal}
