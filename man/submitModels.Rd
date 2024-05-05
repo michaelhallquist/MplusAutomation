@@ -9,7 +9,7 @@ submitModels(
   recursive = FALSE,
   filefilter = NULL,
   replaceOutfile = "always",
-  Mplus_command = detectMplus(),
+  Mplus_command = NULL,
   quiet = FALSE,
   scheduler = "slurm",
   sched_args = NULL,
@@ -19,10 +19,10 @@ submitModels(
   memgb_per_model = 8L,
   time_per_model = "1:00:00",
   time_per_command = NULL,
-  fork_jobs = TRUE,
   pre = NULL,
   post = NULL,
   batch_outdir = NULL,
+  job_script_prefix = NULL,
   debug = FALSE
 )
 }
@@ -50,11 +50,12 @@ defaults). Allows the user to specify the name/path of the Mplus executable to b
 running models. This covers situations where Mplus is not in the system's path,
 or where one wants to test different versions of the Mplus program.}
 
-\item{quiet}{optional. If \code{FALSE}, show status messages in the console.
-#' @param scheduler Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', or 'sh'.
-     The terms 'qsub' and 'torque' are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
-     and 'slurm'. The scheduler 'sh' does not submit to any scheduler at all, but instead executes the command
-     immediately via sh.}
+\item{quiet}{optional. If \code{FALSE}, show status messages in the console.}
+
+\item{scheduler}{Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', or 'sh'.
+The terms 'qsub' and 'torque' are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
+and 'slurm'. The scheduler 'sh' does not submit to any scheduler at all, but instead executes the command
+immediately via sh.}
 
 \item{sched_args}{A character vector of arguments to be included in the scheduling command. On TORQUE, these
 will typically begin with '-l' such as '-l wall_time=10:00:00'. These are added inside the submission script
@@ -75,19 +76,18 @@ Default: 1.}
 
 \item{memgb_per_model}{amount of memory (RAM) requested for each model (in GB). Default: 8.}
 
-\item{time_per_model}{amount of time requested for each model. Default: 1:00:00 (1 hour).}
+\item{time_per_model}{amount of time requested for each model. Default: "1:00:00" (1 hour). If
+a number is provided, we will treat this as the number of minutes.}
 
-\item{fork_jobs}{if TRUE, all jobs within a single batch will run simultaneously using the fork (&) approach.}
+\item{pre}{user-specified shell commands  to include in the job script prior to running Mplus (e.g., module load commands)}
 
-\item{pre}{user-specified code to include in the job script prior to job_list (e.g., module load commands)}
+\item{post}{user-specified shell commands to include in the job script after Mplus runs (e.g., execute results wrangling script)}
 
-\item{debug}{a logical indicating whether to actually submit the jobs (TRUE) or just create the scripts for inspection (FALSE)}
-
-\item{job_out_dir}{the directory where job scripts should be written}
+\item{batch_outdir}{the directory where job scripts should be written}
 
 \item{job_script_prefix}{the filename prefix for each job script}
 
-\item{log_file}{a csv log file containing the job ids and commands that were executed}
+\item{debug}{a logical indicating whether to actually submit the jobs (TRUE) or just create the scripts for inspection (FALSE)}
 }
 \value{
 None. Function is used for its side effects (submitting models).

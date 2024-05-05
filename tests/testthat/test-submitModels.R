@@ -1,7 +1,8 @@
-# examine whether we get
+# tests for submitModels
 
 p <- testthat::test_path("submitModels")
 
+# checks on parsing of scheduling arguments and script setup
 track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE)
 
 test_that("submitModels job ID check", {
@@ -9,7 +10,13 @@ test_that("submitModels job ID check", {
 })
 
 test_that("submitModels job allocation checks", {
-    expect_equal(track$memgb[1], 16),
-    expect_equal(track$cores[1], 2),
+    expect_equal(track$memgb[1], 16)
+    expect_equal(track$cores[1], 2)
     expect_equal(track$wall_time[1], "3:00:00")
 })
+
+# checks on cluster (must be run on slurm cluster!)
+track <- submitModels(p,
+    scheduler = "slurm",
+    batch_outdir = "/proj/mnhallqlab/users/michael/submitModels_test"
+)
