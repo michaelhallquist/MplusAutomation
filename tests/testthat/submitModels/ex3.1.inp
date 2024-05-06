@@ -1,13 +1,12 @@
 ! memgb 16
-! time 3:00:00
+! time 0:30:00
 ! processors 2
-! #SBATCH --mail-user=michael@hallquist.com
 ! #SBATCH --mail-type=FAIL
-! pre Rscript --vanilla prep_data.R
+! pre Rscript --vanilla pre_example.R
 TITLE:	this is an example of a simple linear
 	regression for a continuous observed
 	dependent variable with two covariates
 DATA:	FILE IS ex3.1.dat;
 VARIABLE:	NAMES ARE y1 x1 x3;
 MODEL:	y1 ON x1 x3;
-! post Rscript --vanilla cleanup_ex3.1.R
+! post Rscript --vanilla post_example.R

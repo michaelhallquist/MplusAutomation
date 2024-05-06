@@ -173,7 +173,7 @@ filter_inp_filelist <- function(inp_files, replaceOutfile = "always", quiet=TRUE
     }
   }
 
-  return(inp_files[-drop_pos])
+  return(inp_files[setdiff(seq_along(inp_files), drop_pos)])
 }
 
 #' Submit Mplus models to a high-performance cluster scheduler
@@ -225,12 +225,14 @@ filter_inp_filelist <- function(inp_files, replaceOutfile = "always", quiet=TRUE
 #' @param batch_outdir the directory where job scripts should be written
 #' @param job_script_prefix the filename prefix for each job script
 #' @param debug a logical indicating whether to actually submit the jobs (TRUE) or just create the scripts for inspection (FALSE)
-
+#' @param fail_on_error Whether to stop execution of the script (TRUE), or issue a warning (FALSE) if the job
+#'      submission fails. Defaults to TRUE.
 #' @return None. Function is used for its side effects (submitting models).
 #' @author Michael Hallquist
-#' @seealso \code{\link{submitModels_Interactive}}
-#' @keywords interface
 #' @export
+#' @details
+#'   Note that if `fail_on_error` is `TRUE` and submission of one model fails, the submission loop will stop, rather than 
+#'   submitting further models.
 #' @examples
 #' \dontrun{
 #'   submitModels("C:/Users/Michael/Mplus Runs", recursive=TRUE, showOutput=TRUE,
@@ -240,10 +242,11 @@ filter_inp_filelist <- function(inp_files, replaceOutfile = "always", quiet=TRUE
 #'   submitModels(getwd(), filefilter = "ex8.*", batch_outdir="~/mplus_batch_12")
 #' }
 submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
-    replaceOutfile="always", Mplus_command = NULL, quiet = FALSE,
+    replaceOutfile="modifiedDate", Mplus_command = NULL, quiet = FALSE,
     scheduler="slurm", sched_args=NULL, env_variables=NULL, export_all=FALSE,
     cores_per_model = 1L, memgb_per_model = 8L, time_per_model="1:00:00",
-    time_per_command = NULL, pre=NULL, post=NULL, batch_outdir=NULL, job_script_prefix=NULL, debug=FALSE
+    time_per_command = NULL, pre=NULL, post=NULL, batch_outdir=NULL, job_script_prefix=NULL, 
+    debug = FALSE, fail_on_error = TRUE
     ) {
 
   checkmate::assert_character(target)
@@ -256,8 +259,8 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
   checkmate::assert_flag(quiet)
   checkmate::assert_string(scheduler)
   checkmate::assert_subset(scheduler, c("qsub", "torque", "sbatch", "slurm"))
-  checkmate::assert_character(sched_args)
-  checkmate::assert_character(env_variables)
+  checkmate::assert_character(sched_args, null.ok = TRUE)
+  checkmate::assert_character(env_variables, null.ok = TRUE)
   checkmate::assert_flag(export_all)
   checkmate::assert_integerish(cores_per_model, lower = 1, len = 1L)
   checkmate::assert_number(memgb_per_model, lower = 0.1)
@@ -266,11 +269,12 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
   } else if (checkmate::test_string(time_per_model)) {
     time_per_model <- validate_dhms(time_per_model)
   }
-  checkmate::assert_character(pre)
-  checkmate::assert_character(post)
+  checkmate::assert_character(pre, null.ok = TRUE)
+  checkmate::assert_character(post, null.ok = TRUE)
   checkmate::assert_string(batch_outdir, null.ok = TRUE)
   checkmate::assert_string(job_script_prefix, null.ok = TRUE)
   checkmate::assert_flag(debug)
+  checkmate::assert_flag(fail_on_error)
   
   if (is.null(batch_outdir)) batch_outdir <- file.path(getwd(), "mplus_batch_files") # default batch files location
   if (!dir.exists(batch_outdir)) dir.create(batch_outdir, recursive = TRUE) # create batch folder if needed
@@ -358,6 +362,10 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
   run_df$dir <- sapply(split_files, "[[", "directory")
   run_df$file <- sapply(split_files, "[[", "filename")
   run_df$pre <- run_df$post <- run_df$sched <- replicate(nrow(run_df), c()) # add empty list columns for pre, post, and sched
+
+  if (!is.null(pre)) run_df$pre <- replicate(nrow(run_df), pre, simplify = FALSE) # overall pre lines for all models
+  if (!is.null(post)) run_df$post <- replicate(nrow(run_df), post, simplify = FALSE) # overall post lines for all models
+  if (!is.null(sched_args)) run_df$sched <- replicate(nrow(run_df), sched_args, simplify = FALSE) # overall scheduler lines for all models
   
   # unclear on this design decision, but for now, centralize all submission scripts in one folder
   ndigits <- floor(log10(abs(nrow(run_df)))) + 1
@@ -365,10 +373,10 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
   # read inp files for parallel directives
   for (rr in seq_len(nrow(run_df))) {
     ff <- readLines(run_df$inp_file[rr])
-    par_lines <- grep("^\\s*\\!\\s*(memgb|processors|time)\\s+", ff, ignore.case=TRUE, perl=TRUE, value=TRUE)
-    sched_lines <- grep("^\\s*\\!\\s*#\\s*(SBATCH|PBS)\\s+", ff, ignore.case = TRUE, perl = TRUE, value=TRUE)
-    pre_lines <- grep("^\\s*\\!\\s*pre\\s+", ff, ignore.case = TRUE, perl = TRUE, value=TRUE)
-    post_lines <- grep("^\\s*\\!\\s*post\\s+", ff, ignore.case = TRUE, perl = TRUE, value=TRUE)
+    par_lines <- grep("^\\s*\\!\\s*(memgb|processors|time)\\s+", ff, ignore.case = TRUE, perl = TRUE, value = TRUE)
+    sched_lines <- grep("^\\s*\\!\\s*#\\s*(SBATCH|PBS)\\s+", ff, ignore.case = TRUE, perl = TRUE, value = TRUE)
+    pre_lines <- grep("^\\s*\\!\\s*pre\\s+", ff, ignore.case = TRUE, perl = TRUE, value = TRUE)
+    post_lines <- grep("^\\s*\\!\\s*post\\s+", ff, ignore.case = TRUE, perl = TRUE, value = TRUE)
 
     if (length(par_lines) > 1L) {
       for (pp in par_lines) {
@@ -388,15 +396,33 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
 
     if (length(pre_lines) > 0L) {
       pre_lines <- sub("^\\s*\\!\\s*pre\\s+", "", pre_lines, ignore.case = TRUE, perl = TRUE)
-      run_df$pre[[rr]] <- pre_lines
+      run_df$pre[[rr]] <- c(run_df$pre[[rr]], pre_lines)
     }
 
     if (length(post_lines) > 0L) {
       post_lines <- sub("^\\s*\\!\\s*post\\s+", "", post_lines, ignore.case = TRUE, perl = TRUE)
-      run_df$post[[rr]] <- post_lines
+      run_df$post[[rr]] <- c(run_df$post[[rr]], post_lines)
     }
 
-    if (length(sched_lines) > 0L) run_df$sched[[rr]] <- sched_lines
+    if (length(sched_lines) > 0L) {
+      sched_lines <- sub("^\\s*\\!\\s*#(SBATCH|PBS)\\s*", "", sched_lines, perl = TRUE)
+
+      if (is.null(run_df$sched[[rr]])) {
+        run_df$sched[[rr]] <- sched_lines
+      } else {
+        # ensure that we override overall arguments with model-specific arguments
+        flag_this <- sub("^\\s*(-[A-z]|--[A-z\\-]+=).*", "\\1", sched_lines, perl = TRUE)
+        flag_overall <- sub("^\\s*(-[A-z]|--[A-z\\-]+=).*", "\\1", run_df$sched[[rr]], perl = TRUE)
+        m <- flag_overall %in% flag_this
+        run_df$sched[[rr]] <- c(run_df$sched[[rr]][!m], sched_lines)
+      }
+    }
+
+    # always put job output file in the same directory as the Mplus model unless user states otherwise (also avoid .out extension)
+    flags <- sub("^\\s*(-[A-z]|--[A-z\\-]+=).*", "\\1", run_df$sched[[rr]], perl = TRUE)
+    if (!any(grepl("(--output=|-o)", flags, perl=T))) {
+      run_df$sched[[rr]] <- c(run_df$sched[[rr]], paste0("-o ", run_df$dir[rr], "/mplus-", sub(".inp", "", run_df$file[rr], fixed = TRUE), "-job-%j.txt"))
+    }
   }
 
   ####
@@ -405,11 +431,13 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
     # core model execution code
     model_str <- c(
       "export TMPDIR=$( mktemp -d )", # create job-specific temporary directory
+      paste0("export MPLUSDIR='", run_df$dir[rr], "'"),
+      paste0("export MPLUSINP='", run_df$file[rr], "'"),
       paste0("cd \"", run_df$dir[rr], "\""),
       "",
-      ifelse(!is.null(run_df$pre[[rr]]), run_df$pre[[rr]], NA_character_), # model-specific pre commands
+      if (!is.null(run_df$pre[[rr]])) run_df$pre[[rr]], # model-specific pre commands
       paste0("\"", Mplus_command, "\" \"", run_df$file[rr], "\""),
-      ifelse(!is.null(run_df$post[[rr]]), run_df$post[[rr]], NA_character_) # model-specific post commands
+      if (!is.null(run_df$post[[rr]])) run_df$post[[rr]] # model-specific post commands
     )
 
     if (scheduler == "sbatch") {
@@ -421,8 +449,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
         paste0("#SBATCH -n ", run_df$cores[rr]),
         paste0("#SBATCH --time=", run_df$wall_time[rr]),
         paste0("#SBATCH --mem=", run_df$memgb[rr], "G"),
-        ifelse(!is.null(sched_args), paste("#SBATCH", sched_args), NA_character_), # common scheduler arguments
-        ifelse(!is.null(run_df$sched_lines[[rr]]), paste("#SBATCH", run_df$sched_lines[[rr]]), NA_character_), # model-specific scheduler arguments
+        if (!is.null(run_df$sched[[rr]])) paste("#SBATCH", run_df$sched[[rr]]), # common and model-specific scheduler arguments
         ""
       )
     } else if (scheduler == "qsub") {
@@ -433,8 +460,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
         paste0("#PBS -l nodes=1:ppn=", run_df$cores[rr]),
         paste0("#PBS -l walltime=", run_df$wall_time[rr]),
         paste0("#PBS -l mem=", run_df$memgb[rr], "gb"),
-        paste("#PBS", sched_args), # common scheduler arguments
-        ifelse(!is.null(run_df$sched_lines[[rr]]), paste("#PBS", run_df$sched_lines[[rr]]), NA_character_), # model-specific scheduler arguments
+        if (!is.null(sched_args)) paste("#PBS", sched_args), # common and model-specific scheduler arguments
         ""
       )
     } else if (scheduler == "local") {
@@ -653,7 +679,7 @@ slurm_job_status <- function(job_ids = NULL, user = NULL, sacct_format = "jobid,
 
   out$JobID <- as.character(out$JobID)
   df <- merge(df_base, out, by="JobID")
-  df$State[is.na(State)] <- "MISSING" # indicate missing job states
+  df$State[is.na(df$State)] <- "MISSING" # indicate missing job states
   
   return(df)
 }
@@ -766,14 +792,18 @@ local_job_status <- function(job_ids = NULL, user = NULL,
 #' @param mplus_submission_df The data.frame returned by \code{submitModels} containing
 #'   jobs to check on
 #' @param quiet If \code{TRUE}, do not print out the submission data.frame with current status
-#' @return the \code{mplus_submission_df} with
+#' @return invisibly, the \code{mplus_submission_df} with `$status` amd `$status_time` updated
+#' @export
 checkSubmission <- function(mplus_submission_df = NULL, quiet = FALSE) {
   checkmate::assert_class(mplus_submission_df, "mplus_submission_df")
-  mplus_submission_df$status <- get_job_status(attr(mplus_submission_df, "scheduler"))
-  mplus_submission_df$status_time <- Sys.time()
+  mplus_submission_df$status <- get_job_status(mplus_submission_df$jobid, attr(mplus_submission_df, "scheduler"))
+  mplus_submission_df$status_time <- as.character(Sys.time())
 
-  print(mplus_submission_df)
-  return(mplus_submission_df)
+  if (!quiet) {
+    cat("Submission status as of:", mplus_submission_df$status_time[1L], "\n-------\n")
+    print(mplus_submission_df[,c("jobid", "file", "status")])
+  }
+  return(invisible(mplus_submission_df))
 }
 
 #' summary function for submission from \code{submitModels}
@@ -781,10 +811,13 @@ checkSubmission <- function(mplus_submission_df = NULL, quiet = FALSE) {
 #' @param refresh if \code{TRUE}, check the status of jobs for this object before printing
 #' @method summary mplus_submission_df
 #' @export
-summary.mplus_submission_df <- function(x, refresh=FALSE) {
+summary.mplus_submission_df <- function(x, refresh=TRUE) {
   checkmate::assert_class(x, "mplus_submission_df")
   checkmate::assert_flag(refresh)
   if (is.null(x$status)) x$status <- "missing"
+
+  if (refresh) x <- tryCatch(checkSubmission(x, quiet = TRUE), error = function(e) x)
+
   cat("Number of models in submission: ", nrow(x), "\n")
   cat("Complete jobs: ", sum(x$status == "complete"), "\n")
   cat("Queued jobs: ", sum(x$status == "queued"), "\n")

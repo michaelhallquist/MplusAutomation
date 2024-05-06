@@ -1,6 +1,7 @@
 # tests for submitModels
+setwd("/proj/mnhallqlab/users/michael/MplusAutomation")
 
-p <- testthat::test_path("submitModels")
+p <- test_path("submitModels")
 
 # checks on parsing of scheduling arguments and script setup
 track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE)
@@ -18,5 +19,13 @@ test_that("submitModels job allocation checks", {
 # checks on cluster (must be run on slurm cluster!)
 track <- submitModels(p,
     scheduler = "slurm",
-    batch_outdir = "/proj/mnhallqlab/users/michael/submitModels_test"
+    batch_outdir = "/proj/mnhallqlab/users/michael/submitModels_test",
+    Mplus_command = "/proj/mnhallqlab/local/bin/mplus",
+    sched_args = c("--mail-user=mnhallq"),
+    debug=FALSE,
+    replaceOutfile = "always"
 )
+
+track <- checkSubmission(track)
+summary(track)
+

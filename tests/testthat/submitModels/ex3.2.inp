@@ -1,7 +1,7 @@
 ! memgb 4
 ! time 4:00:00
 ! processors 1
-! #SBATCH -A hallquist
+! #SBATCH -p general
 TITLE:	this is an example of a censored 
         regression for a censored dependent
         variable with two covariates
