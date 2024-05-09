@@ -8,7 +8,7 @@ submitModels(
   target = getwd(),
   recursive = FALSE,
   filefilter = NULL,
-  replaceOutfile = "always",
+  replaceOutfile = "modifiedDate",
   Mplus_command = NULL,
   quiet = FALSE,
   scheduler = "slurm",
@@ -23,7 +23,8 @@ submitModels(
   post = NULL,
   batch_outdir = NULL,
   job_script_prefix = NULL,
-  debug = FALSE
+  debug = FALSE,
+  fail_on_error = TRUE
 )
 }
 \arguments{
@@ -88,6 +89,9 @@ a number is provided, we will treat this as the number of minutes.}
 \item{job_script_prefix}{the filename prefix for each job script}
 
 \item{debug}{a logical indicating whether to actually submit the jobs (TRUE) or just create the scripts for inspection (FALSE)}
+
+\item{fail_on_error}{Whether to stop execution of the script (TRUE), or issue a warning (FALSE) if the job
+submission fails. Defaults to TRUE.}
 }
 \value{
 None. Function is used for its side effects (submitting models).
@@ -95,6 +99,10 @@ None. Function is used for its side effects (submitting models).
 \description{
 This function submits a group of Mplus models (.inp files) located within a
 single directory or nested within subdirectories.
+}
+\details{
+Note that if `fail_on_error` is `TRUE` and submission of one model fails, the submission loop will stop, rather than 
+  submitting further models.
 }
 \examples{
 \dontrun{
@@ -105,10 +113,6 @@ single directory or nested within subdirectories.
   submitModels(getwd(), filefilter = "ex8.*", batch_outdir="~/mplus_batch_12")
 }
 }
-\seealso{
-\code{\link{submitModels_Interactive}}
-}
 \author{
 Michael Hallquist
 }
-\keyword{interface}

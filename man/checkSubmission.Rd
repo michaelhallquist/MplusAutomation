@@ -13,7 +13,7 @@ jobs to check on}
 \item{quiet}{If \code{TRUE}, do not print out the submission data.frame with current status}
 }
 \value{
-the \code{mplus_submission_df} with
+invisibly, the \code{mplus_submission_df} with `$status` amd `$status_time` updated
 }
 \description{
 check on the status of submitted Mplus jobs on the cluster

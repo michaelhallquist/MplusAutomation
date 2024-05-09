@@ -66,6 +66,7 @@ a single mplus.model object, not a list of files. Specific elements are:
   \item{tech12}{a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
   \item{fac_score_stats}{factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section}
   \item{lcCondMeans}{conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models}
+  \item{r3step}{predictors of latent class membership using the 3-step procedure (R3STEP)}
   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)}
   \item{output}{The entire, raw output file.}
 }
