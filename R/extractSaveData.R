@@ -33,9 +33,7 @@ getSavedata_Fileinfo <- function(outfile) {
   #if returnData is false, just the variable names are returned
   #considering using addHeader to prepend a header row
 
-  if(!file.exists(outfile)) {
-    stop("Cannot locate outfile: ", outfile)
-  }
+  if(!file.exists(outfile)) stop("Cannot locate outfile: ", outfile)
 
   outfiletext <- scan(outfile, what="character", sep="\n", strip.white=FALSE, blank.lines.skip=FALSE, quiet=TRUE)
 
@@ -45,7 +43,6 @@ getSavedata_Fileinfo <- function(outfile) {
   }
 
   return(l_getSavedata_Fileinfo(outfile, outfiletext))
-
 }
 
 #' local function that does the work of getSaveData_Fileinfo
@@ -250,14 +247,6 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
     saveFile <- trimSpace(savedataSection[(saveFile.text[1L] + 1)])
   }
 
-  #save file format (sometimes on same line, sometimes on next line)
-#  saveFileFormat.text <- getSection("^\\s*Save file format", savedataSection, sectionStarts)
-#
-#  #actually, sometimes the format is "Free" and falls on the same line...
-#  if (!is.null(saveFileFormat.text)) {
-#    saveFileFormat <- trimSpace(saveFileFormat.text[1]) #first line contains format
-#  }
-#
 
 #  #file record length
 #  savefile.recordlength <- getSection("^\\s*Save file record length\\s+\\d+\\s*$", savedataSection, sectionStarts)
@@ -280,22 +269,60 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
     varsSplit <- strsplit(trimSpace(variablesToParse), "\\s+")
     
     # Use rlang::flatten to remove the nested lists that result from the inner lapply over imputations
-    # 2024: removed rlang::flatten in favor of inner unlist. Cannot find case where this was important
+    # 2024: removed rlang::flatten in favor of local function. Allows us to remove dependency
     varsSplit <- lapply(1:length(varsSplit), function(x) {
         vname <- varsSplit[[x]]
         if (x %in% which_imp) {
           #replicate the variable for each imputation
-          return(unlist(lapply(1:nimp, function(i) { c(vname[1:(length(vname)-1)], sprintf("I_%03d", i), vname[length(vname)]) })))
+          return(lapply(1:nimp, function(i) { c(vname[1:(length(vname)-1)], sprintf("I_%03d", i), vname[length(vname)]) }))
         } else {
           return(vname)
         }
       })
+    
+    # https://stackoverflow.com/questions/19734412/flatten-nested-list-into-1-deep-list
+    renquote <- function(l) if (is.list(l)) lapply(l, renquote) else enquote(l)
+    varsSplit <- lapply(unlist(renquote(varsSplit)), eval) # flatten list hierarchy
     
     fileVarNames <- sapply(varsSplit, function(x) { paste(x[1:(length(x) - 1)], collapse=".") })
     fileVarFormats <- sapply(varsSplit, function(x) { x[length(x)] }) #last element
     fileVarWidths <- strapply(fileVarFormats, "[IEFG]+(\\d+)(\\.\\d+)*", as.numeric, perl=TRUE, simplify=TRUE)
 
   }
+  
+  # For some large outputs, records span multiple rows, which is a hard fixed-width parsing demand. Identify the chunks and split out the variables by chunk
+  # save file format (sometimes on same line, sometimes on next line)
+  # Mplus uses slashes to denote when single records span multiple lines: 512F10.3 / 505F10.3 / 505F10.3 / 540F10.3 I6 I7
+  saveFileFormat.text <- grep("^\\s*Save file format\\s*$", savedataSection, perl=TRUE)
+  
+  if (length(saveFileFormat.text) > 0L) {
+    saveFileFormat <- trimSpace(savedataSection[saveFileFormat.text[1L] + 1])
+    by_row <- strsplit(saveFileFormat, "\\s*/\\s*", perl=TRUE)[[1]]
+    record_chunks <- length(by_row)
+    chunkVarWidths <- lapply(by_row, function(cc) {
+      # add a 1 in front of records that have no repeat digit(s) in front
+      cc <- gsub("(?<![0-9])([IEFG][0-9\\.]+)", "1\\1", cc, perl=TRUE)
+      nreps <- strapply(cc, "(\\d+)[IEFG][0-9\\.]+", as.numeric, perl=TRUE, simplify = TRUE)
+      var_widths <- strapply(cc, "(?:\\d+)[IEFG]+(\\d+)(\\.\\d+)*", as.numeric, perl=TRUE, simplify = TRUE)
+      
+      # now repeat the widths the correct number of times to form the line
+      var_widths <- rep(var_widths, nreps)
+      return(var_widths)
+    })
+    
+    # assign variable names to chunks based on record lengths
+    chunkVarIdx <- c(0, cumsum(sapply(chunkVarWidths, length)))
+    chunkVarNames <- lapply(2:length(chunkVarIdx), function(ii) fileVarNames[(chunkVarIdx[ii-1]+1):chunkVarIdx[ii]])
+  } else {
+    chunkVarWidths <- list(fileVarWidths) # a list of variable widths for multi-line ragged files
+    chunkVarNames <- list(fileVarNames) # a list of variable names for multi-line ragged files
+  }
+  
+  #  #actually, sometimes the format is "Free" and falls on the same line...
+  #  if (!is.null(saveFileFormat.text)) {
+  #    saveFileFormat <- trimSpace(saveFileFormat.text[1]) #first line contains format
+  #  }
+  #
 
   #Monte carlo and multiple imputation output: contains only order of variables, not their format
   order.text <- getMultilineSection("Order of variables", savedataSection, outfile, allowMultiple=FALSE)
@@ -310,7 +337,6 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
     fileVarNames <- trimSpace(variablesToParse)
   }
 
-
   #future: plausible values output from Bayesian runs
   #PLAUSIBLE VALUE MEAN, MEDIAN, SD, AND PERCENTILES FOR EACH OBSERVATION
 
@@ -319,7 +345,7 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
   #N.B. Would like to shift return to "saveFile", but need to update everywhere and note deprecation in changelog
 
   #bayesVarTypes=bayesVarTypes,
-  return(list(fileName=saveFile, fileVarNames=fileVarNames, fileVarFormats=fileVarFormats, fileVarWidths=fileVarWidths,
+  return(list(fileName=saveFile, fileVarNames=fileVarNames, fileVarFormats=fileVarFormats, fileVarWidths=fileVarWidths, chunkVarNames=chunkVarNames, chunkVarWidths=chunkVarWidths,
           bayesFile=bayesFile, bayesVarNames=bayesVarNames, bayesIterDetails=bayesIterDetails, tech3File=tech3File, tech4File=tech4File))
 }
 
@@ -379,7 +405,7 @@ getSavedata_Data <- function(outfile) {
 #' }
 #' @keywords internal
 getSavedata_Bparams <- function(outfile, discardBurnin=TRUE) {
-  #exposed wrapper for l_getSavedata_readRawFile, which pulls bayesian parameters into a data.frame
+  #exposed wrapper for getSavedata_readRawFile, which pulls bayesian parameters into a data.frame
   
   message("getSavedata_Bparams has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"bparameters\")$bparameters to replicate the old functionality.")
   return(invisible(NULL))
@@ -402,7 +428,7 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
   #missing fileInfo
   if (is.null(fileInfo)) return(NULL)
 
-  bp <- l_getSavedata_readRawFile(outfile, outfiletext, format="free", fileName=fileInfo[["bayesFile"]], varNames=fileInfo[["bayesVarNames"]])
+  bp <- getSavedata_readRawFile(outfile, outfiletext, format="free", fileName=fileInfo[["bayesFile"]], varNames=fileInfo[["bayesVarNames"]])
   
   if (is.null(bp)) return(NULL)
   
@@ -504,7 +530,8 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
 #' @return A data frame of the extracted data.
 #' @keywords internal
 #' @importFrom utils read.table read.fwf
-l_getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileName, varNames, varWidths, input) {
+#' @importFrom data.table setDF setnames fread
+getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileName, varNames, varWidths, input) {
   outfileDirectory <- splitFilePath(outfile)$directory
 
   #if file requested is missing, then abort data pull
@@ -606,9 +633,39 @@ l_getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", file
     #strip.white is necessary for na.strings to work effectively with fixed width fields
     #otherwise would need something like "*       " for na.strings
 
-    dataset <- read.fwf(file=savedataFile, widths=varWidths, header=FALSE,
-        na.strings="*", col.names=varNames, strip.white=TRUE)
+    # custom parser using data.table
+    mplus_read_fwf <- function(file, widths, header=FALSE, na.strings="*", col.names=NULL) {
+      dt <- fread(savedataFile, header=F, sep="\n", strip.white = FALSE)
+      if (!is.list(varWidths)) varWidths <- list(varWidths) # allow vector input for nchunks = 1
+      if (!is.list(col.names)) col.names <- list(col.names) # allow vector input for nchunks = 1
+      
+      cs <- cumsum(unlist(varWidths))
+      cols <- data.frame(beg=c(1, cs[1:length(cs)-1]+1), end=cs)
+      nchunks <- length(varWidths)
+      
+      if (nchunks > 1L) { # need to paste together multi-line records on one line for simpler parsing
+        dt[, cnum := rep(1:(nrow(dt)/nchunks), each=nchunks)]
+        dt <- dt[, .(V1=paste0(V1, collapse="")), by=cnum]
+      }
+      
+      # take the appropriate substring positions for each variable on each row, use type.convert to convert characters to numbers
+      conv <- dt[ , lapply(seq_len(length(cols$beg)), function(ii) {
+        type.convert(trimws(substr(V1, cols$beg[ii], cols$end[ii])), as.is=TRUE, na.strings=na.strings)
+      })]
+      
+      setnames(conv, make.names(unlist(col.names)))
+      setDF(conv) # return standard data.frame
+      return(conv)
+    }
+    
+    dataset <- mplus_read_fwf(savedataFile, varWidths, header=FALSE, na.strings="*", col.names=varNames)
+    
+    # old, slow approach
+    # dataset <- read.fwf(file=savedataFile, widths=unlist(varWidths), header=FALSE,
+    #      na.strings="*", col.names=unlist(varNames), strip.white=TRUE)
+    
   }
 
   return(dataset)
 }
+

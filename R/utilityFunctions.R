@@ -334,8 +334,8 @@ getSection <- function(sectionHeader, outfiletext, headers="standard") {
   #identify headers after this section to find end of section
   subsequentHeaders <- which(h > beginSection)
   
-  if (length(subsequentHeaders) == 0) { nextHeader <- length(outfiletext) #just return the whole enchilada
-  } else { nextHeader <- h[subsequentHeaders[1]] - 1 }
+  if (length(subsequentHeaders) == 0) nextHeader <- length(outfiletext) #just return the whole enchilada
+  else nextHeader <- h[subsequentHeaders[1]] - 1
   
   section.found <- outfiletext[(beginSection+1):nextHeader]
   attr(section.found, "lines") <- beginSection:nextHeader
@@ -385,6 +385,7 @@ parse_into_sections <- function(outfiletext) {
       "BETWEEN-LEVEL FACTOR SCORE COMPARISONS",
       "ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION",
       "ODDS RATIO FOR THE ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION",
+      "ODDS RATIOS FOR TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS",
       "LATENT CLASS ODDS RATIO RESULTS", "LOGRANK OUTPUT", "STANDARDIZED MODEL RESULTS",
       "WITHIN-LEVEL STANDARDIZED MODEL RESULTS FOR CLUSTER \\d+",
       "R-SQUARE", "QUALITY OF NUMERICAL RESULTS", "QUALITY OF NUMERICAL RESULTS FOR .*", "TECHNICAL OUTPUT", "TECHNICAL \\d+ OUTPUT",
@@ -406,6 +407,7 @@ parse_into_sections <- function(outfiletext) {
       "EQUALITY TESTS OF MEANS ACROSS CLASSES USING THE BCH PROCEDURE",
       "EQUALITY TESTS OF MEANS ACROSS CLASSES USING THE 3-STEP PROCEDURE",
       "EQUALITY TESTS OF MEANS/PROBABILITIES ACROSS CLASSES",
+      "TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS USING", # 3-step regression
       "THE FOLLOWING DATA SET\\(S\\) DID NOT RESULT IN A COMPLETED REPLICATION:",
       "RESIDUAL OUTPUT", "RESIDUAL OUTPUT FOR THE.*", 
       "MODEL MODIFICATION INDICES", "MODIFICATION INDICES", 
@@ -880,16 +882,14 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       else if (identical(thisLine, c("StdYX", "StdY", "Std")) && identical (nextLine, c("Estimate", "Estimate", "Estimate")))
         varNames <- c("param", "stdyx", "stdy", "std")
       
-    }
-    else if (sectionType == "mod_indices") {
+    } else if (sectionType == "mod_indices") {
       nhl <- 1 #default for mod indices
       if (identical(thisLine, c("M.I.", "E.P.C.", "Std", "E.P.C.", "StdYX", "E.P.C."))) {
         varNames <- c("modV1", "operator", "modV2", "MI", "EPC", "Std_EPC", "StdYX_EPC")
       } else if (identical(thisLine, c("M.I.", "E.P.C."))) {
         varNames <- c("modV1", "operator", "modV2", "MI", "EPC") 
       }
-    }
-    else if (sectionType == "confidence_intervals") {
+    } else if (sectionType == "confidence_intervals") {
       nhl <- 1 #default for CIs
       if (identical(thisLine, c("Lower",".5%","Lower","2.5%","Lower","5%",
               "Estimate","Upper","5%","Upper","2.5%","Upper",".5%" ))) {
@@ -898,8 +898,7 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
               "Estimate","Upper","2.5%","Upper",".5%" ))) {
         varNames <- c("param", "low.5", "low2.5", "est", "up2.5", "up.5")
       }
-    }
-    else if (sectionType == "auxe") { #currently unused
+    } else if (sectionType == "auxe") { #currently unused
       nhl <- 1
       if (identical(thisLine, c("Mean", "S.E.", "Mean", "S.E."))) {
         varNames <- c("Mean", "SE", "Mean", "SE")

@@ -12,7 +12,7 @@
 extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionName) {
   if (isEmpty(thisChunk)) stop("Missing chunk to parse.\n  ", filename)
   if (isEmpty(columnNames)) stop("Missing column names for chunk.\n  ", filename)
-  if (missing(sectionName)) { sectionName <- "" } #right now, just use sectionName for R-SQUARE section, where there are no subheaders per se
+  if (missing(sectionName)) sectionName <- "" #right now, just use sectionName for R-SQUARE section, where there are no subheaders per se
   
   #R-SQUARE sections are not divided into the usual subheader sections, and the order of top-level headers is not comparable to typical output.
   #Create a single match for the whole section
@@ -66,7 +66,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     
     #sometimes chunks have no parameters because they are empty. e.g., stdyx for ex7.30
     #in this case, return null
-    if (nrow(convertMatches)==0) { return(NULL) }
+    if (nrow(convertMatches)==0) return(NULL)
     
     #develop a dataframe that divides into keyword matches versus variable matches
     convertMatches <- ddply(convertMatches, "startline", function(row) {
@@ -498,16 +498,16 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
       allSections <- appendListElements(allSections, extractParameters_1section(filename, unstandardizedSection, "unstandardized"))
     }
     
-    alt.undstandardized <- getSection("^ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION$", outfiletext)
+    alt.unstandardized <- getSection("^ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION$", outfiletext)
     
-    if (!is.null(alt.undstandardized)) {
-      header.idx <- c(grep("Parameterization using Reference Class (\\d+)", alt.undstandardized), length(alt.undstandardized))
+    if (!is.null(alt.unstandardized)) {
+      header.idx <- c(grep("Parameterization using Reference Class (\\d+)", alt.unstandardized), length(alt.unstandardized))
       
       alt.params <- llply(1:(length(header.idx)-1), function(i) {
         start.line <- header.idx[[i]]
         end.line <- header.idx[[i+1]]-1
         
-        alt.section <- c(alt.undstandardized[1:4], alt.undstandardized[start.line:end.line])
+        alt.section <- c(alt.unstandardized[1:4], alt.unstandardized[start.line:end.line])
         
         res <- extractParameters_1section(filename, alt.section, "alt")
         
