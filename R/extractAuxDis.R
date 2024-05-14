@@ -282,3 +282,53 @@ extractAux <- function(outfiletext, filename) {
 
   return(ret)
 }
+
+#' Extract output of R3STEP procedure
+#'
+#' @param outfiletext character vector of Mplus output file from which to extract the AUX section
+#' @param filename filename of the Mplus output file being processed
+#' @return A list containing the parsed R3STEP sections
+#' @keywords internal
+extractR3step <- function(outfiletext, filename) {
+  allSections <- list() # holds parameters for all identified sections
+
+  parR3stepSection <- getSection("^TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS USING::^THE 3-STEP PROCEDURE", outfiletext)
+  if (is.null(parR3stepSection)) return(allSections) # nothing
+  
+  # The highest class value is the default reference, so we need to add 1 to the highest alternative reference class number to infer the first class
+  classNums <- strapply(parR3stepSection, "Parameterization using Reference Class (\\d+)", as.numeric, empty=NA_integer_, simplify=TRUE)
+  firstClass <- max(na.omit(classNums)) + 1
+  firstLine <- paste("Parameterization using Reference Class", firstClass) # Add this on the first line so that we parse the structure correctly
+  
+  parR3stepSection <- c(firstLine, parR3stepSection)
+  allSections <- appendListElements(allSections, extractParameters_1section(filename, parR3stepSection, "multinomialTests"))
+  
+  # odds ratios
+  parR3oddsSection <- getSection("^ODDS RATIOS FOR TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS::^USING THE 3-STEP PROCEDURE$", outfiletext)
+  
+  if (!is.null(parR3oddsSection)) {
+    parR3oddsSection <- c(firstLine, parR3oddsSection)
+    allSections <- appendListElements(allSections, extractParameters_1section(filename, parR3oddsSection, "multinomialOdds"))
+  }
+  
+  # confidence intervals for 3-step procedure
+  ciR3stepSection <- getSection("^CONFIDENCE INTERVALS FOR TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS$::^USING THE 3-STEP PROCEDURE$", outfiletext)
+
+  if (!is.null(ciR3stepSection)) {
+    ciR3stepSection <- c(firstLine, ciR3stepSection)
+    hline <- detectColumnNames(filename, ciR3stepSection, "confidence_intervals")
+    allSections <- appendListElements(allSections, extractParameters_1section(filename, ciR3stepSection, "ci.unstandardized"))
+  }
+  
+  # confidence intervals odds ratios for 3-step procedure
+  ciR3stepOddsSection <- getSection("^CONFIDENCE INTERVALS OF ODDS RATIOS FOR TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL$::^LOGISTIC REGRESSIONS USING THE 3-STEP PROCEDURE$", outfiletext)
+  
+  if (!is.null(ciR3stepOddsSection)) {
+    # at present, the CI header is not reprinted in the odds ratio section, so we need to copy-paste header line for parsing
+    ciR3stepOddsSection <- c(firstLine, ciR3stepSection[attr(hline, "header_lines")], ciR3stepOddsSection)
+    allSections <- appendListElements(allSections, extractParameters_1section(filename, ciR3stepOddsSection, "ci.odds"))
+  }
+  
+  return(allSections)
+
+}

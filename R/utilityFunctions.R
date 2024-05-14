@@ -403,6 +403,7 @@ parse_into_sections <- function(outfiletext) {
       "CONFIDENCE INTERVALS OF STANDARDIZED TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT,", #omitted "AND DIRECT EFFECTS" in v7
       "CONFIDENCE INTERVALS OF STANDARDIZED TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS", #fit onto 1 line in v8!
       "CONFIDENCE INTERVALS FOR TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS", # 3-step output in v8.10
+      "CONFIDENCE INTERVALS OF ODDS RATIOS FOR TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL", # 3-step output in v8.10
       "EQUALITY TESTS OF MEANS ACROSS CLASSES USING POSTERIOR PROBABILITY-BASED",
       "EQUALITY TESTS OF MEANS ACROSS CLASSES USING THE BCH PROCEDURE",
       "EQUALITY TESTS OF MEANS ACROSS CLASSES USING THE 3-STEP PROCEDURE",
@@ -749,8 +750,8 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
   detectionFinished <- FALSE
   line <- 1
   while(detectionFinished == FALSE) {
-    thisLine <- strsplit(modelSection[line], "\\s+", perl=TRUE)[[1]] #assumes that lines are trimmed of leading/trailing whitespace
-    if (line < length(modelSection)) nextLine <- strsplit(modelSection[line+1], "\\s+", perl=TRUE)[[1]]
+    thisLine <- strsplit(trimws(modelSection[line]), "\\s+", perl=TRUE)[[1]]
+    if (line < length(modelSection)) nextLine <- strsplit(trimws(modelSection[line+1]), "\\s+", perl=TRUE)[[1]]
     else nextLine <- NA_character_
     
     if (sectionType == "model_results") {
@@ -762,7 +763,7 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       
       #Bayesian (ESTIMATOR=BAYES) 6-column output
       if (identical(thisLine, c("Posterior", "One-Tailed", "95%", "C.I.")) &&
-          identical (nextLine, c("Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%")))        
+          identical(nextLine, c("Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%")))        
         varNames <- c("param", "est", "posterior_sd", "pval", "lower_2.5ci", "upper_2.5ci")
       
       #Bayesian 6-column output for R-SQUARE (Just has "Variable" on the front)
@@ -772,17 +773,17 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       
       #Bayesian (ESTIMATOR=BAYES) 7-column output (Mplus v7)
       else if (identical(thisLine, c("Posterior", "One-Tailed", "95%", "C.I.")) &&
-          identical (nextLine, c("Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%", "Significance")))        
+          identical(nextLine, c("Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%", "Significance")))        
         varNames <- c("param", "est", "posterior_sd", "pval", "lower_2.5ci", "upper_2.5ci", "sig")
       
       #Monte Carlo output (e.g., UG ex12.4)
       else if (identical(thisLine, c("ESTIMATES", "S.", "E.", "M.", "S.", "E.", "95%", "%", "Sig")) &&
-          identical (nextLine, c("Population", "Average", "Std.", "Dev.", "Average", "Cover", "Coeff")))        
+          identical(nextLine, c("Population", "Average", "Std.", "Dev.", "Average", "Cover", "Coeff")))        
         varNames <- c("param", "population", "average", "population_sd", "average_se", "mse", "cover_95", "pct_sig_coef")
       
       #Monte Carlo output for STD results
       else if (identical(thisLine, c("ESTIMATES", "S.", "E.", "%", "Sig")) &&
-          identical (nextLine, c("Average", "Std.", "Dev.", "Average", "Coeff")))        
+          identical(nextLine, c("Average", "Std.", "Dev.", "Average", "Coeff")))        
         varNames <- c("param", "average", "population_sd", "average_se", "pct_sig_coef")
       
       #Multiple imputation output (I think format introduced in v7)
@@ -804,6 +805,11 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
       else if (identical(thisLine, c("(Est.", "-", "1)", "Two-Tailed")) &&
           identical(nextLine, c("Estimate", "S.E.", "/", "S.E.", "P-Value")))
         varNames <- c("param", "est", "se", "est_se", "pval")
+      
+      # Odds ratios in latent class models
+      else if (identical(thisLine, c("95%", "C.I.")) &&
+               identical(nextLine, c("Estimate", "S.E.", "Lower", "2.5%", "Upper", "2.5%")))
+        varNames <- c("param", "est", "se", "lower_2.5ci", "upper_2.5ci")
       
       #Five-column output for R-Square that applies to most unstandardized and standardized sections in Mplus 5 and later
       else if ((identical(thisLine, c("Observed", "Two-Tailed")) || identical(thisLine, c("Latent", "Two-Tailed"))) &&
@@ -1403,4 +1409,18 @@ detectMplus <- function() {
   }
 
   return(mplus)  
+}
+
+# copy elements of append into target. note that data.frames inherit list,
+# so could be wonky if append is a data.frame (shouldn't happen here)
+appendListElements <- function(target, append) {
+  if (!is.list(target)) stop("target is not a list.")
+  if (!is.list(append)) stop("append is not a list.")
+  
+  for (elementName in names(append)) {
+    if (!is.null(target[[elementName]])) warning("Element is already present in target list: ", elementName)
+    target[[elementName]] <- append[[elementName]]
+  }
+  
+  return(target)
 }

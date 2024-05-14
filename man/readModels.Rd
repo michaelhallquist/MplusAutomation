@@ -62,12 +62,13 @@ a single mplus.model object, not a list of files. Specific elements are:
   \item{tech7}{a list containing sample statistics for each latent class from OUTPUT: TECH7}
   \item{tech8}{a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8}
   \item{tech9}{a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9}
-  \item{tech10}{a list containing model fit information from OUTPUT: TECH10}'   
+  \item{tech10}{a list containing model fit information from OUTPUT: TECH10}
   \item{tech12}{a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
   \item{fac_score_stats}{factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section}
   \item{lcCondMeans}{conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models}
   \item{r3step}{predictors of latent class membership using the 3-step procedure (R3STEP)}
   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)}
+  \item{h5results}{a list containing data from h5results file produced by Mplus v8.11+. (Requires rhdf5 package)}
   \item{output}{The entire, raw output file.}
 }
 \description{

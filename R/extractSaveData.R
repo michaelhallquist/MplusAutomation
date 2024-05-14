@@ -77,7 +77,8 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
       "Sample/H1/Pooled-Within Matrix", #sample
       "Bayesian Parameters", #bparameters
       "Within and between sample statistics with Weight matrix", #swmatrix
-      "Model Estimated Covariance Matrix" #covariance
+      "Model Estimated Covariance Matrix", #covariance
+      "Results in H5 Format"
   )
 
   #extract entire savedata section
@@ -93,7 +94,7 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
   #initialize these variables to empty character strings so that list return value is complete
   #important in cases where some savedata output available, but other sections unused
   listVars <- c("saveFile", "fileVarNames", "fileVarFormats", "fileVarWidths", "bayesFile", "bayesVarNames",
-      "tech3File", "tech4File", "covFile", "sampleFile", "estimatesFile")
+      "tech3File", "tech4File", "covFile", "sampleFile", "estimatesFile", "h5resultsFile")
   l_ply(listVars, assign, value=NA_character_, envir=environment())
   
   # NULL bparameters iterations if not available (needs to be NULL instead of NA since the return is a data.frame)
@@ -340,13 +341,23 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
   #future: plausible values output from Bayesian runs
   #PLAUSIBLE VALUE MEAN, MEDIAN, SD, AND PERCENTILES FOR EACH OBSERVATION
 
-
+  # v8.11+: results in HDF5 format
+  h5resultsSection <- getSection("^\\s*Results in H5 Format\\s*$", savedataSection, sectionStarts)
+  
+  if (!is.null(h5resultsSection)) {
+    h5Start <- grep("^\\s*Save file\\s*$", h5resultsSection, ignore.case=TRUE, perl=TRUE)
+    if (length(h5Start) > 0L) {
+      h5resultsFile <- trimSpace(h5resultsSection[h5Start+1]) # save file is on the next line
+    }
+    linesParsed <- c(linesParsed, attr(h5resultsSection, "lines"))
+  }
+  
   #return the file information as a list
   #N.B. Would like to shift return to "saveFile", but need to update everywhere and note deprecation in changelog
 
   #bayesVarTypes=bayesVarTypes,
   return(list(fileName=saveFile, fileVarNames=fileVarNames, fileVarFormats=fileVarFormats, fileVarWidths=fileVarWidths, chunkVarNames=chunkVarNames, chunkVarWidths=chunkVarWidths,
-          bayesFile=bayesFile, bayesVarNames=bayesVarNames, bayesIterDetails=bayesIterDetails, tech3File=tech3File, tech4File=tech4File))
+          bayesFile=bayesFile, bayesVarNames=bayesVarNames, bayesIterDetails=bayesIterDetails, tech3File=tech3File, tech4File=tech4File, h5resultsFile=h5resultsFile))
 }
 
 #' Load an analysis dataset from the SAVEDATA command into an R data.frame
@@ -529,7 +540,6 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
 #' @param input list of parsed Mplus input section extracted upstream in readModels
 #' @return A data frame of the extracted data.
 #' @keywords internal
-#' @importFrom utils read.table read.fwf
 #' @importFrom data.table setDF setnames fread
 getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileName, varNames, varWidths, input) {
   outfileDirectory <- splitFilePath(outfile)$directory
@@ -555,10 +565,6 @@ getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileNa
   #cat("Outfile dir: ", outfileDirectory, "\n")
   #cat("Savedata directory: ", savedataSplit$directory, "\n")
   #cat("concat result: ", savedataFile, "\n")
-
-  #need to read as fixed width format given the way Mplus left-aligns missing vals (*)
-  #dataset <- read.table(file=file.path(path, fileInfo$fileName), header=FALSE,
-  #    na.strings="*", col.names=fileInfo$varNames)
 
   if (format == "free") {
     #handle case where filename contains * indicating Monte Carlo (MC) or multiple imputation (MI) dataset with reps
@@ -613,13 +619,14 @@ getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileNa
         warning("Unable to locate SAVEDATA files for filename: ", resplit$filename)
       } else {
         for (f in 1:length(fileList)) {
-          dataset[[make.names(fileNames[f])]] <- read.table(file=fileList[f], header=FALSE,
-              na.strings="*", col.names=varNames, strip.white=TRUE)
+          dataset[[make.names(fileNames[f])]] <- fread(file=fileList[f], header=FALSE,
+              na.strings="*", col.names=varNames, strip.white=TRUE, data.table=FALSE)
         }
       }
 
     } else {
-      dataset <- read.table(file=savedataFile, header=FALSE, na.strings="*", strip.white=TRUE)
+      dataset <- fread(file=savedataFile, header=FALSE, na.strings="*", strip.white=TRUE, data.table = FALSE)
+      
       if (length(varNames) > ncol(dataset)) {
         warning("Number of variable names for Bayesian Parameters section exceeds number of columns in: ", savedataFile)
         varNames <- varNames[1:ncol(dataset)] #heuristically, just using columns names up to the last column in the data

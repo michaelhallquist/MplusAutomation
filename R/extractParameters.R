@@ -240,7 +240,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
   #detectColumnNames sub-divides (perhaps unnecessarily) the matches based on the putative section type of the output
   #current distinctions include modification indices, confidence intervals, and model results.
-  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized")) { 
+  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized", "ci.odds")) { 
     sectionType <- "confidence_intervals"
   } else if (sectionName == "irt.parameterization" || sectionName == "probability.scale") {
     #the IRT section follows from the MODEL RESULTS section, and column headers are not reprinted.
@@ -278,20 +278,23 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
   classPropMatches <- grep("^\\s*Class Proportions\\s*$", modelSection, ignore.case=TRUE)
   classSpecificMatches <- grep("^\\s*(Results|Parameters) for Class-specific Model Parts of [\\w_\\.]+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
+  referenceClassMatches <- grep("^\\s*Parameterization using Reference Class [0-9]+", modelSection, ignore.case=TRUE)
 
-  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches, classSpecificMatches))
+  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches, classSpecificMatches, referenceClassMatches))
   
   if (length(topLevelMatches) > 0) {
 
     lcNum <- NULL
     bwWi <- NULL
     groupName <- NULL
+    rcNum <- NULL
 
     matchIndex <- 1
     for (match in topLevelMatches) {
       if (grepl("\\s*Within-Level Standardized Estimates Averaged Over Clusters\\s*", modelSection[match], perl=TRUE)) {
         bwWi <- "Within.Std.Averaged.Over.Clusters"
-      } else if (match %in% betweenWithinMatches) { bwWi <- sub("\\s+Level\\s*$", "", modelSection[match], perl=TRUE)
+      } else if (match %in% betweenWithinMatches) { 
+        bwWi <- sub("\\s+Level\\s*$", "", modelSection[match], perl=TRUE)
       } else if (match %in% latentClassMatches) {
         if ((pos <- regexpr("Pattern", modelSection[match], ignore.case=TRUE)) > 0) {
           #need to pull out and concatenate all numerical values following pattern
@@ -320,6 +323,10 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         #N.B.: 15Mar2012. the parse chunk routine can't handle the class proportions output right now
         #because there is no nesting. Need to come back and fix.
         #for now, this output is just ignored.
+      } else if (match %in% referenceClassMatches) {
+        lcNum <- NULL
+        bwWi <- NULL
+        rcNum <- sub("^\\s*Parameterization using Reference Class ([0-9]+)\\s*$", "\\1", modelSection[match], perl=TRUE)
       }
 
       #if the subsequent top level match is more than 2 lines away, assume that there is a
@@ -395,6 +402,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
           parsedChunk$LatentClass <- lcNum
           parsedChunk$BetweenWithin <- bwWi
           parsedChunk$Group <- groupName
+          parsedChunk$ReferenceClass <- rcNum
           allSectionParameters <- rbind(allSectionParameters, parsedChunk)
         }
       }
@@ -464,20 +472,6 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
   #   warning(paste0("EFA, MIXTURE EFA, and TWOLEVEL EFA files are not currently supported by extractModelParameters.\n  Skipping outfile: ", filename))
   #   return(NULL) #skip file
   # }
-
-  # copy elements of append into target. note that data.frames inherit list,
-  # so could be wonky if append is a data.frame (shouldn't happen here)
-  appendListElements <- function(target, append) {
-    if (!is.list(target)) stop("target is not a list.")
-    if (!is.list(append)) stop("append is not a list.")
-
-    for (elementName in names(append)) {
-      if (!is.null(target[[elementName]])) warning("Element is already present in target list: ", elementName)
-      target[[elementName]] <- append[[elementName]]
-    }
-
-    return(target)
-  }
   
   allSections <- list() #holds parameters for all identified sections
   if (length(multisectionMatches <- grep("^\\s*MODEL RESULTS FOR .*", outfiletext, perl=TRUE, value=TRUE)) > 0L) {

@@ -61,11 +61,13 @@
 #'   \item{tech7}{a list containing sample statistics for each latent class from OUTPUT: TECH7}
 #'   \item{tech8}{a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8}
 #'   \item{tech9}{a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9}
-#'   \item{tech10}{a list containing model fit information from OUTPUT: TECH10}'   
+#'   \item{tech10}{a list containing model fit information from OUTPUT: TECH10}
 #'   \item{tech12}{a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12}
 #'   \item{fac_score_stats}{factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section}
 #'   \item{lcCondMeans}{conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models}
+#'   \item{r3step}{predictors of latent class membership using the 3-step procedure (R3STEP)}
 #'   \item{gh5}{a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)}
+#'   \item{h5results}{a list containing data from h5results file produced by Mplus v8.11+. (Requires rhdf5 package)}
 #'   \item{output}{The entire, raw output file.}
 #' @author Michael Hallquist
 #' @keywords interface
@@ -83,8 +85,8 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
   allsections <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
       "invariance_testing", "parameters", "class_counts", "indirect", "mod_indices", "residuals",
       "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-      "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "gh5",
-      "output")
+      "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "r3step", 
+      "gh5", "h5results", "output")
 
   if (isTRUE(what[1L] == "all")) {
     what <- allsections
@@ -242,22 +244,22 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
           })
     }
 
+    #SAVEDATA file information -- always extract so that downstream code (e.g., bparameters and h5results) can find info if needed
+    allFiles[[listID]]$savedata_info <- fileInfo <- tryCatch(l_getSavedata_Fileinfo(curfile, outfiletext, allFiles[[listID]]$summaries), error=function(e) {
+      message("Error extracting SAVEDATA file information in output file: ", curfile); print(e)
+      return(list())
+    })
+    
     if (isTRUE("savedata" %in% what)) {
-      #SAVEDATA file information
-      allFiles[[listID]]$savedata_info <- fileInfo <- tryCatch(l_getSavedata_Fileinfo(curfile, outfiletext, allFiles[[listID]]$summaries), error=function(e) {
-            message("Error extracting SAVEDATA file information in output file: ", curfile); print(e)
-            return(list())
-          })
-
       #missing widths indicative of MI/MC run
       if (isFALSE(is.null(fileInfo)) && isTRUE(is.na(fileInfo[["fileVarWidths"]]))) {
-        allFiles[[listID]]$savedata <- tryCatch(l_getSavedata_readRawFile(curfile, outfiletext, format="free", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], input=inp),
+        allFiles[[listID]]$savedata <- tryCatch(getSavedata_readRawFile(curfile, outfiletext, format="free", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], input=inp),
             error=function(e) {
               message("Error reading SAVEDATA rawfile: ", fileInfo[["fileName"]] , " in output file: ", curfile); print(e)
               return(list())
             })
       } else {
-        allFiles[[listID]]$savedata <- tryCatch(l_getSavedata_readRawFile(curfile, outfiletext, format="fixed", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], varWidths=fileInfo[["fileVarWidths"]], input=inp),
+        allFiles[[listID]]$savedata <- tryCatch(getSavedata_readRawFile(curfile, outfiletext, format="fixed", fileName=fileInfo[["fileName"]], varNames=fileInfo[["chunkVarNames"]], varWidths=fileInfo[["chunkVarWidths"]], input=inp),
             error=function(e) {
               message("Error reading SAVEDATA rawfile: ", fileInfo[["fileName"]] , " in output file: ", curfile); print(e)
               return(list())
@@ -331,7 +333,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
       })
     }    
     
-    #TECH12: observed versus estimated sample stats for TYPE=MIXTURE
+    ### TECH12: observed versus estimated sample stats for TYPE=MIXTURE
     if (isTRUE("tech12" %in% what)) {
       allFiles[[listID]]$tech12 <- tryCatch(extractTech12(outfiletext, curfile), error=function(e) {
             message("Error extracting TECH12 in output file: ", curfile); print(e)
@@ -339,20 +341,31 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
           })
     }
 
-    #TECH15: CONDITIONAL PROBABILITIES FOR THE CLASS VARIABLES for TYPE=MIXTURE
+    ### TECH15: CONDITIONAL PROBABILITIES FOR THE CLASS VARIABLES for TYPE=MIXTURE
     if (isTRUE("tech15" %in% what)) {
       allFiles[[listID]]$tech15 <- tryCatch(extractTech15(outfiletext, curfile), error=function(e) {
         message("Error extracting TECH15 in output file: ", curfile); print(e)
         return(list())
       })
     }
+    
+    ### Factor score statistics
     if (isTRUE("fac_score_stats" %in% what)) {
       allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
     }
 
     if (isTRUE("lcCondMeans" %in% what)) {
-      #aux(e) means and pairwise comparisons
+      # aux(e) means and pairwise comparisons
       allFiles[[listID]]$lcCondMeans <- extractAux(outfiletext, curfile)
+    }
+    
+    ### R3Step output (3-step procedure)
+    if (isTRUE("r3step" %in% what)) {
+      # 3-step logistic regression approach
+      allFiles[[listID]]$r3step <- tryCatch(extractR3step(outfiletext, curfile), error=function(e) {
+        message("Error extracting R3STEP in output file: ", curfile); print(e)
+        return(list())
+      })
     }
 
     #add class tag for use with compareModels
@@ -366,39 +379,38 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
       }
     }
 
+    ### GH5 file
+    gh5 <- list() # default empty field
     if (isTRUE("gh5" %in% what)) {
       #check for gh5 file, and load if possible
-      gh5 <- list()
       gh5fname <- sub("^(.*)\\.out$", "\\1.gh5", curfile, ignore.case=TRUE, perl=TRUE)
-      if (isTRUE(file.exists(gh5fname))) {
-        if (isTRUE(requireNamespace("rhdf5", quietly = TRUE))) {
-          gh5 <- tryCatch({rhdf5::h5dump(file=gh5fname, recursive=TRUE, load=TRUE)},
-                          error = function(e) { NULL })
-          
-          # The h5dump error seems to occur in some rhdf5 versions when h5dump is used on
-          # a file with a non-standard file extension (as opposed to the canonical .h5).
-          # Thus, attempt a file extension workaround.
-          if (is.null(gh5[1L])) {
-            tmp_h5 <- tempfile(fileext=".h5")
-            file.copy(gh5fname, to=tmp_h5)
-            gh5 <- tryCatch({rhdf5::h5dump(file=tmp_h5, recursive=TRUE, load=TRUE)},
-                            error = function(e) { NULL })
-            unlink(tmp_h5) #cleanup temp
-          }
-        } else {
-          warning(paste(c("Unable to read gh5 file because rhdf5 package not installed.\n",
-                          "To install, in an R session, type:\n",
-                          "  install.packages(\"BiocManager\")\n",
-                          "  BiocManager::install(\"rhdf5\")\n")))
-        }
-      }
-      allFiles[[listID]]$gh5 <- gh5
+      gh5 <- read_h5(gh5fname)
     }
-
+    allFiles[[listID]]$gh5 <- gh5
+    
+    ### H5 results
+    h5results <- list() # default empty field
+    if (isTRUE("h5results" %in% what) && isFALSE(is.null(fileInfo)) && !is.na(fileInfo$h5resultsFile[1L])) {
+      #check for h5results file, and load if possible
+      h5resultsfname <- fileInfo$h5resultsFile[1L]
+      
+      if (is.na(splitFilePath(h5resultsfname)$directory)) { # if just a local file, add curfile directory
+        h5resultsfname <- file.path(dirname(curfile), h5resultsfname)
+      }
+      
+      h5results <- read_h5(h5resultsfname)
+    }
+    allFiles[[listID]]$h5results <- h5results
+    
+    ### Text of .out file
     if (isTRUE("output" %in% what)) {
       allFiles[[listID]]$output <- rawtext
     }
     
+    # clean up savedata file info if it was not requested
+    if (isFALSE("savedata" %in% what)) {
+      allFiles[[listID]]$savedata_info <- NULL
+    }
   }
 
   if (identical(length(outfiles), 1L)) {
@@ -408,4 +420,34 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
   }
 
   return(allFiles)
+}
+
+# helper function to read hdf5 files
+read_h5 <- function(file) {
+  if (!file.exists(file)) return(list()) # empty return
+  
+  if (isTRUE(requireNamespace("rhdf5", quietly = TRUE))) {
+    h5 <- tryCatch({ rhdf5::h5dump(file=file, recursive=TRUE, load=TRUE) },
+                          error = function(e) NULL)
+    
+    # The h5dump error seems to occur in some rhdf5 versions when h5dump is used on
+    # a file with a non-standard file extension (as opposed to the canonical .h5).
+    # Thus, attempt a file extension workaround.
+    if (is.null(h5[1L])) {
+      tmp_h5 <- tempfile(fileext=".h5")
+      file.copy(h5, to=tmp_h5)
+      h5 <- tryCatch({rhdf5::h5dump(file=tmp_h5, recursive=TRUE, load=TRUE)},
+                            error = function(e) list() )
+      unlink(tmp_h5) #cleanup temp
+    }
+  } else {
+    warning(paste(c("Unable to read hdf5 file because rhdf5 package not installed.\n",
+                    "To install, in an R session, type:\n",
+                    "  install.packages(\"BiocManager\")\n",
+                    "  BiocManager::install(\"rhdf5\")\n")))
+    
+    h5 <- list()
+  }
+  
+  return(h5)
 }

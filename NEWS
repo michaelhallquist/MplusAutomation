@@ -1,7 +1,10 @@
 Version 1.2 (DEVELOPMENT)
  - feature:     New submitModels function supports asynchronous submission of Mplus models on high-performance clusters using slurm or torque
  - feature:     Rewrote parser for fixed-width Mplus output objects (esp. SAVEDATA files). Now 10x faster!
+ - feature:     Use data.table fread for reading delimited files (e.g., BPARAMETERS). Approximately 10x faster!
  - feature:     Parser for SAVEDATA outputs now handles massive records where Mplus splits records across rows (esp. SAVE = FSCORES)
+ - feature:     readModels extracts results of the R3STEP procedure in $r3step. Closes #204
+ - feature:     readModels extracts new H5RESULTS object from Mplus v8.11 in $h5results
  - notice:      Package namespace has been cleaned up to remove long-deprecated functions including extractModelSummaries, extractModelParameters, and extractModIndices.
 
 Version 1.1.2
