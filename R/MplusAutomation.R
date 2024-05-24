@@ -1,5 +1,5 @@
+"_PACKAGE"
 #' @title Automating Mplus Model Estimation and Interpretation
-#' @docType package
 #' @name MplusAutomation
 #'
 #' @description The MplusAutomation package leverages the flexibility of the
@@ -53,8 +53,8 @@
 #' \tabular{ll}{
 #' Package: \tab MplusAutomation\cr
 #' Type: \tab Package\cr
-#' Version: \tab 1.1.1\cr
-#' Date: \tab 2024-01-27\cr
+#' Version: \tab 1.2\cr
+#' Date: \tab 2024-05-16\cr
 #' License: \tab LGPL-3\cr
 #' LazyLoad: \tab yes\cr
 #' }

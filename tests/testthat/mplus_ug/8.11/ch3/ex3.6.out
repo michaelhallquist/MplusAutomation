@@ -1,0 +1,344 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+05/24/2024  12:05 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a multinomial
+          logistic regression for an unordered
+          categorical (nominal) dependent variable
+          with two covariates
+  DATA:	FILE IS ex3.6.dat;
+  VARIABLE:	NAMES ARE u1 x1 x3;
+  	NOMINAL IS u1;
+  MODEL:  u1 ON x1 x3;
+  SAVEDATA:
+  	H5RESULTS = ex3.6.h5;
+  OUTPUT:
+  	CINTERVAL STANDARDIZED;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a multinomial
+logistic regression for an unordered
+categorical (nominal) dependent variable
+with two covariates
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    1
+Number of independent variables                                  2
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Unordered categorical (nominal)
+   U1
+
+Observed independent variables
+   X1          X3
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                    STANDARD
+  Number of integration points                                  15
+  Dimensions of numerical integration                            0
+  Adaptive quadrature                                           ON
+Cholesky                                                       OFF
+
+Input data file(s)
+  ex3.6.dat
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    U1
+      Category 1    0.242          121.000
+      Category 2    0.368          184.000
+      Category 3    0.390          195.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     X1                    0.000      -0.035      -3.139    0.20%      -0.842     -0.239     -0.016
+             500.000       1.041       0.091       3.252    0.20%       0.254      0.887
+     X3                   -0.067      -0.060      -3.145    0.20%      -0.870     -0.304     -0.034
+             500.000       0.960       0.073       2.857    0.20%       0.205      0.741
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        6
+
+Loglikelihood
+
+          H0 Value                        -433.426
+          H0 Scaling Correction Factor      1.0174
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                     878.853
+          Bayesian (BIC)                   904.140
+          Sample-Size Adjusted BIC         885.096
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ U1#1       ON
+    X1                 0.769      0.165      4.669      0.000
+    X3                 2.259      0.203     11.147      0.000
+
+ U1#2       ON
+    X1                 0.280      0.114      2.444      0.015
+    X3                 0.885      0.143      6.200      0.000
+
+ Intercepts
+    U1#1              -0.749      0.158     -4.728      0.000
+    U1#2               0.262      0.120      2.192      0.028
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.849E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+LOGISTIC REGRESSION ODDS RATIO RESULTS
+
+                                                95% C.I.
+                    Estimate       S.E.  Lower 2.5% Upper 2.5%
+
+ U1#1       ON
+    X1                 2.157      0.355      1.562      2.978
+    X3                 9.578      1.941      6.438     14.249
+
+ U1#2       ON
+    X1                 1.323      0.151      1.057      1.656
+    X3                 2.423      0.346      1.832      3.206
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ U1#1       ON
+    X1                 0.784      0.170      4.619      0.000
+    X3                 2.213      0.211     10.513      0.000
+
+ U1#2       ON
+    X1                 0.285      0.117      2.437      0.015
+    X3                 0.867      0.143      6.084      0.000
+
+ Intercepts
+    U1#1              -0.749      0.158     -4.728      0.000
+    U1#2               0.262      0.120      2.192      0.028
+
+
+STDY Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ U1#1       ON
+    X1                 0.769      0.165      4.669      0.000
+    X3                 2.259      0.203     11.147      0.000
+
+ U1#2       ON
+    X1                 0.280      0.114      2.444      0.015
+    X3                 0.885      0.143      6.200      0.000
+
+ Intercepts
+    U1#1              -0.749      0.158     -4.728      0.000
+    U1#2               0.262      0.120      2.192      0.028
+
+
+STD Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ U1#1       ON
+    X1                 0.769      0.165      4.669      0.000
+    X3                 2.259      0.203     11.147      0.000
+
+ U1#2       ON
+    X1                 0.280      0.114      2.444      0.015
+    X3                 0.885      0.143      6.200      0.000
+
+ Intercepts
+    U1#1              -0.749      0.158     -4.728      0.000
+    U1#2               0.262      0.120      2.192      0.028
+
+
+CONFIDENCE INTERVALS OF MODEL RESULTS
+
+                  Lower .5%  Lower 2.5%    Lower 5%    Estimate    Upper 5%  Upper 2.5%   Upper .5%
+
+ U1#1     ON
+    X1               0.345       0.446       0.498       0.769       1.039       1.091       1.193
+    X3               1.737       1.862       1.926       2.259       2.593       2.657       2.782
+
+ U1#2     ON
+    X1              -0.015       0.055       0.092       0.280       0.468       0.504       0.575
+    X3               0.517       0.605       0.650       0.885       1.120       1.165       1.253
+
+ Intercepts
+    U1#1            -1.157      -1.059      -1.009      -0.749      -0.488      -0.438      -0.341
+    U1#2            -0.046       0.028       0.065       0.262       0.459       0.497       0.570
+
+
+CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS
+
+ U1#1     ON
+    X1               1.411       1.562       1.645       2.157       2.828       2.978       3.296
+    X3               5.682       6.438       6.862       9.578      13.368      14.249      16.144
+
+ U1#2     ON
+    X1               0.985       1.057       1.096       1.323       1.597       1.656       1.777
+    X3               1.678       1.832       1.916       2.423       3.065       3.206       3.500
+
+
+CONFIDENCE INTERVALS OF STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                  Lower .5%  Lower 2.5%    Lower 5%    Estimate    Upper 5%  Upper 2.5%   Upper .5%
+
+ U1#1     ON
+    X1               0.347       0.451       0.505       0.784       1.063       1.117       1.221
+    X3               1.671       1.801       1.867       2.213       2.560       2.626       2.756
+
+ U1#2     ON
+    X1              -0.016       0.056       0.093       0.285       0.478       0.515       0.587
+    X3               0.500       0.588       0.633       0.867       1.102       1.146       1.234
+
+ Intercepts
+    U1#1            -1.157      -1.059      -1.009      -0.749      -0.488      -0.438      -0.341
+    U1#2            -0.046       0.028       0.065       0.262       0.459       0.497       0.570
+
+
+STDY Standardization
+
+                  Lower .5%  Lower 2.5%    Lower 5%    Estimate    Upper 5%  Upper 2.5%   Upper .5%
+
+ U1#1     ON
+    X1               0.345       0.446       0.498       0.769       1.039       1.091       1.193
+    X3               1.737       1.862       1.926       2.259       2.593       2.657       2.782
+
+ U1#2     ON
+    X1              -0.015       0.055       0.092       0.280       0.468       0.504       0.575
+    X3               0.517       0.605       0.650       0.885       1.120       1.165       1.253
+
+ Intercepts
+    U1#1            -1.157      -1.059      -1.009      -0.749      -0.488      -0.438      -0.341
+    U1#2            -0.046       0.028       0.065       0.262       0.459       0.497       0.570
+
+
+STD Standardization
+
+                  Lower .5%  Lower 2.5%    Lower 5%    Estimate    Upper 5%  Upper 2.5%   Upper .5%
+
+ U1#1     ON
+    X1               0.345       0.446       0.498       0.769       1.039       1.091       1.193
+    X3               1.737       1.862       1.926       2.259       2.593       2.657       2.782
+
+ U1#2     ON
+    X1              -0.015       0.055       0.092       0.280       0.468       0.504       0.575
+    X3               0.517       0.605       0.650       0.885       1.120       1.165       1.253
+
+ Intercepts
+    U1#1            -1.157      -1.059      -1.009      -0.749      -0.488      -0.438      -0.341
+    U1#2            -0.046       0.028       0.065       0.262       0.459       0.497       0.570
+
+
+SAVEDATA INFORMATION
+
+
+  Results in H5 Format
+
+  Save file
+    ex3.6.h5
+
+  List of results saved
+
+    Summary of Analysis
+    Model Fit Information
+    Model Results
+    Logistic Regression Odds Ratio Results
+    Standardized Model Results
+    Confidence Intervals of Model Results
+    Confidence Intervals of Standardized Model Results
+
+     Beginning Time:  12:05:57
+        Ending Time:  12:05:57
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

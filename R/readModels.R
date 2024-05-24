@@ -101,6 +101,8 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
   outfiles <- getOutFileList(target, recursive, filefilter)
 
   allFiles <- list()
+  
+  ## Loop over files and add the results of each to the allFiles list
   for (curfile in outfiles) {
     if (isFALSE(quiet)) { cat("Reading model: ", curfile, "\n") }
 
@@ -111,18 +113,25 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
     rawtext <- readLines(curfile)
     outfiletext <- parse_into_sections(rawtext) #identify and cache top-level header section
 
-    #Parse Mplus input into a list by section
-    #if ("input" %in% what) {
-      allFiles[[listID]]$input <- inp <- tryCatch(extractInput_1file(rawtext, curfile), error=function(e) {
-            message("Error parsing input section of output file: ", curfile); print(e)
-            return(list())
-          })
-    #}
-    ## cleanup escaped quotes around data file name
-    ## if it happened to be quoted in Mplus
-    allFiles[[listID]]$input$data$file <- gsub("\\\"", "",
-     allFiles[[listID]]$input$data$file)
-
+    ### COMPULSORY SECTIONS NEEDED FOR DOWNSTREAM FUNCTIONS: input, summaries, savedata_info
+    
+    #SAVEDATA file information -- always extract so that downstream code (e.g., bparameters and h5results) can find info if needed
+    savedata_info <- tryCatch(l_getSavedata_Fileinfo(curfile, outfiletext, summaries), error=function(e) {
+      message("Error extracting SAVEDATA file information in output file: ", curfile); print(e)
+      return(list())
+    })
+    
+    ### Parse Mplus input into a list by section
+    inp <- tryCatch(extractInput_1file(rawtext, curfile), error=function(e) {
+      message("Error parsing input section of output file: ", curfile); print(e)
+      return(list())
+    })
+    
+    #Model summary output (including MODEL FIT INFORMATION)
+    summaries <- tryCatch(extractSummaries_1file(outfiletext, curfile, input=inp), error=function(e) {
+      message("Error extracting model summaries in output file: ", curfile); print(e)
+      return(list())
+    })
 
     if (isTRUE("warn_err" %in% what)) {
       #Parse warnings and errors in output file
@@ -160,26 +169,22 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
     }
 
     if (isTRUE("summaries" %in% what)) {
-      #Model summary output (including MODEL FIT INFORMATION)
-      allFiles[[listID]]$summaries <- tryCatch(extractSummaries_1file(outfiletext, curfile, input=inp), error=function(e) {
-            message("Error extracting model summaries in output file: ", curfile); print(e)
-            return(list())
-          })
+      
       # Fix for multigroup models, where Observations were not parsed correctly
       # Some applications need the number of observations by group. I'm
       # including them as an attribute of the $summaries data.frame, so any
       # downstream operations on $summaries don't break down due to different
       # column names / number of columns.
 
-      if (isFALSE(is.null(allFiles[[listID]][["summaries"]]))) {
-        if (isFALSE(is.na(allFiles[[listID]]$summaries[["NGroups"]])) && isTRUE(allFiles[[listID]]$summaries[["NGroups"]] > 1)) {
+      if (isFALSE(is.null(summaries))) {
+        if (isFALSE(is.na(summaries[["NGroups"]])) && isTRUE(summaries[["NGroups"]] > 1)) {
           obs <- outfiletext[(grep("^\\s*(Average )*Number of observations\\s*", outfiletext, ignore.case = TRUE)[1L] + 1):(grep("^\\s*(Total sample size|Number of dependent variables|Number of replications)", outfiletext)[1L] - 1)]
           obs <- gsub("Group", "", obs)
           obs <- unlist(strsplit(trimws(obs), "\\s+"))
           if (isTRUE(length(obs) %% 2 == 0)) {
             Observations <- as.numeric(obs[seq(2, to = length(obs), by = 2)])
             names(Observations) <- obs[seq(1, to = length(obs), by = 2)]
-            attr(allFiles[[listID]]$summaries, "Observations") <- Observations
+            attr(summaries, "Observations") <- Observations
           }
         }
       }
@@ -209,14 +214,14 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
 
     if (isTRUE("class_counts" %in% what)) {
       #Latent class counts
-      allFiles[[listID]]$class_counts <- tryCatch(extractClassCounts(outfiletext, curfile, allFiles[[listID]]$summaries), error=function(e) {
+      allFiles[[listID]]$class_counts <- tryCatch(extractClassCounts(outfiletext, curfile, summaries), error=function(e) {
             message("Error extracting latent class counts in output file: ", curfile); print(e)
             return(list())
           })
       
       #add total number of latent classes to summaries (in case of multiple categorical latent variables, this is just the product)
       if (isTRUE("summaries" %in% what) && !is.null(allFiles[[listID]]$class_counts$modelEstimated)) {
-        allFiles[[listID]]$summaries$NLatentClasses <- nrow(allFiles[[listID]]$class_counts$modelEstimated)
+        summaries$NLatentClasses <- nrow(allFiles[[listID]]$class_counts$modelEstimated)
       }
     }
 
@@ -244,24 +249,18 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
           })
     }
 
-    #SAVEDATA file information -- always extract so that downstream code (e.g., bparameters and h5results) can find info if needed
-    allFiles[[listID]]$savedata_info <- fileInfo <- tryCatch(l_getSavedata_Fileinfo(curfile, outfiletext, allFiles[[listID]]$summaries), error=function(e) {
-      message("Error extracting SAVEDATA file information in output file: ", curfile); print(e)
-      return(list())
-    })
-    
     if (isTRUE("savedata" %in% what)) {
       #missing widths indicative of MI/MC run
-      if (isFALSE(is.null(fileInfo)) && isTRUE(is.na(fileInfo[["fileVarWidths"]]))) {
-        allFiles[[listID]]$savedata <- tryCatch(getSavedata_readRawFile(curfile, outfiletext, format="free", fileName=fileInfo[["fileName"]], varNames=fileInfo[["fileVarNames"]], input=inp),
+      if (isFALSE(is.null(savedata_info)) && isTRUE(is.na(savedata_info[["fileVarWidths"]]))) {
+        allFiles[[listID]]$savedata <- tryCatch(getSavedata_readRawFile(curfile, outfiletext, format="free", fileName=savedata_info[["fileName"]], varNames=savedata_info[["fileVarNames"]], input=inp),
             error=function(e) {
-              message("Error reading SAVEDATA rawfile: ", fileInfo[["fileName"]] , " in output file: ", curfile); print(e)
+              message("Error reading SAVEDATA rawfile: ", savedata_info[["fileName"]] , " in output file: ", curfile); print(e)
               return(list())
             })
       } else {
-        allFiles[[listID]]$savedata <- tryCatch(getSavedata_readRawFile(curfile, outfiletext, format="fixed", fileName=fileInfo[["fileName"]], varNames=fileInfo[["chunkVarNames"]], varWidths=fileInfo[["chunkVarWidths"]], input=inp),
+        allFiles[[listID]]$savedata <- tryCatch(getSavedata_readRawFile(curfile, outfiletext, format="fixed", fileName=savedata_info[["fileName"]], varNames=savedata_info[["chunkVarNames"]], varWidths=savedata_info[["chunkVarWidths"]], input=inp),
             error=function(e) {
-              message("Error reading SAVEDATA rawfile: ", fileInfo[["fileName"]] , " in output file: ", curfile); print(e)
+              message("Error reading SAVEDATA rawfile: ", savedata_info[["fileName"]] , " in output file: ", curfile); print(e)
               return(list())
             })
       }
@@ -269,8 +268,8 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
 
     if (isTRUE("bparameters" %in% what)) {
       #Read BPARAMETERS (posterior draws) file from disk
-      allFiles[[listID]]$bparameters <- tryCatch(l_getSavedata_Bparams(curfile, outfiletext, fileInfo, discardBurnin=FALSE), error=function(e) {
-            message("Error reading BPARAMETERS file: ", fileInfo[["bayesFile"]], " in output file: ", curfile); print(e)
+      allFiles[[listID]]$bparameters <- tryCatch(l_getSavedata_Bparams(curfile, outfiletext, savedata_info, discardBurnin=FALSE), error=function(e) {
+            message("Error reading BPARAMETERS file: ", savedata_info[["bayesFile"]], " in output file: ", curfile); print(e)
             return(list())
           })
     }
@@ -286,7 +285,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
 
     #TECH3: covariance/correlation matrix of parameter estimates
     if (isTRUE("tech3" %in% what)) {
-      allFiles[[listID]]$tech3 <- tryCatch(extractTech3(outfiletext, fileInfo, curfile), error=function(e) {
+      allFiles[[listID]]$tech3 <- tryCatch(extractTech3(outfiletext, savedata_info, curfile), error=function(e) {
             message("Error extracting TECH3 in output file: ", curfile); print(e)
             return(list())
           })
@@ -373,9 +372,9 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
     attr(allFiles[[listID]], "filename") <- curfile
 
     #cleanup summary columns containing only NAs
-    for (col in names(allFiles[[listID]]$summaries)) {
-      if (isTRUE(all(is.na(allFiles[[listID]]$summaries[[col]])))) {
-        allFiles[[listID]]$summaries[[col]] <- NULL
+    for (col in names(summaries)) {
+      if (isTRUE(all(is.na(summaries[[col]])))) {
+        summaries[[col]] <- NULL
       }
     }
 
@@ -390,9 +389,9 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
     
     ### H5 results
     h5results <- list() # default empty field
-    if (isTRUE("h5results" %in% what) && isFALSE(is.null(fileInfo)) && !is.na(fileInfo$h5resultsFile[1L])) {
+    if (isTRUE("h5results" %in% what) && isFALSE(is.null(savedata_info)) && !is.na(savedata_info$h5resultsFile[1L])) {
       #check for h5results file, and load if possible
-      h5resultsfname <- fileInfo$h5resultsFile[1L]
+      h5resultsfname <- savedata_info$h5resultsFile[1L]
       
       if (is.na(splitFilePath(h5resultsfname)$directory)) { # if just a local file, add curfile directory
         h5resultsfname <- file.path(dirname(curfile), h5resultsfname)
@@ -407,10 +406,10 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
       allFiles[[listID]]$output <- rawtext
     }
     
-    # clean up savedata file info if it was not requested
-    if (isFALSE("savedata" %in% what)) {
-      allFiles[[listID]]$savedata_info <- NULL
-    }
+    # add compulsory sections to object if requested by user
+    if (isTRUE("input" %in% what)) allFiles[[listID]]$input <- inp
+    if (isTRUE("summaries" %in% what)) allFiles[[listID]]$summaries <- summaries
+    if (isTRUE("savedata" %in% what)) allFiles[[listID]]$savedata_info <- savedata_info
   }
 
   if (identical(length(outfiles), 1L)) {

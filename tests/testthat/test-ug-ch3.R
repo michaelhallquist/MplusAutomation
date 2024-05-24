@@ -69,5 +69,28 @@ test_that("Ch 3: Example 3.5 - Logistic Regression", {
   expect_equal(m$sampstat$univariate.sample.statistics["X1", "Skewness"], -0.133)
   expect_equal(m$summaries$Estimator, "ML")
   expect_equal(m$input$data$file, "ex3.5.dat")
+  
+  # odds ratios
+  expect_equal(m$parameters$odds$est[1L], 2.921)
+  expect_equal(m$parameters$odds$lower_2.5ci[2L], 4.423)
+  
+  # probability scale
+  expect_equal(m$parameters$probability.scale$est[2L], 0.346)
 })
 
+# modified version of multinomial regression ex3.6 that includes odds ratios and confidence intervals
+# only currently run on 8.11
+test_that("Ch 3: Example 3.6 - Multinomial Regression", {
+  m <- readModels(target = get_mplus_file("ch3/ex3.6.out", mplus_version="8.11"))
+  b <- coef(m, params = "regression")
+  expect_equal(trimws(b$Label[2]), "U1#1<-X3")
+  expect_equal(b$est[2], 2.259)
+  expect_equal(b$se[2], 0.203)
+  
+  # odds ratios
+  expect_equal(m$parameters$odds$est[1L], 2.157)
+  expect_equal(m$parameters$odds$lower_2.5ci[2L], 6.438)
+  
+  # confidence intervals for odds ratios
+  expect_equal(m$parameters$ci.odds$low.5[3L], 0.985)
+})

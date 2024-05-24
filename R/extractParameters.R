@@ -251,8 +251,15 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
     columnNames <- suppressWarnings(detectColumnNames(filename, modelSection, "model_results"))
     
     #If we can't detect column names (because they're not reprinted from model results, assume a 5-column header -- heuristic
-    if (is.null(columnNames)) { columnNames <- c("param", "est", "se", "est_se", "pval") } #default if detection fails
-  } else { sectionType <- "model_results" }
+    if (is.null(columnNames)) columnNames <- c("param", "est", "se", "est_se", "pval") #default if detection fails
+  } else if (sectionName == "odds") {
+    columnNames <- suppressWarnings(detectColumnNames(filename, modelSection, "model_results"))
+    
+    #If we can't detect column names (because they're not printed), assume that it's just param and est. Happens in Mplus v8, for example.
+    if (is.null(columnNames)) columnNames <- c("param", "est") #default if detection fails
+  } else { 
+    sectionType <- "model_results" 
+  }
 
   if (!exists("columnNames")) { columnNames <- detectColumnNames(filename, modelSection, sectionType) }
 
@@ -482,7 +489,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
       unstandardizedSection <- getSection(multisectionMatches[s], outfiletext)
       if (!is.null(unstandardizedSection)) {
         unstandardizedList[[ sectionNames[s] ]] <- extractParameters_1section(filename, unstandardizedSection, "unstandardized")[[1]]
-      }      
+      }
     }
     allSections$unstandardized <- unstandardizedList
   } else {
@@ -618,10 +625,18 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", other_cols)] #reorder columns
     allSections <- appendListElements(allSections, probParsed)
   }
+  
+  # odds ratios
+  oddsSection <- getSection("^LOGISTIC REGRESSION ODDS RATIO RESULTS$", outfiletext)
+  if (!is.null(oddsSection)) {
+    allSections <- appendListElements(allSections, extractParameters_1section(filename, oddsSection, "odds"))
+  }
 
   #confidence intervals for usual output, credibility intervals for bayesian output
   ciSection <- getSection("^(CONFIDENCE INTERVALS OF MODEL RESULTS|CREDIBILITY INTERVALS OF MODEL RESULTS)$", outfiletext)
   if (!is.null(ciSection)) {
+    # capture the header line to be reused by the odds section, if relevant (where the header is not reprinted)
+    hline <- detectColumnNames(filename, ciSection, "confidence_intervals")
     allSections <- appendListElements(allSections, extractParameters_1section(filename, ciSection, "ci.unstandardized"))
   }
 
@@ -637,6 +652,13 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     std.section <- getSection("STD Standardization", ciStdSection, headers=stdsections)
     if (!is.null(std.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, std.section, "ci.std.standardized"))
   }
+  
+  # when the confidence intervals for logistic regression odds are present, the header line is not reprinted and must be copied from the 
+  ciOddsSection <- getSection("^CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS$", outfiletext)
+  if (!is.null(ciOddsSection)) {
+    ciOddsSection <- c(ciSection[attr(hline, "header_lines")], ciOddsSection)
+    allSections <- appendListElements(allSections, extractParameters_1section(filename, ciOddsSection, "ci.odds")) 
+  }
 
   #extract EFA parameters if this is an EFA output
   if (efa) {
@@ -649,7 +671,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
 
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "unstandardized.alt", "r2", "ci.unstandardized",
-      "irt.parameterization", "probability.scale",
+      "irt.parameterization", "probability.scale", "odds", "ci.odds",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",
       "std.standardized", "ci.std.standardized",

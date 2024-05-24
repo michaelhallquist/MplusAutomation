@@ -1,0 +1,12 @@
+TITLE:	this is an example of a multinomial
+        logistic regression for an unordered
+        categorical (nominal) dependent variable
+        with two covariates
+DATA:	FILE IS ex3.6.dat;
+VARIABLE:	NAMES ARE u1 x1 x3;
+	NOMINAL IS u1;
+MODEL:  u1 ON x1 x3;
+SAVEDATA:
+	H5RESULTS = ex3.6.h5;
+OUTPUT:
+	CINTERVAL STANDARDIZED;

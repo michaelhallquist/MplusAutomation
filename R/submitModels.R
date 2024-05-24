@@ -735,6 +735,7 @@ torque_job_status <- function(job_ids, user = NULL) {
 #' @param ps_format the format string passed to ps
 #' @return a data.table with job information for each job id
 #' @importFrom data.table setnames fread
+#' @importFrom utils type.convert
 #' @keywords internal
 local_job_status <- function(job_ids = NULL, user = NULL,
                              ps_format = "user,pid,state,time,etime,%cpu,%mem,comm,xstat") {
@@ -810,8 +811,9 @@ checkSubmission <- function(mplus_submission_df = NULL, quiet = FALSE) {
 #' @param x the \code{mplus_submission_df} object to summarize
 #' @param refresh if \code{TRUE}, check the status of jobs for this object before printing
 #' @method summary mplus_submission_df
+#' @importFrom utils head
 #' @export
-summary.mplus_submission_df <- function(x, refresh=TRUE) {
+summary.mplus_submission_df <- function(x, refresh=TRUE, ...) {
   checkmate::assert_class(x, "mplus_submission_df")
   checkmate::assert_flag(refresh)
   if (is.null(x$status)) x$status <- "missing"

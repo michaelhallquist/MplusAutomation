@@ -4,7 +4,7 @@
 \alias{summary.mplus_submission_df}
 \title{summary function for submission from \code{submitModels}}
 \usage{
-\method{summary}{mplus_submission_df}(x, refresh = TRUE)
+\method{summary}{mplus_submission_df}(x, refresh = TRUE, ...)
 }
 \arguments{
 \item{x}{the \code{mplus_submission_df} object to summarize}

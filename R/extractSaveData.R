@@ -541,6 +541,7 @@ l_getSavedata_Bparams <- function(outfile, outfiletext, fileInfo, discardBurnin=
 #' @return A data frame of the extracted data.
 #' @keywords internal
 #' @importFrom data.table setDF setnames fread
+#' @importFrom utils type.convert
 getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileName, varNames, varWidths, input) {
   outfileDirectory <- splitFilePath(outfile)$directory
 

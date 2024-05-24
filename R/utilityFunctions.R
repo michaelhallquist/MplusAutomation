@@ -694,7 +694,9 @@ getOutFileList <- function(target, recursive=FALSE, filefilter) {
 #'   and absolute path.
 #' @keywords internal
 #' @examples
+#'   \dontrun{
 #'   splitFilePath("dir1/subdir1/mplus1.inp")
+#'   }
 splitFilePath <- function(filepath, normalize=FALSE) {
   if (!is.character(filepath)) stop("Path not a character string")
   if (nchar(filepath) < 1 || is.na(filepath)) stop("Path is missing or of zero length")

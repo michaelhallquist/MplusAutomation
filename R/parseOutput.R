@@ -716,6 +716,8 @@ extractInput_1file <- function(outfiletext, filename) {
   input$montecarlo <- divideIntoFields(input$montecarlo)
   input$savedata <- divideIntoFields(input$savedata)
   
+  ## cleanup escaped quotes around data file name if it happened to be quoted in Mplus
+  input$data$file <- gsub("\\\"", "", input$data$file)
   
   attr(input, "start.line") <- startInput
   attr(input, "end.line") <- endInput

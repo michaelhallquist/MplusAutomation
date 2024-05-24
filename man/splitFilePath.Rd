@@ -18,6 +18,8 @@ This is a helper function to split path into path and filename.
 Code adapted from R.utils filePath command.
 }
 \examples{
+  \dontrun{
   splitFilePath("dir1/subdir1/mplus1.inp")
+  }
 }
 \keyword{internal}
