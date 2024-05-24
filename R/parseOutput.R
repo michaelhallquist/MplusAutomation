@@ -1476,9 +1476,9 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
   
   covcoverageList <- list()
   
-  covcoverageSubsections <- getMultilineSection("PROPORTION OF DATA PRESENT( FOR [\\w\\d\\s\\.,_]+)*",
+  covcoverageSubsections <- getMultilineSection("PROPORTION OF DATA PRESENT FOR \\w+(?:\\s+\\(\\d+\\))*\\s*$",
     covcoverageSection, filename, allowMultiple=TRUE)
-  
+
   matchlines <- attr(covcoverageSubsections, "matchlines")
   
   if (length(covcoverageSubsections) == 0 || all(is.na(covcoverageSubsections))) { #See UG ex9.7.out
