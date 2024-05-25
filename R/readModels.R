@@ -177,8 +177,8 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
           obs <- gsub("Group", "", obs)
           obs <- unlist(strsplit(trimws(obs), "\\s+"))
           if (isTRUE(length(obs) %% 2 == 0)) {
-            Observations <- as.numeric(obs[seq(3, to = length(obs), by = 3)])
-            names(Observations) <- obs[seq(1, to = length(obs), by = 3)]
+            Observations <- as.numeric(obs[seq(2, to = length(obs), by = 2)])
+            names(Observations) <- obs[seq(1, to = length(obs), by = 2)]
             attr(allFiles[[listID]]$summaries, "Observations") <- Observations
           }
         }
