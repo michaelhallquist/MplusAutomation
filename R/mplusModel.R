@@ -258,16 +258,18 @@ mplusModel_r6 <- R6::R6Class(
     #' @param replaceOutfile Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists; 
     #'   “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
     #'   file is more recent than the output file modified date (implying there have been updates to the model).
-    submit = function(replaceOutfile = "modifiedDate") {
+    #' @param ... additional arguments passed to `submitModels`
+    submit = function(replaceOutfile = "modifiedDate", ...) {
       self$write_inp()
       self$write_dat()
-      submitModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command)
+      submitModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command, ...)
     },
     
     #' @description run this model locally using `runModels`
     #' @param replaceOutfile Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists; 
     #'   “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
     #'   file is more recent than the output file modified date (implying there have been updates to the model).
+    #' @param ... additional arguments passed to `runModels`
     run = function(replaceOutfile = "modifiedDate") {
       # TODO: only write inp and dat files if things have changed compared to disk
       self$write_inp()
