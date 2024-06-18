@@ -115,12 +115,6 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
 
     ### COMPULSORY SECTIONS NEEDED FOR DOWNSTREAM FUNCTIONS: input, summaries, savedata_info
     
-    #SAVEDATA file information -- always extract so that downstream code (e.g., bparameters and h5results) can find info if needed
-    savedata_info <- tryCatch(l_getSavedata_Fileinfo(curfile, outfiletext, summaries), error=function(e) {
-      message("Error extracting SAVEDATA file information in output file: ", curfile); print(e)
-      return(list())
-    })
-    
     ### Parse Mplus input into a list by section
     inp <- tryCatch(extractInput_1file(rawtext, curfile), error=function(e) {
       message("Error parsing input section of output file: ", curfile); print(e)
@@ -132,7 +126,13 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", 
       message("Error extracting model summaries in output file: ", curfile); print(e)
       return(list())
     })
-
+    
+    #SAVEDATA file information -- always extract so that downstream code (e.g., bparameters and h5results) can find info if needed
+    savedata_info <- tryCatch(l_getSavedata_Fileinfo(curfile, outfiletext, summaries), error=function(e) {
+      message("Error extracting SAVEDATA file information in output file: ", curfile); print(e)
+      return(list())
+    })
+    
     if (isTRUE("warn_err" %in% what)) {
       #Parse warnings and errors in output file
       warn_err <- tryCatch(extractWarningsErrors_1file(outfiletext, curfile, input=inp), error=function(e) {
