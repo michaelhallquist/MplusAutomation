@@ -486,7 +486,6 @@ divideIntoFields <- function(section.text, required) {
     }
     
     section.divide[[make.names(tolower(cmdName))]] <- cmdArgs
-    
   }
   
   if (!missing(required)) { stopifnot(all(required %in% names(section.divide))) }
@@ -661,8 +660,6 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
 #' @param filename The filename
 #' @return The parsed input file
 #' @keywords internal
-#' @examples
-#' # make me!!!
 extractInput_1file <- function(outfiletext, filename) {
   input <- list()
   class(input) <- c("mplus.inp", "list")
@@ -690,18 +687,34 @@ extractInput_1file <- function(outfiletext, filename) {
   
   input.text <- outfiletext[startInput[1L]:endInput[1L]] #explicit first element because there could be both warnings and errors.
   
+  input <- parseMplusSyntax(input.text)
+  
+  attr(input, "start.line") <- startInput
+  attr(input, "end.line") <- endInput
+  
+  return(input)
+}
+
+#' Convert an Mplus syntax string into a parsed list
+parseMplusSyntax <- function(syntax, dropSectionNames=TRUE) {
+  input <- list()
+  class(input) <- c("mplus.inp", "list")
+  
   #some code adapted from mplus2lavaan prototype
-  inputHeaders <- grep("^\\s*(title:|data.*:|variable:|define:|analysis:|model.*:|output:|savedata:|plot:|montecarlo:)", input.text, ignore.case=TRUE, perl=TRUE)
+  inputHeaders <- grep("^\\s*(title:|data.*:|variable:|define:|analysis:|model.*:|output:|savedata:|plot:|montecarlo:)", syntax, ignore.case=TRUE, perl=TRUE)
   
   stopifnot(length(inputHeaders) > 0L)
   
   for (h in 1:length(inputHeaders)) {
-    sectionEnd <- ifelse(h < length(inputHeaders), inputHeaders[h+1] - 1, length(input.text))
-    section <- input.text[inputHeaders[h]:sectionEnd]
+    sectionEnd <- ifelse(h < length(inputHeaders), inputHeaders[h+1] - 1, length(syntax))
+    section <- syntax[inputHeaders[h]:sectionEnd]
     sectionName <- trimSpace(sub("^([^:]+):.*$", "\\1", section[1L], perl=TRUE)) #obtain text before the colon
     
-    #dump section name from input syntax
-    section[1L] <- sub("^[^:]+:(.*)$", "\\1", section[1L], perl=TRUE)
+    # dump section name from input syntax
+    if (dropSectionNames) section[1L] <- sub("^[^:]+:(.*)$", "\\1", section[1L], perl=TRUE)
+    
+    # if the line with the section name is otherwise blank, do not add the empty string
+    if (section[1L] == "") section <- section[-1L]
     
     input[[make.names(tolower(sectionName))]] <- section
   }
@@ -709,8 +722,8 @@ extractInput_1file <- function(outfiletext, filename) {
   #divide some input sections into fields
   #need to do a better job here of handling blank lines and such
   input$title <- paste(trimSpace(input$title), collapse=" ")
-  input$data <- divideIntoFields(input$data)
-  input$data.imputation <- divideIntoFields(input$data.imputation)
+  data_fields <- grep("^data", names(input), value=TRUE) # data sections all have command = syntax
+  for (dd in seq_along(data_fields)) input[[ data_fields[dd] ]] <- divideIntoFields(input[[ data_fields[dd] ]])
   input$variable <- divideIntoFields(input$variable)
   input$analysis <- divideIntoFields(input$analysis)
   input$montecarlo <- divideIntoFields(input$montecarlo)
@@ -719,11 +732,36 @@ extractInput_1file <- function(outfiletext, filename) {
   ## cleanup escaped quotes around data file name if it happened to be quoted in Mplus
   input$data$file <- gsub("\\\"", "", input$data$file)
   
-  attr(input, "start.line") <- startInput
-  attr(input, "end.line") <- endInput
-  
   return(input)
 }
+
+mplusInpToString <- function(obj) {
+  stopifnot(inherits(obj, "mplus.inp"))
+  
+  str <- c()
+  for (ii in seq_along(obj)) {
+    str <- c(str, paste0(sub(".", " ", toupper(names(obj)[ii]), fixed=TRUE), ":"))
+    this_section <- obj[[ii]]
+    if (is.list(this_section)) {
+      for (jj in seq_along(this_section)) {
+        wrapped <- strwrap(this_section[[jj]], width=85, exdent=4)
+        wrapped[1L] <- paste0(toupper(names(this_section)[jj]), " = ", wrapped[1L]) # add command = to first line
+        wrapped[length(wrapped)] <- paste0(wrapped[length(wrapped)], ";") # add trailing semicolon
+        str <- c(str, wrapped)
+      }
+    } else {
+      # just paste syntax as is
+      str <- c(
+        str,
+        trimws(this_section)
+      )
+    }
+  }
+  
+  return(str)
+}
+
+
 
 #' Extract the summaries from one file
 #'

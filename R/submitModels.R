@@ -224,6 +224,10 @@ filter_inp_filelist <- function(inp_files, replaceOutfile = "always", quiet=TRUE
 #' @param post user-specified shell commands to include in the job script after Mplus runs (e.g., execute results wrangling script)
 #' @param batch_outdir the directory where job scripts should be written
 #' @param job_script_prefix the filename prefix for each job script
+#' @param combine_jobs if TRUE, \code{submitModels} will seek to combine similar models into batches to reduce the total number of jobs
+#' @param max_time_per_job The maximum time (in days-hours:minutes:seconds format) allowed for a combined job
+#' @param combine_memgb_tolerance The memory tolerance for combining similar models in GB. Defaults to 1 (i.e., models that differ by <= 1 GB can be combined)
+#' @param combine_cores_tolerance The cores tolerance for combining similar models in number of cores. Defaults to 2 (i.e., models that whose core requests differ by <= 2 can be combined)
 #' @param debug a logical indicating whether to actually submit the jobs (TRUE) or just create the scripts for inspection (FALSE)
 #' @param fail_on_error Whether to stop execution of the script (TRUE), or issue a warning (FALSE) if the job
 #'      submission fails. Defaults to TRUE.
@@ -245,8 +249,9 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
     replaceOutfile="modifiedDate", Mplus_command = NULL, quiet = FALSE,
     scheduler="slurm", sched_args=NULL, env_variables=NULL, export_all=FALSE,
     cores_per_model = 1L, memgb_per_model = 8L, time_per_model="1:00:00",
-    time_per_command = NULL, pre=NULL, post=NULL, batch_outdir=NULL, job_script_prefix=NULL, 
-    debug = FALSE, fail_on_error = TRUE
+    pre=NULL, post=NULL, batch_outdir=NULL, job_script_prefix=NULL,
+    combine_jobs = TRUE, max_time_per_job = "24:00:00", combine_memgb_tolerance = 1, 
+    combine_cores_tolerance = 2, debug = FALSE, fail_on_error = TRUE
     ) {
 
   checkmate::assert_character(target)
@@ -417,29 +422,105 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
         run_df$sched[[rr]] <- c(run_df$sched[[rr]][!m], sched_lines)
       }
     }
-
-    # always put job output file in the same directory as the Mplus model unless user states otherwise (also avoid .out extension)
-    flags <- sub("^\\s*(-[A-z]|--[A-z\\-]+=).*", "\\1", run_df$sched[[rr]], perl = TRUE)
-    if (!any(grepl("(--output=|-o)", flags, perl=T))) {
-      run_df$sched[[rr]] <- c(run_df$sched[[rr]], paste0("-o ", run_df$dir[rr], "/mplus-", sub(".inp", "", run_df$file[rr], fixed = TRUE), "-job-%j.txt"))
-    }
   }
 
   ####
+  # chunk run_df into combined jobs if requested
+  chunk_jobs <- function(combine_jobs, run_df, max_time_per_job, combine_memgb_tolerance, combine_cores_tolerance) {
+    
+    # first, convert inp_file, file, and dir to list columns to support multi-model rows
+    run_df$inp_file <- as.list(run_df$inp_file)
+    run_df$file <- as.list(run_df$file)
+    run_df$dir <- as.list(run_df$dir)
+
+    if (isFALSE(combine_jobs)) return(run_df) # no further chunking
+    
+    # we can only combine jobs that have the same scheduler arguments
+    run_list <- run_df %>% group_by(sched) %>% group_split()
+    out_list <- list()
+    for (rr in run_list) {
+      if (nrow(rr) == 1L) {
+        out_list <- c(out_list, list(rr))
+        next # no need to attempt chunking if only a single model has these scheduler arguments
+      }
+      
+      # process rows of this sublist (that share scheduler arguments)
+      toproc <- rep(TRUE, nrow(rr))
+      
+      while (any(toproc)) {
+        # look for biggest jobs that can be chunked together based on memory and cores
+        max_cores <- max(rr$cores[toproc])
+        max_mem <- max(rr$memgb[toproc])
+        elig_chunk <- which(toproc & (rr$memgb >= max_mem - combine_memgb_tolerance) & (rr$cores >= max_cores - combine_cores_tolerance))
+        
+        if (length(elig_chunk) == 1L) { # no model can be chunked with this one
+          toproc[elig_chunk] <- FALSE
+        } else {
+          time_total_hr <- 0
+          time_max_hr <- dhms_to_hours(max_time_per_job)
+          this_chunk <- rr[elig_chunk,]
+          this_chunk$wall_num <- sapply(this_chunk$wall_time, dhms_to_hours)
+          this_chunk <- this_chunk[order(this_chunk$wall_num),] # sort in ascending order by wall time
+          
+          while (nrow(this_chunk) > 0L) {
+            elig_times <- cumsum(this_chunk$wall_num)
+            
+            # initialize chunked job with maximal memory and core demand
+            this_job <- data.frame(jobid=NA_character_, cores=max_cores, memgb=max_mem,
+                               wall_time=NA_character_, sched_script=NA_character_)
+            
+            included <- elig_times < time_max_hr
+            this_job$inp_file <- list(unlist(this_chunk$inp_file[included]))
+            this_job$dir <- list(unlist(this_chunk$dir[included]))
+            this_job$file <- list(unlist(this_chunk$file[included]))
+            this_job$pre <- list(this_chunk$pre[included])
+            this_job$post <- list(this_chunk$post[included])
+            
+            this_job$wall_time <- validate_dhms(paste0(max(elig_times[included]), ":00:00"))
+            this_job$sched <- this_chunk$sched[1L] # by definition, sched arguments apply to all models in this chunk
+            
+            out_list <- c(out_list, list(this_job))
+            this_chunk <- this_chunk[!included,,drop=FALSE] # drop rows that are complete
+          }
+          
+          toproc[elig_chunk] <- FALSE # drop this chunk now that it is done
+          
+        }
+      }
+    }
+    return(do.call(rbind, out_list))
+  }
+  
+  # handle job chunking, if requested
+  run_df <- chunk_jobs(combine_jobs, run_df, max_time_per_job, combine_memgb_tolerance, combine_cores_tolerance)
+  
+  ####
   # loop over run_df and submit jobs
   for (rr in seq_len(nrow(run_df))) {
+    batch_name <- ifelse(length(run_df$file[[rr]]) > 1L, paste0("batch", rr), sub(".inp", "", run_df$file[[rr]], fixed=TRUE))
+    
+    # always put job output file in the same directory as the Mplus model unless user states otherwise (also avoid .out extension)
+    flags <- sub("^\\s*(-[A-z]|--[A-z\\-]+=).*", "\\1", run_df$sched[[rr]], perl = TRUE)
+    if (!any(grepl("(--output=|-o)", flags, perl=T))) {
+      run_df$sched[[rr]] <- c(run_df$sched[[rr]], paste0("-o ", run_df$dir[rr], "/mplus-", batch_name, "-job-%j.txt"))
+    }
+    
+    nfiles <- length(run_df$file[[rr]])
     # core model execution code
-    model_str <- c(
-      "export TMPDIR=$( mktemp -d )", # create job-specific temporary directory
-      paste0("export MPLUSDIR='", run_df$dir[rr], "'"),
-      paste0("export MPLUSINP='", run_df$file[rr], "'"),
-      paste0("cd \"", run_df$dir[rr], "\""),
-      "",
-      if (!is.null(run_df$pre[[rr]])) run_df$pre[[rr]], # model-specific pre commands
-      paste0("\"", Mplus_command, "\" \"", run_df$file[rr], "\""),
-      if (!is.null(run_df$post[[rr]])) run_df$post[[rr]] # model-specific post commands
-    )
-
+    model_str <- "export TMPDIR=$( mktemp -d )" # create job-specific temporary directory
+    for (ii in seq_len(nfiles)) {
+      model_str <- c(
+        model_str,
+        "",
+        paste0("export MPLUSDIR='", run_df$dir[[rr]][ii], "'"),
+        paste0("export MPLUSINP='", run_df$file[[rr]][ii], "'"),
+        paste0("cd \"", run_df$dir[[rr]][ii], "\""),
+        "",
+        if (!is.null(run_df$pre[[rr]][[ii]])) run_df$pre[[rr]][[ii]], # model-specific pre commands
+        paste0("\"", Mplus_command, "\" \"", run_df$file[[rr]][ii], "\""),
+        if (!is.null(run_df$post[[rr]][[ii]])) run_df$post[[rr]][[ii]]) # model-specific post commands
+    }
+    
     if (scheduler == "sbatch") {
       file_suffix <- ".sbatch"
       job_str <- c(
@@ -468,7 +549,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
     }
 
     job_str <- na.omit(c(job_str, model_str)) # use na.omit to drop blanks from ifelse
-    script <- file.path(batch_outdir, sprintf(paste0("%.", ndigits, "d_%s"), rr, sub(".inp", file_suffix, run_df$file[rr])))
+    script <- file.path(batch_outdir, sprintf(paste0("%.", ndigits, "d_%s%s"), rr, batch_name, file_suffix))
     writeLines(job_str, con = script)
     run_df$sched_script[rr] <- script
     
