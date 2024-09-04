@@ -435,6 +435,14 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
 
     if (isFALSE(combine_jobs)) return(run_df) # no further chunking
     
+    run_df$wall_hr <- sapply(run_df$wall_time, dhms_to_hours)
+    time_max_hr <- dhms_to_hours(max_time_per_job)
+    
+    if (any(run_df$wall_hr > time_max_hr)) {
+      nexceed <- sum(run_df$wall_hr > time_max_hr)
+      warning(nexceed, " models have compute times longer than the allowed max_time_per_job for job combination. In these cases, single model jobs will be submitted with the compute time requested")
+    }
+    
     # we can only combine jobs that have the same scheduler arguments
     run_list <- run_df %>% group_by(sched) %>% group_split()
     out_list <- list()
@@ -456,20 +464,20 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
         if (length(elig_chunk) == 1L) { # no model can be chunked with this one
           toproc[elig_chunk] <- FALSE
         } else {
-          time_total_hr <- 0
-          time_max_hr <- dhms_to_hours(max_time_per_job)
           this_chunk <- rr[elig_chunk,]
-          this_chunk$wall_num <- sapply(this_chunk$wall_time, dhms_to_hours)
-          this_chunk <- this_chunk[order(this_chunk$wall_num),] # sort in ascending order by wall time
+          this_chunk <- this_chunk[order(this_chunk$wall_hr),] # sort in ascending order by wall time
           
           while (nrow(this_chunk) > 0L) {
-            elig_times <- cumsum(this_chunk$wall_num)
+            elig_times <- cumsum(this_chunk$wall_hr)
             
             # initialize chunked job with maximal memory and core demand
             this_job <- data.frame(jobid=NA_character_, cores=max_cores, memgb=max_mem,
                                wall_time=NA_character_, sched_script=NA_character_)
             
             included <- elig_times < time_max_hr
+            # if all remaining jobs are more than the allowed max job time, revert to single jobs scheduled for their individually requested times
+            if (all(included == FALSE)) included <- c(TRUE, rep(FALSE, nrow(this_chunk) - 1))
+            
             this_job$inp_file <- list(unlist(this_chunk$inp_file[included]))
             this_job$dir <- list(unlist(this_chunk$dir[included]))
             this_job$file <- list(unlist(this_chunk$file[included]))
@@ -500,9 +508,10 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
     batch_name <- ifelse(length(run_df$file[[rr]]) > 1L, paste0("batch", rr), sub(".inp", "", run_df$file[[rr]], fixed=TRUE))
     
     # always put job output file in the same directory as the Mplus model unless user states otherwise (also avoid .out extension)
+    # if there are multiple models in a batch, put the output file in the directory of the the first model
     flags <- sub("^\\s*(-[A-z]|--[A-z\\-]+=).*", "\\1", run_df$sched[[rr]], perl = TRUE)
     if (!any(grepl("(--output=|-o)", flags, perl=T))) {
-      run_df$sched[[rr]] <- c(run_df$sched[[rr]], paste0("-o ", run_df$dir[rr], "/mplus-", batch_name, "-job-%j.txt"))
+      run_df$sched[[rr]] <- c(run_df$sched[[rr]], paste0("-o ", run_df$dir[[rr]][1], "/mplus-", batch_name, "-job-%j.txt"))
     }
     
     nfiles <- length(run_df$file[[rr]])

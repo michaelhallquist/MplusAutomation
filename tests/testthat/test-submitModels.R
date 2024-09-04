@@ -2,7 +2,7 @@
 p <- test_path("submitModels")
 
 # checks on parsing of scheduling arguments and script setup
-track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE)
+track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE, max_time_per_job = "2:10:00")
 
 test_that("submitModels job ID check", {
     expect_equal(track$jobid[1], "dummy_1")
@@ -28,3 +28,6 @@ test_that("submitModels job allocation checks", {
 # track <- checkSubmission(track)
 # summary(track)
 
+# combine jobs challenge
+p <- test_path("submitModels/job_combine")
+track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE, max_time_per_job = "48:10:00", batch_outdir = file.path(p, "batchfiles"))

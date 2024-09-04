@@ -15,8 +15,6 @@ Wrapped by `mplusModel`
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{syntax}}{the Mplus model syntax as a character vector}
-
 \item{\code{input}}{Mplus input syntax parsed into a list by major section}
 
 \item{\code{warnings}}{Syntax and estimation warnings as a list}
@@ -26,6 +24,25 @@ Wrapped by `mplusModel`
 \item{\code{summaries}}{a list containing the model summary information and statistics}
 
 \item{\code{savedata}}{a list containing the data output by the SAVEDATA command}
+}
+\if{html}{\out{</div>}}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{model_dir}}{the directory for Mplus files corresponding to this model}
+
+\item{\code{inp_file}}{the location of the Mplus .inp file for this model}
+
+\item{\code{out_file}}{the location of the Mplus .out file for this model}
+
+\item{\code{dat_file}}{the location of the Mplus .dat (data) file for this model}
+
+\item{\code{data}}{the dataset used for estimating this model}
+
+\item{\code{Mplus_command}}{the location of the Mplus program}
+
+\item{\code{syntax}}{the Mplus syntax for this model as a character vector}
 }
 \if{html}{\out{</div>}}
 }
@@ -118,13 +135,15 @@ write the .inp and .dat files for this model to the intended location
 \subsection{Method \code{write_inp()}}{
 write the .inp and .dat files for this model to the intended location
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$write_inp(overwrite = TRUE, quiet = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$write_inp(overwrite = TRUE, inp_file = NULL, quiet = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{overwrite}}{if `TRUE`, overwrite existing data. Default: `TRUE`.}
+
+\item{\code{inp_file}}{The location of the input file to write. If NULL (default), use the `$inp_file` of this object.}
 
 \item{\code{quiet}}{if `TRUE`, do not produce messages about the outcome of this command (e.g., a message about overwriting existing data)}
 }
@@ -137,7 +156,7 @@ write the .inp and .dat files for this model to the intended location
 \subsection{Method \code{submit()}}{
 submit this model for estimation on an HPC using `submitModels`
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$submit(replaceOutfile = "modifiedDate")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$submit(replaceOutfile = "modifiedDate", ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -146,6 +165,8 @@ submit this model for estimation on an HPC using `submitModels`
 \item{\code{replaceOutfile}}{Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists; 
 “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
 file is more recent than the output file modified date (implying there have been updates to the model).}
+
+\item{\code{...}}{additional arguments passed to `submitModels`}
 }
 \if{html}{\out{</div>}}
 }
@@ -165,6 +186,8 @@ run this model locally using `runModels`
 \item{\code{replaceOutfile}}{Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists; 
 “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
 file is more recent than the output file modified date (implying there have been updates to the model).}
+
+\item{\code{...}}{additional arguments passed to `runModels`}
 }
 \if{html}{\out{</div>}}
 }

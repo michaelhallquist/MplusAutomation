@@ -18,11 +18,14 @@ submitModels(
   cores_per_model = 1L,
   memgb_per_model = 8L,
   time_per_model = "1:00:00",
-  time_per_command = NULL,
   pre = NULL,
   post = NULL,
   batch_outdir = NULL,
   job_script_prefix = NULL,
+  combine_jobs = TRUE,
+  max_time_per_job = "24:00:00",
+  combine_memgb_tolerance = 1,
+  combine_cores_tolerance = 2,
   debug = FALSE,
   fail_on_error = TRUE
 )
@@ -87,6 +90,14 @@ a number is provided, we will treat this as the number of minutes.}
 \item{batch_outdir}{the directory where job scripts should be written}
 
 \item{job_script_prefix}{the filename prefix for each job script}
+
+\item{combine_jobs}{if TRUE, \code{submitModels} will seek to combine similar models into batches to reduce the total number of jobs}
+
+\item{max_time_per_job}{The maximum time (in days-hours:minutes:seconds format) allowed for a combined job}
+
+\item{combine_memgb_tolerance}{The memory tolerance for combining similar models in GB. Defaults to 1 (i.e., models that differ by <= 1 GB can be combined)}
+
+\item{combine_cores_tolerance}{The cores tolerance for combining similar models in number of cores. Defaults to 2 (i.e., models that whose core requests differ by <= 2 can be combined)}
 
 \item{debug}{a logical indicating whether to actually submit the jobs (TRUE) or just create the scripts for inspection (FALSE)}
 

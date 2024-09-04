@@ -17,7 +17,4 @@ The parsed input file
 \description{
 Function to extract and parse mplus input syntax from the output file
 }
-\examples{
-# make me!!!
-}
 \keyword{internal}

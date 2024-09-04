@@ -40,4 +40,4 @@ rm(example1, example2, example3)
 \author{
 Joshua F. Wiley <jwiley.psych@gmail.com>
 }
-\keyword{interface}
+\keyword{internal}
