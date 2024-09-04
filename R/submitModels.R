@@ -447,6 +447,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
     run_list <- run_df %>% group_by(sched) %>% group_split()
     out_list <- list()
     for (rr in run_list) {
+      
       if (nrow(rr) == 1L) {
         out_list <- c(out_list, list(rr))
         next # no need to attempt chunking if only a single model has these scheduler arguments
@@ -483,8 +484,8 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
             this_job$file <- list(unlist(this_chunk$file[included]))
             this_job$pre <- list(this_chunk$pre[included])
             this_job$post <- list(this_chunk$post[included])
-            
-            this_job$wall_time <- validate_dhms(paste0(max(elig_times[included]), ":00:00"))
+            this_job$wall_hr <- max(elig_times[included])
+            this_job$wall_time <- validate_dhms(paste0(this_job$wall_hr, ":00:00"))
             this_job$sched <- this_chunk$sched[1L] # by definition, sched arguments apply to all models in this chunk
             
             out_list <- c(out_list, list(this_job))
