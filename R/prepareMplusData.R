@@ -382,6 +382,9 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #'   data file name.  Defaults to \code{FALSE} for consistency with previous
 #'   behavior where this feature was not available.
 #' @param quiet optional. If \code{TRUE}, show status messages in the console.
+#' @param use_relative_path If \code{TRUE}, only include the relative path in the \code{DATA: FILE =}
+#'   syntax returned by the function. This works well if the \code{.dat} file and the \code{.inp} file
+#'   are located in the same folder, as is common for \code{Mplus}. Default: \code{FALSE}.
 #' @return Invisibly returns a character vector of the Mplus input
 #'   syntax. Primarily called for its side effect of creating Mplus
 #'   data files and optionally input files.
@@ -517,10 +520,14 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' }
 prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dropCols=NULL, dummyCode=NULL,
                              interactive=TRUE, overwrite=TRUE, imputed=FALSE,
-                             writeData=c("always", "ifmissing", "never"), hashfilename=FALSE, quiet = TRUE) {
+                             writeData=c("always", "ifmissing", "never"), hashfilename=FALSE, quiet = TRUE, use_relative_path = FALSE) {
   
   checkmate::assert_string(filename, null.ok = TRUE)
   checkmate::assert_subset(writeData, choices = c("always", "ifmissing", "never"),  empty.ok = FALSE)
+  checkmate::assert_flag(overwrite)
+  checkmate::assert_flag(hashfilename)
+  checkmate::assert_flag(quiet)
+  checkmate::assert_flag(use_relative_path)
   
   writeData <- match.arg(writeData)
   
@@ -632,18 +639,26 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
     }
   }
   
+  title <- "TITLE: Your title goes here\n"
+  
   # use gsub on filename to force wrap at 75 chars, breaking on spaces or slashes
   if (isTRUE(imputed)) {
+    data_file <- ifelse(use_relative_path, basename(impfilename), impfilename)
+    variable_names <- createVarSyntax(df[[1]])
+    
     syntax <- c(
-      "TITLE: Your title goes here\n",
-      DATA <- paste0("DATA:\n  FILE = \"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', impfilename)), "\";\n", "TYPE = IMPUTATION;\n"),
-      "VARIABLE: \n", createVarSyntax(df[[1]]), "MISSING=.;\n")
+      title,
+      paste0("DATA:\n  FILE = \"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', data_file)), "\";\n", "TYPE = IMPUTATION;\n"),
+      "VARIABLE: \n", variable_names, "MISSING=.;\n")
     
   } else {
+    data_file <- ifelse(use_relative_path, basename(filename), filename)
+    variable_names <- createVarSyntax(df)
+    
     syntax <- c(
-      "TITLE: Your title goes here\n",
-      DATA <- paste0("DATA:\n  FILE = \"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', filename)), "\";\n"),
-      "VARIABLE: \n", createVarSyntax(df), "MISSING=.;\n")
+      title,
+      paste0("DATA:\n  FILE = \"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', data_file)), "\";\n"),
+      "VARIABLE: \n", variable_names, "MISSING=.;\n")
   }
   
   # if inpfile is a logical value and is TRUE
@@ -673,6 +688,12 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
   
   # write out syntax, either to stdout or to a file
   cat(syntax, file=inpfile, sep="")
+  
+  # tag syntax with fields for other functions (mplusModel) that modify extant syntax
+  attr(syntax, "title") <- title
+  attr(syntax, "data_file") <- data_file
+  attr(syntax, "variable_names") <- variable_names
+  attr(syntax, "missing") <- "." # hard-coded for now since no other option exists
   
   # return syntax invisibly for later use/reuse
   return(invisible(syntax))

@@ -705,6 +705,11 @@ parseMplusSyntax <- function(syntax, dropSectionNames=TRUE) {
   
   stopifnot(length(inputHeaders) > 0L)
   
+  # handle comments that precede any major section
+  if (all(inputHeaders > 1L)) {
+    input[["preamble"]] <- syntax[1:(min(inputHeaders) - 1L)]
+  }
+  
   for (h in 1:length(inputHeaders)) {
     sectionEnd <- ifelse(h < length(inputHeaders), inputHeaders[h+1] - 1, length(syntax))
     section <- syntax[inputHeaders[h]:sectionEnd]
@@ -740,7 +745,7 @@ mplusInpToString <- function(obj) {
   
   str <- c()
   for (ii in seq_along(obj)) {
-    str <- c(str, paste0(sub(".", " ", toupper(names(obj)[ii]), fixed=TRUE), ":"))
+    if (names(obj)[ii] != "preamble") str <- c(str, paste0(sub(".", " ", toupper(names(obj)[ii]), fixed=TRUE), ":")) # preamble has no heading
     this_section <- obj[[ii]]
     if (is.list(this_section)) {
       for (jj in seq_along(this_section)) {

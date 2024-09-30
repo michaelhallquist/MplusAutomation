@@ -16,7 +16,8 @@ prepareMplusData(
   imputed = FALSE,
   writeData = c("always", "ifmissing", "never"),
   hashfilename = FALSE,
-  quiet = TRUE
+  quiet = TRUE,
+  use_relative_path = FALSE
 )
 }
 \arguments{
@@ -75,6 +76,10 @@ data file name.  Defaults to \code{FALSE} for consistency with previous
 behavior where this feature was not available.}
 
 \item{quiet}{optional. If \code{TRUE}, show status messages in the console.}
+
+\item{use_relative_path}{If \code{TRUE}, only include the relative path in the \code{DATA: FILE =}
+syntax returned by the function. This works well if the \code{.dat} file and the \code{.inp} file
+are located in the same folder, as is common for \code{Mplus}. Default: \code{FALSE}.}
 }
 \value{
 Invisibly returns a character vector of the Mplus input

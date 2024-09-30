@@ -11,7 +11,7 @@
 #' @export
 #' @importFrom stats na.omit
 #' @seealso \code{\link{mplusModeler}}, \code{\link{mplusObject}}
-#' @keywords interface
+#' @keywords internal
 #' @examples
 #'
 #' example1 <- mplusObject(MODEL = "mpg ON wt;",

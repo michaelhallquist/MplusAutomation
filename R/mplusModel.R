@@ -23,15 +23,18 @@ mplusModel_r6 <- R6::R6Class(
   lock_objects=FALSE,
   private=list(
     pvt_output_loaded = FALSE,
+    pvt_syntax = NULL,           # syntax for this model, parsed into a list
     pvt_data = NULL,             # data.frame containing data for model estimation
     pvt_inp_file = NULL,         # name of .inp file
     pvt_out_file = NULL,         # name of .out file
     pvt_dat_file = NULL,         # name of .dat file
     pvt_model_dir = NULL,        # location of model files
     pvt_Mplus_command = NULL,    # location of Mplus binary
+    pvt_variables = NULL,        # names of columns in data to be written to the .dat file
     
     # private method to populate fields using the result of readModels
     populate_output = function(o) {
+      private$pvt_output_loaded <- TRUE
       for (ff in c("parameters", "input", "warnings", "summaries", "savedata")) {
       #for (ff in names(o)) {
         unlockBinding(ff, self)
@@ -42,15 +45,31 @@ mplusModel_r6 <- R6::R6Class(
     
     # private method to clear all fields after the object is invalidated (e.g., by changing the inp_file or data)
     clear_output = function() {
+      private$pvt_output_loaded <- FALSE
       for (ff in c("parameters", "input", "warnings", "summaries", "savedata")) {
         #for (ff in names(o)) {
         unlockBinding(ff, self)
         self[[ff]] <- NULL
         lockBinding(ff, self)
       }
+    },
+    
+    detect_variables = function() {
+      # both syntax and data must be present to attempt detection
+      if (is.null(private$pvt_syntax) || is.null(private$pvt_data)) return(invisible(NULL))
+      
+      # mimic mplusObject to use detectVariables
+      obj <- list()
+      obj$MODEL <- private$pvt_syntax$model
+      obj$DEFINE <- private$pvt_syntax$define
+      obj$VARIABLE <- private$pvt_syntax$variables
+      obj$rdata <- private$pvt_data
+      
+      private$pvt_variables <- detectVariables(obj)
     }
   ),
   active = list(
+    #' @field model_dir the directory for Mplus files corresponding to this model
     model_dir = function(value) {
       if (missing(value)) {
         private$pvt_model_dir
@@ -59,23 +78,31 @@ mplusModel_r6 <- R6::R6Class(
         private$pvt_model_dir <- value
       }
     },
+    
+    #' @field inp_file the location of the Mplus .inp file for this model
     inp_file = function(value) {
       if (missing(value)) file.path(private$pvt_model_dir, private$pvt_inp_file)
       else stop("Cannot set read-only field")
     },
+    
+    #' @field out_file the location of the Mplus .out file for this model
     out_file = function(value) {
       if (missing(value)) file.path(private$pvt_model_dir, private$pvt_out_file)
       else stop("Cannot set read-only field")
     },
+    
+    #' @field dat_file the location of the Mplus .dat (data) file for this model
     dat_file = function(value)  {
       if (missing(value)) file.path(private$pvt_model_dir, private$pvt_dat_file)
       else stop("Cannot set read-only field")
     },
+    
+    #' @field data the dataset used for estimating this model
     data = function(value) {
       if (missing(value)) {
         private$pvt_data
       } else {
-        had_data <- !is.null(private$pvt_data)
+        had_data <- !is.null(private$pvt_data) # is the user updating data for an existing model?
         if (is.null(value)) {
           private$pvt_data <- NULL # unset data
         } else if (checkmate::test_data_table(value)) {
@@ -83,17 +110,25 @@ mplusModel_r6 <- R6::R6Class(
         } else if (checkmate::test_data_frame(value)) {
           private$pvt_data <- value
         } else {
-          warning("data must be a data.frame object")
+          stop("data must be a data.frame object")
         }
         
         if (had_data) {
           # invalidate loaded output if data changes
           message("Data has changed. Unloading model results from object.")
-          private$pvt_output_loaded <- FALSE
           private$clear_output()  
+        }
+        
+        # if we are updating the dataset, make sure that all expected variables are present
+        if (!is.null(value) && !is.null(private$pvt_variables)) {
+          missing_vars <- setdiff(names(value), private$pvt_variables)
+          if (length(missing_vars) > 0L) 
+            warning("The following variables are mentioned in the model syntax, but missing in the data: ", paste(missing_vars, collapse=", "))
         }
       }
     },
+    
+    #' @field Mplus_command the location of the Mplus program
     Mplus_command = function(value) {
       if (missing(value)) {
         private$pvt_Mplus_command
@@ -107,11 +142,26 @@ mplusModel_r6 <- R6::R6Class(
           if (!checkmate::test_file_exists(value)) warning("Mplus_command does not point to a valid location. This could cause problems!")
         }
       }
+    },
+    
+    #' @field syntax the Mplus syntax for this model as a character vector
+    syntax = function(value) {
+      if (missing(value)) {
+        mplusInpToString(private$pvt_syntax)
+        #unname(unlist(private$pvt_syntax)) # unlist to return as character
+      } else {
+        if (!checkmate::test_character(value)) {
+          stop("Syntax must be a character vector")
+        } else {
+          private$pvt_syntax <- parseMplusSyntax(value, dropSectionNames = TRUE)
+
+          # detect variables in syntax
+          private$detect_variables()
+        }
+      }
     }
   ),
   public=list(
-    #' @field syntax the Mplus model syntax as a character vector
-    syntax = NULL,
     
     ### READ-ONLY FIELDS (set by populate_output)
     #' @field input Mplus input syntax parsed into a list by major section
@@ -147,8 +197,8 @@ mplusModel_r6 <- R6::R6Class(
         s <- splitFilePath(inp_file, normalize=TRUE)
         private$pvt_model_dir <- ifelse(is.na(s$directory), getwd(), s$directory)
         private$pvt_inp_file <- s$filename
-        private$pvt_out_file <- sub("\\.inp$", ".out", s$filename)
-        private$pvt_dat_file <- sub("\\.inp$", ".dat", s$filename)
+        private$pvt_out_file <- sub("\\.inp?$", ".out", s$filename)
+        private$pvt_dat_file <- sub("\\.inp?$", ".dat", s$filename)
         
         if (file.exists(self$out_file) && isTRUE(read)) self$read() # load the .out file if requested
         
@@ -175,15 +225,14 @@ mplusModel_r6 <- R6::R6Class(
       # populate model syntax
       if (!checkmate::test_character(syntax)) stop("syntax argument must not be NULL")
       
-      # force syntax to be a character vector (convert \n to elements)
-      self$syntax <- unlist(strsplit(syntax, "\\n"))
-      
       # populate model data
       self$data <- data
       
+      # force syntax to be a character vector (convert \n to elements)
+      self$syntax <- unlist(strsplit(syntax, "\\n"))
+      
       # set Mplus command
       self$Mplus_command <- Mplus_command
-      
       
       ### args from submitModels
       # function(target=getwd(), recursive=FALSE, filefilter = NULL,
@@ -200,7 +249,6 @@ mplusModel_r6 <- R6::R6Class(
       checkmate::assert_flag(force)
       if ((force || !private$pvt_output_loaded) && file.exists(self$out_file)) {
         o <- MplusAutomation::readModels(self$out_file)
-        private$pvt_output_loaded <- TRUE
         private$populate_output(o)
       }
     },
@@ -220,18 +268,30 @@ mplusModel_r6 <- R6::R6Class(
         return(invisible(self))
       }
 
-      inp_syntax <- MplusAutomation::prepareMplusData(df = self$data, filename = self$dat_file, ...)
+      inp_syntax <- MplusAutomation::prepareMplusData(df = self$data, filename = self$dat_file, keepCols=private$pvt_variables, ...)
+      
+      # ensure that the variable names in the syntax match what we detected
+      private$pvt_syntax$variable$names <- attr(inp_syntax, "variable_names")
+      private$pvt_syntax$variable$missing <- attr(inp_syntax, "missing")
+      
       if (!quiet) message("Writing data to file: ", self$dat_file)
       return(invisible(self))
     },
     
     #' @description write the .inp and .dat files for this model to the intended location
     #' @param overwrite if `TRUE`, overwrite existing data. Default: `TRUE`.
+    #' @param inp_file The location of the input file to write. If NULL (default), use the `$inp_file` of this object.
     #' @param quiet if `TRUE`, do not produce messages about the outcome of this command (e.g., a message about overwriting existing data)
-    write_inp = function(overwrite = TRUE, quiet = FALSE) {
+    write_inp = function(overwrite = TRUE, inp_file = NULL, quiet = FALSE) {
       checkmate::assert_flag(overwrite)
+      checkmate::assert_string(inp_file, null.ok = TRUE)
       checkmate::assert_flag(quiet)
       write <- TRUE
+      
+      if (is.null(inp_file)) inp_file <- self$inp_file
+      
+      # always ensure that the data file in the syntax matches the internal object location
+      private$pvt_syntax$data$file <- self$dat_file
       
       # if the inp file exists, compare its contents against the user's syntax
       if (file.exists(self$inp_file)) {
@@ -260,8 +320,8 @@ mplusModel_r6 <- R6::R6Class(
     #'   file is more recent than the output file modified date (implying there have been updates to the model).
     #' @param ... additional arguments passed to `submitModels`
     submit = function(replaceOutfile = "modifiedDate", ...) {
-      self$write_inp()
       self$write_dat()
+      self$write_inp()
       submitModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command, ...)
     },
     
@@ -272,8 +332,8 @@ mplusModel_r6 <- R6::R6Class(
     #' @param ... additional arguments passed to `runModels`
     run = function(replaceOutfile = "modifiedDate") {
       # TODO: only write inp and dat files if things have changed compared to disk
-      self$write_inp()
       self$write_dat()
+      self$write_inp()
       runModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command)
       
     }
