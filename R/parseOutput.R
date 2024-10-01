@@ -749,19 +749,20 @@ mplusInpToString <- function(obj) {
     this_section <- obj[[ii]]
     if (is.list(this_section)) {
       for (jj in seq_along(this_section)) {
-        wrapped <- strwrap(this_section[[jj]], width=85, exdent=4)
-        wrapped[1L] <- paste0(toupper(names(this_section)[jj]), " = ", wrapped[1L]) # add command = to first line
-        wrapped[length(wrapped)] <- paste0(wrapped[length(wrapped)], ";") # add trailing semicolon
-        str <- c(str, wrapped)
+        # add COMMAND = X;
+        str <- c(str, paste0(toupper(names(this_section)[jj]), " = ", this_section[[jj]], ";"))
       }
     } else {
       # just paste syntax as is
-      str <- c(
-        str,
-        trimws(this_section)
-      )
+      str <- c(str, trimws(this_section))
     }
   }
+
+  # expand any newlines embedded in fields (esp. DATA: FILE) prior to wrapping
+  str <- unlist(strsplit(str, "\n"))
+
+  # handle wrapping
+  str <- strwrap(str, width=85, exdent=4)
   
   return(str)
 }

@@ -8,7 +8,6 @@
 #' @param quiet optional. If \code{TRUE}, show status messages in the console.
 #' @return A vector of variables from the R dataset to use.
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
-#' @export
 #' @importFrom stats na.omit
 #' @seealso \code{\link{mplusModeler}}, \code{\link{mplusObject}}
 #' @keywords internal
@@ -38,7 +37,7 @@ detectVariables <- function(object, quiet = TRUE) {
     } else {
       v <- colnames(object$rdata)
     }
-
+   
     tmpVARIABLE <- unlist(c(
       tryCatch(unlist(strsplit(object$VARIABLE, split = ";")), error = function(e) ""),
       tryCatch(unlist(strsplit(object$DEFINE, split = ";")), error = function(e) ""),

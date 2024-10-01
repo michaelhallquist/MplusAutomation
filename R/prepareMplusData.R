@@ -644,21 +644,21 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
   # use gsub on filename to force wrap at 75 chars, breaking on spaces or slashes
   if (isTRUE(imputed)) {
     data_file <- ifelse(use_relative_path, basename(impfilename), impfilename)
-    variable_names <- createVarSyntax(df[[1]])
+    variable_names <- paste(gsub("\\.", "_", colnames(df[[1]])), collapse=" ") # a little silly not to use createVarSyntax, but it adds NAME = ...
     
     syntax <- c(
       title,
       paste0("DATA:\n  FILE = \"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', data_file)), "\";\n", "TYPE = IMPUTATION;\n"),
-      "VARIABLE: \n", variable_names, "MISSING=.;\n")
+      "VARIABLE: \n", createVarSyntax(df[[1]]), "MISSING=.;\n")
     
   } else {
     data_file <- ifelse(use_relative_path, basename(filename), filename)
-    variable_names <- createVarSyntax(df)
+    variable_names <- paste(gsub("\\.", "_", colnames(df)), collapse=" ")
     
     syntax <- c(
       title,
       paste0("DATA:\n  FILE = \"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', data_file)), "\";\n"),
-      "VARIABLE: \n", variable_names, "MISSING=.;\n")
+      "VARIABLE: \n", createVarSyntax(df), "MISSING=.;\n")
   }
   
   # if inpfile is a logical value and is TRUE
@@ -686,8 +686,8 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
     }
   }
   
-  # write out syntax, either to stdout or to a file
-  cat(syntax, file=inpfile, sep="")
+  # write out syntax, either to stdout or to a file (don't print if quiet is TRUE)
+  if (!identical(inpfile, stdout()) || !quiet) cat(syntax, file=inpfile, sep="")
   
   # tag syntax with fields for other functions (mplusModel) that modify extant syntax
   attr(syntax, "title") <- title

@@ -58,14 +58,22 @@ mplusModel_r6 <- R6::R6Class(
       # both syntax and data must be present to attempt detection
       if (is.null(private$pvt_syntax) || is.null(private$pvt_data)) return(invisible(NULL))
       
-      # mimic mplusObject to use detectVariables
-      obj <- list()
-      obj$MODEL <- private$pvt_syntax$model
-      obj$DEFINE <- private$pvt_syntax$define
-      obj$VARIABLE <- private$pvt_syntax$variables
-      obj$rdata <- private$pvt_data
-      
-      private$pvt_variables <- detectVariables(obj)
+      # TODO: make variable detection better... detectVariables misses IDVARIABLE and CLUSTER, for example
+      # and we need to convert the pvt_syntax sections to strings to match detectVariables
+
+      # this is preferred for now: use user-specified names
+      if (!is.null(private$pvt_syntax$variable$names)) {
+        private$pvt_variables <- strsplit(private$pvt_syntax$variable$names, "\\s+")[[1L]]
+      } else {
+        # mimic mplusObject to use detectVariables
+        obj <- list()
+        obj$MODEL <- private$pvt_syntax$model
+        obj$DEFINE <- private$pvt_syntax$define
+        obj$VARIABLE <- private$pvt_syntax$variable
+        obj$rdata <- private$pvt_data
+
+        private$pvt_variables <- detectVariables(obj)
+      }      
     }
   ),
   active = list(
@@ -268,12 +276,13 @@ mplusModel_r6 <- R6::R6Class(
         return(invisible(self))
       }
 
-      inp_syntax <- MplusAutomation::prepareMplusData(df = self$data, filename = self$dat_file, keepCols=private$pvt_variables, ...)
+      inp_syntax <- prepareMplusData(df = self$data, filename = self$dat_file, keepCols=private$pvt_variables, quiet = TRUE, use_relative_path = TRUE, ...)
       
       # ensure that the variable names in the syntax match what we detected
       private$pvt_syntax$variable$names <- attr(inp_syntax, "variable_names")
       private$pvt_syntax$variable$missing <- attr(inp_syntax, "missing")
-      
+      private$pvt_syntax$data$file <- attr(inp_syntax, "data_file") # update FILE = in DATA section to match absolute/relative (NB, this is overridden in write_inp... need to unify)
+
       if (!quiet) message("Writing data to file: ", self$dat_file)
       return(invisible(self))
     },
@@ -291,7 +300,10 @@ mplusModel_r6 <- R6::R6Class(
       if (is.null(inp_file)) inp_file <- self$inp_file
       
       # always ensure that the data file in the syntax matches the internal object location
-      private$pvt_syntax$data$file <- self$dat_file
+      # and apply wrapping at 75 characters to avoid > 90 errors
+      # we also need to add quotations to get Mplus to handle multi-line read properly
+      # currently forcing this to refer to the relative path (since the goal is always to have .dat files match location)
+      private$pvt_syntax$data$file <- paste0("\"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', basename(self$dat_file))), "\"")
       
       # if the inp file exists, compare its contents against the user's syntax
       if (file.exists(self$inp_file)) {
@@ -335,6 +347,7 @@ mplusModel_r6 <- R6::R6Class(
       self$write_dat()
       self$write_inp()
       runModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command)
+      self$read(force = TRUE) # read/re-read after estimation
       
     }
   )
