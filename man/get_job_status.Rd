@@ -2,7 +2,7 @@
 % Please edit documentation in R/submitModels.R
 \name{get_job_status}
 \alias{get_job_status}
-\title{This function pauses execution of an R script while a scheduled qsub job is not yet complete.}
+\title{This function checks the status of one or more compute jobs}
 \usage{
 get_job_status(job_ids, scheduler = "slurm", quiet = TRUE)
 }
@@ -20,9 +20,7 @@ the function prints out status updates for each tracked job so that the user kno
 A vector of job statuses corresponding to each job id
 }
 \description{
-It is intended to give you control over job dependencies within R when the formal PBS
-depend approach is insufficient, especially in the case of a script that spawns child jobs that
-need to be scheduled or complete before the parent script should continue.
+This function checks the status of one or more compute jobs
 }
 \details{
 Note that for the \code{scheduler} argument, "torque" and "qsub" are the same;

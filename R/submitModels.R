@@ -200,17 +200,17 @@ filter_inp_filelist <- function(inp_files, replaceOutfile = "always", quiet=TRUE
 #'   running models. This covers situations where Mplus is not in the system's path,
 #'   or where one wants to test different versions of the Mplus program.
 #' @param quiet optional. If \code{FALSE}, show status messages in the console.
-#' @param scheduler Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', or 'sh'.
-#'      The terms 'qsub' and 'torque' are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
-#'      and 'slurm'. The scheduler 'sh' does not submit to any scheduler at all, but instead executes the command
-#'      immediately via sh.
+#' @param scheduler Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', 'local', or 'sh'.
+#'      The terms `'qsub'` and `'torque'` are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
+#'      and 'slurm'. If `'local'` or  `'sh'` are specified, `submitModels` does not submit to any scheduler at all, 
+#'      but instead executes the command locally via a shell script.
 #' @param sched_args A character vector of arguments to be included in the scheduling command. On TORQUE, these
 #'      will typically begin with '-l' such as '-l wall_time=10:00:00'. These are added inside the submission script
 #'      for each model and are shared across all models. To add model-specific arguments, include `! #SBATCH` or
 #'      `! #PBS` lines inside the individual .inp files
 #' @param env_variables A named character vector containing environment variables and their values to be passed
-#'      to the \code{script} at execution time. This is handled by the '-v' directive on TORQUE clusters and
-#'      by '--export' on Slurm clusters. The names of this vector are the environment variable names and
+#'      to the \code{script} at execution time. This is handled by the `-v` directive on TORQUE clusters and
+#'      by `--export` on Slurm clusters. The names of this vector are the environment variable names and
 #'      the values of the vector are the environment variable values to be passed in.
 #'      If you want to propagate the current value of an environment variable to the compute node at runtime,
 #'      use NA as the value of the element in \code{env_variables}. See examples.
@@ -219,7 +219,7 @@ filter_inp_filelist <- function(inp_files, replaceOutfile = "always", quiet=TRUE
 #'      Default: 1.
 #' @param memgb_per_model amount of memory (RAM) requested for each model (in GB). Default: 8.
 #' @param time_per_model amount of time requested for each model. Default: "1:00:00" (1 hour). If
-#'   a number is provided, we will treat this as the number of minutes.
+#'      a number is provided, we will treat this as the number of minutes.
 #' @param pre user-specified shell commands  to include in the job script prior to running Mplus (e.g., module load commands)
 #' @param post user-specified shell commands to include in the job script after Mplus runs (e.g., execute results wrangling script)
 #' @param batch_outdir the directory where job scripts should be written
@@ -227,23 +227,23 @@ filter_inp_filelist <- function(inp_files, replaceOutfile = "always", quiet=TRUE
 #' @param combine_jobs if TRUE, \code{submitModels} will seek to combine similar models into batches to reduce the total number of jobs
 #' @param max_time_per_job The maximum time (in days-hours:minutes:seconds format) allowed for a combined job
 #' @param combine_memgb_tolerance The memory tolerance for combining similar models in GB. Defaults to 1 (i.e., models that differ by <= 1 GB can be combined)
-#' @param combine_cores_tolerance The cores tolerance for combining similar models in number of cores. Defaults to 2 (i.e., models that whose core requests differ by <= 2 can be combined)
+#' @param combine_cores_tolerance The cores tolerance for combining models with similar core requests. Defaults to 2 (i.e., models whose core requests differ by <= 2 can be combined)
 #' @param debug a logical indicating whether to actually submit the jobs (TRUE) or just create the scripts for inspection (FALSE)
 #' @param fail_on_error Whether to stop execution of the script (TRUE), or issue a warning (FALSE) if the job
 #'      submission fails. Defaults to TRUE.
-#' @return None. Function is used for its side effects (submitting models).
+#' @return A data.frame recording details of the jobs submitted by `submitModels`. This can be passed to the `summary` function
+#'   or to `checkSubmission` to see the state of submitted jobs.
+#'   
 #' @author Michael Hallquist
+#' @importFrom data.table data.table
 #' @export
 #' @details
 #'   Note that if `fail_on_error` is `TRUE` and submission of one model fails, the submission loop will stop, rather than 
 #'   submitting further models.
 #' @examples
 #' \dontrun{
-#'   submitModels("C:/Users/Michael/Mplus Runs", recursive=TRUE, showOutput=TRUE,
-#'     replaceOutfile="modifiedDate", logFile="MH_RunLog.txt")
-#' }
-#' \dontrun{
-#'   submitModels(getwd(), filefilter = "ex8.*", batch_outdir="~/mplus_batch_12")
+#'   submitModels("~/Michael/submitTest", recursive=TRUE, sched_args=c("--mail=user", "--export=v"), 
+#'     max_time_per_job = "2:10:00", combine_jobs = TRUE)
 #' }
 submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
     replaceOutfile="modifiedDate", Mplus_command = NULL, quiet = FALSE,
@@ -273,11 +273,17 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
     time_per_model <- minutes_to_dhms(time_per_model)
   } else if (checkmate::test_string(time_per_model)) {
     time_per_model <- validate_dhms(time_per_model)
+  } else {
+    stop("Cannot validate time_per_model: ", time_per_model)
   }
   checkmate::assert_character(pre, null.ok = TRUE)
   checkmate::assert_character(post, null.ok = TRUE)
   checkmate::assert_string(batch_outdir, null.ok = TRUE)
   checkmate::assert_string(job_script_prefix, null.ok = TRUE)
+  checkmate::assert_flag(combine_jobs)
+  checkmate::assert_string(max_time_per_job)
+  checkmate::assert_number(combine_memgb_tolerance, lower=0)
+  checkmate::assert_integerish(combine_cores_tolerance, len = 1L, lower=0)
   checkmate::assert_flag(debug)
   checkmate::assert_flag(fail_on_error)
   
@@ -359,7 +365,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
   ####
   # build plan for scheduling jobs
 
-  run_df <- data.frame(
+  run_df <- data.table(
     jobid = NA_character_, inp_file = inp_files, cores = cores_per_model, memgb = memgb_per_model,
     wall_time = time_per_model, sched_script = NA_character_
   )
@@ -443,8 +449,16 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
       warning(nexceed, " models have compute times longer than the allowed max_time_per_job for job combination. In these cases, single model jobs will be submitted with the compute time requested")
     }
     
+    # sched arguments are list columns since each model can have multiple arguments
+    # flatten to allow data.table split to work
+    sched_flat <- sapply(run_df$sched, function(x) paste(x, collapse=" "))
+    
     # we can only combine jobs that have the same scheduler arguments
-    run_list <- run_df %>% group_by(sched) %>% group_split()
+    run_list <- split(run_df, f = sched_flat)
+    
+    # avoid dplyr dependency
+    #run_list <- run_df %>% group_by(sched) %>% group_split()
+    
     out_list <- list()
     for (rr in run_list) {
       
@@ -486,7 +500,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
             this_job$post <- list(this_chunk$post[included])
             this_job$wall_hr <- max(elig_times[included])
             this_job$wall_time <- validate_dhms(paste0(this_job$wall_hr, ":00:00"))
-            this_job$sched <- this_chunk$sched[1L] # by definition, sched arguments apply to all models in this chunk
+            this_job$sched <- this_chunk$sched[1L] # by definition of splits, sched arguments apply to all models in this chunk
             
             out_list <- c(out_list, list(this_job))
             this_chunk <- this_chunk[!included,,drop=FALSE] # drop rows that are complete
@@ -613,11 +627,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
 
 
 
-#' This function pauses execution of an R script while a scheduled qsub job is not yet complete.
-#'
-#' It is intended to give you control over job dependencies within R when the formal PBS
-#' depend approach is insufficient, especially in the case of a script that spawns child jobs that
-#' need to be scheduled or complete before the parent script should continue.
+#' This function checks the status of one or more compute jobs
 #'
 #' @param job_ids One or more job ids of existing PBS or slurm jobs, or process ids of a local process for
 #'   \code{scheduler="sh"}.

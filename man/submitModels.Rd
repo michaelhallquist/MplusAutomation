@@ -56,10 +56,10 @@ or where one wants to test different versions of the Mplus program.}
 
 \item{quiet}{optional. If \code{FALSE}, show status messages in the console.}
 
-\item{scheduler}{Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', or 'sh'.
-The terms 'qsub' and 'torque' are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
-and 'slurm'. The scheduler 'sh' does not submit to any scheduler at all, but instead executes the command
-immediately via sh.}
+\item{scheduler}{Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', 'local', or 'sh'.
+The terms `'qsub'` and `'torque'` are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
+and 'slurm'. If `'local'` or  `'sh'` are specified, `submitModels` does not submit to any scheduler at all, 
+but instead executes the command locally via a shell script.}
 
 \item{sched_args}{A character vector of arguments to be included in the scheduling command. On TORQUE, these
 will typically begin with '-l' such as '-l wall_time=10:00:00'. These are added inside the submission script
@@ -67,8 +67,8 @@ for each model and are shared across all models. To add model-specific arguments
 `! #PBS` lines inside the individual .inp files}
 
 \item{env_variables}{A named character vector containing environment variables and their values to be passed
-to the \code{script} at execution time. This is handled by the '-v' directive on TORQUE clusters and
-by '--export' on Slurm clusters. The names of this vector are the environment variable names and
+to the \code{script} at execution time. This is handled by the `-v` directive on TORQUE clusters and
+by `--export` on Slurm clusters. The names of this vector are the environment variable names and
 the values of the vector are the environment variable values to be passed in.
 If you want to propagate the current value of an environment variable to the compute node at runtime,
 use NA as the value of the element in \code{env_variables}. See examples.}
@@ -97,7 +97,7 @@ a number is provided, we will treat this as the number of minutes.}
 
 \item{combine_memgb_tolerance}{The memory tolerance for combining similar models in GB. Defaults to 1 (i.e., models that differ by <= 1 GB can be combined)}
 
-\item{combine_cores_tolerance}{The cores tolerance for combining similar models in number of cores. Defaults to 2 (i.e., models that whose core requests differ by <= 2 can be combined)}
+\item{combine_cores_tolerance}{The cores tolerance for combining models with similar core requests. Defaults to 2 (i.e., models whose core requests differ by <= 2 can be combined)}
 
 \item{debug}{a logical indicating whether to actually submit the jobs (TRUE) or just create the scripts for inspection (FALSE)}
 
@@ -105,7 +105,8 @@ a number is provided, we will treat this as the number of minutes.}
 submission fails. Defaults to TRUE.}
 }
 \value{
-None. Function is used for its side effects (submitting models).
+A data.frame recording details of the jobs submitted by `submitModels`. This can be passed to the `summary` function
+  or to `checkSubmission` to see the state of submitted jobs.
 }
 \description{
 This function submits a group of Mplus models (.inp files) located within a
@@ -117,11 +118,8 @@ Note that if `fail_on_error` is `TRUE` and submission of one model fails, the su
 }
 \examples{
 \dontrun{
-  submitModels("C:/Users/Michael/Mplus Runs", recursive=TRUE, showOutput=TRUE,
-    replaceOutfile="modifiedDate", logFile="MH_RunLog.txt")
-}
-\dontrun{
-  submitModels(getwd(), filefilter = "ex8.*", batch_outdir="~/mplus_batch_12")
+  submitModels("~/Michael/submitTest", recursive=TRUE, sched_args=c("--mail=user", "--export=v"), 
+    max_time_per_job = "2:10:00", combine_jobs = TRUE)
 }
 }
 \author{

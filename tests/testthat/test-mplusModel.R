@@ -15,6 +15,27 @@ recon2 <- mplusInpToString(syn2)
 
 m <- mplusModel(syntax=orig)
 identical(m$syntax, trimws(orig))
+
+paste(m$syntax, collapse=" ")
+paste(trimws(orig), collapse=" ")
+
 trimws(orig)
 m$syntax
 m$write_inp()
+
+# simple regression 
+syn <- "
+TITLE:	this is an example of a simple linear
+	regression for a continuous observed
+	dependent variable with two covariates
+DATA:	FILE IS ex3.1.dat;
+VARIABLE:	NAMES ARE y1 x1 x3;
+MODEL:	y1 ON x1 x3;
+"
+
+m <- mplusModel(inp_file="/Users/hallquist/Data_Analysis/r_packages/MplusAutomation/tests/testthat/submitModels/ex3.1.inp")
+
+dd <- m$data
+
+nobj <- mplusModel(syntax=syn, data=dd, inp_file="/Users/hallquist/Data_Analysis/r_packages/MplusAutomation/tests/testthat/ex3.1_mplusmodel.inp")
+nobj$run()

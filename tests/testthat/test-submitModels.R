@@ -12,6 +12,7 @@ test_that("submitModels job allocation checks", {
     expect_equal(track$memgb[1], 16)
     expect_equal(track$cores[1], 2)
     expect_equal(track$wall_time[1], "0:30:00")
+    
 })
 
 # setwd("/proj/mnhallqlab/users/michael/MplusAutomation")
