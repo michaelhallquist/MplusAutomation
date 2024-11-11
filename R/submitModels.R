@@ -280,6 +280,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
   checkmate::assert_character(post, null.ok = TRUE)
   checkmate::assert_string(batch_outdir, null.ok = TRUE)
   checkmate::assert_string(job_script_prefix, null.ok = TRUE)
+  if (is.null(job_script_prefix)) job_script_prefix <- "" # to allow sprintf to work as expected
   checkmate::assert_flag(combine_jobs)
   checkmate::assert_string(max_time_per_job)
   checkmate::assert_number(combine_memgb_tolerance, lower=0)
@@ -573,7 +574,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
     }
 
     job_str <- na.omit(c(job_str, model_str)) # use na.omit to drop blanks from ifelse
-    script <- file.path(batch_outdir, sprintf(paste0("%.", ndigits, "d_%s%s"), rr, batch_name, file_suffix))
+    script <- file.path(batch_outdir, sprintf(paste0("%s%.", ndigits, "d_%s%s"), job_script_prefix, rr, batch_name, file_suffix))
     writeLines(job_str, con = script)
     run_df$sched_script[rr] <- script
     
