@@ -373,7 +373,9 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
   split_files <- lapply(inp_files, splitFilePath, normalize = TRUE)
   run_df$dir <- sapply(split_files, "[[", "directory")
   run_df$file <- sapply(split_files, "[[", "filename")
-  run_df$pre <- run_df$post <- run_df$sched <- replicate(nrow(run_df), c()) # add empty list columns for pre, post, and sched
+  run_df[, pre := .(list(NULL))] # add empty list columns for pre, post, and sched
+  run_df[, post := .(list(NULL))]
+  run_df[, sched := .(list(NULL))]
 
   if (!is.null(pre)) run_df$pre <- replicate(nrow(run_df), pre, simplify = FALSE) # overall pre lines for all models
   if (!is.null(post)) run_df$post <- replicate(nrow(run_df), post, simplify = FALSE) # overall post lines for all models
