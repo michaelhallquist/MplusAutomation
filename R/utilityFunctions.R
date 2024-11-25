@@ -640,13 +640,14 @@ parseCatOutput <- function(text) {
 #' @param target The target file or directory
 #' @param recursive A logical value whether to search recursively.
 #'   Defaults to \code{FALSE}.
-#' @param filefilter A regular expression passed to \code{grep}
-#'   used to filter the output files.
+#' @param filefilter A PCRE regular expression passed to \code{grep}
+#'   used to filter the output files based on their file names
+#' @param pathfilter A PCRE regular expression passed to \code{grep}
+#'   used to filter the output files based on their absolute paths
 #' @return A character vector of the output files
 #' @keywords internal
-#' @examples
-#' # make me!!!
-getOutFileList <- function(target, recursive=FALSE, filefilter) {
+#' @importFrom checkmate assert_string
+getOutFileList <- function(target, recursive=FALSE, filefilter, pathfilter) {
 #could this also be used by runModels to locate input files?
 #seems like that function would do well to allow for directories and single files, too.
   
@@ -654,18 +655,61 @@ getOutFileList <- function(target, recursive=FALSE, filefilter) {
   if (file.exists(target)) {
     if (isTRUE(file.info(target)$isdir)) {
       
+      # always convert to absolute path for filtering
+      target <- normalizePath(target)
+      
       #obtain list of all files in the specified directory
-      filelist <- list.files(path=target, recursive=recursive, full.names=TRUE)
+      filelist <- list.files(path=target, recursive=recursive, full.names=FALSE)
       
       #retain only .out files
       outfiles <- filelist[grep(".*\\.out$", filelist, ignore.case=TRUE)]
       
-      if (!missing(filefilter)) {
-        dropOutExtensions <- sapply(outfiles, function(x) {
-              if (nchar(x) >= 4) return(tolower(substr(x, 1, (nchar(x)-4))))
-            })
-        outfiles <- outfiles[grep(paste(".*", filefilter, ".*", sep=""), dropOutExtensions, ignore.case=TRUE, perl=TRUE)]
+      # for filtering paths
+      paths <- normalizePath(file.path(target, dirname(outfiles)))
+      
+      if (missing(filefilter)) {
+        good_files <- seq_along(outfiles)
+      } else {
+        checkmate::assert_string(filefilter)
+        # allow filter to include .out, and to specify start (^) and end ($) characters
+        firstChar <- ".*"
+        if (substr(filefilter, 1, 1) == "^") firstChar <- "^"
+        lastChar <- ".*"
+        dropOut <- TRUE
+        if (substr(filefilter, nchar(filefilter) - 4, nchar(filefilter)) == "\\.out") {
+          lastChar <- "$" # enforce EOL after .out
+          dropOut <- FALSE
+        } else if (substr(filefilter, nchar(filefilter) - 5, nchar(filefilter)) == "\\.out$") {
+          lastChar <- "" # EOL already present
+          dropOut <- FALSE
+        }
+        
+        if (dropOut) {
+          dropOutExtensions <- sapply(outfiles, function(x) {
+            if (nchar(x) >= 4) return(tolower(substr(x, 1, (nchar(x)-4))))
+          })
+          good_files <- grep(paste(firstChar, filefilter, lastChar, sep=""), dropOutExtensions, ignore.case=TRUE, perl=TRUE)
+        } else {
+          good_files <- grep(paste(firstChar, filefilter, lastChar, sep=""), outfiles, ignore.case=TRUE, perl=TRUE)
+        }
       }
+      
+      if (missing(pathfilter)) {
+        good_paths <- seq_along(outfiles)
+      } else {
+        checkmate::assert_string(pathfilter)
+        
+        # allow filter to include .out, and to specify start (^) and end ($) characters
+        firstChar <- ".*"
+        if (substr(pathfilter, 1, 1) == "^") firstChar <- "^"
+        lastChar <- ".*"
+        if (substr(pathfilter, nchar(pathfilter), nchar(pathfilter)) == "$") lastChar <- "" # EOL already present
+
+        good_paths <- grep(paste(firstChar, pathfilter, lastChar, sep=""), paths, ignore.case=TRUE, perl=TRUE)
+      }
+      
+      keep <- intersect(good_paths, good_files)
+      outfiles <- file.path(paths[keep], outfiles[keep])
     }
     else {
       #ensure that target is a single output file.

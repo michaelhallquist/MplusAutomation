@@ -8,6 +8,7 @@ readModels(
   target = getwd(),
   recursive = FALSE,
   filefilter,
+  pathfilter,
   what = "all",
   quiet = TRUE
 )
@@ -24,9 +25,12 @@ subdirectories within \code{target}. Defaults to \code{FALSE}.}
 
 \item{filefilter}{a Perl regular expression (PCRE-compatible)
 specifying particular output files to be parsed within
-\code{directory}. See \code{regex} or
+\code{directory} based on their file name. See \code{regex} or
 \url{http://www.pcre.org/pcre.txt} for details about regular
 expression syntax.}
+
+\item{pathfilter}{a Perl regular expression (PCRE-compatible) specifying particular
+paths to be parsed within \code{directory} based on their absolute paths.}
 
 \item{what}{a character vector denoting what aspects of Mplus output to extract.
 Defaults to \code{"all"}, which will extract all supported output sections.

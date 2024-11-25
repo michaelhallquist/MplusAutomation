@@ -4,7 +4,7 @@
 \alias{getOutFileList}
 \title{Get Output File List}
 \usage{
-getOutFileList(target, recursive = FALSE, filefilter)
+getOutFileList(target, recursive = FALSE, filefilter, pathfilter)
 }
 \arguments{
 \item{target}{The target file or directory}
@@ -12,8 +12,11 @@ getOutFileList(target, recursive = FALSE, filefilter)
 \item{recursive}{A logical value whether to search recursively.
 Defaults to \code{FALSE}.}
 
-\item{filefilter}{A regular expression passed to \code{grep}
-used to filter the output files.}
+\item{filefilter}{A PCRE regular expression passed to \code{grep}
+used to filter the output files based on their file names}
+
+\item{pathfilter}{A PCRE regular expression passed to \code{grep}
+used to filter the output files based on their absolute paths}
 }
 \value{
 A character vector of the output files
@@ -23,8 +26,5 @@ This is a helper function used by extractModelSummaries and extractModelParamete
 It determines whether the target is a single file or a directory.
 If it is a directory, all .out files are returned (perhaps recursively)
 It also permits the files to be filtered using a certain regular expression.
-}
-\examples{
-# make me!!!
 }
 \keyword{internal}

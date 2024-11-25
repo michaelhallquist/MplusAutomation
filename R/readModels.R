@@ -13,9 +13,11 @@
 #'   	subdirectories within \code{target}. Defaults to \code{FALSE}.
 #' @param filefilter a Perl regular expression (PCRE-compatible)
 #'   	specifying particular output files to be parsed within
-#'   	\code{directory}. See \code{regex} or
+#'   	\code{directory} based on their file name. See \code{regex} or
 #'   	\url{http://www.pcre.org/pcre.txt} for details about regular
 #'   	expression syntax.
+#' @param pathfilter a Perl regular expression (PCRE-compatible) specifying particular
+#'   paths to be parsed within \code{directory} based on their absolute paths.
 #' @param what a character vector denoting what aspects of Mplus output to extract.
 #'    Defaults to \code{"all"}, which will extract all supported output sections.
 #'    See details for additional information.
@@ -77,7 +79,7 @@
 #'   allOutput <- readModels(
 #'     "C:/Program Files/Mplus/Mplus Examples/User's Guide Examples", recursive=TRUE)
 #' }
-readModels <- function(target=getwd(), recursive=FALSE, filefilter, what="all", quiet=TRUE) {
+readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, what="all", quiet=TRUE) {
   #large wrapper function to read summaries, parameters, and savedata from one or more output files.
 
   ## enforce quiet being logical and length 1 as used in if else statements
