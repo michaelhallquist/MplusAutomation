@@ -31,6 +31,7 @@ mplusModel_r6 <- R6::R6Class(
     pvt_model_dir = NULL,        # location of model files
     pvt_Mplus_command = NULL,    # location of Mplus binary
     pvt_variables = NULL,        # names of columns in data to be written to the .dat file
+    pvt_is_montecarlo = FALSE,   # whether this is a monte carlo model (in which case the data section is irrelevant)
     
     # private method to populate fields using the result of readModels
     populate_output = function(o) {
@@ -165,6 +166,9 @@ mplusModel_r6 <- R6::R6Class(
 
           # detect variables in syntax
           private$detect_variables()
+
+          # determine whether this is a montecarlo model
+          private$pvt_is_montecarlo <- any(grepl("^\\s*montecarlo\\s*:", value, ignore.case = TRUE, perl=TRUE))
         }
       }
     }
@@ -206,7 +210,6 @@ mplusModel_r6 <- R6::R6Class(
         private$pvt_model_dir <- ifelse(is.na(s$directory), getwd(), s$directory)
         private$pvt_inp_file <- s$filename
         private$pvt_out_file <- sub("\\.inp?$", ".out", s$filename)
-        private$pvt_dat_file <- sub("\\.inp?$", ".dat", s$filename)
         
         if (file.exists(self$out_file) && isTRUE(read)) self$read() # load the .out file if requested
         
@@ -216,8 +219,10 @@ mplusModel_r6 <- R6::R6Class(
         }
         
         # if data is not provided, but the .out file is provided, attempt to read the data
-        if (is.null(data) && private$pvt_output_loaded) {
+        if (is.null(data) && private$pvt_output_loaded && !is.null(self$input$data$file)) {
           dfile <- self$input$data$file
+          private$pvt_dat_file <- self$input$data$file
+          
           # if file cannot be loaded as is because of a relative path problem, look in the model directory
           if (!file.exists(dfile)) {
             dfile <- file.path(private$pvt_model_dir, dfile)
@@ -269,6 +274,9 @@ mplusModel_r6 <- R6::R6Class(
       checkmate::assert_flag(overwrite)
       checkmate::assert_flag(quiet)
       
+      # montecarlo models do not have data files
+      if (private$pvt_is_montecarlo) return(invisible(self))
+      
       if (is.null(self$data)) stop("Cannot write data to file because this object has no data.")
       
       if (file.exists(self$dat_file) && isFALSE(overwrite)) {
@@ -303,7 +311,7 @@ mplusModel_r6 <- R6::R6Class(
       # and apply wrapping at 75 characters to avoid > 90 errors
       # we also need to add quotations to get Mplus to handle multi-line read properly
       # currently forcing this to refer to the relative path (since the goal is always to have .dat files match location)
-      private$pvt_syntax$data$file <- paste0("\"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', basename(self$dat_file))), "\"")
+      if (!is.null(private$pvt_syntax$data$file)) private$pvt_syntax$data$file <- paste0("\"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', basename(self$dat_file))), "\"")
       
       # if the inp file exists, compare its contents against the user's syntax
       if (file.exists(self$inp_file)) {

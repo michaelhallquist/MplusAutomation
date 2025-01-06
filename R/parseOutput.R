@@ -735,7 +735,7 @@ parseMplusSyntax <- function(syntax, dropSectionNames=TRUE) {
   input$savedata <- divideIntoFields(input$savedata)
   
   ## cleanup escaped quotes around data file name if it happened to be quoted in Mplus
-  input$data$file <- gsub("\\\"", "", input$data$file)
+  if (!is.null(input$data$file)) input$data$file <- gsub("\\\"", "", input$data$file)
   
   return(input)
 }

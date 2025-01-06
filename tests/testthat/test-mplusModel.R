@@ -39,3 +39,7 @@ dd <- m$data
 
 nobj <- mplusModel(syntax=syn, data=dd, inp_file="/Users/hallquist/Data_Analysis/r_packages/MplusAutomation/tests/testthat/ex3.1_mplusmodel.inp")
 nobj$run()
+
+
+m <- mplusModel(inp_file="/Users/hallquist/Data_Analysis/Miscellaneous/Rens_GMM_Constraints/mcex8.1.inp")
+m$run()
