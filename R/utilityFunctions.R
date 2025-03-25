@@ -186,43 +186,50 @@ testBParamCompoundConstraint <- function(bparams, test) {
 #' @param charvector Character vector
 #' @param perl A logical whether or not to use perl based
 #'   regular expressions.  Defaults to \code{TRUE}.
+#' @param include_tag if TRUE, return the match as a character string. This is the default, but
+#'   setting to `FALSE` is a bit faster
 #' @return A \code{data.frame}
 #' @author Michael Hallquist
 #' @keywords internal
 #' @examples
-#' ## make me
-friendlyGregexpr <- function(pattern, charvector, perl=TRUE) {
-  #now create data frame documenting the start and end of all tags
-  #rather than ldply, need a usual loop to track element number (in cases where charvector is a vector)
-  regexpMatches <- gregexpr(pattern, charvector, perl=perl)
+#'   friendlyGregexpr("(BY|WITH|ON)", 
+#'     c("POS_WI BY", "X WITH Y WITH Z")
+#'   )
+friendlyGregexpr <- function(pattern, charvector, perl = TRUE, include_tag = TRUE) {
+  regexpMatches <- gregexpr(pattern, charvector, perl = perl)
   
-  convertMatches <- c()
-  for (i in 1:length(regexpMatches)) {
+  matches_list <- vector("list", length(regexpMatches))
+  index <- 1
+  
+  for (i in seq_along(regexpMatches)) {
     thisLine <- regexpMatches[[i]]
-    #only append if there is at least one match on this line
     if (thisLine[1] != -1) {
-      convertMatches <- rbind(convertMatches, data.frame(element=i, start=thisLine, end=thisLine+attr(thisLine, "match.length")-1))
+      match.lengths <- attr(thisLine, "match.length")
+      start <- as.integer(thisLine) # remove attributes
+      
+      matches_list[[index]] <- matrix(data=c(
+        rep(i, length(thisLine)), start, start + match.lengths - 1L),
+        ncol=3, dimnames=list(NULL, c("element", "start", "end"))
+      )
+      
+      index <- index + 1
     }
   }
   
-  #if no matches exist, return null (otherwise, will break adply)
-  if (is.null(convertMatches)) return(NULL)
+  # Combine results if there are matches
+  convertMatches <- if (index > 1) as.data.frame(do.call(rbind, matches_list[1:(index - 1)])) else return(NULL)
   
-  #okay, now we have a data frame with the line, starting position, and ending position of every tag
+  # Add 'tag' column using vectorized substr()
+  if (isTRUE(include_tag)) {
+    convertMatches$tag <- mapply(
+      function(elem, start, end) substr(charvector[elem], start, end),
+      convertMatches$element, convertMatches$start, convertMatches$end
+    )
+  }
   
-  #time to classify into simple, array, iterator, and conditional
-  
-  #first, add the actual tag to the data.frame to make it easier to parse
-  #using adply (is this not its intended use?) to iterate over rows and apply func
-  convertMatches <- adply(convertMatches, 1, function(row) {
-        row$tag <- substr(charvector[row$element], row$start, row$end)
-        #for some reason, adply does not respect the stringsAsFactors here
-        return(as.data.frame(row, stringAsFactors=FALSE))
-      })
-  
-  convertMatches$tag <- as.character(convertMatches$tag)
   return(convertMatches)
 }
+
 
 #expose as root-level function to be used by model summary extraction
 #METHOD NOW DEPRECATED. USING KEYWORD-MATCHING APPROACH BELOW

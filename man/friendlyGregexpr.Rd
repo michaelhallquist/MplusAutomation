@@ -4,7 +4,7 @@
 \alias{friendlyGregexpr}
 \title{Friendly Regular Expression}
 \usage{
-friendlyGregexpr(pattern, charvector, perl = TRUE)
+friendlyGregexpr(pattern, charvector, perl = TRUE, include_tag = TRUE)
 }
 \arguments{
 \item{pattern}{The pattern to search for}
@@ -13,6 +13,9 @@ friendlyGregexpr(pattern, charvector, perl = TRUE)
 
 \item{perl}{A logical whether or not to use perl based
 regular expressions.  Defaults to \code{TRUE}.}
+
+\item{include_tag}{if TRUE, return the match as a character string. This is the default, but
+setting to `FALSE` is a bit faster}
 }
 \value{
 A \code{data.frame}
@@ -21,7 +24,9 @@ A \code{data.frame}
 Creates data frame documenting the start and end of all tags.
 }
 \examples{
-## make me
+  friendlyGregexpr("(BY|WITH|ON)", 
+    c("POS_WI BY", "X WITH Y WITH Z")
+  )
 }
 \author{
 Michael Hallquist

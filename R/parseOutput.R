@@ -524,7 +524,7 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
   endInputWarnErr <- grep("^\\s*(INPUT READING TERMINATED NORMALLY|\\*\\*\\* WARNING.*|\\d+ (?:ERROR|WARNING)\\(S\\) FOUND IN THE INPUT INSTRUCTIONS|\\*\\*\\* ERROR.*)\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
   
 
-# Check for fatal errors --------------------------------------------------
+  # Check for fatal errors --------------------------------------------------
 
   fatalerror <- grep("FATAL ERROR", outfiletext, fixed = T)
   if(isTRUE(length(fatalerror) > 0)){
