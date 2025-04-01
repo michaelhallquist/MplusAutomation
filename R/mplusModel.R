@@ -244,6 +244,11 @@ mplusModel_r6 <- R6::R6Class(
       # force syntax to be a character vector (convert \n to elements)
       self$syntax <- unlist(strsplit(syntax, "\\n"))
       
+      # set default data file name
+      if (isFALSE(private$pvt_is_montecarlo) && is.null(private$pvt_dat_file) && !is.null(private$pvt_inp_file)) {
+        private$pvt_dat_file <- sub("\\.inp?$", ".dat", private$pvt_inp_file)
+      }
+      
       # set Mplus command
       self$Mplus_command <- Mplus_command
       
