@@ -4,14 +4,19 @@ p <- test_path("submitModels")
 # checks on parsing of scheduling arguments and script setup
 track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE, max_time_per_job = "2:10:00", combine_jobs = TRUE)
 
+# single model
+inp <- file.path(p, "ex3.1.inp")
+
+submitModels(inp, sched_args=c("--mail=user", "--export=v"), debug=TRUE, max_time_per_job = "2:10:00", combine_jobs = TRUE, replace="always")
+
 test_that("submitModels job ID check", {
     expect_equal(track$jobid[1], "dummy_1")
 })
 
 test_that("submitModels job allocation checks", {
-    expect_equal(track$memgb[1], 16)
-    expect_equal(track$cores[1], 2)
-    expect_equal(track$wall_time[1], "0:30:00")
+    expect_equal(track$memgb[1], 4)
+    expect_equal(track$cores[1], 1)
+    expect_equal(track$wall_time[1], "2:00:00")
     
 })
 

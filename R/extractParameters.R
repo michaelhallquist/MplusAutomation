@@ -45,67 +45,71 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
 
     thisChunk <- thisChunk[!headerRows]
       
-    convertMatches <- data.frame(startline=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
+    convertMatches <- data.frame(element=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
   } else if (sectionName=="probability.scale") {
     #Probability scale output tends to fall in one uniform chunk. If it has header (e.g., Latent Class 1), these are handled upstream before parsing into chunks processed here.
-    convertMatches <- data.frame(startline=1, keyword="Probability.Scale", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
+    convertMatches <- data.frame(element=1, keyword="Probability.Scale", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
   } else {
-    #okay to match beginning and end of line because strip.white used in scan
-    matches <- gregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Item Locations|Item Categories|Item Guessing|Upper Asymptote|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion|Steps)|([\\w_\\d+\\.#\\&\\^]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&\\^]+\\s*\\|\\s*[\\w_\\d+\\.#\\&\\^]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
-
-    #more readable (than above) using ldply from plyr
-    convertMatches <- ldply(matches, function(row) data.frame(start=row, end=row+attr(row, "match.length")-1))
+    # okay to match beginning and end of line because strip.white used in scan
+    # Mar2025: switch to optimized friendlyGregexpr for speed
+    convertMatches <- friendlyGregexpr("^\\s*((Means|Thresholds|Intercepts|Variances|Item Difficulties|Item Locations|Item Categories|Item Guessing|Upper Asymptote|Residual Variances|Base Hazard Parameters|New/Additional Parameters|Scales|Dispersion|Steps)|([\\w_\\d+\\.#\\&\\^]+\\s+(BY|WITH|ON|\\|))|([\\w_\\d+\\.#\\&\\^]+\\s*\\|\\s*[\\w_\\d+\\.#\\&\\^]+\\s*(BY|WITH|ON)))\\s*$", thisChunk, perl=TRUE)
     
-    #beware faulty logic below... assumes only one match per line (okay here)
-    convertMatches$startline <- 1:nrow(convertMatches)
+    # sometimes chunks have no parameters because they are empty. e.g., stdyx for ex7.30
+    # in this case, return null
+    if (is.null(convertMatches)) return(NULL)
+    # if (nrow(convertMatches)==0L) return(NULL)
     
-    #only keep lines with a single match
-    #this removes rows that are -1 from gregexpr
-    convertMatches <- convertMatches[which(convertMatches$start > 0),]
-    #convertMatches <- subset(convertMatches, start > 0) #removed for compliance with CRAN
+    # Mar2025: for speed, switch to base R regex and lapply, avoiding repeated calls to data.frame
+    #develop a data.frame that divides into keyword matches versus variable matches
+    results <- lapply(seq_len(nrow(convertMatches)), function(i) {
+      row <- convertMatches[i, ]
+      match <- row$tag
+      
+      # no variable names or operators for elements such as means
+      if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", 
+                       "New/Additional Parameters", "Scales", "Item Difficulties", "Item Locations", "Item Categories", 
+                       "Item Guessing", "Upper Asymptote", "Dispersion", "Steps")) {
+        return(c(keyword = make.names(match), slope = NA_character_, varname = NA_character_, operator = NA_character_))
+      } 
+      
+      # for regmatches, the first element is always the entire match, and subsequent elements are capturing groups
+      # paramHeader operator, like POS_AFFECT BY
+      param_match <- regmatches(match, regexec("^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s+(BY|WITH|ON|\\|)\\s*$", match, perl=TRUE))[[1]]
+      if (length(param_match) > 1L) {
+        return(c(keyword = NA_character_, slope = NA_character_, varname = param_match[2], operator = param_match[3]))
+      }
+      
+      rslope_match <- regmatches(match, regexec("^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*\\|\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*(BY|WITH|ON)\\s*$", match, perl=TRUE))[[1]]
+      if (length(rslope_match) > 1L) {
+        return(c(keyword = NA_character_, slope = rslope_match[2], varname = rslope_match[3], operator = rslope_match[4]))
+      }
+      
+      stop("failure to match keyword: ", match)
+    })
     
-    #sometimes chunks have no parameters because they are empty. e.g., stdyx for ex7.30
-    #in this case, return null
-    if (nrow(convertMatches)==0) return(NULL)
-    
-    #develop a dataframe that divides into keyword matches versus variable matches
-    convertMatches <- ddply(convertMatches, "startline", function(row) {
-          #pull the matching keyword based on the start/end attributes from gregexpr
-          match <- substr(thisChunk[row$startline], row$start, row$end)
-
-          #check for keyword
-          if (match %in% c("Means", "Thresholds", "Intercepts", "Variances", "Residual Variances", "Base Hazard Parameters", "New/Additional Parameters", 
-              "Scales", "Item Difficulties", "Item Locations", "Item Categories", "Item Guessing", "Upper Asymptote", "Dispersion", "Steps")) {
-            return(data.frame(startline=row$startline, keyword=make.names(match), varname=NA_character_, operator=NA_character_, stringsAsFactors=FALSE))
-          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s+(BY|WITH|ON|\\|)\\s*$", c, perl=TRUE)[[1]]) > 0) { #typical "factor BY" heading  
-            return(data.frame(startline=row$startline, keyword=NA_character_, varname=variable[1], operator=variable[2], stringsAsFactors=FALSE))
-          } else if (length(variable <- strapply(match, "^\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*\\|\\s*([\\w_\\d+\\.#\\&\\^]+)\\s*(BY|WITH|ON)\\s*$", c, perl=TRUE)[[1]]) > 0) { #random slope syntax
-            return(data.frame(startline=row$startline, keyword=NA_character_, slope=variable[1], varname=variable[2], operator=variable[3], stringsAsFactors=FALSE))
-          } else stop("failure to match keyword: ", match, "\n  ", filename)
-        })
+    char_mat <- do.call(rbind, results)
+    convertMatches <- data.frame(element=convertMatches$element, char_mat) # convert to data.frame and restore element
   }
-  
-  comboFrame <- c()
 
   #convertMatches will now contain a data.frame marking the section headers for the chunk
   #example:
-  #		startline keyword varname operator endline
+  #		element keyword varname operator endline
   #		        7    <NA>      FW       BY      12
   #		       13    <NA>      FW       ON      16
-
-  for (i in 1:nrow(convertMatches)) {
+  
+  combo_list <- lapply(seq_len(nrow(convertMatches)), function(i) {
     #define the end line for this match as the start of next match - 1
-    if (i < nrow(convertMatches)) convertMatches[i,"endline"] <- convertMatches[i+1,"startline"]-1
+    if (i < nrow(convertMatches)) convertMatches[i,"endline"] <- convertMatches[i+1,"element"]-1L
     else convertMatches[i,"endline"] <- length(thisChunk) # or if last chunk in the section, just define as length
 
     #need +1 to eliminate header row from params
-    paramsToParse <- thisChunk[(convertMatches[i, "startline"]+1):convertMatches[i, "endline"]]
+    paramsToParse <- thisChunk[(convertMatches[i, "element"]+1L):convertMatches[i, "endline"]]
 
     #Very rarely, a section header is printed, but no parameters follow. In such cases, skip to the next match
     #example:
     #  I1       |
     #
-    if (all(paramsToParse=="")) { next }
+    if (all(paramsToParse=="")) return(NULL) # next
     
     #should result in a short list of params to parse (that belong to a given header i)
     #Example:
@@ -139,7 +143,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     if (columnNames[2L] == "est") {
       splitParams <- lapply(splitParams, function(x) {
         if (length(x) >= 2L && grepl("undefined", x[2L], ignore.case = TRUE)) { 
-          x <- c(x[1L], rep("NA_real_", length(columnNames) - 1)) #Fill in NAs for undefined params
+          x <- c(x[1L], rep("NA", length(columnNames) - 1)) #Fill in NAs for undefined params
         }
         return(x)
       })
@@ -162,7 +166,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     if (length(columnNames) == 6L && (columnNames[6L] == "scale_f" || columnNames[6L] == "resid_var")) {
       splitParams <- lapply(splitParams, function(col) {
         lcol <- length(col)
-        if (lcol == 5L) { col[6L] <- "NA_real_" } #NA-fill variables without a scale factor or residual variance
+        if (lcol == 5L) { col[6L] <- "NA" } #NA-fill variables without a scale factor or residual variance
         return(col)
       })
     }
@@ -171,7 +175,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     if (length(columnNames) == 3L && columnNames[3L] %in% c("resid_var", "scale_f")) {
       splitParams <- lapply(splitParams, function(col) {
         lcol <- length(col)
-        if (lcol == 2L) { col[3L] <- "NA_real_" } #NA-fill variables without a residual variance
+        if (lcol == 2L) { col[3L] <- "NA" } #NA-fill variables without a residual variance
         return(col)
       })
     }
@@ -179,17 +183,10 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #rbind the split list as a data.frame
     parsedParams <- data.frame(do.call("rbind", splitParams), stringsAsFactors=FALSE)
 
-    #for each column, convert to numeric if it is. Otherwise, return as character
-    parsedParams <- data.frame(lapply(parsedParams, function(col) {
-      #a bit convoluted, but we want to test for a purely numeric string by using a regexp that only allows numbers, periods, and the minus sign
-      #then sum the number of matches > 0 (i.e., where a number was found).
-      #if the sum is the same as the length of the column, then all elements are purely numeric.
-      if (all(col %in% c("TRUE", "FALSE"))) return(as.logical(col)) #True/False significance check above
-      else if (sum(sapply(gregexpr("^(NA_real_|[\\d\\.-]+)$", col, perl=TRUE), "[", 1) > 0) == length(col)) return(suppressWarnings(as.numeric(col)))
-      else return(as.character(col))
-    }), stringsAsFactors=FALSE)
-
-
+    # At present, parsedParams is a data.frame of all character variables.
+    # For each column, convert to numeric, logical, or character if it is. Otherwise, return as character
+    parsedParams[] <- lapply(parsedParams, type.convert, as.is=TRUE)  # Apply transformation to each column
+    
     #use the column names detected in extractParameters_1section
     names(parsedParams) <- columnNames
 
@@ -198,11 +195,12 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
 
     #put the paramHeader at the front of the data.frame columns
     parsedParams <- parsedParams[,c("paramHeader", columnNames)]
-
-    #add the current chunk to the overall data.frame
-    comboFrame <- rbind(comboFrame, parsedParams)
-
-  }
+    
+    return(parsedParams)
+  })
+  
+  #combined the chunks into one data.frame
+  comboFrame <- do.call(rbind, combo_list)
 
   if (sectionName == "r2") { comboFrame$paramHeader <- NULL } #not relevant for this section
   
