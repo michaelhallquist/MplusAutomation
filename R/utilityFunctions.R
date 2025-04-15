@@ -675,13 +675,15 @@ getOutFileList <- function(target, recursive=FALSE, filefilter, pathfilter) {
       # for filtering paths
       paths <- normalizePath(file.path(target, dirname(outfiles)))
       
+      # ensure that outfiles only contains filenames, no directories
+      outfiles <- basename(outfiles)
+      
       if (missing(filefilter)) {
         good_files <- seq_along(outfiles)
       } else {
         checkmate::assert_string(filefilter)
         # allow filter to include .out, and to specify start (^) and end ($) characters
-        firstChar <- ".*"
-        if (substr(filefilter, 1, 1) == "^") firstChar <- "^"
+        firstChar <- ifelse(substr(filefilter, 1, 1) == "^", "^", ".*")
         lastChar <- ".*"
         dropOut <- TRUE
         if (substr(filefilter, nchar(filefilter) - 4, nchar(filefilter)) == "\\.out") {
