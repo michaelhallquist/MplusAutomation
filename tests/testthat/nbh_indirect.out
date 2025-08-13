@@ -1,12 +1,45 @@
+Mplus VERSION 8.3
+MUTHEN & MUTHEN
+05/24/2024   5:05 PM
+
 INPUT INSTRUCTIONS
 
- this is a stub
+
+  title: test;
+  data: file is ./p1_mi/p1_list.txt;
+  type = imputation;
+  vari: names are m1-m3 y x;
+
+  model:
+  !measurement model
+  m by m1-m3;
+
+  !structural model
+  y on x m(c b);
+  m on x(a);
+
+  model constraint:
+  new(med);
+  med = a * b;
+
+  output: samp stand;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
 
 SUMMARY OF ANALYSIS
 
  this is a stub
 
+
+
 TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
 
 Effects from MYIV to DVNB
 
@@ -35,3 +68,15 @@ Effects from MYIV to DVNB#1
   Direct
     DVNB#1
     MYIV               0.711      0.264      2.695      0.007
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2019 Muthen & Muthen

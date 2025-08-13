@@ -39,7 +39,9 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
               identical(x, c("Variable", "Estimate", "Variance")) ||
               identical(x, c("Posterior", "One-Tailed", "95%", "C.I.")) ||
               identical(x, c("Variable", "Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%")) ||
-              identical(x, c("Observed", "Two-Tailed", "Rate", "of")) #r2 output for MI v8 with rate of missing
+              identical(x, c("Observed", "Two-Tailed", "Rate", "of")) || #r2 output for MI v8 with rate of missing
+              identical(x, c("Latent", "Two-Tailed", "Rate", "of")) ||
+              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Missing"))
           ) { TRUE } else { FALSE }
         })
 

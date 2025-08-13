@@ -849,7 +849,7 @@ detectColumnNames <- function(filename, modelSection, sectionType="model_results
         varNames <- c("param", "est", "se", "est_se", "pval", "rate_missing")
       
       #Multiple imputation output for R2 including rate of missing (introduced in v8, I think)
-      else if (identical(thisLine, c("Observed", "Two-Tailed", "Rate", "of")) &&
+      else if ((identical(thisLine, c("Observed", "Two-Tailed", "Rate", "of")) || identical(thisLine, c("Latent", "Two-Tailed", "Rate", "of"))) &&
           identical(nextLine, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Missing")))
         varNames <- c("param", "est", "se", "est_se", "pval", "rate_missing")
       

@@ -11,6 +11,7 @@ Version 1.2 (DEVELOPMENT)
  - feature:     readModels extracts new H5RESULTS object from Mplus v8.11 in $h5results
  - notice:      Package namespace has been cleaned up to remove long-deprecated functions including extractModelSummaries, extractModelParameters, and extractModIndices.
  - bugfix:      readModels now detects filefilter arguments that use $ or ^ to denote the end or beginning of a string, respectively, and also handles ".out" being included in filefilter Addresses #194.
+ - bugfix:      readModels now parses indirect effects for NB/ZI models with binary outcomes annotated with #. Closes #217.
 
 Version 1.1.2
  - bugfix:      Break file paths > 90 chars in prepareMplusData and mplusModeler to avoid line length errors
