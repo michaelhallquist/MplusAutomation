@@ -197,10 +197,7 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
         cat("  Diff degrees of freedom: ", dfDiff, "\n")
         cat("  P-value: ", round(pval, 4), "\n")
 
-        diffTestRes <- list(method="DIFFTEST",
-                             chiSqDiff=val,
-                             df=dfDiff,
-                             p=pval)
+        diffTestRes$DIFFTEST <- list(chiSqDiff=val, df=dfDiff, p=pval)
 
       } else if (m1Summaries$Estimator %in% c("ML", "MLM", "MLR", "WLS", "WLSM") && m1Summaries$Parameters != m2Summaries$Parameters) {
         if (m1Summaries$Estimator == m2Summaries$Estimator ) {
@@ -228,12 +225,9 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
             cat("  P-value: ", round(pval, 4), "\n")
             cat("\n  Note: The chi-square difference test assumes that these models are nested.\n  It is up to you to verify this assumption.\n")
 
-            diffTestRes <- list(method="MLR",
-                                 scalingCorrection=cd,
-                                 chiSqDiff=ChiSqDiff,
-                                 df=dfDiff,
-                                 p=pval)
+            diffTestRes$MLR_LL <- list(scalingCorrection=cd, chiSqDiff=ChiSqDiff, df=dfDiff, p=pval)
           }
+          
           if (m1Summaries$Estimator %in% c("ML", "MLR", "MLM", "WLSM")) {
             if (m1Summaries$Estimator %in% c("ML", "WLS"))
               #for ML and WLS,  no need to correct chi-square with scaling factors
@@ -253,13 +247,11 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
             cat("  P-value:", round(pval, 4), "\n")
             cat("\nNote: The chi-square difference test assumes that these models are nested.\n  It is up to you to verify this assumption.\n")
 
-            diffTestRes <- list(method=m1Summaries$Estimator,
-                                 chiSqDiff=ChiSqDiff,
-                                 df=dfDiff,
-                                 p=pval)
+            diffTestRes$ChiSqDiff <- list(chiSqDiff=ChiSqDiff, df=dfDiff, p=pval)
           }
-        } else
+        } else {
           warning("Cannot compute chi-square difference test because different estimators used: ", m1Summaries$Estimator, " and ", m2Summaries$Estimator)
+        }
       }
       if (!is.null(diffTestRes)) ret$diffTest <- diffTestRes
     }
