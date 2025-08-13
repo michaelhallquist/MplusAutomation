@@ -86,7 +86,7 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
   for (idx in 1:length(isplit)) {
     i_element <- isplit[[idx]]
     i_out <- list()
-    effectHeaders <- grep("^Effects from [A-z_0-9]+ to [A-z_0-9]+$", i_element, ignore.case=TRUE, perl=TRUE)
+    effectHeaders <- grep("^Effects from [\\w#]+ to [\\w#]+$", i_element, ignore.case=TRUE, perl=TRUE)
     if (length(effectHeaders) == 0L) { next } #nothing to parse -- skip to next iteration
     
     #determine group name, if relevant
@@ -98,8 +98,8 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
     
     for (e in 1:length(effectHeaders)) {
       elist <- list()
-      elist$pred <- sub("^Effects from ([A-z_0-9]+) to [A-z_0-9]+$", "\\1", i_element[effectHeaders[e]], ignore.case=TRUE, perl=TRUE)
-      elist$outcome <- sub("^Effects from [A-z_0-9]+ to ([A-z_0-9]+)$", "\\1", i_element[effectHeaders[e]], ignore.case=TRUE, perl=TRUE)
+      elist$pred <- sub("^Effects from ([\\w#]+) to [\\w#]+$", "\\1", i_element[effectHeaders[e]], ignore.case=TRUE, perl=TRUE)
+      elist$outcome <- sub("^Effects from [\\w#]+ to ([\\w#]+)$", "\\1", i_element[effectHeaders[e]], ignore.case=TRUE, perl=TRUE)
       
       end <- ifelse (e < length(effectHeaders), effectHeaders[e+1]-1, length(i_element))
       esection <- i_element[(effectHeaders[e]+1):end]
