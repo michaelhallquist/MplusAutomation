@@ -46,7 +46,9 @@ Assumes that the models are nested. Not available for MLMV, WLSMV, and ULSMV est
 Use DIFFTEST in Mplus instead.}
 }
 \value{
-No value is returned by this function. It is used to print model differences to the R console.
+A list containing the comparison results. The list includes summary statistics
+for both models, parameter comparisons (equal, different, and unique
+parameters), and, when requested, the chi-square difference test.
 }
 \description{
 The \code{compareModels} function compares the output of two Mplus files and prints similarities and

@@ -64,7 +64,11 @@
 #' @param diffTest Whether to compute a chi-square difference test between the models.
 #'   	Assumes that the models are nested. Not available for MLMV, WLSMV, and ULSMV estimators.
 #'   	Use DIFFTEST in Mplus instead.
-#' @return No value is returned by this function. It is used to print model differences to the R console.
+#' @return A list containing the results of the comparison. Elements include
+#'   \code{summaries} with selected summary statistics for both models,
+#'   \code{parameters} listing equal and differing parameters as well as those
+#'   unique to each model, and, when \code{diffTest = TRUE}, a \code{diffTest}
+#'   element with the chi-square difference test.
 #' @author Michael Hallquist
 #' @keywords interface
 #' @importFrom stats pchisq
@@ -98,7 +102,9 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
         equalityMargin["pvalue"] <- .0001
     }
   }
-  
+
+  ret <- list()
+
   cat("\n==============\n\nMplus model comparison\n----------------------\n\n")
   
   if (!is.null(fn <- attr(m1, "filename")))
@@ -139,7 +145,9 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
     if (!"allsummaries" %in% show) {
       sumCombined <- sumCombined[, intersect(comparators, names(sumCombined))]
     }
-    
+
+    ret$summaries <- sumCombined
+
     # manual loop seems easier here (tried apply, sapply combos... too painful)
     sumCombinedL <- as.list(sumCombined)
     nameList <- names(sumCombinedL)
@@ -171,6 +179,7 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
     
     #chi-square difference testing
     if (diffTest == TRUE) {
+      diffTestRes <- NULL
       if ("ChiSqDiffTest_Value" %in% unique(c(names(m1Summaries), names(m2Summaries)))) {
         #computed using difftest
         if ("ChiSqDiffTest_Value" %in% names(m1Summaries)) {
@@ -187,7 +196,12 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
         cat("  Chi-square difference: ", round(val, 4), "\n")
         cat("  Diff degrees of freedom: ", dfDiff, "\n")
         cat("  P-value: ", round(pval, 4), "\n")
-        
+
+        diffTestRes <- list(method="DIFFTEST",
+                             chiSqDiff=val,
+                             df=dfDiff,
+                             p=pval)
+
       } else if (m1Summaries$Estimator %in% c("ML", "MLM", "MLR", "WLS", "WLSM") && m1Summaries$Parameters != m2Summaries$Parameters) {
         if (m1Summaries$Estimator == m2Summaries$Estimator ) {
           if (m1Summaries$Parameters < m2Summaries$Parameters) {
@@ -210,8 +224,15 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
             cat("  Difference Test Scaling Correction: ", cd, "\n")
             cat("  Chi-square difference: ", round(ChiSqDiff, 4), "\n")
             cat("  Diff degrees of freedom: ", dfDiff, "\n")
-            cat("  P-value: ", round(pchisq(ChiSqDiff, dfDiff, lower.tail=FALSE), 4), "\n")
+            pval <- pchisq(ChiSqDiff, dfDiff, lower.tail=FALSE)
+            cat("  P-value: ", round(pval, 4), "\n")
             cat("\n  Note: The chi-square difference test assumes that these models are nested.\n  It is up to you to verify this assumption.\n")
+
+            diffTestRes <- list(method="MLR",
+                                 scalingCorrection=cd,
+                                 chiSqDiff=ChiSqDiff,
+                                 df=dfDiff,
+                                 p=pval)
           }
           if (m1Summaries$Estimator %in% c("ML", "MLR", "MLM", "WLSM")) {
             if (m1Summaries$Estimator %in% c("ML", "WLS"))
@@ -228,12 +249,19 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
             if (! m1Summaries$Estimator %in% c("WLS", "ML")) cat("  Difference Test Scaling Correction:", cd, "\n")
             cat("  Chi-square difference:", round(ChiSqDiff, 4), "\n")
             cat("  Diff degrees of freedom:", dfDiff, "\n")
-            cat("  P-value:", round(pchisq(ChiSqDiff, dfDiff, lower.tail=FALSE), 4), "\n")
+            pval <- pchisq(ChiSqDiff, dfDiff, lower.tail=FALSE)
+            cat("  P-value:", round(pval, 4), "\n")
             cat("\nNote: The chi-square difference test assumes that these models are nested.\n  It is up to you to verify this assumption.\n")
+
+            diffTestRes <- list(method=m1Summaries$Estimator,
+                                 chiSqDiff=ChiSqDiff,
+                                 df=dfDiff,
+                                 p=pval)
           }
         } else
           warning("Cannot compute chi-square difference test because different estimators used: ", m1Summaries$Estimator, " and ", m2Summaries$Estimator)
       }
+      if (!is.null(diffTestRes)) ret$diffTest <- diffTestRes
     }
   }
   
@@ -363,6 +391,16 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
     cat("\n=========\n\nModel parameter comparison\n--------------------------\n")
     paramsEqual <- with(matchDF, testEquality(m1_est, m2_est, equalityMargin["param"]))
     pvalsEqual <- with(matchDF, testEquality(m1_pval, m2_pval, equalityMargin["pvalue"]))
+
+    paramsList <- list(
+      equal = if (any(paramsEqual)) matchDF[paramsEqual == TRUE, ] else matchDF[0, ],
+      diff = if (any(!paramsEqual)) matchDF[paramsEqual == FALSE, ] else matchDF[0, ],
+      pdiff = if (any(!pvalsEqual)) matchDF[pvalsEqual == FALSE, ] else matchDF[0, ],
+      m1Only = if (length(m1Only) > 0) m1Params[m1Params$paramCombined %in% m1Only, !names(m1Params) == "paramCombined"] else m1Params[0, !names(m1Params) == "paramCombined"],
+      m2Only = if (length(m2Only) > 0) m2Params[m2Params$paramCombined %in% m2Only, !names(m2Params) == "paramCombined"] else m2Params[0, !names(m2Params) == "paramCombined"]
+    )
+
+    ret$parameters <- paramsList
     
     if (any(c("all", "equal") %in% show)) {
       cat("  Parameters present in both models\n=========\n\n")
@@ -442,4 +480,5 @@ compareModels <- function(m1, m2, show="all", equalityMargin=c(param=0.0001, pva
   }
   
   cat("\n==============\n")
+  return(invisible(ret))
 }
