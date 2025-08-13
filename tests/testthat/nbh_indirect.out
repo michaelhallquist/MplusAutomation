@@ -1,0 +1,37 @@
+INPUT INSTRUCTIONS
+
+ this is a stub
+
+SUMMARY OF ANALYSIS
+
+ this is a stub
+
+TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS
+
+Effects from MYIV to DVNB
+
+  Total               -0.015      0.230     -0.063      0.950
+  Total indirect       0.035      0.062      0.567      0.571
+
+  Specific indirect 1
+    DVNB
+    MYMED
+    MYIV               0.035      0.062      0.567      0.571
+
+  Direct
+    DVNB
+    MYIV              -0.050      0.225     -0.222      0.824
+
+Effects from MYIV to DVNB#1
+
+  Total                0.631      0.262      2.410      0.016
+  Total indirect      -0.080      0.076     -1.047      0.295
+
+  Specific indirect 1
+    DVNB#1
+    MYMED
+    MYIV              -0.080      0.076     -1.047      0.295
+
+  Direct
+    DVNB#1
+    MYIV               0.711      0.264      2.695      0.007
