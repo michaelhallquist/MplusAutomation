@@ -1,0 +1,190 @@
+---
+title: "Submitting Many Mplus Models to an HPC with submitModels()"
+author: "Michael Hallquist"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    number_sections: false
+vignette: >
+  %\VignetteIndexEntry{submitting Mplus models on HPC with submitModels()}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+library(MplusAutomation)
+```
+
+# Motivation
+
+Many modern SEM applications (e.g., BSEM with MCMC, multilevel SEM with many random effects, ML with multidimensional integration) can require **tens of minutes to many hours** per model. When you need to estimate **hundreds or thousands** of models, such as in Monte Carlo studies or large screening pipelines, a high-performance computing cluster (HPCC) is the right tool. `MplusAutomation::submitModels()` streamlines **creating, batching, submitting, and tracking** Mplus jobs on HPCC schedulers (SLURM or Torque), so projects that would take weeks locally can finish in hours on a cluster.
+
+# Overview: `submitModels()`
+
+```r
+submitModels(
+  target = getwd(),
+  recursive = FALSE,
+  filefilter = NULL,
+  replaceOutfile = "modifiedDate",
+  scheduler = c("slurm", "torque"),
+  sched_args = NULL,
+  cores_per_model = 1L,
+  memgb_per_model = 8L,
+  time_per_model = "1:00:00",
+  combine_jobs = TRUE,
+  max_time_per_job = "24:00:00",
+  combine_memgb_tolerance = 1,
+  combine_cores_tolerance = 2,
+  batch_outdir = NULL
+)
+```
+
+## Key ideas
+
+- **Target selection**: point to a folder (or vector of folders) containing `.inp` files; optionally recurse and/or use `filefilter` (regex) to narrow submissions.  
+- **Replace policy**: set `replaceOutfile = "modifiedDate"` to resubmit only when the `.inp` is newer than an existing `.out`.  
+- **Scheduler resources**: request per-model **cores**, **memory (GB)**, and **time**; pick your scheduler (`"slurm"` or `"torque"`).  
+- **Batching**: set `combine_jobs = TRUE` to group **similar** models into a single batch job capped by `max_time_per_job`; “similarity” is controlled by tolerances for memory and cores.
+
+## Minimal examples
+
+Submit all `.inp` files in a directory (not its subdirectories) to SLURM:
+
+```r
+track <- submitModels(
+  target = "/proj/my_mplus_models",
+  scheduler = "slurm",
+  cores_per_model = 1L,
+  memgb_per_model = 8L,
+  time_per_model = "01:00:00",
+  combine_jobs = TRUE,
+  max_time_per_job = "24:00:00"
+)
+```
+
+Filter by regex and search subfolders:
+
+```r
+track <- submitModels(
+  target       = "/proj/my_mplus_models",
+  recursive    = TRUE,
+  filefilter   = ".*12hour_forecast.*",
+  replaceOutfile = "modifiedDate",
+  scheduler    = "slurm",
+  cores_per_model = 2L,
+  memgb_per_model = 16L,
+  time_per_model  = "02:00:00"
+)
+```
+
+Torque/PBS users:
+
+```r
+track <- submitModels(
+  target = "path/to/models",
+  scheduler = "torque",
+  cores_per_model = 4L,
+  memgb_per_model = 24L,
+  time_per_model = "0-06:00:00"  # dd-hh:mm:ss accepted by Torque
+)
+```
+
+# Inline HPCC directives inside `.inp` files
+
+You can **override** global `submitModels()` arguments by embedding **comment-line directives** in the Mplus input file. These are read and translated into scheduler flags at submission time:
+
+```
+! memgb        16
+! processors   2
+! time         0:30:00
+! #SBATCH      --mail-type=FAIL
+! #PBS         -m ae
+! pre          Rscript --vanilla pre_run.R
+! post         Rscript --vanilla post_run.R
+```
+
+- `memgb`, `processors`, `time` set per-model requests.  
+- `! #SBATCH ...` or `! #PBS ...` lines are passed through to SLURM/Torque.  
+- `pre`/`post` let you run scripts around the Mplus call (e.g., bookkeeping, post-parse with `readModels()`).
+
+**Example `.inp` header**
+
+```
+! memgb 16
+! processors 2
+! time 0:30:00
+! #SBATCH --mail-type=FAIL
+! pre  Rscript --vanilla pre_example.R
+! post Rscript --vanilla post_example.R
+
+TITLE: Example regression
+DATA:  FILE IS ex3.1.dat;
+VARIABLE: NAMES ARE y1 x1 x3;
+MODEL: y1 ON x1 x3;
+```
+
+A simple “post” script might parse the output to RDS:
+
+```r
+# post_example.R
+mplusdir <- Sys.getenv("MPLUSDIR")
+mplusinp <- Sys.getenv("MPLUSINP")
+
+library(MplusAutomation)
+m <- readModels(file.path(mplusdir, sub("\\.inp$", ".out", mplusinp)))
+saveRDS(m, file.path(mplusdir, sub("\\.inp$", ".rds", mplusinp)))
+```
+
+# Batching models into combined jobs
+
+Submitting **thousands** of tiny jobs can annoy schedulers and slow throughput. With `combine_jobs = TRUE`, `submitModels()` groups models with **similar** resource needs (within `combine_memgb_tolerance` GB and `combine_cores_tolerance` cores) into a batch whose **total time** does not exceed `max_time_per_job`. This reduces queue overhead and improves cluster utilization.
+
+Example strategy:
+
+```r
+track <- submitModels(
+  target = "/proj/mplus_runs",
+  scheduler = "slurm",
+  combine_jobs = TRUE,
+  max_time_per_job = "06:00:00",
+  combine_memgb_tolerance = 1,
+  combine_cores_tolerance = 2
+)
+```
+
+# Tracking job status
+
+`submitModels()` returns a data frame that records job metadata (IDs, paths, resources). Use `checkSubmission()` (or `summary(track)`) to query the scheduler for **live status**:
+
+```r
+checkSubmission(track)
+# Submission status as of: 2024-10-10 08:16:53
+# -------
+# jobid      file        status
+# 50531540   ex3.3.inp   queued
+# 50531541   ex3.1.inp   queued
+
+Sys.sleep(45)
+checkSubmission(track)
+# jobid      file        status
+# 50531540   ex3.3.inp   complete
+# 50531541   ex3.1.inp   complete
+```
+
+This makes it easy to poll progress and kick off downstream steps once batches are done.
+
+# Practical tips
+
+- **Choose time format** that your scheduler accepts (SLURM: `hh:mm:ss` or `d-hh:mm:ss`; Torque often prefers `d-hh:mm:ss`).  
+- Start with **conservative** per-model resources, then adjust using inline directives for outliers.  
+- Keep `replaceOutfile = "modifiedDate"` to avoid resubmitting completed models unless the `.inp` changed.  
+- Use `pre`/`post` hooks to encapsulate pre/post-processing, logging, and artifact capture.
+
