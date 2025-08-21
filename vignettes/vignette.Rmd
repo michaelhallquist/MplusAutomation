@@ -423,67 +423,55 @@ summary statistics from one or more models. Such summary statistics include item
 log-likelihood values, root mean squared error of approximation (RMSEA), and Akaike's Information
 (AIC).
 
-Please note: The preferred way to obtain summary statistics (and other Mplus
-output) is the `readModels()` function, which is described above.
-
-The `extractModelSummaries()` function is designed to extract model summaries from a group of models
-located within a directory (or nested within subdirectories). This function returns a `data.frame`
-containing one row per model, with columns representing several fit statistics. Note that `extractModelSummaries`
-can also extract summaries from a single file by simply passing in a file, not a directory, as the `target`.
-
-A basic call to the function includes the directory containing output files to be parsed:
+The `readModels()` function extracts these summary statistics along with other
+information from Mplus output. If only summaries are required, specify
+`what = "summaries"`; otherwise, read all sections and then access the
+`$summaries` element of the returned list:
 
 ```{r, eval=FALSE, echo=TRUE}
 
-mySummaries <- extractModelSummaries(
+mlist <- readModels(
   "C:/Data_Analysis/ComparingLCAvCFA",
-  recursive = TRUE)
+  recursive = TRUE,
+  what = "summaries")
+mySummaries <- do.call("rbind.fill", sapply(mlist, "[", "summaries"))
 
 ```
 
-Now, the variable mySummaries is a `data.frame` containing summary statistics about models
-contained in the `ComparingLCAvCFA` directory.
+As with `runModels()`, `readModels()` includes `recursive` and `filefilter`
+parameters to control which output files are parsed. The `filefilter` parameter
+accepts a Perl-compatible regular expression. Note that backslashes used in
+regular expressions must be doubled inside `R` strings (i.e., `\\`).
 
-As with `runModels()`, `extractModelSummaries()` includes a `recursive` parameter
-that specifies whether to parse output files located in subdirectories beneath the target directory
-(defaults to `FALSE`).
-
-In addition, `extractModelSummaries()` also includes a parameter, `filefilter`, that allows
-the user to parse only files matching certain search criteria. `filefilter` accepts a Perl-compatible
-regular expression string. If you're unfamiliar with regular expressions in Perl, 
-I suggest these two websites:
-
-* http://www.pcre.org/pcre.txt
-* https://www.regular-expressions.info/
-
-Note that many regular expression in Perl rely on backslashes (\\) for
-defining character classes, escaping certain characters, and so on. In `R`, backslashes contained
-in strings must be doubled (i.e., \\\\).
-
-Here is an example of filtering only files that match "ex4" followed by any characters
-Note that the function automatically searches only files with the .out extension, so it isn't
-necessary to include .out in the file filter.
+Here is an example of filtering only files that match "ex4" followed by any
+characters. The function automatically searches only files with the `.out`
+extension, so it is not necessary to include `.out` in the file filter.
 
 ```{r, eval=FALSE, echo=FALSE}
 
-summaryStats <- extractModelSummaries(
+mlist <- readModels(
   "C:/Program Files/Mplus/Mplus Examples/User's Guide Examples/Outputs",
-  filefilter="ex4.*")
+  filefilter = "ex4.*",
+  what = "summaries")
+summaryStats <- do.call("rbind.fill", sapply(mlist, "[", "summaries"))
 
 ```
 
-Here is a more complex filter that matches filenames that begin with the digits 1, 2, or 3
-(for 1-class, 2-class, or 3-class output files) and also contain the text "Threshold":
+Here is a more complex filter that matches filenames that begin with the digits
+1, 2, or 3 (for 1-class, 2-class, or 3-class output files) and also contain the
+text "Threshold":
 
 ```{r, eval=FALSE, echo=TRUE}
 
-summaryStats <- extractModelSummaries(
+mlist <- readModels(
   "C:/Data_Analysis/Multiclass Models",
-  filefilter="[123]{1}-class.*Threshold.*")
+  filefilter = "[123]{1}-class.*Threshold.*",
+  what = "summaries")
+summaryStats <- do.call("rbind.fill", sapply(mlist, "[", "summaries"))
 
 ```
 
-## Listing of summary statistics extracted by extractModelSummaries
+## Listing of summary statistics extracted by readModels
 
 As of this version of the package (0.5), the following summary statistics are automatically extracted,
 when available:
@@ -532,9 +520,9 @@ when available:
 * `T11_VLMR_PValue`: TECH11: Vuong-Lo-Mendell-Rubin LRT p-value
 * `T11_LMR_Value`: TECH11: Lo-Mendell-Rubin Adjusted LRT value
 * `T11_LMR_PValue`: TECH11: Lo-Mendell-Rubin Adjusted LRT p-value
-	
-The `extractModelSummaries()` function is designed to work in conjunction with functions that generate
-tables of summary statistics (see below).
+
+These summary statistics can be used in conjunction with functions that generate
+tables of model fit information (see below).
 
 # Summarizing model fit statistics in tabular form
 
@@ -678,30 +666,32 @@ my_model$mod_indices
 
 # Extracting model parameters
 
-The `extractModelParameters()` function extracts the model parameters from
-the MODEL RESULTS and STANDARDIZED MODEL RESULTS sections of a given Mplus output file.
-Examples of such parameters include the parameter estimate, std. err, param/s.e., and two-tailed p-value.
+The `readModels()` function extracts the model parameters from the MODEL
+RESULTS and STANDARDIZED MODEL RESULTS sections of a given Mplus output file.
+Examples of such parameters include the parameter estimate, standard error,
+parameter estimate divided by its standard error, and the two-tailed p-value.
 
-Further, `extractmodelParameters()` supports extraction of results from
-many output files, with the results being returned as a list object, one element per output file. When available,
-unstandardized and standardized (StdYX, StdY, Std) parameters are extracted from each output file into a list object
-whose elements are `data.frame` objects. Relatedly, the `resultType` parameter has been deprecated and will
-be removed in a future version.
+`readModels()` can process many output files, returning a list with one element
+per file. When available, unstandardized and standardized (StdYX, StdY, Std)
+parameters are extracted into nested `data.frame` objects.
 
 ## Example: Extracting parameters from a single file
 
 ```{r, eval=FALSE, echo=TRUE}
 
-modelResults <- extractModelParameters(
-  "C:/Data_Analysis/Mplus Output.out")
+modelResults <- readModels(
+  "C:/Data_Analysis/Mplus Output.out",
+  what = "parameters")$parameters
 
 ```
 
-The above call will return a list with unstandardized and standardized results (if requested by including OUTPUT: STANDARDIZED)
-from the Mplus Output.out file. If all standardizations are available in the output, the returned list will have the following elements:
-`unstandardized`, `stdyx.standardized`, `stdy.standardized`, and `std.standardized`. Each of these
-elements is a `data.frame` containing model results for the relevant section. Such elements may be accessed in using traditional `R`
-list operators, such as:
+The above call returns a list with unstandardized and standardized results (if
+requested by including OUTPUT: STANDARDIZED in the Mplus input). If all
+standardizations are available in the output, the returned list will have the
+following elements: `unstandardized`, `stdyx.standardized`,
+`stdy.standardized`, and `std.standardized`. Each of these elements is a
+`data.frame` containing model results for the relevant section. Such elements
+may be accessed using traditional `R` list operators, such as:
 
 ```{r, eval=FALSE, echo=TRUE}
 
@@ -714,13 +704,16 @@ standardizedResults <- modelResults[["stdyx.standardized"]]
 
 ## Example: Extracting parameters from multiple files
 
-By passing in a directory as the `target` parameter to `extractModelParameters()`, parameters for all files in the specified
-directory will be parsed and returned as a list, with one element per file. As with `extractModelSummaries()`, the `recursive`
-parameter specifies whether to parse files nested within subdirectories, and the `filefilter` specifies and optional Perl-compatible
-regular expression for parsing only matching files within the `target` directory.
+By passing a directory to `readModels()` with `what = "parameters"`, parameters
+for all files in the specified directory will be parsed and returned as a list,
+with one element per file. The `recursive` parameter specifies whether to parse
+files nested within subdirectories, and `filefilter` specifies an optional
+Perl-compatible regular expression for parsing only matching files within the
+target directory.
 
-Say, for example, that there were two subdirectories within the ComparingLCAvCFA directory with 3 outputs each.
-Note that this example builds on the recursive `runModels()` example above.
+Say, for example, that there were two subdirectories within the ComparingLCAvCFA
+directory with 3 outputs each. Note that this example builds on the recursive
+`runModels()` example above.
 
 ```
 ComparingLCAvCFA/LCA/1-class LCA.out
@@ -732,13 +725,15 @@ ComparingLCAvCFA/CFA/2-factor CFA.out
 ComparingLCAvCFA/CFA/3-factor CFA.out
 ```
 
-Then the following code would extract model parameters for all files in the directory structure, returning each output as a list element.
+Then the following code would extract model parameters for all files in the
+directory structure, returning each output as a list element.
 
 ```{r, eval=FALSE, echo=TRUE}
 
-allModelParameters <- extractModelParameters(
+allModelParameters <- readModels(
   "C:/Data_Analysis/ComparingLCAvCFA",
-  recursive = TRUE)
+  recursive = TRUE,
+  what = "parameters")
 
 ```
 
@@ -757,28 +752,30 @@ names(allModelParameters)
 
 ```
 
-So, to extract the STDYX standardized results for the 2-factor CFA, one would access that \lstinline|data.frame| as follows:
+So, to extract the STDYX standardized results for the 2-factor CFA, one would
+access that `data.frame` as follows:
 
 ```{r, eval=FALSE, echo=TRUE}
 
-TwoFacCFA.STDYX <- allModelParameters$ComparingLCAvCFA.CFA.2.factor.CFA.out$stdyx.standardized
+TwoFacCFA.STDYX <- allModelParameters$ComparingLCAvCFA.CFA.2.factor.CFA.out$parameters$stdyx.standardized
 
 ```
 
 ### Extracting and combining model results across files and sections
 
-Depending on the application, it may be useful to only retain certain sections or to build a single large data.frame from the multi-file
+Depending on the application, it may be useful to only retain certain sections or to build a single large `data.frame` from the multi-file
 list. What follows are a few standard `R` practices for combining and subsetting data that may be unfamiliar to inexperienced `R` users. These
-examples serve to demonstrate how to work with the `extractModelParameters()` list flexibly.
+examples serve to demonstrate how to work with the `readModels()` list flexibly.
 
 **Example: Only retaining unstandardized output**
 
-By default, `extractModelParameters()` returns unstandardized and standardized output, where available. To retain only unstandardized results, for example,
+By default, `readModels()` returns unstandardized and standardized output, where available. To retain only unstandardized results, for example,
 one could do the following (building on the CFA v. LCA example above):
 
 ```{r, eval=FALSE, echo=TRUE}
 
-unstandardizedOnly <- sapply(allModelParameters, "[", "unstandardized")
+unstandardizedOnly <- sapply(allModelParameters, "[", c("parameters"))
+unstandardizedOnly <- sapply(unstandardizedOnly, "[", "unstandardized")
 
 ```
 
@@ -789,7 +786,8 @@ the `names` function. For example, to retain the existing filenames without appe
 ```{r, eval=FALSE, echo=TRUE}
 
 oldNames <- names(allModelParameters)
-unstandardizedOnly <- sapply(allModelParameters, "[", "unstandardized")
+unstandardizedOnly <- sapply(allModelParameters, "[", c("parameters"))
+unstandardizedOnly <- sapply(unstandardizedOnly, "[", "unstandardized")
 names(unstandardizedOnly) <- oldNames
 
 ```
@@ -826,9 +824,10 @@ Variables included in such `data.frame` objects include:
 5. est_se: Quotient of `paramest/se`, representing z-test/t-test in large samples
 6. pval: Two-tailed p-value for the `est_se` quotient
 
-Some models may provide different parameters, such as posterior standard deviation for Bayesian models, and these are
-extracted appropriately by the function. See the `R` documentation for the function: `?extractModelParameters` for details
-about variable names for different model types.
+Some models may provide different parameters, such as posterior standard
+deviation for Bayesian models, and these are extracted appropriately by the
+function. See the `R` documentation for `readModels` for details about variable
+names for different model types.
 
 ## Capitalizing on the graphics strength of `R` to visualize results
 
@@ -843,7 +842,7 @@ By contrast, Mplus has very basic graphics functionality that lacks the flexibil
 
 Now that we have illustrated how to import Mplus model parameter estimates into `R`,
 here are just a couple of examples of how useful graphs in \textit{R} can be developed
-from `extractModelParameters()` data.
+from `readModels()` data.
 
 **Example: Plotting means and standard errors from a finite mixture model**
 
@@ -855,7 +854,7 @@ this plot is to visualize the means and standard error of each indicator across 
 
   library(MplusAutomation)
   library(ggplot2)
-  modelParams <- extractModelParameters("output_to_plot.out)$unstandardized
+  modelParams <- readModels("output_to_plot.out")$parameters$unstandardized
   modelParams <- subset(modelParams,
     paramHeader=="Means" &
       LatentClass != "Categorical.Latent.Variables",
@@ -893,9 +892,10 @@ The `compareModels()` function is designed to compare model fit indices and/or p
 This function also computes chi-square difference tests for nested models estimated with the ML, MLM, MLR, WLS, or WLSM estimators
 using the `diffTest` parameter.
 
-To use `compareModels()`, I recommend using `readModels()` to extract various fit statistics and parameters
-from two or more models. You can pass in the results of `extractModelSummaries()` or `extractModelParameters()`
-to `compareModels()`, but the output will be limited to summaries or parameters, respectively.
+To use `compareModels()`, I recommend using `readModels()` to extract various
+fit statistics and parameters from two or more models. You can pass in either
+the `summaries` or `parameters` components of the objects returned by
+`readModels()` to `compareModels()`, or provide the full model objects.
 
 Here is a brief example of how one might use `compareModels()`.
 
