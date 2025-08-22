@@ -83,7 +83,7 @@ mplusModel_r6 <- R6::R6Class(
       if (missing(value)) {
         private$pvt_model_dir
       } else {
-        if (!dir.exists(value)) dir.create(value)
+        if (!dir.exists(value)) dir.create(value, recursive = TRUE)
         private$pvt_model_dir <- value
       }
     },
@@ -130,9 +130,10 @@ mplusModel_r6 <- R6::R6Class(
         
         # if we are updating the dataset, make sure that all expected variables are present
         if (!is.null(value) && !is.null(private$pvt_variables)) {
-          missing_vars <- setdiff(names(value), private$pvt_variables)
-          if (length(missing_vars) > 0L) 
-            warning("The following variables are mentioned in the model syntax, but missing in the data: ", paste(missing_vars, collapse=", "))
+          missing_vars <- setdiff(private$pvt_variables, names(value))
+          if (length(missing_vars) > 0L)
+            warning("The following variables are mentioned in the model syntax, but missing in the data: ",
+                    paste(missing_vars, collapse=", "))
         }
       }
     },
@@ -166,6 +167,13 @@ mplusModel_r6 <- R6::R6Class(
 
           # detect variables in syntax
           private$detect_variables()
+
+          if (!is.null(private$pvt_data) && !is.null(private$pvt_variables)) {
+            missing_vars <- setdiff(private$pvt_variables, names(private$pvt_data))
+            if (length(missing_vars) > 0L)
+              warning("The following variables are mentioned in the model syntax, but missing in the data: ",
+                      paste(missing_vars, collapse=", "))
+          }
 
           # determine whether this is a montecarlo model
           private$pvt_is_montecarlo <- any(grepl("^\\s*montecarlo\\s*:", value, ignore.case = TRUE, perl=TRUE))
@@ -285,7 +293,7 @@ mplusModel_r6 <- R6::R6Class(
       if (is.null(self$data)) stop("Cannot write data to file because this object has no data.")
       
       if (file.exists(self$dat_file) && isFALSE(overwrite)) {
-        if (!quiet) message("Not overwriting existing data file: ", self$data)
+        if (!quiet) message("Not overwriting existing data file: ", self$dat_file)
         return(invisible(self))
       }
 
@@ -355,13 +363,13 @@ mplusModel_r6 <- R6::R6Class(
     #'   “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
     #'   file is more recent than the output file modified date (implying there have been updates to the model).
     #' @param ... additional arguments passed to `runModels`
-    run = function(replaceOutfile = "modifiedDate") {
+    run = function(replaceOutfile = "modifiedDate", ...) {
       # TODO: only write inp and dat files if things have changed compared to disk
       self$write_dat()
       self$write_inp()
-      runModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command)
+      runModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command, ...)
       self$read(force = TRUE) # read/re-read after estimation
-      
+
     }
   )
 )
