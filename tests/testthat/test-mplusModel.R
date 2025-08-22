@@ -1,45 +1,50 @@
-# test mplusObject
+context("mplusModel R6 class")
 
-m <- mplusModel(inp_file="/Users/hallquist/Data_Analysis/r_packages/MplusAutomation/tests/testthat/mplus_ug/8.11/ch8/ex8.6r3step.inp")
-
-m <- mplusModel(inp_file="/Users/hallquist/Data_Analysis/Momentum/momentum_collab/code/ema/analysis/s1_s2_factors/07_fscores_RLla_p24_v2_fixloadings_exp.inp")
-
-m <- mplusModel(inp_file="/Users/hallquist/Data_Analysis/Momentum/momentum_collab/code/ema/analysis/s1_s2_factors/07_fscores_RLla_p24_v2_fixloadings_exp.inp", read=FALSE)
-
-orig <- readLines("/Users/hallquist/Data_Analysis/Momentum/momentum_collab/code/ema/analysis/s1_s2_factors/07_fscores_RLla_p24_v2_fixloadings_exp.inp")
-syn <- parseMplusSyntax(orig)
-recon <- mplusInpToString(syn)
-
-syn2 <- parseMplusSyntax(recon)
-recon2 <- mplusInpToString(syn2)
-
-m <- mplusModel(syntax=orig)
-identical(m$syntax, trimws(orig))
-
-paste(m$syntax, collapse=" ")
-paste(trimws(orig), collapse=" ")
-
-trimws(orig)
-m$syntax
-m$write_inp()
-
-# simple regression 
-syn <- "
-TITLE:	this is an example of a simple linear
-	regression for a continuous observed
-	dependent variable with two covariates
-DATA:	FILE IS ex3.1.dat;
-VARIABLE:	NAMES ARE y1 x1 x3;
-MODEL:	y1 ON x1 x3;
+test_that("mplusModel R6 object can be initialized with syntax and data", {
+  syn <- "
+TITLE:  this is an example of a simple linear
+        regression for a continuous observed
+        dependent variable with two covariates
+DATA:   FILE IS ex3.1.dat;
+VARIABLE:       NAMES ARE y1 x1 x3;
+MODEL:  y1 ON x1 x3;
 "
+  dat <- as.data.frame(data.table::fread(testthat::test_path("submitModels","ex3.1.dat"), data.table=FALSE))
+  names(dat) <- c("y1","x1","x3")
+  tmp <- withr::local_tempdir()
+  m <- mplusModel(syntax = syn, data = dat, inp_file = file.path(tmp, "ex3.1.inp"))
 
-m <- mplusModel(inp_file="/Users/hallquist/Data_Analysis/r_packages/MplusAutomation/tests/testthat/submitModels/ex3.1.inp")
+  expect_true(inherits(m, "mplusModel_r6"))
+  expect_equal(m$model_dir, tmp)
+  expect_equal(m$inp_file, file.path(tmp, "ex3.1.inp"))
+})
 
-dd <- m$data
+test_that("mplusModel writes input and data files", {
+  syn <- "
+TITLE:  this is an example of a simple linear
+        regression for a continuous observed
+        dependent variable with two covariates
+DATA:   FILE IS ex3.1.dat;
+VARIABLE:       NAMES ARE y1 x1 x3;
+MODEL:  y1 ON x1 x3;
+"
+  dat <- as.data.frame(data.table::fread(testthat::test_path("submitModels","ex3.1.dat"), data.table=FALSE))
+  names(dat) <- c("y1","x1","x3")
+  tmp <- withr::local_tempdir()
+  m <- mplusModel(syntax = syn, data = dat, inp_file = file.path(tmp, "ex3.1.inp"))
+  m$write_dat()
+  m$write_inp()
+  expect_true(file.exists(m$dat_file))
+  expect_true(file.exists(m$inp_file))
+})
 
-nobj <- mplusModel(syntax=syn, data=dd, inp_file="/Users/hallquist/Data_Analysis/r_packages/MplusAutomation/tests/testthat/ex3.1_mplusmodel.inp")
-nobj$run()
+test_that("mplusModel reads existing output", {
+  tmp <- withr::local_tempdir()
+  file.copy(testthat::test_path("submitModels","ex3.1.inp"), tmp)
+  file.copy(testthat::test_path("submitModels","ex3.1.dat"), tmp)
+  file.copy(testthat::test_path("ex3.1.out"), tmp)
+  m <- mplusModel(inp_file = file.path(tmp, "ex3.1.inp"), read = TRUE)
+  expect_equal(m$summaries$AIC, 1396.667, tolerance = 1e-3)
+  expect_equal(nrow(m$data), 500)
+})
 
-
-m <- mplusModel(inp_file="/Users/hallquist/Data_Analysis/Miscellaneous/Rens_GMM_Constraints/mcex8.1.inp")
-m$run()
