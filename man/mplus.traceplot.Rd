@@ -47,7 +47,7 @@ Trace and density plots can also be obtained using the coda package and the bpar
 }
 }
 \seealso{
-\code{\link{plot.mcmc}}
+\code{\link[coda:plot.mcmc]{plot.mcmc}}
 }
 \author{
 Joseph Glass, Michael Hallquist

@@ -696,6 +696,12 @@ extractInput_1file <- function(outfiletext, filename) {
 }
 
 #' Convert an Mplus syntax string into a parsed list
+#' @param syntax the character vector containing Mplus syntax
+#' @param dropSectionNames Logical. If TRUE, section names will be dropped from the parsed list
+#' @details
+#'   This function converts an Mplus syntax string into a list parsed into sections such as TITLE and DATA
+#' @return a parsed list of Mplus syntax
+#' @keywords internal
 parseMplusSyntax <- function(syntax, dropSectionNames=TRUE) {
   input <- list()
   class(input) <- c("mplus.inp", "list")

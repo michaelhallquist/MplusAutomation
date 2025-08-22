@@ -1,4 +1,5 @@
 Version 1.2 (DEVELOPMENT)
+ - notice:      MplusAutomation examples vignette updated to refer to readModels, not outmoded extract* functions
  - feature:     New pathfilter argument to readModels allows for selection of outputs to read based both on path name (pathfilter) and file name (filefilter)
  - feature:     compareModels now returns a list of comparison results including chi-square difference tests when requested
  - feature:     New mplusModel object that simplifies inline integration of Mplus and R.
@@ -10,6 +11,7 @@ Version 1.2 (DEVELOPMENT)
  - feature:     readModels extracts odds ratios and their confidence intervals into $parameters$odds and $parameters$ci.odds, respectively. Addresses #192.
  - feature:     readModels extracts results of the R3STEP procedure in $r3step. Closes #204
  - feature:     readModels extracts new H5RESULTS object from Mplus v8.11 in $h5results
+ - feature:     compareModels now returns a list containing the results of the comparison, including the diffTest. Closes #185.
  - notice:      Package namespace has been cleaned up to remove long-deprecated functions including extractModelSummaries, extractModelParameters, and extractModIndices.
  - bugfix:      readModels now detects filefilter arguments that use $ or ^ to denote the end or beginning of a string, respectively, and also handles ".out" being included in filefilter Addresses #194.
  - bugfix:      readModels now parses indirect effects for NB/ZI models with binary outcomes annotated with #. Closes #217.

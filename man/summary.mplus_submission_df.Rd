@@ -4,12 +4,14 @@
 \alias{summary.mplus_submission_df}
 \title{summary function for submission from \code{submitModels}}
 \usage{
-\method{summary}{mplus_submission_df}(x, refresh = TRUE, ...)
+\method{summary}{mplus_submission_df}(object, refresh = TRUE, ...)
 }
 \arguments{
-\item{x}{the \code{mplus_submission_df} object to summarize}
+\item{object}{the \code{mplus_submission_df} object to summarize}
 
 \item{refresh}{if \code{TRUE}, check the status of jobs for this object before printing}
+
+\item{...}{additional arguments, not currently used}
 }
 \description{
 summary function for submission from \code{submitModels}

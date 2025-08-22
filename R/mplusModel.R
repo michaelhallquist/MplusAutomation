@@ -17,6 +17,8 @@ mplusModel <- function(syntax=NULL, data=NULL, inp_file=NULL, read=TRUE) {
 #' An R6 class for a single Mplus model
 #' @details
 #'   Wrapped by `mplusModel`
+#'   Note that this R6 class deliberately uses unlockBinding to populate private fields after the object is instantiated.
+#'   This allows the model outputs to be added to the relevant sections of the object while keeping the fields private.
 #' @keywords internal
 mplusModel_r6 <- R6::R6Class(
   classname = "mplusModel_r6",
@@ -453,8 +455,7 @@ expandCmd <- function(cmd) {
       v_post.num <- as.integer(substr(v_post, attr(v_post.match, "capture.start")[whichCapture], attr(v_post.match, "capture.start")[whichCapture] + attr(v_post.match, "capture.length")[whichCapture] - 1))
       v_post.prefix <- substr(v_post, 1, attr(v_post.match, "capture.start")[whichCapture] - 1) # just trusting that pre and post match
       
-      if (is.na(v_pre.num) || is.na(v_post.num)) lav_msg_stop(
-        gettext("Cannot expand variables:"), v_pre, ", ", v_post)
+      if (is.na(v_pre.num) || is.na(v_post.num)) stop("Cannot expand variables: ", v_pre, ", ", v_post)
       v_expand <- paste(v_post.prefix, v_pre.num:v_post.num, v_post.suffix, sep = "", collapse = " ")
       
       # for first hyphen, there may be non-hyphenated syntax preceding the initial match

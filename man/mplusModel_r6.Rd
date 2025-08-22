@@ -10,6 +10,8 @@ An R6 class for a single Mplus model
 }
 \details{
 Wrapped by `mplusModel`
+  Note that this R6 class deliberately uses unlockBinding to populate private fields after the object is instantiated.
+  This allows the model outputs to be added to the relevant sections of the object while keeping the fields private.
 }
 \keyword{internal}
 \section{Public fields}{
@@ -177,7 +179,7 @@ file is more recent than the output file modified date (implying there have been
 \subsection{Method \code{run()}}{
 run this model locally using `runModels`
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$run(replaceOutfile = "modifiedDate")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$run(replaceOutfile = "modifiedDate", ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

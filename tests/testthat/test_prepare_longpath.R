@@ -17,7 +17,9 @@ test_that("prepareMplusData long path", {
 test_that("prepareMplusData short path", {
   data(iris)
   path <- tempdir()
-  expect_lte(nchar(path), 70) # make sure we force a short enough path
+  # don't attempt this if tempdir is rather long since we're trying to see how it handles short paths
+  testthat::skip_if(nchar(path) > 70, "tempdir() too long on this platform")
+  expect_lte(nchar(path), 70) # make sure we start with a short enough path
   ff <- file.path(path, "i.dat")
   syn <- prepareMplusData(iris, filename=ff)
   dline <- grep("^DATA:", syn)

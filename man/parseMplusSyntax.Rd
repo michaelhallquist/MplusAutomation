@@ -6,6 +6,18 @@
 \usage{
 parseMplusSyntax(syntax, dropSectionNames = TRUE)
 }
+\arguments{
+\item{syntax}{the character vector containing Mplus syntax}
+
+\item{dropSectionNames}{Logical. If TRUE, section names will be dropped from the parsed list}
+}
+\value{
+a parsed list of Mplus syntax
+}
 \description{
 Convert an Mplus syntax string into a parsed list
 }
+\details{
+This function converts an Mplus syntax string into a list parsed into sections such as TITLE and DATA
+}
+\keyword{internal}

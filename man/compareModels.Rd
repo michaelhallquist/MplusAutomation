@@ -46,9 +46,11 @@ Assumes that the models are nested. Not available for MLMV, WLSMV, and ULSMV est
 Use DIFFTEST in Mplus instead.}
 }
 \value{
-A list containing the comparison results. The list includes summary statistics
-for both models, parameter comparisons (equal, different, and unique
-parameters), and, when requested, the chi-square difference test.
+A list containing the results of the comparison. Elements include
+  \code{summaries} with selected summary statistics for both models,
+  \code{parameters} listing equal and differing parameters as well as those
+  unique to each model, and, when \code{diffTest = TRUE}, a \code{diffTest}
+  element with the chi-square difference test.
 }
 \description{
 The \code{compareModels} function compares the output of two Mplus files and prints similarities and

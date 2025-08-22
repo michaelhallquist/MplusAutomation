@@ -1,5 +1,3 @@
-context("mplusModel R6 class")
-
 test_that("mplusModel R6 object can be initialized with syntax and data", {
   syn <- "
 TITLE:  this is an example of a simple linear
@@ -11,7 +9,7 @@ MODEL:  y1 ON x1 x3;
 "
   dat <- as.data.frame(data.table::fread(testthat::test_path("submitModels","ex3.1.dat"), data.table=FALSE))
   names(dat) <- c("y1","x1","x3")
-  tmp <- withr::local_tempdir()
+  tmp <- normalizePath(tempdir())
   m <- mplusModel(syntax = syn, data = dat, inp_file = file.path(tmp, "ex3.1.inp"))
 
   expect_true(inherits(m, "mplusModel_r6"))
@@ -28,9 +26,10 @@ DATA:   FILE IS ex3.1.dat;
 VARIABLE:       NAMES ARE y1 x1 x3;
 MODEL:  y1 ON x1 x3;
 "
+  
   dat <- as.data.frame(data.table::fread(testthat::test_path("submitModels","ex3.1.dat"), data.table=FALSE))
   names(dat) <- c("y1","x1","x3")
-  tmp <- withr::local_tempdir()
+  tmp <- normalizePath(tempdir())
   m <- mplusModel(syntax = syn, data = dat, inp_file = file.path(tmp, "ex3.1.inp"))
   m$write_dat()
   m$write_inp()
@@ -39,7 +38,7 @@ MODEL:  y1 ON x1 x3;
 })
 
 test_that("mplusModel reads existing output", {
-  tmp <- withr::local_tempdir()
+  tmp <- tempdir()
   file.copy(testthat::test_path("submitModels","ex3.1.inp"), tmp)
   file.copy(testthat::test_path("submitModels","ex3.1.dat"), tmp)
   file.copy(testthat::test_path("ex3.1.out"), tmp)

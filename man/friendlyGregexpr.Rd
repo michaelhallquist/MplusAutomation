@@ -24,9 +24,11 @@ A \code{data.frame}
 Creates data frame documenting the start and end of all tags.
 }
 \examples{
+\dontrun{
   friendlyGregexpr("(BY|WITH|ON)", 
     c("POS_WI BY", "X WITH Y WITH Z")
   )
+} 
 }
 \author{
 Michael Hallquist

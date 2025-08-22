@@ -22,7 +22,7 @@
 #'   Called for the side effect of displaying an MCMC chains traceplot.
 #' @author Joseph Glass, Michael Hallquist
 #' @export
-#' @seealso \code{\link{plot.mcmc}}
+#' @seealso \code{\link[coda:plot.mcmc]{plot.mcmc}}
 #' @examples
 #' \dontrun{
 #'   myModel <- readModels("BayesModel_WithGH5MCMC.out")

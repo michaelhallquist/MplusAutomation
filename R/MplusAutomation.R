@@ -72,6 +72,9 @@
 NULL
 
 
+# Handle NSE data.table usage inside submitModels functions
+if (getRversion() >= "2.15.1") utils::globalVariables(c("cnum", "V1", "sched"))
+
 # display version number and citation when the package is loaded
 .onAttach <- function(libname, pkgname) {
 

@@ -757,16 +757,20 @@ slurm_job_status <- function(job_ids = NULL, user = NULL, sacct_format = "jobid,
   # cat(cmd, "\n")
   res <- system2("sacct", args = cmd, stdout = TRUE)
 
-  df_base <- data.frame(JobID = job_ids)
-  df_empty <- df_base %>%
-    mutate(
-      Submit = NA_character_,
-      Timelimit = NA_character_,
-      Start = NA_character_,
-      End = NA_character_,
-      State = "MISSING"
-    )
-
+  # Base data frame for requested JobIDs
+  df_base <- data.frame(
+    JobID = if (is.null(job_ids)) character(0) else as.character(job_ids),
+    stringsAsFactors = FALSE
+  )
+  
+  # Empty fallback with required columns (no dplyr)
+  df_empty <- df_base
+  df_empty$Submit    <- NA_character_
+  df_empty$Timelimit <- NA_character_
+  df_empty$Start     <- NA_character_
+  df_empty$End       <- NA_character_
+  df_empty$State     <- "MISSING"
+  
   # handle non-zero exit status -- return empty data
   if (!is.null(attr(res, "status"))) {
     warning("sacct call generated non-zero exit status")
@@ -912,24 +916,25 @@ checkSubmission <- function(mplus_submission_df = NULL, quiet = FALSE) {
 }
 
 #' summary function for submission from \code{submitModels}
-#' @param x the \code{mplus_submission_df} object to summarize
+#' @param object the \code{mplus_submission_df} object to summarize
 #' @param refresh if \code{TRUE}, check the status of jobs for this object before printing
+#' @param ... additional arguments, not currently used
 #' @method summary mplus_submission_df
 #' @importFrom utils head
 #' @export
-summary.mplus_submission_df <- function(x, refresh=TRUE, ...) {
-  checkmate::assert_class(x, "mplus_submission_df")
+summary.mplus_submission_df <- function(object, refresh=TRUE, ...) {
+  checkmate::assert_class(object, "mplus_submission_df")
   checkmate::assert_flag(refresh)
-  if (is.null(x$status)) x$status <- "missing"
+  if (is.null(object$status)) object$status <- "missing"
 
-  if (refresh) x <- tryCatch(checkSubmission(x, quiet = TRUE), error = function(e) x)
+  if (refresh) object <- tryCatch(checkSubmission(object, quiet = TRUE), error = function(e) object)
 
-  cat("Number of models in submission: ", nrow(x), "\n")
-  cat("Complete jobs: ", sum(x$status == "complete"), "\n")
-  cat("Queued jobs: ", sum(x$status == "queued"), "\n")
-  cat("Still running: ", sum(x$status == "running"), "\n")
+  cat("Number of models in submission: ", nrow(object), "\n")
+  cat("Complete jobs: ", sum(object$status == "complete"), "\n")
+  cat("Queued jobs: ", sum(object$status == "queued"), "\n")
+  cat("Still running: ", sum(object$status == "running"), "\n")
 
-  rdf <- x[x$status == "running", ]
+  rdf <- object[object$status == "running", ]
   if (nrow(rdf) > 0L) {
     print(head(rdf, n=20))
   }

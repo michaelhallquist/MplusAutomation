@@ -192,9 +192,11 @@ testBParamCompoundConstraint <- function(bparams, test) {
 #' @author Michael Hallquist
 #' @keywords internal
 #' @examples
+#' \dontrun{
 #'   friendlyGregexpr("(BY|WITH|ON)", 
 #'     c("POS_WI BY", "X WITH Y WITH Z")
 #'   )
+#' } 
 friendlyGregexpr <- function(pattern, charvector, perl = TRUE, include_tag = TRUE) {
   regexpMatches <- gregexpr(pattern, charvector, perl = perl)
   
