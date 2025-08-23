@@ -1,15 +1,14 @@
-# Sugar functions for making the ggbrain() + layers approach work
-
 #' Create an mplusModel object for a given model
 #' @param syntax a character vector of Mplus input syntax for this model
 #' @param data a data.frame to be used for estimating the model
 #' @param inp_file the location of .inp file for this model
 #' @param read If TRUE and the .out file already exists, read the contents of the .out file using `readModels`
+#' @param Mplus_command The location of the Mplus executable to run. If NULL, use `detectMplus()`
 #' @return a `mplusModel_r6` object containing information about the model
 #' @export
-mplusModel <- function(syntax=NULL, data=NULL, inp_file=NULL, read=TRUE) {
+mplusModel <- function(syntax=NULL, data=NULL, inp_file=NULL, read=TRUE, Mplus_command = NULL) {
   # simple wrapper around class constructor
-  mobj <- mplusModel_r6$new(syntax, data, inp_file, read)
+  mobj <- mplusModel_r6$new(syntax, data, inp_file, read, Mplus_command)
   
   return(mobj)
 }
