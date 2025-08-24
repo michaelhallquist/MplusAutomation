@@ -34,26 +34,29 @@ mplusModel_r6 <- R6::R6Class(
     pvt_variables = NULL,        # names of columns in data to be written to the .dat file
     pvt_is_montecarlo = FALSE,   # whether this is a monte carlo model (in which case the data section is irrelevant)
     
-    # private method to populate fields using the result of readModels
+    # read-only outputs (backing storage)
+    pvt_input      = NULL,
+    pvt_warnings   = NULL,
+    pvt_parameters = NULL,
+    pvt_summaries  = NULL,
+    pvt_savedata   = NULL,
+    
     populate_output = function(o) {
       private$pvt_output_loaded <- TRUE
-      for (ff in c("parameters", "input", "warnings", "summaries", "savedata")) {
-      #for (ff in names(o)) {
-        unlockBinding(ff, self)
-        self[[ff]] <- o[[ff]]
-        lockBinding(ff, self)
-      }
+      private$pvt_parameters <- o$parameters
+      private$pvt_input      <- o$input
+      private$pvt_warnings   <- o$warnings
+      private$pvt_summaries  <- o$summaries
+      private$pvt_savedata   <- o$savedata
     },
     
-    # private method to clear all fields after the object is invalidated (e.g., by changing the inp_file or data)
     clear_output = function() {
       private$pvt_output_loaded <- FALSE
-      for (ff in c("parameters", "input", "warnings", "summaries", "savedata")) {
-        #for (ff in names(o)) {
-        unlockBinding(ff, self)
-        self[[ff]] <- NULL
-        lockBinding(ff, self)
-      }
+      private$pvt_parameters <- NULL
+      private$pvt_input      <- NULL
+      private$pvt_warnings   <- NULL
+      private$pvt_summaries  <- NULL
+      private$pvt_savedata   <- NULL
     },
     
     detect_variables = function() {
@@ -180,26 +183,36 @@ mplusModel_r6 <- R6::R6Class(
           private$pvt_is_montecarlo <- any(grepl("^\\s*montecarlo\\s*:", value, ignore.case = TRUE, perl=TRUE))
         }
       }
+    },
+    
+    # ---- read-only output fields (active bindings) ----
+    #' @field input Parsed Mplus input sections (read-only)
+    input = function(value) {
+      if (missing(value)) private$pvt_input
+      else stop("`input` is read-only.")
+    },
+    #' @field warnings Mplus warnings (read-only)
+    warnings = function(value) {
+      if (missing(value)) private$pvt_warnings
+      else stop("`warnings` is read-only.")
+    },
+    #' @field parameters Parameter estimates (read-only)
+    parameters = function(value) {
+      if (missing(value)) private$pvt_parameters
+      else stop("`parameters` is read-only.")
+    },
+    #' @field summaries Model summaries/statistics (read-only)
+    summaries = function(value) {
+      if (missing(value)) private$pvt_summaries
+      else stop("`summaries` is read-only.")
+    },
+    #' @field savedata Data produced by SAVEDATA (read-only)
+    savedata = function(value) {
+      if (missing(value)) private$pvt_savedata
+      else stop("`savedata` is read-only.")
     }
   ),
   public=list(
-    
-    ### READ-ONLY FIELDS (set by populate_output)
-    #' @field input Mplus input syntax parsed into a list by major section
-    input = NULL,
-    
-    #' @field warnings Syntax and estimation warnings as a list
-    warnings = NULL,
-    
-    #' @field parameters a list containing the parameter estimates for the model
-    parameters = NULL,
-    
-    #' @field summaries a list containing the model summary information and statistics
-    summaries = NULL,
-    
-    #' @field savedata a list containing the data output by the SAVEDATA command
-    savedata = NULL,
-    
     #' @description generate an mplusModel_r6 object
     #' @param syntax a character vector of Mplus input syntax for this model
     #' @param data a data.frame to be used for estimating the model
@@ -233,9 +246,7 @@ mplusModel_r6 <- R6::R6Class(
           private$pvt_dat_file <- self$input$data$file
           
           # if file cannot be loaded as is because of a relative path problem, look in the model directory
-          if (!file.exists(dfile)) {
-            dfile <- file.path(private$pvt_model_dir, dfile)
-          }
+          if (!file.exists(dfile)) dfile <- file.path(private$pvt_model_dir, dfile)
           data <- tryCatch(data.table::fread(dfile, header = FALSE, na.strings=c("*", "."), strip.white=TRUE, data.table = FALSE),
                            error=function(e) { warning("Could not load data file: ", dfile); return(NULL) })
           

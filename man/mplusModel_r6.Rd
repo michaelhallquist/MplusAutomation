@@ -14,21 +14,6 @@ Wrapped by `mplusModel`
   This allows the model outputs to be added to the relevant sections of the object while keeping the fields private.
 }
 \keyword{internal}
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{input}}{Mplus input syntax parsed into a list by major section}
-
-\item{\code{warnings}}{Syntax and estimation warnings as a list}
-
-\item{\code{parameters}}{a list containing the parameter estimates for the model}
-
-\item{\code{summaries}}{a list containing the model summary information and statistics}
-
-\item{\code{savedata}}{a list containing the data output by the SAVEDATA command}
-}
-\if{html}{\out{</div>}}
-}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
@@ -45,6 +30,16 @@ Wrapped by `mplusModel`
 \item{\code{Mplus_command}}{the location of the Mplus program}
 
 \item{\code{syntax}}{the Mplus syntax for this model as a character vector}
+
+\item{\code{input}}{Parsed Mplus input sections (read-only)}
+
+\item{\code{warnings}}{Mplus warnings (read-only)}
+
+\item{\code{parameters}}{Parameter estimates (read-only)}
+
+\item{\code{summaries}}{Model summaries/statistics (read-only)}
+
+\item{\code{savedata}}{Data produced by SAVEDATA (read-only)}
 }
 \if{html}{\out{</div>}}
 }
