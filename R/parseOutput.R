@@ -1043,7 +1043,7 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #'   subdirectories within \code{directory}. Defaults to \code{FALSE}.
 #' @param filefilter a Perl regular expression (PCRE-compatible) specifying particular
 #'   output files to be parsed within \code{directory}. See \code{regex} or
-#'   \url{http://www.pcre.org/pcre.txt} for details about regular expression syntax.
+#'   \url{https://www.pcre.org/pcre.txt} for details about regular expression syntax.
 #'
 #' @return Returns a \code{data.frame} containing model fit statistics for all output files within \code{directory}.
 #' The \code{data.frame} contains some of the following variables (depends on model type):

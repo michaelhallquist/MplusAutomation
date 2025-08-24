@@ -213,7 +213,7 @@ runModels_Interactive <- function(directory=getwd(), recursive="0",
 #' @param recursive optional. If \code{TRUE}, run all models nested in subdirectories
 #'   within \code{directory}. Defaults to \code{FALSE}. Not relevant if \code{target} is a single file.
 #' @param filefilter a Perl regular expression (PCRE-compatible) specifying particular input
-#'   files to be run among those found in \code{target}. See \code{regex} or \url{http://www.pcre.org/pcre.txt}
+#'   files to be run among those found in \code{target}. See \code{regex} or \url{https://www.pcre.org/pcre.txt}
 #'   for details about regular expression syntax.
 #' @param showOutput optional. If \code{TRUE}, show estimation output (TECH8)
 #'   in the R console. Note that if run within Rgui, output will display within R,

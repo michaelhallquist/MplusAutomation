@@ -18,7 +18,7 @@ nested in subdirectories within \code{target}. Defaults to
 
 \item{filefilter}{a Perl regular expression (PCRE-compatible)
 specifying particular output files to be parsed within \code{directory}.
-See \code{regex} or \url{http://www.pcre.org/pcre.txt} for
+See \code{regex} or \url{https://www.pcre.org/pcre.txt} for
 details about regular expression syntax.}
 }
 \value{

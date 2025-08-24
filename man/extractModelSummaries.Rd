@@ -16,7 +16,7 @@ subdirectories within \code{directory}. Defaults to \code{FALSE}.}
 
 \item{filefilter}{a Perl regular expression (PCRE-compatible) specifying particular
 output files to be parsed within \code{directory}. See \code{regex} or
-\url{http://www.pcre.org/pcre.txt} for details about regular expression syntax.}
+\url{https://www.pcre.org/pcre.txt} for details about regular expression syntax.}
 }
 \value{
 Returns a \code{data.frame} containing model fit statistics for all output files within \code{directory}.

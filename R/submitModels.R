@@ -188,7 +188,7 @@ filter_inp_filelist <- function(inp_files, replaceOutfile = "always", quiet=TRUE
 #' @param recursive optional. If \code{TRUE}, run all models nested in subdirectories
 #'   within \code{directory}. Defaults to \code{FALSE}. Not relevant if \code{target} is a single file.
 #' @param filefilter a Perl regular expression (PCRE-compatible) specifying particular input
-#'   files to be run among those found in \code{target}. See \code{regex} or \url{http://www.pcre.org/pcre.txt}
+#'   files to be run among those found in \code{target}. See \code{regex} or \url{https://www.pcre.org/pcre.txt}
 #'   for details about regular expression syntax.
 #' @param replaceOutfile optional. Currently supports three settings: \dQuote{always}, which
 #'   runs all models, regardless of whether an output file for the model exists; \dQuote{never},

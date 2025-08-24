@@ -140,7 +140,7 @@ extractModIndices_1file <- function(outfiletext, filename) {
 #'   \code{FALSE}.
 #' @param filefilter a Perl regular expression (PCRE-compatible)
 #'   specifying particular output files to be parsed within \code{directory}.
-#'   See \code{regex} or \url{http://www.pcre.org/pcre.txt} for
+#'   See \code{regex} or \url{https://www.pcre.org/pcre.txt} for
 #'   details about regular expression syntax.
 #'
 #' @return If \code{target} is a single file, a data.frame

@@ -14,7 +14,7 @@
 #' @param filefilter a Perl regular expression (PCRE-compatible)
 #'   	specifying particular output files to be parsed within
 #'   	\code{directory} based on their file name. See \code{regex} or
-#'   	\url{http://www.pcre.org/pcre.txt} for details about regular
+#'   	\url{https://www.pcre.org/pcre.txt} for details about regular
 #'   	expression syntax.
 #' @param pathfilter a Perl regular expression (PCRE-compatible) specifying particular
 #'   paths to be parsed within \code{directory} based on their absolute paths.

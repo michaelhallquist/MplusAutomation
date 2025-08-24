@@ -716,7 +716,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
 #' @param recursive optional. If \code{TRUE}, parse all models nested in subdirectories
 #'   within \code{target}. Defaults to \code{FALSE}.
 #' @param filefilter a Perl regular expression (PCRE-compatible) specifying particular output
-#'   files to be parsed within \code{directory}. See \code{regex} or \url{http://www.pcre.org/pcre.txt}
+#'   files to be parsed within \code{directory}. See \code{regex} or \url{https://www.pcre.org/pcre.txt}
 #'   for details about regular expression syntax.
 #' @param dropDimensions Relevant only for multi-file parsing. If \code{TRUE}, then if only one output
 #'   section (usually unstandardized) is present for all files in the parsed list, then eliminate

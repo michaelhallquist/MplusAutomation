@@ -27,7 +27,7 @@ Defaults to the current working directory. Example: \dQuote{C:/Users/Michael/Mpl
 within \code{directory}. Defaults to \code{FALSE}. Not relevant if \code{target} is a single file.}
 
 \item{filefilter}{a Perl regular expression (PCRE-compatible) specifying particular input
-files to be run among those found in \code{target}. See \code{regex} or \url{http://www.pcre.org/pcre.txt}
+files to be run among those found in \code{target}. See \code{regex} or \url{https://www.pcre.org/pcre.txt}
 for details about regular expression syntax.}
 
 \item{showOutput}{optional. If \code{TRUE}, show estimation output (TECH8)
