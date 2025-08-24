@@ -33,3 +33,4 @@ products
 !tests/testthat/*.out
 !tests/testthat/*.csv
 !tests/testthat/mplus_ug
+docs

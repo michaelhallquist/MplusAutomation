@@ -21,3 +21,4 @@ vignettes/precompile.R
 ^vignettes/.*\.out$
 ^vignettes/.*\.dat$
 .vscode
+^\.github$
