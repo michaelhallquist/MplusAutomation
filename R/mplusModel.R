@@ -1,3 +1,14 @@
+# sections returned by readModels (used for dynamic active bindings)
+.mplus_sections <- c(
+  "input", "warnings", "errors", "data_summary", "sampstat",
+  "covariance_coverage", "summaries", "invariance_testing",
+  "parameters", "class_counts", "indirect", "mod_indices",
+  "residuals", "savedata", "savedata_info", "bparameters",
+  "tech1", "tech3", "tech4", "tech7", "tech8", "tech9",
+  "tech10", "tech12", "tech15", "fac_score_stats",
+  "lcCondMeans", "r3step", "gh5", "h5results", "output"
+)
+
 #' Create an mplusModel object for a given model
 #' @param syntax a character vector of Mplus input syntax for this model
 #' @param data a data.frame to be used for estimating the model
@@ -19,47 +30,37 @@ mplusModel <- function(syntax=NULL, data=NULL, inp_file=NULL, read=TRUE, Mplus_c
 #'   Note that this R6 class deliberately uses unlockBinding to populate private fields after the object is instantiated.
 #'   This allows the model outputs to be added to the relevant sections of the object while keeping the fields private.
 #' @keywords internal
-mplusModel_r6 <- R6::R6Class(
+ mplusModel_r6 <- R6::R6Class(
   classname = "mplusModel_r6",
   lock_objects=FALSE,
-  private=list(
-    pvt_output_loaded = FALSE,
-    pvt_syntax = NULL,           # syntax for this model, parsed into a list
-    pvt_data = NULL,             # data.frame containing data for model estimation
-    pvt_inp_file = NULL,         # name of .inp file
-    pvt_out_file = NULL,         # name of .out file
-    pvt_dat_file = NULL,         # name of .dat file
-    pvt_model_dir = NULL,        # location of model files
-    pvt_Mplus_command = NULL,    # location of Mplus binary
-    pvt_variables = NULL,        # names of columns in data to be written to the .dat file
-    pvt_is_montecarlo = FALSE,   # whether this is a monte carlo model (in which case the data section is irrelevant)
-    
-    # read-only outputs (backing storage)
-    pvt_input      = NULL,
-    pvt_warnings   = NULL,
-    pvt_parameters = NULL,
-    pvt_summaries  = NULL,
-    pvt_savedata   = NULL,
-    
-    populate_output = function(o) {
-      private$pvt_output_loaded <- TRUE
-      private$pvt_parameters <- o$parameters
-      private$pvt_input      <- o$input
-      private$pvt_warnings   <- o$warnings
-      private$pvt_summaries  <- o$summaries
-      private$pvt_savedata   <- o$savedata
-    },
-    
-    clear_output = function() {
-      private$pvt_output_loaded <- FALSE
-      private$pvt_parameters <- NULL
-      private$pvt_input      <- NULL
-      private$pvt_warnings   <- NULL
-      private$pvt_summaries  <- NULL
-      private$pvt_savedata   <- NULL
-    },
-    
-    detect_variables = function() {
+  private = c(
+    list(
+      pvt_output_loaded = FALSE,
+      pvt_syntax = NULL,           # syntax for this model, parsed into a list
+      pvt_data = NULL,             # data.frame containing data for model estimation
+      pvt_inp_file = NULL,         # name of .inp file
+      pvt_out_file = NULL,         # name of .out file
+      pvt_dat_file = NULL,         # name of .dat file
+      pvt_model_dir = NULL,        # location of model files
+      pvt_Mplus_command = NULL,    # location of Mplus binary
+      pvt_variables = NULL,        # names of columns in data to be written to the .dat file
+      pvt_is_montecarlo = FALSE,   # whether this is a monte carlo model (in which case the data section is irrelevant)
+
+      populate_output = function(o) {
+        private$pvt_output_loaded <- TRUE
+        for (sec in .mplus_sections) {
+          private[[paste0("pvt_", sec)]] <- o[[sec]]
+        }
+      },
+
+      clear_output = function() {
+        private$pvt_output_loaded <- FALSE
+        for (sec in .mplus_sections) {
+          private[[paste0("pvt_", sec)]] <- NULL
+        }
+      },
+
+      detect_variables = function() {
       # both syntax and data must be present to attempt detection
       if (is.null(private$pvt_syntax) || is.null(private$pvt_data)) return(invisible(NULL))
       
@@ -78,41 +79,44 @@ mplusModel_r6 <- R6::R6Class(
         obj$rdata <- private$pvt_data
 
         private$pvt_variables <- detectVariables(obj)
-      }      
+      }
     }
   ),
-  active = list(
-    #' @field model_dir the directory for Mplus files corresponding to this model
-    model_dir = function(value) {
-      if (missing(value)) {
+  setNames(vector("list", length(.mplus_sections)), paste0("pvt_", .mplus_sections))
+  ),
+  active = c(
+    list(
+      #' @field model_dir the directory for Mplus files corresponding to this model
+      model_dir = function(value) {
+        if (missing(value)) {
         private$pvt_model_dir
       } else {
         if (!dir.exists(value)) dir.create(value, recursive = TRUE)
         private$pvt_model_dir <- value
       }
-    },
-    
-    #' @field inp_file the location of the Mplus .inp file for this model
-    inp_file = function(value) {
-      if (missing(value)) file.path(private$pvt_model_dir, private$pvt_inp_file)
-      else stop("Cannot set read-only field")
-    },
-    
-    #' @field out_file the location of the Mplus .out file for this model
-    out_file = function(value) {
-      if (missing(value)) file.path(private$pvt_model_dir, private$pvt_out_file)
-      else stop("Cannot set read-only field")
-    },
-    
-    #' @field dat_file the location of the Mplus .dat (data) file for this model
-    dat_file = function(value)  {
-      if (missing(value)) file.path(private$pvt_model_dir, private$pvt_dat_file)
-      else stop("Cannot set read-only field")
-    },
-    
-    #' @field data the dataset used for estimating this model
-    data = function(value) {
-      if (missing(value)) {
+      },
+
+      #' @field inp_file the location of the Mplus .inp file for this model
+      inp_file = function(value) {
+        if (missing(value)) file.path(private$pvt_model_dir, private$pvt_inp_file)
+        else stop("Cannot set read-only field")
+      },
+
+      #' @field out_file the location of the Mplus .out file for this model
+      out_file = function(value) {
+        if (missing(value)) file.path(private$pvt_model_dir, private$pvt_out_file)
+        else stop("Cannot set read-only field")
+      },
+
+      #' @field dat_file the location of the Mplus .dat (data) file for this model
+      dat_file = function(value)  {
+        if (missing(value)) file.path(private$pvt_model_dir, private$pvt_dat_file)
+        else stop("Cannot set read-only field")
+      },
+
+      #' @field data the dataset used for estimating this model
+      data = function(value) {
+        if (missing(value)) {
         private$pvt_data
       } else {
         had_data <- !is.null(private$pvt_data) # is the user updating data for an existing model?
@@ -141,10 +145,10 @@ mplusModel_r6 <- R6::R6Class(
         }
       }
     },
-    
-    #' @field Mplus_command the location of the Mplus program
-    Mplus_command = function(value) {
-      if (missing(value)) {
+
+      #' @field Mplus_command the location of the Mplus program
+      Mplus_command = function(value) {
+        if (missing(value)) {
         private$pvt_Mplus_command
       } else {
         if (is.null(value)) {
@@ -157,17 +161,17 @@ mplusModel_r6 <- R6::R6Class(
         }
       }
     },
-    
-    #' @field syntax the Mplus syntax for this model as a character vector
-    syntax = function(value) {
-      if (missing(value)) {
+
+      #' @field syntax the Mplus syntax for this model as a character vector
+      syntax = function(value) {
+        if (missing(value)) {
         mplusInpToString(private$pvt_syntax)
         #unname(unlist(private$pvt_syntax)) # unlist to return as character
       } else {
         if (!checkmate::test_character(value)) {
           stop("Syntax must be a character vector")
-        } else {
-          private$pvt_syntax <- parseMplusSyntax(value, dropSectionNames = TRUE)
+      } else {
+        private$pvt_syntax <- parseMplusSyntax(value, dropSectionNames = TRUE)
 
           # detect variables in syntax
           private$detect_variables()
@@ -183,34 +187,15 @@ mplusModel_r6 <- R6::R6Class(
           private$pvt_is_montecarlo <- any(grepl("^\\s*montecarlo\\s*:", value, ignore.case = TRUE, perl=TRUE))
         }
       }
-    },
-    
-    # ---- read-only output fields (active bindings) ----
-    #' @field input Parsed Mplus input sections (read-only)
-    input = function(value) {
-      if (missing(value)) private$pvt_input
-      else stop("`input` is read-only.")
-    },
-    #' @field warnings Mplus warnings (read-only)
-    warnings = function(value) {
-      if (missing(value)) private$pvt_warnings
-      else stop("`warnings` is read-only.")
-    },
-    #' @field parameters Parameter estimates (read-only)
-    parameters = function(value) {
-      if (missing(value)) private$pvt_parameters
-      else stop("`parameters` is read-only.")
-    },
-    #' @field summaries Model summaries/statistics (read-only)
-    summaries = function(value) {
-      if (missing(value)) private$pvt_summaries
-      else stop("`summaries` is read-only.")
-    },
-    #' @field savedata Data produced by SAVEDATA (read-only)
-    savedata = function(value) {
-      if (missing(value)) private$pvt_savedata
-      else stop("`savedata` is read-only.")
     }
+  ),
+  setNames(lapply(.mplus_sections, function(sec) {
+    force(sec)
+    function(value) {
+      if (missing(value)) private[[paste0("pvt_", sec)]]
+      else stop(sprintf("`%s` is read-only.", sec))
+    }
+  }), .mplus_sections)
   ),
   public=list(
     #' @description generate an mplusModel_r6 object

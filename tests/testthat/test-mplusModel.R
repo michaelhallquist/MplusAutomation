@@ -53,3 +53,15 @@ test_that("mplusModel reads existing output", {
   expect_equal(nrow(m$data), 500)
 })
 
+test_that("mplusModel exposes readModels sections", {
+  tmp <- tempdir()
+  file.copy(testthat::test_path("submitModels","ex3.1.inp"), tmp, overwrite = TRUE)
+  file.copy(testthat::test_path("submitModels","ex3.1.dat"), tmp, overwrite = TRUE)
+  file.copy(testthat::test_path("ex3.1.out"), tmp, overwrite = TRUE)
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+  m <- mplusModel(inp_file = file.path(tmp, "ex3.1.inp"), read = TRUE, Mplus_command = mplus_fake)
+  expect_true(length(m$output) > 0)
+  expect_true(is.null(m$errors))
+})
+
