@@ -24,7 +24,7 @@ This function checks the status of one or more compute jobs
 }
 \details{
 Note that for the \code{scheduler} argument, "torque" and "qsub" are the same;
-  "slurm" and "sbatch" are the same, and "sh" and "local" are the same.
+"slurm" and "sbatch" are the same, and "sh" and "local" are the same.
 }
 \examples{
 \dontrun{

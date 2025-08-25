@@ -45,7 +45,7 @@ or a logical vector corresponding to the same.}
 \item{dummyCode}{An optional character vector of column names indicating
 categorical variables in the dataset that should be converted into
 dummy codes (using the \code{fastDummies} package). Note that one dummy
-code is returned for *each level*, so no reference category is implied.
+code is returned for \emph{each level}, so no reference category is implied.
 Thus, it is up to you to drop one of the dummy codes in the Mplus syntax
 to denote the reference category and avoid multicollinearity.}
 
@@ -83,8 +83,8 @@ are located in the same folder, as is common for \code{Mplus}. Default: \code{FA
 }
 \value{
 Invisibly returns a character vector of the Mplus input
-  syntax. Primarily called for its side effect of creating Mplus
-  data files and optionally input files.
+syntax. Primarily called for its side effect of creating Mplus
+data files and optionally input files.
 }
 \description{
 The \code{prepareMplusData} function converts an R data.frame

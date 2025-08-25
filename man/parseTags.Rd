@@ -15,9 +15,9 @@ parseTags(bodySection, initCollection)
 A list with three elements, where each list represents the location,
 start character, end character, tag type, etc. of each tag.
 \describe{
-  \item{initTags}{initMatches}
-  \item{bodyTags}{bodyMatches}
-  \item{bodyText}{bodySection}
+\item{initTags}{initMatches}
+\item{bodyTags}{bodyMatches}
+\item{bodyText}{bodySection}
 }
 }
 \description{

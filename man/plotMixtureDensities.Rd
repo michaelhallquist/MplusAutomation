@@ -32,10 +32,10 @@ subdivided amongst the classes).}
 the transparency of geom_density, so that classes with a small number of
 cases remain visible.}
 
-\item{facet_labels}{Named character vector, the names of which should 
+\item{facet_labels}{Named character vector, the names of which should
 correspond to the facet labels one wishes to rename, and the values of which
 provide new names for these facets. For example, to rename variables, in the
-example with the 'iris' data below, one could specify: 
+example with the 'iris' data below, one could specify:
 \code{facet_labels = c("Pet_leng" = "Petal length")}.}
 }
 \value{
@@ -52,9 +52,11 @@ posterior probability of being assigned to that class.
 This function returns warnings, indicating that sum(weights) != 1.
 These can be ignored. The sum of the "Total" density per variable per model
 is equal to 1, and the sum of all of the posterior probabilities is equal to
-1. This results in a normal density plot for the "Total", which is subdivided
+\enumerate{
+\item This results in a normal density plot for the "Total", which is subdivided
 by the latent classes, in proportion to the posterior probabilities of
 participants being assigned to those clases.
+}
 }
 \examples{
 \dontrun{

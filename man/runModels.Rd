@@ -18,7 +18,7 @@ runModels(
 )
 }
 \arguments{
-\item{target}{a character vector where each element is a directory containing Mplus input files 
+\item{target}{a character vector where each element is a directory containing Mplus input files
 (.inp) to run OR a single .inp file to be run. Elements may be a full path, relative path,
 or a filename within the working directory.
 Defaults to the current working directory. Example: \dQuote{C:/Users/Michael/Mplus Runs}}

@@ -29,7 +29,7 @@ Any column not included in this list will be displayed. By default, \code{dropCo
 Example: \code{c("InputInstructions", "TLI")}}
 
 \item{sortBy}{optional. Field name (as character string) by which to sort the table. Typically an information criterion
-(e.g., "AIC" or "BIC") is used to sort the table. 
+(e.g., "AIC" or "BIC") is used to sort the table.
 Defaults to \code{NULL}, which does not sort the table.}
 
 \item{display}{optional. This parameter specifies whether to display the table in a web
@@ -45,7 +45,7 @@ but these are customizable using the \code{keepCols} and \code{dropCols} paramet
 }
 \note{
 You must choose between \code{keepCols} and \code{dropCols} because it is not sensible to use these
-  together to include and exclude columns. The function will error if you include both parameters.
+together to include and exclude columns. The function will error if you include both parameters.
 }
 \examples{
 # make me!!!

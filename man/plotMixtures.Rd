@@ -31,7 +31,7 @@ headings included in the output).
 Defaults to c('Means', 'Intercepts').}
 
 \item{ci}{What confidence interval should the errorbars span? Defaults to
-a 95\% confidence interval. Set to NULL to remove errorbars.}
+a 95\\% confidence interval. Set to NULL to remove errorbars.}
 
 \item{bw}{Logical. Should the plot be black and white (for print), or color?}
 

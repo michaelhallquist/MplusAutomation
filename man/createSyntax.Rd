@@ -23,7 +23,7 @@ Defaults to \code{FALSE}.}
 }
 \value{
 A character string containing all the text for the Mplus
-  input file.
+input file.
 }
 \description{
 This function takes an object of class \code{mplusObject} and creates
@@ -51,6 +51,6 @@ rm(example1)
 \code{\link{prepareMplusData}}, \code{\link{mplusModeler}}
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \keyword{interface}

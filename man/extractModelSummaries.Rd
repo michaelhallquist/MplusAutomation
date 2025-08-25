@@ -36,15 +36,15 @@ The \code{data.frame} contains some of the following variables (depends on model
 \item{CFI}{Confirmatory Fit Index}
 \item{TLI}{Tucker-Lewis Index}
 \item{RMSEA_Estimate}{Point estimate of root mean squared error of approximation}
-\item{RMSEA_90CI_LB}{Lower bound of the 90\% Confidence Interval around the RMSEA estimate.}
-\item{RMSEA_90CI_UB}{Upper bound of the 90\% Confidence Interval around the RMSEA estimate.}
+\item{RMSEA_90CI_LB}{Lower bound of the 90\\% Confidence Interval around the RMSEA estimate.}
+\item{RMSEA_90CI_UB}{Upper bound of the 90\\% Confidence Interval around the RMSEA estimate.}
 \item{RMSEA_pLT05}{Probability that the RMSEA estimate falls below .05, indicating good fit.}
 \item{ChiSqM_Value}{Model chi-squared value}
 \item{ChiSqM_DF}{Model chi-squared degrees of freedom}
 \item{ChiSqM_PValue}{Model chi-squared p value}
 \item{ChiSqM_ScalingCorrection}{H0 Scaling Correction Factor}
-\item{ObsRepChiSqDiff_95CI_LB}{Lower bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
-\item{ObsRepChiSqDiff_95CI_UB}{Upper bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
+\item{ObsRepChiSqDiff_95CI_LB}{Lower bound of 95\\% confidence interval for the difference between observed and replicated chi-square values}
+\item{ObsRepChiSqDiff_95CI_UB}{Upper bound of 95\\% confidence interval for the difference between observed and replicated chi-square values}
 \item{PostPred_PValue}{Posterior predictive p-value}
 \item{PriorPostPred_PValue}{Prior Posterior Predictive P-Value}
 \item{BLRT_RequestedDraws}{Number of requested bootstrap draws for TECH14.}

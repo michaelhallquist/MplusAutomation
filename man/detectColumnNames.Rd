@@ -15,7 +15,7 @@ detectColumnNames(filename, modelSection, sectionType = "model_results")
 }
 \value{
 A list with elements for the directory, filename,
-  and absolute path.
+and absolute path.
 }
 \description{
 Helper function to detect model results columns.

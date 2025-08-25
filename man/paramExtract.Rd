@@ -67,6 +67,6 @@ the results returned from the \code{\link{readModels}} function.
 \code{\link{readModels}}
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \keyword{utils}

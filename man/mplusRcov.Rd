@@ -33,14 +33,14 @@ Defaults to \code{FALSE}.}
 }
 \value{
 A named character vector of class \sQuote{MplusRstructure} with four elements:
-  \item{all}{A character string collapsing all other sections.}
-  \item{Variances}{A character string containing all of the variances.}
-  \item{Covariances}{A character string containing all of the
-    covariances, properly labelled to allow constraints and the
-    autoregressive residual covariance structure.}
-  \item{Constraints}{A character string containing the \sQuote{MODEL CONSTRAINT}
-    section and code needed to parameterize the residual covariance structure
-    as autoregressive.}
+\item{all}{A character string collapsing all other sections.}
+\item{Variances}{A character string containing all of the variances.}
+\item{Covariances}{A character string containing all of the
+covariances, properly labelled to allow constraints and the
+autoregressive residual covariance structure.}
+\item{Constraints}{A character string containing the \sQuote{MODEL CONSTRAINT}
+section and code needed to parameterize the residual covariance structure
+as autoregressive.}
 }
 \description{
 This function makes it easy to write the Mplus syntax for various
@@ -52,12 +52,12 @@ the residual variance, \eqn{\sigma^{2}_{e}}{s^2}. The residual variance
 is assumed to be identical for all variables and all covariances are
 assumed to be zero. The structure is represented in this table.
 \tabular{llllll}{
-    \tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
-  t1 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \tab \ldots \tab \cr
-  t2 \tab 0 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \ldots \tab \cr
-  t3 \tab 0 \tab 0 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \ldots \tab \cr
-  \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
-  tn \tab 0 \tab 0 \tab 0 \tab \ldots \tab \eqn{\sigma^{2}_{e}}{s^2} \cr
+\tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
+t1 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \tab \ldots \tab \cr
+t2 \tab 0 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \ldots \tab \cr
+t3 \tab 0 \tab 0 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \ldots \tab \cr
+\ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
+tn \tab 0 \tab 0 \tab 0 \tab \ldots \tab \eqn{\sigma^{2}_{e}}{s^2} \cr
 }
 
 The \strong{heterogenous} residual covariance structure estimates
@@ -65,12 +65,12 @@ The \strong{heterogenous} residual covariance structure estimates
 A unique residual variance is estimated for every variable. All
 covariances are assumed to be zero. The structure is represented in this table.
 \tabular{llllll}{
-    \tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
-  t1 \tab \eqn{\sigma^{2}_{e1}}{s1^2} \tab \tab \tab \ldots \tab \cr
-  t2 \tab 0 \tab \eqn{\sigma^{2}_{e2}}{s2^2} \tab \tab \ldots \tab \cr
-  t3 \tab 0 \tab 0 \tab \eqn{\sigma^{2}_{e3}}{s3^2} \tab \ldots \tab \cr
-  \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
-  tn \tab 0 \tab 0 \tab 0 \tab \ldots \tab \eqn{\sigma^{2}_{en}}{sn^2} \cr
+\tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
+t1 \tab \eqn{\sigma^{2}_{e1}}{s1^2} \tab \tab \tab \ldots \tab \cr
+t2 \tab 0 \tab \eqn{\sigma^{2}_{e2}}{s2^2} \tab \tab \ldots \tab \cr
+t3 \tab 0 \tab 0 \tab \eqn{\sigma^{2}_{e3}}{s3^2} \tab \ldots \tab \cr
+\ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
+tn \tab 0 \tab 0 \tab 0 \tab \ldots \tab \eqn{\sigma^{2}_{en}}{sn^2} \cr
 }
 
 The \strong{compound symmetric} residual covariance structure estimates
@@ -79,12 +79,12 @@ and one for the covariance. The residual variance
 is assumed to be identical for all variables and all covariances are
 assumed to be identical. The structure is represented in this table.
 \tabular{llllll}{
-    \tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
-  t1 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \tab \ldots \tab \cr
-  t2 \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \ldots \tab \cr
-  t3 \tab \eqn{\rho}{rho} \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \ldots \tab \cr
-  \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
-  tn \tab \eqn{\rho}{rho} \tab \eqn{\rho}{rho} \tab \eqn{\rho}{rho} \tab \ldots \tab \eqn{\sigma^{2}_{e}}{s^2} \cr
+\tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
+t1 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \tab \ldots \tab \cr
+t2 \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \ldots \tab \cr
+t3 \tab \eqn{\rho}{rho} \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \ldots \tab \cr
+\ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
+tn \tab \eqn{\rho}{rho} \tab \eqn{\rho}{rho} \tab \eqn{\rho}{rho} \tab \ldots \tab \eqn{\sigma^{2}_{e}}{s^2} \cr
 }
 
 The \strong{toeplitz} residual covariance structure estimates
@@ -94,12 +94,12 @@ assumed to be identical for all variables. The covariances one step removed
 are all assumed identical. Likewise for all further bands.
 The structure is represented in this table.
 \tabular{llllll}{
-    \tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
-  t1 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \tab \ldots \tab \cr
-  t2 \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \ldots \tab \cr
-  t3 \tab \eqn{\rho_{2}}{rho2} \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \ldots \tab \cr
-  \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
-  tn \tab \eqn{\rho_{n}}{rhon} \tab \eqn{\rho_{n - 1}}{rho(n - 1)} \tab \eqn{\rho_{n - 2}}{rho(n - 2)} \tab \ldots \tab \eqn{\sigma^{2}_{e}}{s^2} \cr
+\tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
+t1 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \tab \ldots \tab \cr
+t2 \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \ldots \tab \cr
+t3 \tab \eqn{\rho_{2}}{rho2} \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \ldots \tab \cr
+\ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
+tn \tab \eqn{\rho_{n}}{rhon} \tab \eqn{\rho_{n - 1}}{rho(n - 1)} \tab \eqn{\rho_{n - 2}}{rho(n - 2)} \tab \ldots \tab \eqn{\sigma^{2}_{e}}{s^2} \cr
 }
 
 The \strong{autoregressive} residual covariance structure has two parameters:
@@ -111,12 +111,12 @@ time points such as 1 and 2 or 2 and 3. More distant relationships are assumed
 to have smaller correlations, decreasing exponentially. Thus between 1 and 3,
 the estimate is \eqn{\rho^2}{rho^2}. The structure is represented in this table.
 \tabular{llllll}{
-    \tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
-  t1 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \tab \ldots \tab \cr
-  t2 \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \ldots \tab \cr
-  t3 \tab \eqn{\rho^2}{rho^2} \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \ldots \tab \cr
-  \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
-  tn \tab \eqn{\rho^{n-1}}{rho^(n-1)} \tab \eqn{\rho^{n-2}}{rho^(n-2)} \tab \eqn{\rho^{n-3}}{rho^(n-3)} \tab \ldots \tab \eqn{\sigma^{2}_{e}}{s^2} \cr
+\tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
+t1 \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \tab \ldots \tab \cr
+t2 \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \tab \ldots \tab \cr
+t3 \tab \eqn{\rho^2}{rho^2} \tab \eqn{\rho}{rho} \tab \eqn{\sigma^{2}_{e}}{s^2} \tab \ldots \tab \cr
+\ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
+tn \tab \eqn{\rho^{n-1}}{rho^(n-1)} \tab \eqn{\rho^{n-2}}{rho^(n-2)} \tab \eqn{\rho^{n-3}}{rho^(n-3)} \tab \ldots \tab \eqn{\sigma^{2}_{e}}{s^2} \cr
 }
 Because structural equation models generally model covariance structures,
 the autoregressive residual structure must be parameterized in terms of
@@ -136,12 +136,12 @@ constraints. However, in most cases, this results in an overparameterized
 model and is unestimable. The structure is represented in this table.
 
 \tabular{llllll}{
-    \tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
-  t1 \tab \eqn{\sigma^{2}_{e1}}{s1^2} \tab \tab \tab \ldots \tab \cr
-  t2 \tab \eqn{\rho_{1}}{rho1} \tab \eqn{\sigma^{2}_{e2}}{s2^2} \tab \tab \ldots \tab \cr
-  t3 \tab \eqn{\rho_{2}}{rho2} \tab \eqn{\rho_{3}}{rho3} \tab \eqn{\sigma^{2}_{e3}}{s3^2} \tab \ldots \tab \cr
-  \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
-  tn \tab \eqn{\rho_{5}}{rho5} \tab \eqn{\rho_{6}}{rho6} \tab \eqn{\rho_{7}}{rho7} \tab \ldots \tab \eqn{\sigma^{2}_{en}}{sn^2} \cr
+\tab t1 \tab t2 \tab t3 \tab \ldots \tab tn \cr
+t1 \tab \eqn{\sigma^{2}_{e1}}{s1^2} \tab \tab \tab \ldots \tab \cr
+t2 \tab \eqn{\rho_{1}}{rho1} \tab \eqn{\sigma^{2}_{e2}}{s2^2} \tab \tab \ldots \tab \cr
+t3 \tab \eqn{\rho_{2}}{rho2} \tab \eqn{\rho_{3}}{rho3} \tab \eqn{\sigma^{2}_{e3}}{s3^2} \tab \ldots \tab \cr
+\ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \tab \ldots \cr
+tn \tab \eqn{\rho_{5}}{rho5} \tab \eqn{\rho_{6}}{rho6} \tab \eqn{\rho_{7}}{rho7} \tab \ldots \tab \eqn{\sigma^{2}_{en}}{sn^2} \cr
 }
 }
 \examples{
@@ -164,6 +164,6 @@ mplusRcov(letters[1:4], "ar", "rho", "e", FALSE)
 mplusRcov(letters[1:4], "un", "rho", "e", FALSE)
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \keyword{interface}

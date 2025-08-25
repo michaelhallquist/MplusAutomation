@@ -62,6 +62,6 @@ test_that("mplusModel exposes readModels sections", {
   file.create(mplus_fake)
   m <- mplusModel(inp_file = file.path(tmp, "ex3.1.inp"), read = TRUE, Mplus_command = mplus_fake)
   expect_true(length(m$output) > 0)
-  expect_true(is.null(m$errors))
+  expect_true(length(m$errors) == 0L)
 })
 

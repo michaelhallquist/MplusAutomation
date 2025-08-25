@@ -59,5 +59,5 @@ test <- mplusGLM(y ~ x1 + x2 + x3, data = tmpd)
 }
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }

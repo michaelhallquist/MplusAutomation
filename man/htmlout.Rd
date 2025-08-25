@@ -11,7 +11,7 @@ htmlout(url)
 }
 \value{
 A character string that is the filename where the output file was written.
-  Always a temp file in a temp directory.
+Always a temp file in a temp directory.
 }
 \description{
 This is an internal utility function to help with testing MplusAutomation.
@@ -26,6 +26,6 @@ for testing.
 MplusAutomation:::htmlout("https://statmodel.com/usersguide/chap3/ex3.1.html")
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \keyword{internal}

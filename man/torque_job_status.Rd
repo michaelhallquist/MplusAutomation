@@ -19,6 +19,6 @@ helper function to get the status of jobs on a TORQUE cluster
 }
 \details{
 Torque does not keep information about completed jobs available in qstat or qselect.
-   Thus, we need to log when a job is listed as queued, so that it 'going missing' is evidence of it being completed.
+Thus, we need to log when a job is listed as queued, so that it 'going missing' is evidence of it being completed.
 }
 \keyword{internal}

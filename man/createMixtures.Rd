@@ -28,8 +28,8 @@ the syntax and data files.}
 \item{model_overall}{Character. Mplus syntax for the overall model (across
 classes).}
 
-\item{model_class_specific}{Character vector. Mplus syntax for the 
-class-specific model(s) of one or more categorical latent variables. Each 
+\item{model_class_specific}{Character vector. Mplus syntax for the
+class-specific model(s) of one or more categorical latent variables. Each
 element of \code{model_class_specific} is used as the class-specific syntax
 of a different categorical latent variable. This allows one to easily specify
 latent transition analyses (see second example). The character string
@@ -39,7 +39,7 @@ constraints.}
 
 \item{rdata}{Data.frame. An R dataset to be used for the model.}
 
-\item{usevariables}{Character vector, specifying the names of variables in 
+\item{usevariables}{Character vector, specifying the names of variables in
 the rdata object which should be included in the Mplus data file and model.}
 
 \item{OUTPUT}{Character. Syntax for Mplus' OUTPUT option. Highly

@@ -1,4 +1,4 @@
-Version 1.2 (DEVELOPMENT)
+Version 1.2
  - notice:      MplusAutomation examples vignette updated to refer to readModels, not outmoded extract* functions
  - feature:     New pathfilter argument to readModels allows for selection of outputs to read based both on path name (pathfilter) and file name (filefilter)
  - feature:     compareModels now returns a list of comparison results including chi-square difference tests when requested

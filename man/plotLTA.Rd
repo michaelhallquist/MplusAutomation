@@ -17,13 +17,13 @@ plotLTA(
 function additionally requires the model to be a mixture model with multiple
 categorical latent variables.}
 
-\item{node_stroke}{Integer. Base stroke thickness for nodes. Set to 
+\item{node_stroke}{Integer. Base stroke thickness for nodes. Set to
 \code{NULL} to give each node the same stroke thickness.}
 
 \item{max_edge_width}{Integer. Maximum width of edges.}
 
-\item{node_labels}{Character vector, defaults to \code{"variable.class"}, 
-which labels each node by the name of the variable, and the number of the 
+\item{node_labels}{Character vector, defaults to \code{"variable.class"},
+which labels each node by the name of the variable, and the number of the
 class it represents. Set to \code{"class"} to display only class numbers, or
 provide a named character vector where the names correspond to original class
 labels, and the values correspond to their substitute values.}
@@ -41,7 +41,7 @@ An object of class 'ggplot'.
 Plots latent transition probabilities and classification probabilities for
 a single latent transition model (a model with multiple categorical latent
 variables, regressed on one another). Stroke thickness of nodes represents
-the proportion of cases most likely assigned to that class, with wider 
+the proportion of cases most likely assigned to that class, with wider
 strokes representing greater probability. Edge thickness and transparency
 represent the probability of making a particular transition (left to right),
 with thicker/darker edges representing greater probability.

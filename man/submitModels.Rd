@@ -31,7 +31,7 @@ submitModels(
 )
 }
 \arguments{
-\item{target}{a character vector where each element is a directory containing Mplus input files 
+\item{target}{a character vector where each element is a directory containing Mplus input files
 (.inp) to run OR a single .inp file to be run. Elements may be a full path, relative path,
 or a filename within the working directory.
 Defaults to the current working directory. Example: \dQuote{C:/Users/Michael/Mplus Runs}}
@@ -57,25 +57,25 @@ or where one wants to test different versions of the Mplus program.}
 \item{quiet}{optional. If \code{FALSE}, show status messages in the console.}
 
 \item{scheduler}{Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', 'local', or 'sh'.
-The terms `'qsub'` and `'torque'` are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
-and 'slurm'. If `'local'` or  `'sh'` are specified, `submitModels` does not submit to any scheduler at all, 
+The terms \code{'qsub'} and \code{'torque'} are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
+and 'slurm'. If \code{'local'} or  \code{'sh'} are specified, \code{submitModels} does not submit to any scheduler at all,
 but instead executes the command locally via a shell script.}
 
 \item{sched_args}{A character vector of arguments to be included in the scheduling command. On TORQUE, these
 will typically begin with '-l' such as '-l wall_time=10:00:00'. These are added inside the submission script
-for each model and are shared across all models. To add model-specific arguments, include `! #SBATCH` or
-`! #PBS` lines inside the individual .inp files}
+for each model and are shared across all models. To add model-specific arguments, include \verb{! #SBATCH} or
+\verb{! #PBS} lines inside the individual .inp files}
 
 \item{env_variables}{A named character vector containing environment variables and their values to be passed
-to the \code{script} at execution time. This is handled by the `-v` directive on TORQUE clusters and
-by `--export` on Slurm clusters. The names of this vector are the environment variable names and
+to the \code{script} at execution time. This is handled by the \code{-v} directive on TORQUE clusters and
+by \code{--export} on Slurm clusters. The names of this vector are the environment variable names and
 the values of the vector are the environment variable values to be passed in.
 If you want to propagate the current value of an environment variable to the compute node at runtime,
 use NA as the value of the element in \code{env_variables}. See examples.}
 
 \item{export_all}{Whether to export all environment variables to the compute node at runtime. Default: FALSE}
 
-\item{cores_per_model}{How many cpus/cores are requested for each model (can be overriden using `! BATCH` directives in .inp files).
+\item{cores_per_model}{How many cpus/cores are requested for each model (can be overriden using \code{! BATCH} directives in .inp files).
 Default: 1.}
 
 \item{memgb_per_model}{amount of memory (RAM) requested for each model (in GB). Default: 8.}
@@ -105,16 +105,16 @@ a number is provided, we will treat this as the number of minutes.}
 submission fails. Defaults to TRUE.}
 }
 \value{
-A data.frame recording details of the jobs submitted by `submitModels`. This can be passed to the `summary` function
-  or to `checkSubmission` to see the state of submitted jobs.
+A data.frame recording details of the jobs submitted by \code{submitModels}. This can be passed to the \code{summary} function
+or to \code{checkSubmission} to see the state of submitted jobs.
 }
 \description{
 This function submits a group of Mplus models (.inp files) located within a
 single directory or nested within subdirectories.
 }
 \details{
-Note that if `fail_on_error` is `TRUE` and submission of one model fails, the submission loop will stop, rather than 
-  submitting further models.
+Note that if \code{fail_on_error} is \code{TRUE} and submission of one model fails, the submission loop will stop, rather than
+submitting further models.
 }
 \examples{
 \dontrun{

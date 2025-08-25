@@ -19,7 +19,7 @@ The unstandardized estimates all begin with "Parameter" in the Mplus gh5 output.
 }
 \value{
 No value is returned by this function.
-  Called for the side effect of displaying an MCMC chains traceplot.
+Called for the side effect of displaying an MCMC chains traceplot.
 }
 \description{
 Displays a traceplot of the MCMC draws from the poster distribution of each parameter estimate for a Bayesian Mplus model.
@@ -33,8 +33,8 @@ in the model.
 }
 \note{
 Trace and density plots can also be obtained using the coda package and the bparameters
-  element of the mplus.model object. This requires that the posterior draws
-  be saved using SAVEDATA: BPARAMETERS syntax. See example below.
+element of the mplus.model object. This requires that the posterior draws
+be saved using SAVEDATA: BPARAMETERS syntax. See example below.
 }
 \examples{
 \dontrun{
