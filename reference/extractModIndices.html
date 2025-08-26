@@ -85,34 +85,34 @@ details about regular expression syntax.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>If <code>target</code> is a single file, a data.frame
-  containing modification results for the target output file will be
-  returned. If <code>target</code> is a directory, a list will be returned,
-  where each element contains a data.frame of the modification indices
-  for a single file, and the top-level elements are named after the
-  corresponding output file name. The basic <code>data.frame</code> containing
-  the MODEL MODIFICATION INDICES section of <code>outfile</code>. Variables include</p>
+containing modification results for the target output file will be
+returned. If <code>target</code> is a directory, a list will be returned,
+where each element contains a data.frame of the modification indices
+for a single file, and the top-level elements are named after the
+corresponding output file name. The basic <code>data.frame</code> containing
+the MODEL MODIFICATION INDICES section of <code>outfile</code>. Variables include</p>
 <dl><dt>modV1</dt>
 <dd><p>The first variable in the pair to be freed according to the M.I.</p></dd>
 
-  <dt>operator</dt>
+<dt>operator</dt>
 <dd><p>The suggested relationship between <code>modV1</code> and <code>modV2</code>
-    (e.g., WITH for freeing the covariance between <code>modV1</code> and <code>modV2</code>)</p></dd>
+(e.g., WITH for freeing the covariance between <code>modV1</code> and <code>modV2</code>)</p></dd>
 
-  <dt>modV2</dt>
+<dt>modV2</dt>
 <dd><p>The first variable in the pair to be freed according to the M.I.</p></dd>
 
-  <dt>MI</dt>
+<dt>MI</dt>
 <dd><p>The decrease in model chi-square if the specified relationship is freely estimated</p></dd>
 
-  <dt>EPC</dt>
+<dt>EPC</dt>
 <dd><p>The expected parameter estimate between <code>modV1</code> and <code>modV2</code> if freed.</p></dd>
 
-  <dt>Std_EPC</dt>
+<dt>Std_EPC</dt>
 <dd><p>The EPC value standardized using the variances of the continuous latent variables.</p></dd>
 
-  <dt>StdYX_EPC</dt>
+<dt>StdYX_EPC</dt>
 <dd><p>The EPC value standardized using the variances of the continuous latent
-    variables as well as the variances of the background and/or outcome variables.</p></dd>
+variables as well as the variances of the background and/or outcome variables.</p></dd>
 
 </dl></div>
     <div class="section level2">

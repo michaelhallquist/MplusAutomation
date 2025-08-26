@@ -108,7 +108,7 @@ where the est/se = 999.000, per Mplus convention). Default to <code>FALSE</code>
 
 <dt id="arg-showns">showNS<a class="anchor" aria-label="anchor" href="#arg-showns"></a></dt>
 <dd><p>Whether to display non-significant parameter estimates. Can be
-  <code>TRUE</code> or <code>FALSE</code>, or a numeric value (e.g., .10) that defines
+<code>TRUE</code> or <code>FALSE</code>, or a numeric value (e.g., .10) that defines
 what p-value is filtered as non-significant.</p></dd>
 
 
@@ -121,65 +121,67 @@ Use DIFFTEST in Mplus instead.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list containing the results of the comparison. Elements include
-  <code>summaries</code> with selected summary statistics for both models,
-  <code>parameters</code> listing equal and differing parameters as well as those
-  unique to each model, and, when <code>diffTest = TRUE</code>, a <code>diffTest</code>
-  element with the chi-square difference test.</p>
+<code>summaries</code> with selected summary statistics for both models,
+<code>parameters</code> listing equal and differing parameters as well as those
+unique to each model, and, when <code>diffTest = TRUE</code>, a <code>diffTest</code>
+element with the chi-square difference test.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Model outputs to be compared should come from the <code>readModels</code> command.</p>
 <p>The <code>show</code> parameter can be one or more of the following, which can be passed as a vector, such as c("equal", "pdiff").</p>
 <dl><dt>show</dt>
-<dd><p></p><dl><dt>"all"</dt>
+<dd>
+<dl><dt>"all"</dt>
 <dd><p>Display all available model comparison. Equivalent to
-        c("summaries", "equal", "diff", "pdiff", "unique").</p></dd>
+c("summaries", "equal", "diff", "pdiff", "unique").</p></dd>
 
-      <dt>"summaries"</dt>
+<dt>"summaries"</dt>
 <dd><p>Print a comparison of model summary statistics. Compares the following summary
-        statistics (where available): c("Title", "Observations", "Estimator", "Parameters", "LL",
-        "AIC", "BIC", "ChiSqM_Value", "ChiSqM_DF", "CFI", "TLI", "RMSEA", "SRMR", "WRMR")</p></dd>
+statistics (where available): c("Title", "Observations", "Estimator", "Parameters", "LL",
+"AIC", "BIC", "ChiSqM_Value", "ChiSqM_DF", "CFI", "TLI", "RMSEA", "SRMR", "WRMR")</p></dd>
 
-	 <dt>"allsummaries"</dt>
+<dt>"allsummaries"</dt>
 <dd><p>Prints a comparison of all summary statistics available in each model. May
-        generate a lot of output.</p></dd>
+generate a lot of output.</p></dd>
 
-      <dt>"equal"</dt>
+<dt>"equal"</dt>
 <dd><p>Print parameter estimates that are equal between models
-        (i.e., <code>&lt;= equalityMargin["param"]</code>)</p></dd>
+(i.e., <code>&lt;= equalityMargin["param"]</code>)</p></dd>
 .
-      <dt>"diff"</dt>
+<dt>"diff"</dt>
 <dd><p>Print parameter estimates that are different between models
-        (i.e., <code>&gt; equalityMargin["param"]</code>)</p></dd>
+(i.e., <code>&gt; equalityMargin["param"]</code>)</p></dd>
 .
-      <dt>"pdiff"</dt>
+<dt>"pdiff"</dt>
 <dd><p>Print parameter estimates where the p-values differ between models
-        (i.e., <code>&gt; equalityMargin["pvalue"]</code>)</p></dd>
+(i.e., <code>&gt; equalityMargin["pvalue"]</code>)</p></dd>
 .
-      <dt>"unique"</dt>
+<dt>"unique"</dt>
 <dd><p>Print parameter estimates that are unique to each model.</p></dd>
 
 
-</dl><p></p></dd>
+</dl></dd>
 
 
 </dl><p>The <code>sort</code> parameter determines the order in which parameter estimates are displayed. The following options are available:</p>
 <dl><dt>sort</dt>
-<dd><p></p><dl><dt>"none"</dt>
+<dd>
+<dl><dt>"none"</dt>
 <dd><p>No sorting is performed, so parameters are output in the order presented in Mplus. (Default)</p></dd>
 
-      <dt>"type"</dt>
+<dt>"type"</dt>
 <dd><p>Sort parameters by their role in the model. This groups output by regression coefficient (ON),
-        factor loadings (BY), covariances (WITH), and so on. Within each type, output is alphabetical.</p></dd>
+factor loadings (BY), covariances (WITH), and so on. Within each type, output is alphabetical.</p></dd>
 
-      <dt>"alphabetical"</dt>
+<dt>"alphabetical"</dt>
 <dd><p>Sort parameters in alphabetical order.</p></dd>
 
-      <dt>"maxDiff"</dt>
+<dt>"maxDiff"</dt>
 <dd><p>Sort parameter output by the largest differences between models (high to low).</p></dd>
 
 
-</dl><p></p></dd>
+</dl></dd>
 
 
 </dl></div>

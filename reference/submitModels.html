@@ -116,22 +116,22 @@ or where one wants to test different versions of the Mplus program.</p></dd>
 
 <dt id="arg-scheduler">scheduler<a class="anchor" aria-label="anchor" href="#arg-scheduler"></a></dt>
 <dd><p>Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', 'local', or 'sh'.
-The terms `'qsub'` and `'torque'` are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
-and 'slurm'. If `'local'` or  `'sh'` are specified, `submitModels` does not submit to any scheduler at all,
+The terms <code>'qsub'</code> and <code>'torque'</code> are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
+and 'slurm'. If <code>'local'</code> or  <code>'sh'</code> are specified, <code>submitModels</code> does not submit to any scheduler at all,
 but instead executes the command locally via a shell script.</p></dd>
 
 
 <dt id="arg-sched-args">sched_args<a class="anchor" aria-label="anchor" href="#arg-sched-args"></a></dt>
 <dd><p>A character vector of arguments to be included in the scheduling command. On TORQUE, these
 will typically begin with '-l' such as '-l wall_time=10:00:00'. These are added inside the submission script
-for each model and are shared across all models. To add model-specific arguments, include `! #SBATCH` or
-`! #PBS` lines inside the individual .inp files</p></dd>
+for each model and are shared across all models. To add model-specific arguments, include <code>! #SBATCH</code> or
+<code>! #PBS</code> lines inside the individual .inp files</p></dd>
 
 
 <dt id="arg-env-variables">env_variables<a class="anchor" aria-label="anchor" href="#arg-env-variables"></a></dt>
 <dd><p>A named character vector containing environment variables and their values to be passed
-to the <code>script</code> at execution time. This is handled by the `-v` directive on TORQUE clusters and
-by `–export` on Slurm clusters. The names of this vector are the environment variable names and
+to the <code>script</code> at execution time. This is handled by the <code>-v</code> directive on TORQUE clusters and
+by <code>--export</code> on Slurm clusters. The names of this vector are the environment variable names and
 the values of the vector are the environment variable values to be passed in.
 If you want to propagate the current value of an environment variable to the compute node at runtime,
 use NA as the value of the element in <code>env_variables</code>. See examples.</p></dd>
@@ -142,7 +142,7 @@ use NA as the value of the element in <code>env_variables</code>. See examples.<
 
 
 <dt id="arg-cores-per-model">cores_per_model<a class="anchor" aria-label="anchor" href="#arg-cores-per-model"></a></dt>
-<dd><p>How many cpus/cores are requested for each model (can be overriden using `! BATCH` directives in .inp files).
+<dd><p>How many cpus/cores are requested for each model (can be overriden using <code>! BATCH</code> directives in .inp files).
 Default: 1.</p></dd>
 
 
@@ -198,13 +198,13 @@ submission fails. Defaults to TRUE.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data.frame recording details of the jobs submitted by `submitModels`. This can be passed to the `summary` function
-  or to `checkSubmission` to see the state of submitted jobs.</p>
+    <p>A data.frame recording details of the jobs submitted by <code>submitModels</code>. This can be passed to the <code>summary</code> function
+or to <code>checkSubmission</code> to see the state of submitted jobs.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Note that if `fail_on_error` is `TRUE` and submission of one model fails, the submission loop will stop, rather than
-  submitting further models.</p>
+    <p>Note that if <code>fail_on_error</code> is <code>TRUE</code> and submission of one model fails, the submission loop will stop, rather than
+submitting further models.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

@@ -109,89 +109,89 @@ a single mplus.model object, not a list of files. Specific elements are:</p>
 <dl><dt>input</dt>
 <dd><p>Mplus input syntax parsed into a list by major section</p></dd>
 
-  <dt>warnings</dt>
+<dt>warnings</dt>
 <dd><p>Syntax and estimation warnings as a list</p></dd>
 
-  <dt>errors</dt>
+<dt>errors</dt>
 <dd><p>Syntax and estimation errors as a list</p></dd>
 
-  <dt>data_summary</dt>
+<dt>data_summary</dt>
 <dd><p>Output of SUMMARY OF DATA section, including cluster sizes and ICCs</p></dd>
 
-  <dt>sampstat</dt>
+<dt>sampstat</dt>
 <dd><p>Sample statistics provided by OUTPUT: SAMPSTAT, if specified</p></dd>
 
-  <dt>covariance_coverage</dt>
+<dt>covariance_coverage</dt>
 <dd><p>Covariance coverage matrix for checking missingness patterns</p></dd>
 
-  <dt>summaries</dt>
+<dt>summaries</dt>
 <dd><p>Summary statistics from <code>extractModelSummaries</code>, having structure as specified by that function</p></dd>
 
-  <dt>parameters</dt>
+<dt>parameters</dt>
 <dd><p>Model parameters from <code>extractModelParameters</code>, having structure as specified by that function</p></dd>
 
-  <dt>class_counts</dt>
+<dt>class_counts</dt>
 <dd><p>Latent class counts and proportions for models that include a categorical latent variable</p></dd>
 
-  <dt>indirect</dt>
+<dt>indirect</dt>
 <dd><p>Output of MODEL INDIRECT if available in output. Contains <code>$overall</code> and <code>$specific</code> data.frames for each indirect effect section</p></dd>
 
-  <dt>mod_indices</dt>
+<dt>mod_indices</dt>
 <dd><p>Model modification indices from <code>extractModIndices</code>, having structure as specified by that function</p></dd>
 
-  <dt>residuals</dt>
+<dt>residuals</dt>
 <dd><p>a list containing relevant information from OUTPUT: RESIDUALS</p></dd>
 
-  <dt>savedata_info</dt>
+<dt>savedata_info</dt>
 <dd><p>File information about SAVEDATA files related to this output</p></dd>
 
-  <dt>savedata</dt>
+<dt>savedata</dt>
 <dd><p>SAVEDATA file as an R <code>data.frame</code>, as described in <code>getSavedata_Data</code></p></dd>
 
-  <dt>bparameters</dt>
+<dt>bparameters</dt>
 <dd><p>an <code>mcmc.list</code> object containing the draws from the MCMC chains for a Bayesian model that uses the
-  	SAVEDATA: BPARAMETERS command</p></dd>
+SAVEDATA: BPARAMETERS command</p></dd>
 
-  <dt>tech1</dt>
+<dt>tech1</dt>
 <dd><p>a list containing parameter specification and starting values from OUTPUT: TECH1</p></dd>
 
-  <dt>tech3</dt>
+<dt>tech3</dt>
 <dd><p>a list containing parameter covariance and correlation matrices from OUTPUT: TECH3</p></dd>
 
-  <dt>tech4</dt>
+<dt>tech4</dt>
 <dd><p>a list containing means, covariances, and correlations for latent variables from OUTPUT: TECH4</p></dd>
 
-  <dt>tech7</dt>
+<dt>tech7</dt>
 <dd><p>a list containing sample statistics for each latent class from OUTPUT: TECH7</p></dd>
 
-  <dt>tech8</dt>
+<dt>tech8</dt>
 <dd><p>a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8</p></dd>
 
-  <dt>tech9</dt>
+<dt>tech9</dt>
 <dd><p>a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9</p></dd>
 
-  <dt>tech10</dt>
+<dt>tech10</dt>
 <dd><p>a list containing model fit information from OUTPUT: TECH10</p></dd>
 
-  <dt>tech12</dt>
+<dt>tech12</dt>
 <dd><p>a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12</p></dd>
 
-  <dt>fac_score_stats</dt>
+<dt>fac_score_stats</dt>
 <dd><p>factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section</p></dd>
 
-  <dt>lcCondMeans</dt>
+<dt>lcCondMeans</dt>
 <dd><p>conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models</p></dd>
 
-  <dt>r3step</dt>
+<dt>r3step</dt>
 <dd><p>predictors of latent class membership using the 3-step procedure (R3STEP)</p></dd>
 
-  <dt>gh5</dt>
+<dt>gh5</dt>
 <dd><p>a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)</p></dd>
 
-  <dt>h5results</dt>
+<dt>h5results</dt>
 <dd><p>a list containing data from h5results file produced by Mplus v8.11+. (Requires rhdf5 package)</p></dd>
 
-  <dt>output</dt>
+<dt>output</dt>
 <dd><p>The entire, raw output file.</p></dd>
 
 </dl></div>
@@ -201,10 +201,10 @@ a single mplus.model object, not a list of files. Specific elements are:</p>
 reduced set of output sections (especially to speed up the function when reading many files), specify the sections
 as a character vector from the following options:</p>
 <p>c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-     "parameters", "class_counts", "indirect", "mod_indices", "residuals",
-     "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-     "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
-     "output")</p>
+"parameters", "class_counts", "indirect", "mod_indices", "residuals",
+"savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
+"tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
+"output")</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
