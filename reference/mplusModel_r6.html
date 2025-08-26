@@ -343,7 +343,9 @@ file is more recent than the output file modified date (implying there have been
 
 </div><p></p><hr><a id="method-mplusModel_r6-run"></a><div class="section">
 <h3 id="method-run-">Method <code>run()</code><a class="anchor" aria-label="anchor" href="#method-run-"></a></h3>
-<p>run this model locally using <code>runModels</code></p><div class="section">
+<p>run this model locally using <code>runModels</code>. The method detects
+changes in the data and input syntax and only rewrites the corresponding
+files when updates are detected.</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">mplusModel_r6</span><span class="op">$</span><span class="fu">run</span><span class="op">(</span>replaceOutfile <span class="op">=</span> <span class="st">"modifiedDate"</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>

@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   submitModels: submitModels.html
   vignette: vignette.html
-last_built: 2025-08-26T01:12Z
+last_built: 2025-08-26T01:52Z
 urls:
   reference: https://michaelhallquist.github.io/MplusAutomation/reference
   article: https://michaelhallquist.github.io/MplusAutomation/articles
