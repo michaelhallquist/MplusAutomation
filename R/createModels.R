@@ -147,11 +147,9 @@ getInitTags <- function(initCollection) {
 #' @param initCollection The initial collection
 #' @return A list with three elements, where each list represents the location,
 #' start character, end character, tag type, etc. of each tag.
-#' \describe{
-#'   \item{initTags}{initMatches}
-#'   \item{bodyTags}{bodyMatches}
-#'   \item{bodyText}{bodySection}
-#' }
+#' * `initTags`: initMatches
+#' * `bodyTags`: bodyMatches
+#' * `bodyText`: bodySection
 #' @keywords internal
 parseTags <- function(bodySection, initCollection) {
   #first handle init tags

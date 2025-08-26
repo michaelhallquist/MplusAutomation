@@ -153,27 +153,27 @@ detectVariables <- function(object, quiet = TRUE) {
 #' @param ... Arguments passed on to \code{\link{mplusModeler}} if
 #' \code{run > 0}.
 #' @return A list of class \code{mplusObject} with elements
-#' \item{TITLE}{The title in Mplus (if defined)}
-#' \item{DATA}{The data section in Mplus (if defined)}
-#' \item{VARIABLE}{The variable section in Mplus (if defined)}
-#' \item{DEFINE}{The define section in Mplus (if defined)}
-#' \item{MONTECARLO}{The montecarlo section in Mplus (if defined)}
-#' \item{MODELPOPULATION}{The modelpopulation section in Mplus (if defined)}
-#' \item{MODELMISSING}{The modelmissing section in Mplus (if defined)}
-#' \item{ANALYSIS}{The analysis section in Mplus (if defined)}
-#' \item{MODEL}{The model section in Mplus (if defined)}
-#' \item{MODELINDIRECT}{The modelindirect section in Mplus (if defined)}
-#' \item{MODELCONSTRAINT}{The modelconstraint section in Mplus (if defined)}
-#' \item{MODELTEST}{The modeltest section in Mplus (if defined)}
-#' \item{MODELPRIORS}{The modelpriors section in Mplus (if defined)}
-#' \item{OUTPUT}{The output section in Mplus (if defined)}
-#' \item{SAVEDATA}{The savedata section in Mplus (if defined)}
-#' \item{PLOT}{The plot section in Mplus (if defined)}
-#' \item{results}{NULL by default, but can be later updated to include the results from the model run.}
-#' \item{usevariables}{A character vector of the variables from the \code{R} data set to be used.}
-#' \item{rdata}{The \code{R} data set to use for the model.}
-#' \item{imputed}{A logical whether the data are multiply imputed.}
-#' \item{autov}{A logical whether the data should have the usevariables detected automatically or not}
+#' * `TITLE`: The title in Mplus (if defined)
+#' * `DATA`: The data section in Mplus (if defined)
+#' * `VARIABLE`: The variable section in Mplus (if defined)
+#' * `DEFINE`: The define section in Mplus (if defined)
+#' * `MONTECARLO`: The montecarlo section in Mplus (if defined)
+#' * `MODELPOPULATION`: The modelpopulation section in Mplus (if defined)
+#' * `MODELMISSING`: The modelmissing section in Mplus (if defined)
+#' * `ANALYSIS`: The analysis section in Mplus (if defined)
+#' * `MODEL`: The model section in Mplus (if defined)
+#' * `MODELINDIRECT`: The modelindirect section in Mplus (if defined)
+#' * `MODELCONSTRAINT`: The modelconstraint section in Mplus (if defined)
+#' * `MODELTEST`: The modeltest section in Mplus (if defined)
+#' * `MODELPRIORS`: The modelpriors section in Mplus (if defined)
+#' * `OUTPUT`: The output section in Mplus (if defined)
+#' * `SAVEDATA`: The savedata section in Mplus (if defined)
+#' * `PLOT`: The plot section in Mplus (if defined)
+#' * `results`: NULL by default, but can be later updated to include the results from the model run.
+#' * `usevariables`: A character vector of the variables from the \code{R} data set to be used.
+#' * `rdata`: The \code{R} data set to use for the model.
+#' * `imputed`: A logical whether the data are multiply imputed.
+#' * `autov`: A logical whether the data should have the usevariables detected automatically or not
 #'
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
 #' @export
@@ -1020,12 +1020,10 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
 #'   at the time of writing, Mplus does not allow more than 80 characters per row.
 #'   Defaults to \code{FALSE}.
 #' @return A named character vector of class \sQuote{MplusRstructure} with four elements:
-#'   \item{all}{A character string collapsing all other sections.}
-#'   \item{Variances}{A character string containing all of the variances.}
-#'   \item{Covariances}{A character string containing all of the
-#'     covariances, properly labelled to allow constraints and the
-#'     autoregressive residual covariance structure.}
-#'   \item{Constraints}{A character string containing the \sQuote{MODEL CONSTRAINT}
+#' * `all`: A character string collapsing all other sections.
+#' * `Variances`: A character string containing all of the variances.
+#' * `Covariances`: A character string containing all of the covariances, properly labelled to allow constraints and the autoregressive residual covariance structure.
+#' * `Constraints`: A character string containing the \sQuote{MODEL CONSTRAINT
 #'     section and code needed to parameterize the residual covariance structure
 #'     as autoregressive.}
 #' @keywords interface
