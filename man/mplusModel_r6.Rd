@@ -9,10 +9,6 @@ An R6 class for a single Mplus model
 \details{
 Wrapped by \code{mplusModel}
 }
-\section{Active bindings (from \code{readModels()})}{
-
-}
-
 \keyword{internal}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -211,8 +207,8 @@ submit this model for estimation on an HPC using \code{submitModels}
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{replaceOutfile}}{Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists;
-“never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
+\item{\code{replaceOutfile}}{Currently supports three settings: "always", which runs all models, regardless of whether an output file for the model exists;
+"never", which does not run any model that has an existing output file; and "modifiedDate", which only runs a model if the modified date for the input
 file is more recent than the output file modified date (implying there have been updates to the model).}
 
 \item{\code{...}}{additional arguments passed to \code{submitModels}}
@@ -232,8 +228,8 @@ run this model locally using \code{runModels}
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{replaceOutfile}}{Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists;
-“never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
+\item{\code{replaceOutfile}}{Currently supports three settings: "always", which runs all models, regardless of whether an output file for the model exists;
+"never", which does not run any model that has an existing output file; and "modifiedDate", which only runs a model if the modified date for the input
 file is more recent than the output file modified date (implying there have been updates to the model).}
 
 \item{\code{...}}{additional arguments passed to \code{runModels}}

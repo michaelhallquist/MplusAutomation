@@ -23,15 +23,14 @@ plotMixtures(
 (included in the Mplus output) to be plotted.}
 
 \item{coefficients}{Which type of coefficients to plot on the y-axis; default
-is 'unstandardized'. Options include: c('stdyx.standardized',
-'stdy.standardized', 'std.standardized')}
+is 'unstandardized'. Options include: \code{c('stdyx.standardized', 'stdy.standardized', 'std.standardized')}}
 
 \item{parameter}{Which parameter to plot (from Mplus parameter estimate
 headings included in the output).
-Defaults to c('Means', 'Intercepts').}
+Defaults to \code{c('Means', 'Intercepts')}.}
 
 \item{ci}{What confidence interval should the errorbars span? Defaults to
-a 95\\% confidence interval. Set to NULL to remove errorbars.}
+a 95\% confidence interval. Set to NULL to remove errorbars.}
 
 \item{bw}{Logical. Should the plot be black and white (for print), or color?}
 

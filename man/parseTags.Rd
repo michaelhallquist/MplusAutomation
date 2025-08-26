@@ -14,10 +14,10 @@ parseTags(bodySection, initCollection)
 \value{
 A list with three elements, where each list represents the location,
 start character, end character, tag type, etc. of each tag.
-\describe{
-\item{initTags}{initMatches}
-\item{bodyTags}{bodyMatches}
-\item{bodyText}{bodySection}
+\itemize{
+\item \code{initTags}: initMatches
+\item \code{bodyTags}: bodyMatches
+\item \code{bodyText}: bodySection
 }
 }
 \description{

@@ -10,6 +10,7 @@
 
 test_that("createmixtures works", {
   skip_on_cran()
+  skip_if_not(mplusAvailable())
   expect_error({
     out <- createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
     suppressWarnings(print(out))

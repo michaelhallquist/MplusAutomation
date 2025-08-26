@@ -62,41 +62,36 @@ estimators, where DIFFTEST in Mplus is needed).
 \details{
 Model outputs to be compared should come from the \code{readModels} command.
 
-The \code{show} parameter can be one or more of the following, which can be passed as a vector, such as c("equal", "pdiff").
-
-\describe{
-\item{show}{
-\describe{
-\item{"all"}{Display all available model comparison. Equivalent to
-c("summaries", "equal", "diff", "pdiff", "unique").}
-\item{"summaries"}{Print a comparison of model summary statistics. Compares the following summary
-statistics (where available): c("Title", "Observations", "Estimator", "Parameters", "LL",
-"AIC", "BIC", "ChiSqM_Value", "ChiSqM_DF", "CFI", "TLI", "RMSEA", "SRMR", "WRMR")}
-\item{"allsummaries"}{Prints a comparison of all summary statistics available in each model. May
-generate a lot of output.}
-\item{"equal"}{Print parameter estimates that are equal between models
-(i.e., \code{<= equalityMargin["param"]})}.
-\item{"diff"}{Print parameter estimates that are different between models
-(i.e., \code{> equalityMargin["param"]})}.
-\item{"pdiff"}{Print parameter estimates where the p-values differ between models
-(i.e., \code{> equalityMargin["pvalue"]})}.
-\item{"unique"}{Print parameter estimates that are unique to each model.}
-}
-}
+The \code{show} parameter can be one or more of the following, which can be
+passed as a vector, such as c("equal", "pdiff").
+\itemize{
+\item \code{"all"}: Display all available model comparison. Equivalent to
+\code{c("summaries", "equal", "diff", "pdiff", "unique")}.
+\item \code{"summaries"}: Print a comparison of model summary statistics. Compares
+the following summary statistics (where available):
+\code{c("Title", "Observations", "Estimator", "Parameters", "LL", "AIC", "BIC", "ChiSqM_Value", "ChiSqM_DF", "CFI", "TLI", "RMSEA", "SRMR", "WRMR")}.
+\item \code{"allsummaries"}: Print a comparison of all summary statistics available
+in each model. May generate a lot of output.
+\item \code{"equal"}: Print parameter estimates that are equal between models
+(i.e., \verb{<= equalityMargin["param"]}).
+\item \code{"diff"}: Print parameter estimates that are different between models
+(i.e., \verb{> equalityMargin["param"]}).
+\item \code{"pdiff"}: Print parameter estimates where the p-values differ between
+models (i.e., \verb{> equalityMargin["pvalue"]}).
+\item \code{"unique"}: Print parameter estimates that are unique to each model.
 }
 
-The \code{sort} parameter determines the order in which parameter estimates are displayed. The following options are available:
-
-\describe{
-\item{sort}{
-\describe{
-\item{"none"}{No sorting is performed, so parameters are output in the order presented in Mplus. (Default)}
-\item{"type"}{Sort parameters by their role in the model. This groups output by regression coefficient (ON),
-factor loadings (BY), covariances (WITH), and so on. Within each type, output is alphabetical.}
-\item{"alphabetical"}{Sort parameters in alphabetical order.}
-\item{"maxDiff"}{Sort parameter output by the largest differences between models (high to low).}
-}
-}
+The \code{sort} parameter determines the order in which parameter estimates
+are displayed. The following options are available:
+\itemize{
+\item \code{"none"}: No sorting is performed, so parameters are output in the order
+presented in Mplus. (Default)
+\item \code{"type"}: Sort parameters by their role in the model. This groups output
+by regression coefficient (ON), factor loadings (BY), covariances (WITH),
+and so on. Within each type, output is alphabetical.
+\item \code{"alphabetical"}: Sort parameters in alphabetical order.
+\item \code{"maxDiff"}: Sort parameter output by the largest differences between
+models (high to low).
 }
 }
 \examples{

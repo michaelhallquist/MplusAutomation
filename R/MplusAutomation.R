@@ -52,7 +52,7 @@
 #' Package: \tab MplusAutomation\cr
 #' Type: \tab Package\cr
 #' Version: \tab 1.2\cr
-#' Date: \tab 2024-05-16\cr
+#' Date: \tab 2025-08-25\cr
 #' License: \tab LGPL-3\cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -70,8 +70,8 @@
 NULL
 
 
-# Handle NSE data.table usage inside submitModels functions
-if (getRversion() >= "2.15.1") utils::globalVariables(c("cnum", "V1", "sched"))
+# Handle NSE data.table usage inside submitModels functions, private in mplusModel R6
+if (getRversion() >= "2.15.1") utils::globalVariables(c("cnum", "V1", "sched", "private"))
 
 # display version number and citation when the package is loaded
 .onAttach <- function(libname, pkgname) {

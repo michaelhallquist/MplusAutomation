@@ -13,14 +13,14 @@ and tabulating model parameters and fit statistics.
 }
 \details{
 The MplusAutomation package has four primary purposes:
-\enumerate{
+\itemize{
 \item To automatically run groups/batches of models.
 \item To provide routines to extract model fit statistics, parameter estimates, and raw data from 'Mplus' output files.
 \item To facilitate comparisons among models
 \item To provide a template language that allows for the creation of related input files.
-}
 The core routine for running batches of models is \code{\link{runModels}}, with
 an easy-to-use GUI wrapper, \code{\link{runModels_Interactive}}.
+}
 
 The core routine for extracting information from 'Mplus' outputs is \code{\link{readModels}}, which
 returns a list containing all output sections that the package can extract.
@@ -57,7 +57,7 @@ data.frame to a tab-delimited file and provides an 'Mplus' syntax stub for varia
 Package: \tab MplusAutomation\cr
 Type: \tab Package\cr
 Version: \tab 1.2\cr
-Date: \tab 2024-05-16\cr
+Date: \tab 2025-08-25\cr
 License: \tab LGPL-3\cr
 LazyLoad: \tab yes\cr
 }
