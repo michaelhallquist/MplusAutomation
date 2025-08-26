@@ -40,7 +40,7 @@ coefficient names for LaTeX.  Defaults to \code{FALSE}.}
 }
 \value{
 A \code{texreg} object, or for multiple group models,
-  a list of \code{texreg} objects.
+a list of \code{texreg} objects.
 }
 \description{
 This is a method for extracting output in a format
@@ -94,7 +94,7 @@ Other Mplus-Formatting:
 \code{\link{summary.mplusObject}()}
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \concept{Mplus-Formatting}
 \keyword{interface}

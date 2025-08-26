@@ -69,13 +69,13 @@ Passed on to control behavior of \code{\link{runModels}}. Defaults to \code{TRUE
 }
 \value{
 An Mplus model object, with results.
-  If \code{run = 1}, returns an invisible list of results from the run of
-  the Mplus model (see \code{\link[MplusAutomation]{readModels}} from the
-  MplusAutomation package). If \code{run = 0}, the function returns a list
-  with two elements, \sQuote{model} and \sQuote{boot} that are both \code{NULL}.
-  if \code{run >= 1},returns a list with two elements, \sQuote{model} and \sQuote{boot}
-  containing the regular Mplus model output and the boot object, respectively.
-  In all cases, the Mplus data file and input files are created.
+If \code{run = 1}, returns an invisible list of results from the run of
+the Mplus model (see \code{\link[MplusAutomation]{readModels}} from the
+MplusAutomation package). If \code{run = 0}, the function returns a list
+with two elements, \sQuote{model} and \sQuote{boot} that are both \code{NULL}.
+if \code{run >= 1},returns a list with two elements, \sQuote{model} and \sQuote{boot}
+containing the regular Mplus model output and the boot object, respectively.
+In all cases, the Mplus data file and input files are created.
 }
 \description{
 This is a convenience wrapper to automate many of the
@@ -337,5 +337,5 @@ testimp2 <- mplusModeler(
 \code{\link{runModels}} and \code{\link{readModels}}
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }

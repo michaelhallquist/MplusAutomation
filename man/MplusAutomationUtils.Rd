@@ -38,7 +38,7 @@ in which case the hash is added to the user specified filename}
 A list of the data and the md5 hash.
 
 A list of the filename (plus hash) and a logical value
-  whether a filename with the hash already existed or not.
+whether a filename with the hash already existed or not.
 }
 \description{
 Internal utility function, primarily for \code{prepareMplusData}.

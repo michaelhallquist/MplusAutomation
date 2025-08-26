@@ -11,8 +11,8 @@
 }
 \value{
 An error if it cannot be converted or
-  a matrix or data frame with all variables converted to
-  numeric or integer classes
+a matrix or data frame with all variables converted to
+numeric or integer classes
 }
 \description{
 Primarily an internal utility function, for \code{prepareMplusData}.

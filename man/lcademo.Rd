@@ -7,17 +7,17 @@
 \format{
 A list containing 11 elements.
 \describe{
-  \item{Data}{2 Class LCA data simulated using Mplus}
-  \item{CFA}{Mplus output file for CFA}
-  \item{LCA2}{Mplus output file for 2 class LCA}
-  \item{LCA3}{Mplus output file for 3 class LCA}
-  \item{LCA4}{Mplus output file for 4 class LCA}
-  \item{LCA5}{Mplus output file for 5 class LCA}
-  \item{CFAGH5}{GH5 file for CFA}
-  \item{LCA2GH5}{GH5 file for 2 class LCA}
-  \item{LCA3GH5}{GH5 file for 3 class LCA}
-  \item{LCA4GH5}{GH5 file for 4 class LCA}
-  \item{LCA5GH5}{GH5 file for 5 class LCA}
+\item{Data}{2 Class LCA data simulated using Mplus}
+\item{CFA}{Mplus output file for CFA}
+\item{LCA2}{Mplus output file for 2 class LCA}
+\item{LCA3}{Mplus output file for 3 class LCA}
+\item{LCA4}{Mplus output file for 4 class LCA}
+\item{LCA5}{Mplus output file for 5 class LCA}
+\item{CFAGH5}{GH5 file for CFA}
+\item{LCA2GH5}{GH5 file for 2 class LCA}
+\item{LCA3GH5}{GH5 file for 3 class LCA}
+\item{LCA4GH5}{GH5 file for 4 class LCA}
+\item{LCA5GH5}{GH5 file for 5 class LCA}
 }
 }
 \usage{

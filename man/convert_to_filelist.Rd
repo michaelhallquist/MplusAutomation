@@ -8,7 +8,7 @@ then locate all .inp files, and convert them to absolute paths}
 convert_to_filelist(target, filefilter = NULL, recursive = FALSE)
 }
 \arguments{
-\item{target}{a character vector where each element is a directory containing Mplus input files 
+\item{target}{a character vector where each element is a directory containing Mplus input files
 (.inp) to run OR a single .inp file to be run. Elements may be a full path, relative path,
 or a filename within the working directory.}
 

@@ -2,17 +2,17 @@
 % Please edit documentation in R/mplusModel.R
 \name{mplusModel_r6}
 \alias{mplusModel_r6}
-\title{An R6 class for a single Mplus model}
+\title{mplusModel R6 class}
 \description{
-An R6 class for a single Mplus model
-
 An R6 class for a single Mplus model
 }
 \details{
-Wrapped by `mplusModel`
-  Note that this R6 class deliberately uses unlockBinding to populate private fields after the object is instantiated.
-  This allows the model outputs to be added to the relevant sections of the object while keeping the fields private.
+Wrapped by \code{mplusModel}
 }
+\section{Active bindings (from \code{readModels()})}{
+
+}
+
 \keyword{internal}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -31,15 +31,67 @@ Wrapped by `mplusModel`
 
 \item{\code{syntax}}{the Mplus syntax for this model as a character vector}
 
-\item{\code{input}}{Parsed Mplus input sections (read-only)}
+\item{\code{input}}{Read-only accessor for the \code{input} section returned by \code{readModels()}.}
 
-\item{\code{warnings}}{Mplus warnings (read-only)}
+\item{\code{warnings}}{Read-only accessor for the \code{warnings} section returned by \code{readModels()}.}
 
-\item{\code{parameters}}{Parameter estimates (read-only)}
+\item{\code{errors}}{Read-only accessor for the \code{errors} section returned by \code{readModels()}.}
 
-\item{\code{summaries}}{Model summaries/statistics (read-only)}
+\item{\code{data_summary}}{Read-only accessor for the \code{data_summary} section returned by \code{readModels()}.}
 
-\item{\code{savedata}}{Data produced by SAVEDATA (read-only)}
+\item{\code{sampstat}}{Read-only accessor for the \code{sampstat} section returned by \code{readModels()}.}
+
+\item{\code{covariance_coverage}}{Read-only accessor for the \code{covariance_coverage} section returned by \code{readModels()}.}
+
+\item{\code{summaries}}{Read-only accessor for the \code{summaries} section returned by \code{readModels()}.}
+
+\item{\code{invariance_testing}}{Read-only accessor for the \code{invariance_testing} section returned by \code{readModels()}.}
+
+\item{\code{parameters}}{Read-only accessor for the \code{parameters} section returned by \code{readModels()}.}
+
+\item{\code{class_counts}}{Read-only accessor for the \code{class_counts} section returned by \code{readModels()}.}
+
+\item{\code{indirect}}{Read-only accessor for the \code{indirect} section returned by \code{readModels()}.}
+
+\item{\code{mod_indices}}{Read-only accessor for the \code{mod_indices} section returned by \code{readModels()}.}
+
+\item{\code{residuals}}{Read-only accessor for the \code{residuals} section returned by \code{readModels()}.}
+
+\item{\code{savedata}}{Read-only accessor for the \code{savedata} section returned by \code{readModels()}.}
+
+\item{\code{savedata_info}}{Read-only accessor for the \code{savedata_info} section returned by \code{readModels()}.}
+
+\item{\code{bparameters}}{Read-only accessor for the \code{bparameters} section returned by \code{readModels()}.}
+
+\item{\code{tech1}}{Read-only accessor for the \code{tech1} section returned by \code{readModels()}.}
+
+\item{\code{tech3}}{Read-only accessor for the \code{tech3} section returned by \code{readModels()}.}
+
+\item{\code{tech4}}{Read-only accessor for the \code{tech4} section returned by \code{readModels()}.}
+
+\item{\code{tech7}}{Read-only accessor for the \code{tech7} section returned by \code{readModels()}.}
+
+\item{\code{tech8}}{Read-only accessor for the \code{tech8} section returned by \code{readModels()}.}
+
+\item{\code{tech9}}{Read-only accessor for the \code{tech9} section returned by \code{readModels()}.}
+
+\item{\code{tech10}}{Read-only accessor for the \code{tech10} section returned by \code{readModels()}.}
+
+\item{\code{tech12}}{Read-only accessor for the \code{tech12} section returned by \code{readModels()}.}
+
+\item{\code{tech15}}{Read-only accessor for the \code{tech15} section returned by \code{readModels()}.}
+
+\item{\code{fac_score_stats}}{Read-only accessor for the \code{fac_score_stats} section returned by \code{readModels()}.}
+
+\item{\code{lcCondMeans}}{Read-only accessor for the \code{lcCondMeans} section returned by \code{readModels()}.}
+
+\item{\code{r3step}}{Read-only accessor for the \code{r3step} section returned by \code{readModels()}.}
+
+\item{\code{gh5}}{Read-only accessor for the \code{gh5} section returned by \code{readModels()}.}
+
+\item{\code{h5results}}{Read-only accessor for the \code{h5results} section returned by \code{readModels()}.}
+
+\item{\code{output}}{Read-only accessor for the \code{output} section returned by \code{readModels()}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -79,9 +131,9 @@ generate an mplusModel_r6 object
 
 \item{\code{inp_file}}{the location of .inp file for this model}
 
-\item{\code{read}}{If TRUE and the .out file already exists, read the contents of the .out file using `readModels`}
+\item{\code{read}}{If TRUE and the .out file already exists, read the contents of the .out file using \code{readModels}}
 
-\item{\code{Mplus_command}}{N.B.: No need to pass this parameter for most users (has intelligent defaults). Allows the user to 
+\item{\code{Mplus_command}}{N.B.: No need to pass this parameter for most users (has intelligent defaults). Allows the user to
 specify the name/path of the Mplus executable to be used for running models. This covers situations where Mplus
 is not in the system's path, or where one wants to test different versions of the Mplus program.}
 }
@@ -92,7 +144,7 @@ is not in the system's path, or where one wants to test different versions of th
 \if{html}{\out{<a id="method-mplusModel_r6-read"></a>}}
 \if{latex}{\out{\hypertarget{method-mplusModel_r6-read}{}}}
 \subsection{Method \code{read()}}{
-read the results of an Mplus model from the .out file using `readModels`
+read the results of an Mplus model from the .out file using \code{readModels}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$read(force = FALSE)}\if{html}{\out{</div>}}
 }
@@ -100,7 +152,7 @@ read the results of an Mplus model from the .out file using `readModels`
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{force}}{if `TRUE`, re-read the .out file even if was already previously loaded in to this object}
+\item{\code{force}}{if \code{TRUE}, re-read the .out file even if was already previously loaded in to this object}
 }
 \if{html}{\out{</div>}}
 }
@@ -117,11 +169,11 @@ write the .inp and .dat files for this model to the intended location
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{overwrite}}{if `TRUE`, overwrite existing data. Default: `TRUE`.}
+\item{\code{overwrite}}{if \code{TRUE}, overwrite existing data. Default: \code{TRUE}.}
 
-\item{\code{quiet}}{if `TRUE`, do not produce messages about the outcome of this command (e.g., a message about overwriting existing data)}
+\item{\code{quiet}}{if \code{TRUE}, do not produce messages about the outcome of this command (e.g., a message about overwriting existing data)}
 
-\item{\code{...}}{additional arguments passed to `prepareMplusData`}
+\item{\code{...}}{additional arguments passed to \code{prepareMplusData}}
 }
 \if{html}{\out{</div>}}
 }
@@ -138,11 +190,11 @@ write the .inp and .dat files for this model to the intended location
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{overwrite}}{if `TRUE`, overwrite existing data. Default: `TRUE`.}
+\item{\code{overwrite}}{if \code{TRUE}, overwrite existing data. Default: \code{TRUE}.}
 
-\item{\code{inp_file}}{The location of the input file to write. If NULL (default), use the `$inp_file` of this object.}
+\item{\code{inp_file}}{The location of the input file to write. If NULL (default), use the \verb{$inp_file} of this object.}
 
-\item{\code{quiet}}{if `TRUE`, do not produce messages about the outcome of this command (e.g., a message about overwriting existing data)}
+\item{\code{quiet}}{if \code{TRUE}, do not produce messages about the outcome of this command (e.g., a message about overwriting existing data)}
 }
 \if{html}{\out{</div>}}
 }
@@ -151,7 +203,7 @@ write the .inp and .dat files for this model to the intended location
 \if{html}{\out{<a id="method-mplusModel_r6-submit"></a>}}
 \if{latex}{\out{\hypertarget{method-mplusModel_r6-submit}{}}}
 \subsection{Method \code{submit()}}{
-submit this model for estimation on an HPC using `submitModels`
+submit this model for estimation on an HPC using \code{submitModels}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$submit(replaceOutfile = "modifiedDate", ...)}\if{html}{\out{</div>}}
 }
@@ -159,11 +211,11 @@ submit this model for estimation on an HPC using `submitModels`
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{replaceOutfile}}{Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists; 
+\item{\code{replaceOutfile}}{Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists;
 “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
 file is more recent than the output file modified date (implying there have been updates to the model).}
 
-\item{\code{...}}{additional arguments passed to `submitModels`}
+\item{\code{...}}{additional arguments passed to \code{submitModels}}
 }
 \if{html}{\out{</div>}}
 }
@@ -172,7 +224,7 @@ file is more recent than the output file modified date (implying there have been
 \if{html}{\out{<a id="method-mplusModel_r6-run"></a>}}
 \if{latex}{\out{\hypertarget{method-mplusModel_r6-run}{}}}
 \subsection{Method \code{run()}}{
-run this model locally using `runModels`
+run this model locally using \code{runModels}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$run(replaceOutfile = "modifiedDate", ...)}\if{html}{\out{</div>}}
 }
@@ -180,11 +232,11 @@ run this model locally using `runModels`
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{replaceOutfile}}{Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists; 
+\item{\code{replaceOutfile}}{Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists;
 “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
 file is more recent than the output file modified date (implying there have been updates to the model).}
 
-\item{\code{...}}{additional arguments passed to `runModels`}
+\item{\code{...}}{additional arguments passed to \code{runModels}}
 }
 \if{html}{\out{</div>}}
 }

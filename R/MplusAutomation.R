@@ -10,12 +10,10 @@
 #'   and tabulating model parameters and fit statistics.
 #'
 #' @details The MplusAutomation package has four primary purposes:
-#' \enumerate{
-#'   \item To automatically run groups/batches of models.
-#'   \item To provide routines to extract model fit statistics, parameter estimates, and raw data from 'Mplus' output files.
-#'   \item To facilitate comparisons among models
-#'   \item To provide a template language that allows for the creation of related input files.
-#' }
+#' * To automatically run groups/batches of models.
+#' * To provide routines to extract model fit statistics, parameter estimates, and raw data from 'Mplus' output files.
+#' * To facilitate comparisons among models
+#' * To provide a template language that allows for the creation of related input files.
 #' The core routine for running batches of models is \code{\link{runModels}}, with
 #'   an easy-to-use GUI wrapper, \code{\link{runModels_Interactive}}.
 #'

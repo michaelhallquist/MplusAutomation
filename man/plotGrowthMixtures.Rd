@@ -43,7 +43,7 @@ raw data.}
 (transparancy) for the raw data. Minimum should be 0; lower maximum values of
 alpha can help reduce overplotting.}
 
-\item{growth_variables}{Character vector. Indicate the names of the latent 
+\item{growth_variables}{Character vector. Indicate the names of the latent
 variables for the growth trajectory to plot. If NULL (default), all latent
 growth variables are used. Use this option to plot one trajectory when a
 model contains multiple latent growth trajectories.}

@@ -15,7 +15,7 @@ friendlyGregexpr(pattern, charvector, perl = TRUE, include_tag = TRUE)
 regular expressions.  Defaults to \code{TRUE}.}
 
 \item{include_tag}{if TRUE, return the match as a character string. This is the default, but
-setting to `FALSE` is a bit faster}
+setting to \code{FALSE} is a bit faster}
 }
 \value{
 A \code{data.frame}

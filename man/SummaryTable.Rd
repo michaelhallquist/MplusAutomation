@@ -21,7 +21,7 @@ SummaryTable(
 \item{modelList}{A list of models returned from the \code{extractModelSummaries} function.}
 
 \item{type}{A character vector indicating the type of output format to be generated.  One of:
-\dQuote{none}, \dQuote{screen}, \dQuote{popup}, \dQuote{html}, \dQuote{latex}, or \dQuote{markdown}. 
+\dQuote{none}, \dQuote{screen}, \dQuote{popup}, \dQuote{html}, \dQuote{latex}, or \dQuote{markdown}.
 Screen results in a simple summary table being sent to the R console.}
 
 \item{filename}{The name of the file to be created. Can be an absolute or relative path. If \code{filename}
@@ -65,7 +65,7 @@ but these are customizable using the \code{keepCols} and \code{dropCols} paramet
 }
 \note{
 You must choose between \code{keepCols} and \code{dropCols} because it is not sensible to use these
-  together to include and exclude columns. The function will error if you include both parameters.
+together to include and exclude columns. The function will error if you include both parameters.
 }
 \examples{
 \dontrun{

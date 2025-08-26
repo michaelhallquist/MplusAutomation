@@ -15,8 +15,8 @@ extractWarningsErrors_1file(outfiletext, filename, input)
 }
 \value{
 A list with two elements
-  \item{errors}{Mplus Errors}
-  \item{warnings}{Mplus Warnings}
+\item{errors}{Mplus Errors}
+\item{warnings}{Mplus Warnings}
 }
 \description{
 Helper function

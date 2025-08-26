@@ -33,6 +33,6 @@ MplusAutomation:::is.linux()
 MplusAutomation:::os()
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \keyword{internal}

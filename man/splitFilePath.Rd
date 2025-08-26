@@ -11,7 +11,7 @@ splitFilePath(filepath, normalize = FALSE)
 }
 \value{
 A list with elements for the directory, filename,
-  and absolute path.
+and absolute path.
 }
 \description{
 This is a helper function to split path into path and filename.

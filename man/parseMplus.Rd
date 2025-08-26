@@ -14,7 +14,7 @@ lines that do not have them. Defaults to \code{FALSE}.}
 }
 \value{
 a character vector containing the input text and
-  optionally added semicolons.
+optionally added semicolons.
 }
 \description{
 The function parses a character string containing Mplus code
@@ -55,6 +55,6 @@ cat(parseMplus(test), file=stdout())
 \code{\link{mplusModeler}}
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \keyword{utils}

@@ -9,15 +9,14 @@
 #'   If \code{outfile} is a relative path or just the filename, then it is assumed that the file resides in
 #'   the working directory \code{getwd()}.
 #' @return Returns a list of SAVEDATA file information that includes:
-#' \item{fileName}{The name of the file containing the analysis dataset created by the Mplus SAVEDATA command.}
-#' \item{fileVarNames}{A character vector containing the names of variables in the dataset.}
-#' \item{fileVarFormats}{A character vector containing the Fortran-style formats of variables in the dataset.}
-#' \item{fileVarWidths}{A numeric vector containing the widths of variables in the dataset (which is stored in fixed-width format).}
-#' \item{bayesFile}{The name of the BPARAMETERS file containing draws from the posterior distribution created by
-#'   the Mplus SAVEDATA BPARAMETERS command.}
-#' \item{bayesVarNames}{A character vector containing the names of variables in the BPARAMETERS dataset.}
-#' \item{tech3File}{A character vector of the tech 3 output.}
-#' \item{tech4File}{A character vector of the tech 4 output.}
+#' * `fileName`: The name of the file containing the analysis dataset created by the Mplus SAVEDATA command.
+#' * `fileVarNames`: A character vector containing the names of variables in the dataset.
+#' * `fileVarFormats`: A character vector containing the Fortran-style formats of variables in the dataset.
+#' * `fileVarWidths`: A numeric vector containing the widths of variables in the dataset (which is stored in fixed-width format).
+#' * `bayesFile`: The name of the BPARAMETERS file containing draws from the posterior distribution created by the Mplus SAVEDATA BPARAMETERS command.
+#' * `bayesVarNames`: A character vector containing the names of variables in the BPARAMETERS dataset.
+#' * `tech3File`: A character vector of the tech 3 output.
+#' * `tech4File`: A character vector of the tech 4 output.
 #' @author Michael Hallquist
 #' @seealso \code{\link{getSavedata_Data}}
 #' @examples
@@ -55,15 +54,14 @@ getSavedata_Fileinfo <- function(outfile) {
 #'   output file.
 #' @param outfiletext The contents of the output file, for example as read by \code{scan}
 #' @return A list that includes:
-#' \item{fileName}{The name of the file containing the analysis dataset created by the Mplus SAVEDATA command.}
-#' \item{fileVarNames}{A character vector containing the names of variables in the dataset.}
-#' \item{fileVarFormats}{A character vector containing the Fortran-style formats of variables in the dataset.}
-#' \item{fileVarWidths}{A numeric vector containing the widths of variables in the dataset (which is stored in fixed-width format).}
-#' \item{bayesFile}{The name of the BPARAMETERS file containing draws from the posterior distribution created by
-#'   the Mplus SAVEDATA BPARAMETERS command.}
-#' \item{bayesVarNames}{A character vector containing the names of variables in the BPARAMETERS dataset.}
-#' \item{tech3File}{A character vector of the tech 3 output.}
-#' \item{tech4File}{A character vector of the tech 4 output.}
+#' * `fileName`: The name of the file containing the analysis dataset created by the Mplus SAVEDATA command.
+#' * `fileVarNames`: A character vector containing the names of variables in the dataset.
+#' * `fileVarFormats`: A character vector containing the Fortran-style formats of variables in the dataset.
+#' * `fileVarWidths`: A numeric vector containing the widths of variables in the dataset (which is stored in fixed-width format).
+#' * `bayesFile`: The name of the BPARAMETERS file containing draws from the posterior distribution created by the Mplus SAVEDATA BPARAMETERS command.
+#' * `bayesVarNames`: A character vector containing the names of variables in the BPARAMETERS dataset.
+#' * `tech3File`: A character vector of the tech 3 output.
+#' * `tech4File`: A character vector of the tech 4 output.
 #' @importFrom gsubfn strapply
 #' @seealso \code{\link{getSavedata_Data}}
 #' @examples

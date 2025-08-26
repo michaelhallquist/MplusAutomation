@@ -1,3 +1,14 @@
+# sections returned by readModels (used for dynamic active bindings)
+.mplus_sections <- c(
+  "input", "warnings", "errors", "data_summary", "sampstat",
+  "covariance_coverage", "summaries", "invariance_testing",
+  "parameters", "class_counts", "indirect", "mod_indices",
+  "residuals", "savedata", "savedata_info", "bparameters",
+  "tech1", "tech3", "tech4", "tech7", "tech8", "tech9",
+  "tech10", "tech12", "tech15", "fac_score_stats",
+  "lcCondMeans", "r3step", "gh5", "h5results", "output"
+)
+
 #' Create an mplusModel object for a given model
 #' @param syntax a character vector of Mplus input syntax for this model
 #' @param data a data.frame to be used for estimating the model
@@ -13,203 +24,222 @@ mplusModel <- function(syntax=NULL, data=NULL, inp_file=NULL, read=TRUE, Mplus_c
   return(mobj)
 }
 
-#' An R6 class for a single Mplus model
+#' @title mplusModel R6 class
+#' @description An R6 class for a single Mplus model
 #' @details
 #'   Wrapped by `mplusModel`
-#'   Note that this R6 class deliberately uses unlockBinding to populate private fields after the object is instantiated.
-#'   This allows the model outputs to be added to the relevant sections of the object while keeping the fields private.
+#' @name mplusModel_r6
 #' @keywords internal
 mplusModel_r6 <- R6::R6Class(
   classname = "mplusModel_r6",
   lock_objects=FALSE,
-  private=list(
-    pvt_output_loaded = FALSE,
-    pvt_syntax = NULL,           # syntax for this model, parsed into a list
-    pvt_data = NULL,             # data.frame containing data for model estimation
-    pvt_inp_file = NULL,         # name of .inp file
-    pvt_out_file = NULL,         # name of .out file
-    pvt_dat_file = NULL,         # name of .dat file
-    pvt_model_dir = NULL,        # location of model files
-    pvt_Mplus_command = NULL,    # location of Mplus binary
-    pvt_variables = NULL,        # names of columns in data to be written to the .dat file
-    pvt_is_montecarlo = FALSE,   # whether this is a monte carlo model (in which case the data section is irrelevant)
-    
-    # read-only outputs (backing storage)
-    pvt_input      = NULL,
-    pvt_warnings   = NULL,
-    pvt_parameters = NULL,
-    pvt_summaries  = NULL,
-    pvt_savedata   = NULL,
-    
-    populate_output = function(o) {
-      private$pvt_output_loaded <- TRUE
-      private$pvt_parameters <- o$parameters
-      private$pvt_input      <- o$input
-      private$pvt_warnings   <- o$warnings
-      private$pvt_summaries  <- o$summaries
-      private$pvt_savedata   <- o$savedata
-    },
-    
-    clear_output = function() {
-      private$pvt_output_loaded <- FALSE
-      private$pvt_parameters <- NULL
-      private$pvt_input      <- NULL
-      private$pvt_warnings   <- NULL
-      private$pvt_summaries  <- NULL
-      private$pvt_savedata   <- NULL
-    },
-    
-    detect_variables = function() {
-      # both syntax and data must be present to attempt detection
-      if (is.null(private$pvt_syntax) || is.null(private$pvt_data)) return(invisible(NULL))
+  private = c(
+    list(
+      pvt_output_loaded = FALSE,
+      pvt_syntax = NULL,           # syntax for this model, parsed into a list
+      pvt_data = NULL,             # data.frame containing data for model estimation
+      pvt_inp_file = NULL,         # name of .inp file
+      pvt_out_file = NULL,         # name of .out file
+      pvt_dat_file = NULL,         # name of .dat file
+      pvt_model_dir = NULL,        # location of model files
+      pvt_Mplus_command = NULL,    # location of Mplus binary
+      pvt_variables = NULL,        # names of columns in data to be written to the .dat file
+      pvt_is_montecarlo = FALSE,   # whether this is a monte carlo model (in which case the data section is irrelevant)
       
-      # TODO: make variable detection better... detectVariables misses IDVARIABLE and CLUSTER, for example
-      # and we need to convert the pvt_syntax sections to strings to match detectVariables
-
-      # this is preferred for now: use user-specified names
-      if (!is.null(private$pvt_syntax$variable$names)) {
-        private$pvt_variables <- strsplit(private$pvt_syntax$variable$names, "\\s+")[[1L]]
-      } else {
-        # mimic mplusObject to use detectVariables
-        obj <- list()
-        obj$MODEL <- private$pvt_syntax$model
-        obj$DEFINE <- private$pvt_syntax$define
-        obj$VARIABLE <- private$pvt_syntax$variable
-        obj$rdata <- private$pvt_data
-
-        private$pvt_variables <- detectVariables(obj)
-      }      
-    }
+      # private method to populate mplus output fields from readModels result
+      populate_output = function(o) {
+        private$pvt_output_loaded <- TRUE
+        for (sec in .mplus_sections) private[[paste0("pvt_", sec)]] <- o[[sec]]
+      },
+      
+      # private method to clear mplus output fields (if output is invalidated)
+      clear_output = function() {
+        private$pvt_output_loaded <- FALSE
+        for (sec in .mplus_sections) private[[paste0("pvt_", sec)]] <- NULL
+      },
+      
+      detect_variables = function() {
+        # both syntax and data must be present to attempt detection
+        if (is.null(private$pvt_syntax) || is.null(private$pvt_data)) return(invisible(NULL))
+        
+        # TODO: make variable detection better... detectVariables misses IDVARIABLE and CLUSTER, for example
+        # and we need to convert the pvt_syntax sections to strings to match detectVariables
+        
+        # this is preferred for now: use user-specified names
+        if (!is.null(private$pvt_syntax$variable$names)) {
+          private$pvt_variables <- strsplit(private$pvt_syntax$variable$names, "\\s+")[[1L]]
+        } else {
+          # mimic mplusObject to use detectVariables
+          obj <- list()
+          obj$MODEL <- private$pvt_syntax$model
+          obj$DEFINE <- private$pvt_syntax$define
+          obj$VARIABLE <- private$pvt_syntax$variable
+          obj$rdata <- private$pvt_data
+          
+          private$pvt_variables <- detectVariables(obj)
+        }
+      }
+    ),
+    
+    # all output sections from readModels
+    setNames(vector("list", length(.mplus_sections)), paste0("pvt_", .mplus_sections))
   ),
-  active = list(
-    #' @field model_dir the directory for Mplus files corresponding to this model
-    model_dir = function(value) {
-      if (missing(value)) {
-        private$pvt_model_dir
-      } else {
-        if (!dir.exists(value)) dir.create(value, recursive = TRUE)
-        private$pvt_model_dir <- value
-      }
-    },
-    
-    #' @field inp_file the location of the Mplus .inp file for this model
-    inp_file = function(value) {
-      if (missing(value)) file.path(private$pvt_model_dir, private$pvt_inp_file)
-      else stop("Cannot set read-only field")
-    },
-    
-    #' @field out_file the location of the Mplus .out file for this model
-    out_file = function(value) {
-      if (missing(value)) file.path(private$pvt_model_dir, private$pvt_out_file)
-      else stop("Cannot set read-only field")
-    },
-    
-    #' @field dat_file the location of the Mplus .dat (data) file for this model
-    dat_file = function(value)  {
-      if (missing(value)) file.path(private$pvt_model_dir, private$pvt_dat_file)
-      else stop("Cannot set read-only field")
-    },
-    
-    #' @field data the dataset used for estimating this model
-    data = function(value) {
-      if (missing(value)) {
-        private$pvt_data
-      } else {
-        had_data <- !is.null(private$pvt_data) # is the user updating data for an existing model?
-        if (is.null(value)) {
-          private$pvt_data <- NULL # unset data
-        } else if (checkmate::test_data_table(value)) {
-          private$pvt_data <- as.data.frame(value)
-        } else if (checkmate::test_data_frame(value)) {
-          private$pvt_data <- value
+  active = c(
+    list(
+      #' @field model_dir the directory for Mplus files corresponding to this model
+      model_dir = function(value) {
+        if (missing(value)) {
+          private$pvt_model_dir
         } else {
-          stop("data must be a data.frame object")
+          if (!dir.exists(value)) dir.create(value, recursive = TRUE)
+          private$pvt_model_dir <- value
         }
-        
-        if (had_data) {
-          # invalidate loaded output if data changes
-          message("Data has changed. Unloading model results from object.")
-          private$clear_output()  
-        }
-        
-        # if we are updating the dataset, make sure that all expected variables are present
-        if (!is.null(value) && !is.null(private$pvt_variables)) {
-          missing_vars <- setdiff(private$pvt_variables, names(value))
-          if (length(missing_vars) > 0L)
-            warning("The following variables are mentioned in the model syntax, but missing in the data: ",
-                    paste(missing_vars, collapse=", "))
-        }
-      }
-    },
-    
-    #' @field Mplus_command the location of the Mplus program
-    Mplus_command = function(value) {
-      if (missing(value)) {
-        private$pvt_Mplus_command
-      } else {
-        if (is.null(value)) {
-          private$pvt_Mplus_command <- MplusAutomation::detectMplus() # default
-        } else if (!checkmate::test_string(value)) {
-          warning("Mplus_command must be a character string pointing to the location of Mplus")
+      },
+      
+      #' @field inp_file the location of the Mplus .inp file for this model
+      inp_file = function(value) {
+        if (missing(value)) file.path(private$pvt_model_dir, private$pvt_inp_file)
+        else stop("Cannot set read-only field", call. = FALSE)
+      },
+      
+      #' @field out_file the location of the Mplus .out file for this model
+      out_file = function(value) {
+        if (missing(value)) file.path(private$pvt_model_dir, private$pvt_out_file)
+        else stop("Cannot set read-only field", call. = FALSE)
+      },
+      
+      #' @field dat_file the location of the Mplus .dat (data) file for this model
+      dat_file = function(value)  {
+        if (missing(value)) file.path(private$pvt_model_dir, private$pvt_dat_file)
+        else stop("Cannot set read-only field", call. = FALSE)
+      },
+      
+      #' @field data the dataset used for estimating this model
+      data = function(value) {
+        if (missing(value)) {
+          private$pvt_data
         } else {
-          private$pvt_Mplus_command <- value
-          if (!checkmate::test_file_exists(value)) warning("Mplus_command does not point to a valid location. This could cause problems!")
-        }
-      }
-    },
-    
-    #' @field syntax the Mplus syntax for this model as a character vector
-    syntax = function(value) {
-      if (missing(value)) {
-        mplusInpToString(private$pvt_syntax)
-        #unname(unlist(private$pvt_syntax)) # unlist to return as character
-      } else {
-        if (!checkmate::test_character(value)) {
-          stop("Syntax must be a character vector")
-        } else {
-          private$pvt_syntax <- parseMplusSyntax(value, dropSectionNames = TRUE)
-
-          # detect variables in syntax
-          private$detect_variables()
-
-          if (!is.null(private$pvt_data) && !is.null(private$pvt_variables)) {
-            missing_vars <- setdiff(private$pvt_variables, names(private$pvt_data))
+          had_data <- !is.null(private$pvt_data) # is the user updating data for an existing model?
+          if (is.null(value)) {
+            private$pvt_data <- NULL # unset data
+          } else if (checkmate::test_data_table(value)) {
+            private$pvt_data <- as.data.frame(value)
+          } else if (checkmate::test_data_frame(value)) {
+            private$pvt_data <- value
+          } else {
+            stop("data must be a data.frame object")
+          }
+          
+          if (had_data) {
+            # invalidate loaded output if data changes
+            message("Data has changed. Unloading model results from object.")
+            private$clear_output()  
+          }
+          
+          # if we are updating the dataset, make sure that all expected variables are present
+          if (!is.null(value) && !is.null(private$pvt_variables)) {
+            missing_vars <- setdiff(private$pvt_variables, names(value))
             if (length(missing_vars) > 0L)
               warning("The following variables are mentioned in the model syntax, but missing in the data: ",
                       paste(missing_vars, collapse=", "))
           }
-
-          # determine whether this is a montecarlo model
-          private$pvt_is_montecarlo <- any(grepl("^\\s*montecarlo\\s*:", value, ignore.case = TRUE, perl=TRUE))
+        }
+      },
+      
+      #' @field Mplus_command the location of the Mplus program
+      Mplus_command = function(value) {
+        if (missing(value)) {
+          private$pvt_Mplus_command
+        } else {
+          if (is.null(value)) {
+            private$pvt_Mplus_command <- MplusAutomation::detectMplus() # default
+          } else if (!checkmate::test_string(value)) {
+            warning("Mplus_command must be a character string pointing to the location of Mplus")
+          } else {
+            private$pvt_Mplus_command <- value
+            if (!checkmate::test_file_exists(value)) warning("Mplus_command does not point to a valid location. This could cause problems!")
+          }
+        }
+      },
+      
+      #' @field syntax the Mplus syntax for this model as a character vector
+      syntax = function(value) {
+        if (missing(value)) {
+          mplusInpToString(private$pvt_syntax)
+          #unname(unlist(private$pvt_syntax)) # unlist to return as character
+        } else {
+          if (!checkmate::test_character(value)) {
+            stop("Syntax must be a character vector")
+          } else {
+            private$pvt_syntax <- parseMplusSyntax(value, dropSectionNames = TRUE)
+            
+            # detect variables in syntax
+            private$detect_variables()
+            
+            if (!is.null(private$pvt_data) && !is.null(private$pvt_variables)) {
+              missing_vars <- setdiff(private$pvt_variables, names(private$pvt_data))
+              if (length(missing_vars) > 0L)
+                warning("The following variables are mentioned in the model syntax, but missing in the data: ",
+                        paste(missing_vars, collapse=", "))
+            }
+            
+            # determine whether this is a montecarlo model
+            private$pvt_is_montecarlo <- any(grepl("^\\s*montecarlo\\s*:", value, ignore.case = TRUE, perl=TRUE))
+          }
         }
       }
-    },
+    ),
     
-    # ---- read-only output fields (active bindings) ----
-    #' @field input Parsed Mplus input sections (read-only)
-    input = function(value) {
-      if (missing(value)) private$pvt_input
-      else stop("`input` is read-only.")
-    },
-    #' @field warnings Mplus warnings (read-only)
-    warnings = function(value) {
-      if (missing(value)) private$pvt_warnings
-      else stop("`warnings` is read-only.")
-    },
-    #' @field parameters Parameter estimates (read-only)
-    parameters = function(value) {
-      if (missing(value)) private$pvt_parameters
-      else stop("`parameters` is read-only.")
-    },
-    #' @field summaries Model summaries/statistics (read-only)
-    summaries = function(value) {
-      if (missing(value)) private$pvt_summaries
-      else stop("`summaries` is read-only.")
-    },
-    #' @field savedata Data produced by SAVEDATA (read-only)
-    savedata = function(value) {
-      if (missing(value)) private$pvt_savedata
-      else stop("`savedata` is read-only.")
+    # Dynamic read-only active bindings for all .mplus_sections
+    # Pass through the argument sec as a function attribute because R6 resets the function environment
+    # to point to the R6 object itself (so self and private are visible)
+    
+    #' @section Active bindings (from `readModels()`):
+    #' @field input Read-only accessor for the `input` section returned by `readModels()`.
+    #' @field warnings Read-only accessor for the `warnings` section returned by `readModels()`.
+    #' @field errors Read-only accessor for the `errors` section returned by `readModels()`.
+    #' @field data_summary Read-only accessor for the `data_summary` section returned by `readModels()`.
+    #' @field sampstat Read-only accessor for the `sampstat` section returned by `readModels()`.
+    #' @field covariance_coverage Read-only accessor for the `covariance_coverage` section returned by `readModels()`.
+    #' @field summaries Read-only accessor for the `summaries` section returned by `readModels()`.
+    #' @field invariance_testing Read-only accessor for the `invariance_testing` section returned by `readModels()`.
+    #' @field parameters Read-only accessor for the `parameters` section returned by `readModels()`.
+    #' @field class_counts Read-only accessor for the `class_counts` section returned by `readModels()`.
+    #' @field indirect Read-only accessor for the `indirect` section returned by `readModels()`.
+    #' @field mod_indices Read-only accessor for the `mod_indices` section returned by `readModels()`.
+    #' @field residuals Read-only accessor for the `residuals` section returned by `readModels()`.
+    #' @field savedata Read-only accessor for the `savedata` section returned by `readModels()`.
+    #' @field savedata_info Read-only accessor for the `savedata_info` section returned by `readModels()`.
+    #' @field bparameters Read-only accessor for the `bparameters` section returned by `readModels()`.
+    #' @field tech1 Read-only accessor for the `tech1` section returned by `readModels()`.
+    #' @field tech3 Read-only accessor for the `tech3` section returned by `readModels()`.
+    #' @field tech4 Read-only accessor for the `tech4` section returned by `readModels()`.
+    #' @field tech7 Read-only accessor for the `tech7` section returned by `readModels()`.
+    #' @field tech8 Read-only accessor for the `tech8` section returned by `readModels()`.
+    #' @field tech9 Read-only accessor for the `tech9` section returned by `readModels()`.
+    #' @field tech10 Read-only accessor for the `tech10` section returned by `readModels()`.
+    #' @field tech12 Read-only accessor for the `tech12` section returned by `readModels()`.
+    #' @field tech15 Read-only accessor for the `tech15` section returned by `readModels()`.
+    #' @field fac_score_stats Read-only accessor for the `fac_score_stats` section returned by `readModels()`.
+    #' @field lcCondMeans Read-only accessor for the `lcCondMeans` section returned by `readModels()`.
+    #' @field r3step Read-only accessor for the `r3step` section returned by `readModels()`.
+    #' @field gh5 Read-only accessor for the `gh5` section returned by `readModels()`.
+    #' @field h5results Read-only accessor for the `h5results` section returned by `readModels()`.
+    #' @field output Read-only accessor for the `output` section returned by `readModels()`.
+    {
+      .make_ro_binding <- function(section) {
+        f <- function(value) {
+          s <- attr(sys.function(), "section")
+          if (missing(value)) {
+            private[[paste0("pvt_", s)]]
+          } else {
+            stop(sprintf("`%s` is read-only.", s), call. = FALSE)
+          }
+        }
+        attr(f, "section") <- section
+        f
+      }
+      setNames(lapply(.mplus_sections, .make_ro_binding), .mplus_sections)
     }
   ),
   public=list(
@@ -271,14 +301,6 @@ mplusModel_r6 <- R6::R6Class(
       
       # set Mplus command
       self$Mplus_command <- Mplus_command
-      
-      ### args from submitModels
-      # function(target=getwd(), recursive=FALSE, filefilter = NULL,
-      #                          replaceOutfile="modifiedDate", Mplus_command = NULL, quiet = FALSE,
-      #                          scheduler="slurm", sched_args=NULL, env_variables=NULL, export_all=FALSE,
-      #                          cores_per_model = 1L, memgb_per_model = 8L, time_per_model="1:00:00",
-      #                          time_per_command = NULL, pre=NULL, post=NULL, batch_outdir=NULL, job_script_prefix=NULL, 
-      #                          debug = FALSE, fail_on_error = TRUE
     },
     
     #' @description read the results of an Mplus model from the .out file using `readModels`
@@ -308,14 +330,14 @@ mplusModel_r6 <- R6::R6Class(
         if (!quiet) message("Not overwriting existing data file: ", self$dat_file)
         return(invisible(self))
       }
-
+      
       inp_syntax <- prepareMplusData(df = self$data, filename = self$dat_file, keepCols=private$pvt_variables, quiet = TRUE, use_relative_path = TRUE, ...)
       
       # ensure that the variable names in the syntax match what we detected
       private$pvt_syntax$variable$names <- attr(inp_syntax, "variable_names")
       private$pvt_syntax$variable$missing <- attr(inp_syntax, "missing")
       private$pvt_syntax$data$file <- attr(inp_syntax, "data_file") # update FILE = in DATA section to match absolute/relative (NB, this is overridden in write_inp... need to unify)
-
+      
       if (!quiet) message("Writing data to file: ", self$dat_file)
       return(invisible(self))
     },
@@ -381,7 +403,7 @@ mplusModel_r6 <- R6::R6Class(
       self$write_inp()
       runModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command, ...)
       self$read(force = TRUE) # read/re-read after estimation
-
+      
     }
   )
 )
@@ -403,99 +425,152 @@ joinRegexExpand <- function(cmd, argExpand, matches, iterator, matchLength = "ma
   return(cmd.expand)
 }
 
-
-# expand Mplus hyphen syntax (will also expand constraints with hyphens)
-expandCmd <- function(cmd) {
-  # use negative lookahead and negative lookbehind to eliminate possibility of hyphen being used as a negative starting value (e.g., x*-1)
-  # also avoid match of anything that includes a decimal point, such as a floating-point starting value -10.5*x1
+#' Expand Mplus-style hyphenated variable ranges
+#'
+#' Expands Mplus shorthand expressions that specify sequences of variables
+#' using hyphenated ranges (e.g., \code{y1-y3}) into the full list of
+#' variables (e.g., \code{y1 y2 y3}). This function also propagates suffixes
+#' from the right-hand token (e.g., \code{@c}, \code{*c}, or bare \code{*})
+#' to every expanded variable (e.g., \code{y1-y3@1} → \code{y1@1 y2@1 y3@1}).
+#'
+#' By default, the function does **not** expand pure numeric ranges (e.g.,
+#' \code{1-3}) to avoid confusion with arithmetic subtraction. If
+#' \code{expand_numeric = TRUE}, such ranges will be expanded when they
+#' appear in list-like contexts (whitespace/comma/semicolon/parentheses
+#' boundaries) and the line does not contain an equals sign (to avoid
+#' accidental expansion of arithmetic like \code{d = 1 - 3}).
+#'
+#' Hyphens in \code{MODEL CONSTRAINT} expressions such as
+#' \code{a = b1-b2} are explicitly protected and left untouched.
+#'
+#' @param cmd A single character string containing Mplus syntax to expand.
+#' @param expand_numeric Logical. If \code{TRUE}, expand pure numeric ranges
+#'   (e.g., \code{1-3} → \code{1 2 3}) in list-like contexts. Default: \code{FALSE}.
+#'
+#' @return A character string with hyphenated ranges expanded to explicit
+#'   variable lists.
+#'
+#' @examples
+#' expandCmd("y1-y3 y5-y6")
+#' # "y1 y2 y3 y5 y6"
+#'
+#' expandCmd("BY y1-y3@0.5;")
+#' # "BY y1@0.5 y2@0.5 y3@0.5;"
+#'
+#' expandCmd("z10-z12*2")
+#' # "z10*2 z11*2 z12*2"
+#'
+#' expandCmd("MODEL CONSTRAINT: a = b1-b2;")
+#' # "MODEL CONSTRAINT: a = b1-b2;" (unchanged)
+#'
+#' expandCmd("1 - 3", expand_numeric = TRUE)
+#' # "1 2 3"
+#'
+#' expandCmd("d = 1 - 3;", expand_numeric = TRUE)
+#' # "d = 1 - 3;" (unchanged because of '=')
+#'
+#' @keywords internal
+expandCmd <- function(cmd, expand_numeric = FALSE) {
+  x <- cmd
   
-  # need to do a better job of this so that u1-u20* is supported... I don't think the regexp below is general enough
+  # --- Protect constraint-style identifier subtraction (preserve spacing) ---
+  # Example: "a = b1-b2" becomes "a = b1‹MINUS›b2"
+  # The space after '=' is captured and restored unchanged.
+  x <- gsub(
+    "(=\\s*)([A-Za-z_][A-Za-z_0-9]*\\d+)\\s*-\\s*([A-Za-z_][A-Za-z_0-9]*\\d+)",
+    "\\1\\2‹MINUS›\\3",
+    x, perl = TRUE
+  )
   
-  # hyphens <- gregexpr("(?!<(\\*|\\.))\\w+(?!(\\*|\\.))\\s*-\\s*(?!<(\\*|\\.))\\w+(?!(\\*|\\.))", cmd, perl=TRUE)[[1]]
+  # --- Expand identifier ranges (prefixN - prefixM) ---
+  # Boundaries: whitespace, comma, semicolon, parentheses, or string edges.
+  bL <- "(?:(?<=^)|(?<=[\\s,;\\(]))"
+  bR <- "(?:(?=$)|(?=[\\s,;\\)]))"
   
-  # support trailing @XXX. Still still fail on Trait1-Trait3*XXX
-  hyphens <- gregexpr("(?!<(\\*|\\.))\\w+(?!(\\*|\\.))\\s*-\\s*(?!<(\\*|\\.))\\w+(?!(\\*|\\.))(@[\\d\\.\\-]+)?", cmd, perl = TRUE)[[1]]
+  id_pattern <- paste0(
+    bL,
+    "(?<full>",
+    "(?<alpha1>[A-Za-z_][A-Za-z_0-9]*?)(?<i1>\\d+)",
+    "\\s*-\\s*",
+    "(?<alpha2>[A-Za-z_][A-Za-z_0-9]*?)(?<i2>\\d+)",
+    "(?<suf>(?:@[-+]?\\d+(?:\\.\\d+)?|\\*[-+]?\\d*(?:\\.\\d+)?)?)",
+    ")",
+    bR
+  )
   
-  #hyphens <- unlist(gregexpr('-', cmd))
-  #hyphens <- gregexpr("(\\w)(\\d+)-(\\w)(\\d+)", cmd, perl=TRUE)[[1]]
-  
-  # Promising, but this is still failing in the case of x3*1 -4.25*x4
-  # On either side of a hyphen, require alpha character followed by alphanumeric
-  # This enforces that neither side of the hyphen can be a number
-  # Alternatively, match digits on either side alone
-  # hyphens <- gregexpr("([A-z]+\\w*\\s*-\\s*[A-z]+\\w*(@[\\d\\.-]+)?|\\d+\\s*-\\s*\\d+)", cmd, perl=TRUE)[[1]]
-  
-  if (hyphens[1L] > 0) {
-    cmd.expand <- c()
-    ep <- 1
+  m <- gregexpr(id_pattern, x, perl = TRUE)
+  if (m[[1]][1L] != -1L) {
+    starts <- as.integer(m[[1]])
+    caps   <- attr(m[[1]], "capture.start")
+    clen   <- attr(m[[1]], "capture.length")
+    nm     <- attr(m[[1]], "capture.names")
     
-    for (v in 1:length(hyphens)) {
-      # match one keyword before and after hyphen
-      argsplit <- strsplit(substr(cmd, hyphens[v], hyphens[v] + attr(hyphens, "match.length")[v] - 1), "\\s*-\\s*", perl = TRUE)[[1]]
+    cap <- function(k, name) {
+      i <- match(name, nm)
+      if (is.na(i) || caps[k, i] == -1L) "" else
+        substr(x, caps[k, i], caps[k, i] + clen[k, i] - 1L)
+    }
+    
+    # Replace matches from right to left so string indices stay valid.
+    for (k in rev(seq_along(starts))) {
+      a1  <- cap(k, "alpha1"); a2 <- cap(k, "alpha2")
+      i1  <- as.integer(cap(k, "i1")); i2 <- as.integer(cap(k, "i2"))
+      suf <- cap(k, "suf")
       
-      v_pre <- argsplit[1]
-      v_post <- argsplit[2]
+      # Skip if prefixes differ or indices invalid.
+      if (!nzchar(a1) || a1 != a2 || is.na(i1) || is.na(i2) || i2 < i1) next
       
-      v_post.suffix <- sub("^([^@\\*]+)([@\\*][\\d\\-.]+)?$", "\\2", v_post, perl = TRUE) # will be empty string if not present
-      v_post <- sub("[@\\*][\\d\\-.]+$", "", v_post, perl = TRUE) # trim @ suffix
+      # Build expansion sequence.
+      seq_ids <- paste0(a1, i1:i2)
+      if (nzchar(suf)) seq_ids <- paste0(seq_ids, suf)
+      repl <- paste(seq_ids, collapse = " ")
       
-      # If v_pre and v_post contain leading alpha characters, verify that these prefixes match.
-      # Otherwise, there is nothing to expand, as in the case of MODEL CONSTRAINT: e1e2=e1-e2_n.
-      v_pre.alpha <- sub("\\d+$", "", v_pre, perl = TRUE)
-      v_post.alpha <- sub("\\d+$", "", v_post, perl = TRUE)
+      # Replace full match with expanded list.
+      full_start <- caps[k, match("full", nm)]
+      full_len   <- clen[k, match("full", nm)]
+      x <- paste0(
+        substr(x, 1L, full_start - 1L),
+        repl,
+        substr(x, full_start + full_len, nchar(x))
+      )
+    }
+  }
+  
+  # --- Optional: expand pure numeric ranges (1 - 3 → 1 2 3) ---
+  # Only applied if expand_numeric = TRUE and no '=' is present in the line
+  # (to avoid arithmetic like "d = 1 - 3;").
+  if (isTRUE(expand_numeric) && !grepl("=", x, fixed = TRUE)) {
+    num_pattern <- paste0(bL, "(?<full>(?<a>\\d+)\\s*-\\s*(?<b>\\d+))", bR)
+    m2 <- gregexpr(num_pattern, x, perl = TRUE)
+    if (m2[[1]][1L] != -1L) {
+      starts <- as.integer(m2[[1]])
+      caps   <- attr(m2[[1]], "capture.start")
+      clen   <- attr(m2[[1]], "capture.length")
+      nm     <- attr(m2[[1]], "capture.names")
       
-      # only enforce prefix match if we have leading alpha characters (i.e., not simple numeric 1 - 3 syntax)
-      if (length(v_pre.alpha) > 0L && length(v_post.alpha) > 0L) {
-        # if alpha prefixes do match, assume that the hyphen is not for expansion (e.g., in subtraction case)
-        if (v_pre.alpha != v_post.alpha) {
-          return(cmd)
-        }
+      cap2 <- function(k, name) {
+        i <- match(name, nm)
+        if (is.na(i) || caps[k, i] == -1L) "" else
+          substr(x, caps[k, i], caps[k, i] + clen[k, i] - 1L)
       }
       
-      # the basic positive lookbehind blows up with pure numeric constraints (1 - 3) because no alpha char precedes digit
-      # can use an non-capturing alternation grouping to allow for digits only or the final digits after alphas (as in v_post.num)
-      v_pre.num <- as.integer(sub("\\w*(?<=[A-Za-z_])(\\d+)$", "\\1", v_pre, perl = TRUE)) # use positive lookbehind to avoid greedy \w+ match -- capture all digits
-      
-      v_post.match <- regexpr("^(?:\\w*(?<=[A-Za-z_])(\\d+)|(\\d+))$", v_post, perl = TRUE)
-      stopifnot(v_post.match[1L] > 0)
-      
-      # match mat be under capture[1] or capture[2] because of alternation above
-      whichCapture <- which(attr(v_post.match, "capture.start") > 0)
-      
-      v_post.num <- as.integer(substr(v_post, attr(v_post.match, "capture.start")[whichCapture], attr(v_post.match, "capture.start")[whichCapture] + attr(v_post.match, "capture.length")[whichCapture] - 1))
-      v_post.prefix <- substr(v_post, 1, attr(v_post.match, "capture.start")[whichCapture] - 1) # just trusting that pre and post match
-      
-      if (is.na(v_pre.num) || is.na(v_post.num)) stop("Cannot expand variables: ", v_pre, ", ", v_post)
-      v_expand <- paste(v_post.prefix, v_pre.num:v_post.num, v_post.suffix, sep = "", collapse = " ")
-      
-      # for first hyphen, there may be non-hyphenated syntax preceding the initial match
-      cmd.expand[ep] <- joinRegexExpand(cmd, v_expand, hyphens, v)
-      
-      # This won't really work because the cmd.expand element may contain other variables
-      # that are at the beginning or end, prior to hyphen stuff
-      # This is superseded by logic above where @ is included in hyphen match, then trapped as suffix
-      # I don't think it will work yet for this Mplus syntax: y1-y10*5 -- the 5 wouldn't propagate
-      # handle the case of @ fixed values or * starting values used in a list
-      # example: Trait1-Trait3@1
-      ## if (grepl("@|\\*", cmd.expand[ep], perl=TRUE)) {
-      ##   exp_split <- strsplit(cmd.expand[ep], "\\s+", perl=TRUE)[[1]]
-      ##   suffixes <- sub("^([^@\\*]+)([@*][\\d\\.-]+)?$", "\\2", exp_split, perl=TRUE)
-      ##   variables <- sub("^([^@\\*]+)([@*][\\d\\.-]+)?$", "\\1", exp_split, perl=TRUE)
-      ##   suffixes <- suffixes[suffixes != ""]
-      ##   if (length(unique(suffixes)) > 1L) {
-      ##     browser()
-      
-      ##     #stop("Don't know how to interpret syntax: ", cmd)
-      ##   } else {
-      ##     variables <- paste0(variables, suffixes[1])
-      ##     cmd.expand[ep] <- paste(variables, collapse=" ")
-      ##   }
-      ## }
-      
-      ep <- ep + 1
+      for (k in rev(seq_along(starts))) {
+        a <- as.integer(cap2(k, "a")); b <- as.integer(cap2(k, "b"))
+        if (is.na(a) || is.na(b) || b < a) next
+        repl <- paste(a:b, collapse = " ")
+        full_start <- caps[k, match("full", nm)]
+        full_len   <- clen[k, match("full", nm)]
+        x <- paste0(
+          substr(x, 1L, full_start - 1L),
+          repl,
+          substr(x, full_start + full_len, nchar(x))
+        )
+      }
     }
-    return(paste(cmd.expand, collapse = ""))
-  } else {
-    return(cmd) # no hyphens to expand
   }
+  
+  # --- Unprotect sentinels ---
+  x <- gsub("‹MINUS›", "-", x, fixed = TRUE)
+  
+  x
 }

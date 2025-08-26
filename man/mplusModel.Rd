@@ -19,12 +19,12 @@ mplusModel(
 
 \item{inp_file}{the location of .inp file for this model}
 
-\item{read}{If TRUE and the .out file already exists, read the contents of the .out file using `readModels`}
+\item{read}{If TRUE and the .out file already exists, read the contents of the .out file using \code{readModels}}
 
-\item{Mplus_command}{The location of the Mplus executable to run. If NULL, use `detectMplus()`}
+\item{Mplus_command}{The location of the Mplus executable to run. If NULL, use \code{detectMplus()}}
 }
 \value{
-a `mplusModel_r6` object containing information about the model
+a \code{mplusModel_r6} object containing information about the model
 }
 \description{
 Create an mplusModel object for a given model

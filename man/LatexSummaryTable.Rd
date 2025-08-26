@@ -45,7 +45,7 @@ but these are customizable using the \code{keepCols} and \code{dropCols} paramet
 }
 \note{
 You must choose between \code{keepCols} and \code{dropCols} because it is not sensible to use these together
-  to include and exclude columns. The function will error if you include both parameters.
+to include and exclude columns. The function will error if you include both parameters.
 }
 \examples{
 # make me!!!

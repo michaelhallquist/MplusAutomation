@@ -13,9 +13,9 @@ for this function to work properly.}
 }
 \value{
 Usually NULL. Called for the side effect of removing warnings in
-  Mplus output files. If \code{\link{file.access}} testing for write permissions
-  returns \code{FALSE}, a character string note that \code{rmVarWarnings}
-  could not run.
+Mplus output files. If \code{\link{file.access}} testing for write permissions
+returns \code{FALSE}, a character string note that \code{rmVarWarnings}
+could not run.
 }
 \description{
 This function is designed to remove warnings in Mplus output files
@@ -35,6 +35,6 @@ when the \code{varwarnings = FALSE} argument is used.
 \code{\link{mplusModeler}}
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \keyword{internal}

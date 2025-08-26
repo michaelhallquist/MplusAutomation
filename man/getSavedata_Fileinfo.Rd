@@ -18,7 +18,7 @@ Returns a list of SAVEDATA file information that includes:
 \item{fileVarFormats}{A character vector containing the Fortran-style formats of variables in the dataset.}
 \item{fileVarWidths}{A numeric vector containing the widths of variables in the dataset (which is stored in fixed-width format).}
 \item{bayesFile}{The name of the BPARAMETERS file containing draws from the posterior distribution created by
-  the Mplus SAVEDATA BPARAMETERS command.}
+the Mplus SAVEDATA BPARAMETERS command.}
 \item{bayesVarNames}{A character vector containing the names of variables in the BPARAMETERS dataset.}
 \item{tech3File}{A character vector of the tech 3 output.}
 \item{tech4File}{A character vector of the tech 4 output.}

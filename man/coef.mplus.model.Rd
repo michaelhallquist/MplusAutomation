@@ -37,9 +37,9 @@ vector.}
 }
 \value{
 Either a data frame of class \sQuote{mplus.model.coefs}, or in
-  the case of multiple group models, a list of class \sQuote{mplus.model.coefs},
-  where each element of the list is a data frame of class \sQuote{mplus.model.coefs},
-  or a named vector of coefficients, if \code{raw=TRUE}.
+the case of multiple group models, a list of class \sQuote{mplus.model.coefs},
+where each element of the list is a data frame of class \sQuote{mplus.model.coefs},
+or a named vector of coefficients, if \code{raw=TRUE}.
 }
 \description{
 This is a method for returning the coefficients of an mplus.model object.
@@ -91,7 +91,7 @@ Other Mplus-Formatting:
 \code{\link{summary.mplusObject}()}
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \concept{Mplus-Formatting}
 \keyword{interface}

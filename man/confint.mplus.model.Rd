@@ -38,8 +38,8 @@ are used and all parameters are returned.}
 }
 \value{
 A data frame of class \sQuote{mplus.model.cis}, or in
-  the case of multiple group models, a list of class \sQuote{mplus.model.cis},
-  where each element of the list is a data frame of class \sQuote{mplus.model.cis}.
+the case of multiple group models, a list of class \sQuote{mplus.model.cis},
+where each element of the list is a data frame of class \sQuote{mplus.model.cis}.
 }
 \description{
 This is a method for returning the confidence of an mplus.model object.
@@ -92,7 +92,7 @@ Other Mplus-Formatting:
 \code{\link{summary.mplusObject}()}
 }
 \author{
-Joshua F. Wiley <jwiley.psych@gmail.com>
+Joshua F. Wiley \href{mailto:jwiley.psych@gmail.com}{jwiley.psych@gmail.com}
 }
 \concept{Mplus-Formatting}
 \keyword{interface}

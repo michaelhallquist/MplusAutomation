@@ -71,18 +71,18 @@ a different set of variables, including some of the above, as well as
 \item{population_sd}{Standard deviation of parameter value in population across replications.}
 \item{average_se}{Average standard error of estimated parameter value across replications.}
 \item{mse}{Mean squared error.}
-\item{cover_95}{Proportion of replications whose 95\% confidence interval for the parameter includes the population value.}
+\item{cover_95}{Proportion of replications whose 95\\% confidence interval for the parameter includes the population value.}
 \item{pct_sig_coef}{Proportion of replications for which the two-tailed significance test of the parameter is significant (p < .05).}
 
 In the case of confidence interval output (OUTPUT:CINTERVAL), the list element \code{ci.unstandardized} will contain
 a different set of variables, including some of the above, as well as
-\item{low.5}{Lower 0.5\% CI estimate.}
-\item{low2.5}{Lower 2.5\% CI estimate.}
-\item{low5}{Lower 5\% CI estimate.}
+\item{low.5}{Lower 0.5\\% CI estimate.}
+\item{low2.5}{Lower 2.5\\% CI estimate.}
+\item{low5}{Lower 5\\% CI estimate.}
 \item{est}{Parameter estimate value.}
-\item{up5}{Upper 5\% (i.e., 95\%) CI estimate.}
-\item{up2.5}{Upper 2.5\% (i.e., 97.5\%) CI estimate.}
-\item{up.5}{Upper 0.5\% (i.e., 99.5\%) CI estimate.}
+\item{up5}{Upper 5\\% (i.e., 95\\%) CI estimate.}
+\item{up2.5}{Upper 2.5\\% (i.e., 97.5\\%) CI estimate.}
+\item{up.5}{Upper 0.5\\% (i.e., 99.5\\%) CI estimate.}
 
 If the model contains multiple latent classes, an additional variable, \code{LatentClass},
 will be included, specifying the latent class number. Also, the Categorical Latent Variables section
