@@ -500,8 +500,8 @@ divideIntoFields <- function(section.text, required) {
 #' @param filename The filename
 #' @param input The input
 #' @return A list with two elements
-#'   \item{errors}{Mplus Errors}
-#'   \item{warnings}{Mplus Warnings}
+#' * `errors`: Mplus Errors
+#' * `warnings`: Mplus Warnings
 #' @keywords internal
 #' @examples
 #' # make me!!!
@@ -1047,56 +1047,56 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #'
 #' @return Returns a \code{data.frame} containing model fit statistics for all output files within \code{directory}.
 #' The \code{data.frame} contains some of the following variables (depends on model type):
-#' \item{Title}{Title for the model, specified by the TITLE: command}
-#' \item{Filename}{Filename of the output file}
-#' \item{Estimator}{Estimator used for the model (e.g., ML, MLR, WLSMV, etc.)}
-#' \item{LL}{Log-likelihood of the model}
-#' \item{BIC}{Bayesian Information Criterion}
-#' \item{aBIC}{Sample-Size-Adjusted BIC (Sclove, 1987)}
-#' \item{AIC}{Akaike's Information Criterion}
-#' \item{AICC}{Corrected AIC, based on Sugiura (1978) and recommended by Burnham & Anderson (2002)}
-#' \item{DIC}{Deviance Information Criterion. Available in ESTIMATOR=BAYES output.}
-#' \item{Parameters}{Number of parameters estimated by the model}
-#' \item{pD}{Estimated number of parameters in Bayesian output}
-#' \item{Observations}{The number of observations for the model (does not suppport multiple-groups analysis at this time)}
-#' \item{CFI}{Confirmatory Fit Index}
-#' \item{TLI}{Tucker-Lewis Index}
-#' \item{RMSEA_Estimate}{Point estimate of root mean squared error of approximation}
-#' \item{RMSEA_90CI_LB}{Lower bound of the 90\% Confidence Interval around the RMSEA estimate.}
-#' \item{RMSEA_90CI_UB}{Upper bound of the 90\% Confidence Interval around the RMSEA estimate.}
-#' \item{RMSEA_pLT05}{Probability that the RMSEA estimate falls below .05, indicating good fit.}
-#' \item{ChiSqM_Value}{Model chi-squared value}
-#' \item{ChiSqM_DF}{Model chi-squared degrees of freedom}
-#' \item{ChiSqM_PValue}{Model chi-squared p value}
-#' \item{ChiSqM_ScalingCorrection}{H0 Scaling Correction Factor}
-#' \item{ObsRepChiSqDiff_95CI_LB}{Lower bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
-#' \item{ObsRepChiSqDiff_95CI_UB}{Upper bound of 95\% confidence interval for the difference between observed and replicated chi-square values}
-#' \item{PostPred_PValue}{Posterior predictive p-value}
-#' \item{PriorPostPred_PValue}{Prior Posterior Predictive P-Value}
-#' \item{BLRT_RequestedDraws}{Number of requested bootstrap draws for TECH14.}
-#' \item{BLRT_KM1LL}{Log-likelihood of the K-1 model (one less class) for the Bootstrapped Likelihood Ratio Test (TECH14).}
-#' \item{BLRT_2xLLDiff}{Two times the log-likelihood difference of the models with K and K-1 classes (TECH14).}
-#' \item{BLRT_ParamDiff}{Difference in the number of parameters for models with K and K-1 classes (TECH14).}
-#' \item{BLRT_PValue}{P-value of the Bootstrapped Likelihood Ratio Test (TECH14) testing whether the K class model is significantly better than K-1}
-#' \item{BLRT_SuccessfulDraws}{The number of successful bootstrapped samples used in the Bootstrapped Likelihood Ratio Test}
-#' \item{SRMR}{Standardized root mean square residual}
-#' \item{SRMR.Between}{For TYPE=TWOLEVEL output, standardized root mean square residual for between level}
-#' \item{SRMR.Within}{For TYPE=TWOLEVEL output, standardized root mean square residual for within level}
-#' \item{WRMR}{Weighted root mean square residual}
-#' \item{ChiSqBaseline_Value}{Baseline (unstructured) chi-squared value}
-#' \item{ChiSqBaseline_DF}{Baseline (unstructured) chi-squared degrees of freedom}
-#' \item{ChiSqBaseline_PValue}{Baseline (unstructured) chi-squared p value}
-#' \item{NumFactors}{For TYPE=EFA output, the number of factors}
-#' \item{T11_KM1Starts}{TECH11: Number of initial stage random starts for k-1 model}
-#' \item{T11_KM1Final}{TECH11: Number of final stage optimizations for k-1 model}
-#' \item{T11_KM1LL}{TECH11: Log-likelihood of the K-1 model used for the Vuong-Lo-Mendell-Rubin LRT}
-#' \item{T11_VLMR_2xLLDiff}{TECH11: 2 * Log-likelihood Difference of K-class vs. K-1-class model for the Vuong-Lo-Mendell-Rubin LRT}
-#' \item{T11_VLMR_ParamDiff}{TECH11: Difference in number of parameters between K-class and K-1-class model for the Vuong-Lo-Mendell-Rubin LRT}
-#' \item{T11_VLMR_Mean}{TECH11: Vuong-Lo-Mendell-Rubin LRT mean}
-#' \item{T11_VLMR_SD}{TECH11: Vuong-Lo-Mendell-Rubin LRT standard deviation}
-#' \item{T11_VLMR_PValue}{TECH11: Vuong-Lo-Mendell-Rubin LRT p-value}
-#' \item{T11_LMR_Value}{TECH11: Lo-Mendell-Rubin Adjusted LRT value}
-#' \item{T11_LMR_PValue}{TECH11: Lo-Mendell-Rubin Adjusted LRT p-value}
+#' * `Title`: Title for the model, specified by the TITLE: command
+#' * `Filename`: Filename of the output file
+#' * `Estimator`: Estimator used for the model (e.g., ML, MLR, WLSMV, etc.)
+#' * `LL`: Log-likelihood of the model
+#' * `BIC`: Bayesian Information Criterion
+#' * `aBIC`: Sample-Size-Adjusted BIC (Sclove, 1987)
+#' * `AIC`: Akaike's Information Criterion
+#' * `AICC`: Corrected AIC, based on Sugiura (1978) and recommended by Burnham & Anderson (2002)
+#' * `DIC`: Deviance Information Criterion. Available in ESTIMATOR=BAYES output.
+#' * `Parameters`: Number of parameters estimated by the model
+#' * `pD`: Estimated number of parameters in Bayesian output
+#' * `Observations`: The number of observations for the model (does not suppport multiple-groups analysis at this time)
+#' * `CFI`: Confirmatory Fit Index
+#' * `TLI`: Tucker-Lewis Index
+#' * `RMSEA_Estimate`: Point estimate of root mean squared error of approximation
+#' * `RMSEA_90CI_LB`: Lower bound of the 90\% Confidence Interval around the RMSEA estimate.
+#' * `RMSEA_90CI_UB`: Upper bound of the 90\% Confidence Interval around the RMSEA estimate.
+#' * `RMSEA_pLT05`: Probability that the RMSEA estimate falls below .05, indicating good fit.
+#' * `ChiSqM_Value`: Model chi-squared value
+#' * `ChiSqM_DF`: Model chi-squared degrees of freedom
+#' * `ChiSqM_PValue`: Model chi-squared p value
+#' * `ChiSqM_ScalingCorrection`: H0 Scaling Correction Factor
+#' * `ObsRepChiSqDiff_95CI_LB`: Lower bound of 95\% confidence interval for the difference between observed and replicated chi-square values
+#' * `ObsRepChiSqDiff_95CI_UB`: Upper bound of 95\% confidence interval for the difference between observed and replicated chi-square values
+#' * `PostPred_PValue`: Posterior predictive p-value
+#' * `PriorPostPred_PValue`: Prior Posterior Predictive P-Value
+#' * `BLRT_RequestedDraws`: Number of requested bootstrap draws for TECH14.
+#' * `BLRT_KM1LL`: Log-likelihood of the K-1 model (one less class) for the Bootstrapped Likelihood Ratio Test (TECH14).
+#' * `BLRT_2xLLDiff`: Two times the log-likelihood difference of the models with K and K-1 classes (TECH14).
+#' * `BLRT_ParamDiff`: Difference in the number of parameters for models with K and K-1 classes (TECH14).
+#' * `BLRT_PValue`: P-value of the Bootstrapped Likelihood Ratio Test (TECH14) testing whether the K class model is significantly better than K-1
+#' * `BLRT_SuccessfulDraws`: The number of successful bootstrapped samples used in the Bootstrapped Likelihood Ratio Test
+#' * `SRMR`: Standardized root mean square residual
+#' * `SRMR.Between`: For TYPE=TWOLEVEL output, standardized root mean square residual for between level
+#' * `SRMR.Within`: For TYPE=TWOLEVEL output, standardized root mean square residual for within level
+#' * `WRMR`: Weighted root mean square residual
+#' * `ChiSqBaseline_Value`: Baseline (unstructured) chi-squared value
+#' * `ChiSqBaseline_DF`: Baseline (unstructured) chi-squared degrees of freedom
+#' * `ChiSqBaseline_PValue`: Baseline (unstructured) chi-squared p value
+#' * `NumFactors`: For TYPE=EFA output, the number of factors
+#' * `T11_KM1Starts`: TECH11: Number of initial stage random starts for k-1 model
+#' * `T11_KM1Final`: TECH11: Number of final stage optimizations for k-1 model
+#' * `T11_KM1LL`: TECH11: Log-likelihood of the K-1 model used for the Vuong-Lo-Mendell-Rubin LRT
+#' * `T11_VLMR_2xLLDiff`: TECH11: 2 * Log-likelihood Difference of K-class vs. K-1-class model for the Vuong-Lo-Mendell-Rubin LRT
+#' * `T11_VLMR_ParamDiff`: TECH11: Difference in number of parameters between K-class and K-1-class model for the Vuong-Lo-Mendell-Rubin LRT
+#' * `T11_VLMR_Mean`: TECH11: Vuong-Lo-Mendell-Rubin LRT mean
+#' * `T11_VLMR_SD`: TECH11: Vuong-Lo-Mendell-Rubin LRT standard deviation
+#' * `T11_VLMR_PValue`: TECH11: Vuong-Lo-Mendell-Rubin LRT p-value
+#' * `T11_LMR_Value`: TECH11: Lo-Mendell-Rubin Adjusted LRT value
+#' * `T11_LMR_PValue`: TECH11: Lo-Mendell-Rubin Adjusted LRT p-value
 #'
 #' @author Michael Hallquist
 #' @seealso \code{\link{regex}}, \code{\link{runModels}}, \code{\link{readModels}}
