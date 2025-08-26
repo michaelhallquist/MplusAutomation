@@ -3,11 +3,11 @@
 using hyphenated ranges (e.g., y1-y3) into the full list of
 variables (e.g., y1 y2 y3). This function also propagates suffixes
 from the right-hand token (e.g., @c, *c, or bare *)
-to every expanded variable (e.g., y1-y3@1 → y1@1 y2@1 y3@1)."><meta property="og:description" content="Expands Mplus shorthand expressions that specify sequences of variables
+to every expanded variable (e.g., y1-y3@1 -&amp;gt; y1@1 y2@1 y3@1)."><meta property="og:description" content="Expands Mplus shorthand expressions that specify sequences of variables
 using hyphenated ranges (e.g., y1-y3) into the full list of
 variables (e.g., y1 y2 y3). This function also propagates suffixes
 from the right-hand token (e.g., @c, *c, or bare *)
-to every expanded variable (e.g., y1-y3@1 → y1@1 y2@1 y3@1)."></head><body>
+to every expanded variable (e.g., y1-y3@1 -&amp;gt; y1@1 y2@1 y3@1)."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -50,7 +50,7 @@ to every expanded variable (e.g., y1-y3@1 → y1@1 y2@1 y3@1)."></head><body>
 using hyphenated ranges (e.g., <code>y1-y3</code>) into the full list of
 variables (e.g., <code>y1 y2 y3</code>). This function also propagates suffixes
 from the right-hand token (e.g., <code>@c</code>, <code>*c</code>, or bare <code>*</code>)
-to every expanded variable (e.g., <code>y1-y3@1</code> → <code>y1@1 y2@1 y3@1</code>).</p>
+to every expanded variable (e.g., <code>y1-y3@1</code> -&gt; <code>y1@1 y2@1 y3@1</code>).</p>
     </div>
 
     <div class="section level2">
@@ -68,7 +68,7 @@ to every expanded variable (e.g., <code>y1-y3@1</code> → <code>y1@1 y2@1 y3@1<
 
 <dt id="arg-expand-numeric">expand_numeric<a class="anchor" aria-label="anchor" href="#arg-expand-numeric"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, expand pure numeric ranges
-(e.g., <code>1-3</code> → <code>1 2 3</code>) in list-like contexts. Default: <code>FALSE</code>.</p></dd>
+(e.g., <code>1-3</code> -&gt; <code>1 2 3</code>) in list-like contexts. Default: <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -90,30 +90,25 @@ accidental expansion of arithmetic like <code>d = 1 - 3</code>).</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">expandCmd</span><span class="op">(</span><span class="st">"y1-y3 y5-y6"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in expandCmd("y1-y3 y5-y6"):</span> could not find function "expandCmd"</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu">expandCmd</span><span class="op">(</span><span class="st">"y1-y3 y5-y6"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># "y1 y2 y3 y5 y6"</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">expandCmd</span><span class="op">(</span><span class="st">"BY y1-y3@0.5;"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in expandCmd("BY y1-y3@0.5;"):</span> could not find function "expandCmd"</span>
 <span class="r-in"><span><span class="co"># "BY y1@0.5 y2@0.5 y3@0.5;"</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">expandCmd</span><span class="op">(</span><span class="st">"z10-z12*2"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in expandCmd("z10-z12*2"):</span> could not find function "expandCmd"</span>
 <span class="r-in"><span><span class="co"># "z10*2 z11*2 z12*2"</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">expandCmd</span><span class="op">(</span><span class="st">"MODEL CONSTRAINT: a = b1-b2;"</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in expandCmd("MODEL CONSTRAINT: a = b1-b2;"):</span> could not find function "expandCmd"</span>
 <span class="r-in"><span><span class="co"># "MODEL CONSTRAINT: a = b1-b2;" (unchanged)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">expandCmd</span><span class="op">(</span><span class="st">"1 - 3"</span>, expand_numeric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in expandCmd("1 - 3", expand_numeric = TRUE):</span> could not find function "expandCmd"</span>
 <span class="r-in"><span><span class="co"># "1 2 3"</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">expandCmd</span><span class="op">(</span><span class="st">"d = 1 - 3;"</span>, expand_numeric <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in expandCmd("d = 1 - 3;", expand_numeric = TRUE):</span> could not find function "expandCmd"</span>
 <span class="r-in"><span><span class="co"># "d = 1 - 3;" (unchanged because of '=')</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

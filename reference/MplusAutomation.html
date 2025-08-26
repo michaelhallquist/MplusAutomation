@@ -59,13 +59,13 @@ and tabulating model parameters and fit statistics.</p>
 
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The MplusAutomation package has four primary purposes:</p><ol><li><p>To automatically run groups/batches of models.</p></li>
+    <p>The MplusAutomation package has four primary purposes:</p><ul><li><p>To automatically run groups/batches of models.</p></li>
 <li><p>To provide routines to extract model fit statistics, parameter estimates, and raw data from 'Mplus' output files.</p></li>
 <li><p>To facilitate comparisons among models</p></li>
-<li><p>To provide a template language that allows for the creation of related input files.</p></li>
-</ol><p>The core routine for running batches of models is <code><a href="runModels.html">runModels</a></code>, with
-an easy-to-use GUI wrapper, <code><a href="runModels_Interactive.html">runModels_Interactive</a></code>.</p>
-<p>The core routine for extracting information from 'Mplus' outputs is <code><a href="readModels.html">readModels</a></code>, which
+<li><p>To provide a template language that allows for the creation of related input files.
+The core routine for running batches of models is <code><a href="runModels.html">runModels</a></code>, with
+an easy-to-use GUI wrapper, <code><a href="runModels_Interactive.html">runModels_Interactive</a></code>.</p></li>
+</ul><p>The core routine for extracting information from 'Mplus' outputs is <code><a href="readModels.html">readModels</a></code>, which
 returns a list containing all output sections that the package can extract.</p>
 <p>To extract summaries, parameters, modification indices, SAVEDATA output, and all other sections that the package
 can understand, use the <code><a href="readModels.html">readModels</a></code> function. This is the recommended way to extract 'Mplus'
@@ -90,7 +90,7 @@ in order to understand the template language: vignette("Vignette", package="Mplu
 <p>In addition to the major functions above, a function for converting an R data.frame
 for use with 'Mplus' is provided: <code><a href="prepareMplusData.html">prepareMplusData</a></code>. This converts the
 data.frame to a tab-delimited file and provides an 'Mplus' syntax stub for variable names.</p>
-<table class="table table"><tr><td>Package:</td><td>MplusAutomation</td></tr><tr><td>Type:</td><td>Package</td></tr><tr><td>Version:</td><td>1.2</td></tr><tr><td>Date:</td><td>2024-05-16</td></tr><tr><td>License:</td><td>LGPL-3</td></tr><tr><td>LazyLoad:</td><td>yes</td></tr></table></div>
+<table class="table table"><tr><td>Package:</td><td>MplusAutomation</td></tr><tr><td>Type:</td><td>Package</td></tr><tr><td>Version:</td><td>1.2</td></tr><tr><td>Date:</td><td>2025-08-25</td></tr><tr><td>License:</td><td>LGPL-3</td></tr><tr><td>LazyLoad:</td><td>yes</td></tr></table></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Mplus software. Muthen and Muthen. <a href="http://www.statmodel.com" class="external-link">http://www.statmodel.com</a></p>

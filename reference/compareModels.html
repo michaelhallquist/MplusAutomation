@@ -129,62 +129,31 @@ element with the chi-square difference test.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Model outputs to be compared should come from the <code>readModels</code> command.</p>
-<p>The <code>show</code> parameter can be one or more of the following, which can be passed as a vector, such as c("equal", "pdiff").</p>
-<dl><dt>show</dt>
-<dd>
-<dl><dt>"all"</dt>
-<dd><p>Display all available model comparison. Equivalent to
-c("summaries", "equal", "diff", "pdiff", "unique").</p></dd>
-
-<dt>"summaries"</dt>
-<dd><p>Print a comparison of model summary statistics. Compares the following summary
-statistics (where available): c("Title", "Observations", "Estimator", "Parameters", "LL",
-"AIC", "BIC", "ChiSqM_Value", "ChiSqM_DF", "CFI", "TLI", "RMSEA", "SRMR", "WRMR")</p></dd>
-
-<dt>"allsummaries"</dt>
-<dd><p>Prints a comparison of all summary statistics available in each model. May
-generate a lot of output.</p></dd>
-
-<dt>"equal"</dt>
-<dd><p>Print parameter estimates that are equal between models
-(i.e., <code>&lt;= equalityMargin["param"]</code>)</p></dd>
-.
-<dt>"diff"</dt>
-<dd><p>Print parameter estimates that are different between models
-(i.e., <code>&gt; equalityMargin["param"]</code>)</p></dd>
-.
-<dt>"pdiff"</dt>
-<dd><p>Print parameter estimates where the p-values differ between models
-(i.e., <code>&gt; equalityMargin["pvalue"]</code>)</p></dd>
-.
-<dt>"unique"</dt>
-<dd><p>Print parameter estimates that are unique to each model.</p></dd>
-
-
-</dl></dd>
-
-
-</dl><p>The <code>sort</code> parameter determines the order in which parameter estimates are displayed. The following options are available:</p>
-<dl><dt>sort</dt>
-<dd>
-<dl><dt>"none"</dt>
-<dd><p>No sorting is performed, so parameters are output in the order presented in Mplus. (Default)</p></dd>
-
-<dt>"type"</dt>
-<dd><p>Sort parameters by their role in the model. This groups output by regression coefficient (ON),
-factor loadings (BY), covariances (WITH), and so on. Within each type, output is alphabetical.</p></dd>
-
-<dt>"alphabetical"</dt>
-<dd><p>Sort parameters in alphabetical order.</p></dd>
-
-<dt>"maxDiff"</dt>
-<dd><p>Sort parameter output by the largest differences between models (high to low).</p></dd>
-
-
-</dl></dd>
-
-
-</dl></div>
+<p>The <code>show</code> parameter can be one or more of the following, which can be
+passed as a vector, such as c("equal", "pdiff").</p><ul><li><p><code>"all"</code>: Display all available model comparison. Equivalent to
+<code>c("summaries", "equal", "diff", "pdiff", "unique")</code>.</p></li>
+<li><p><code>"summaries"</code>: Print a comparison of model summary statistics. Compares
+the following summary statistics (where available):
+<code>c("Title", "Observations", "Estimator", "Parameters", "LL", "AIC", "BIC", "ChiSqM_Value", "ChiSqM_DF", "CFI", "TLI", "RMSEA", "SRMR", "WRMR")</code>.</p></li>
+<li><p><code>"allsummaries"</code>: Print a comparison of all summary statistics available
+in each model. May generate a lot of output.</p></li>
+<li><p><code>"equal"</code>: Print parameter estimates that are equal between models
+(i.e., <code>&lt;= equalityMargin["param"]</code>).</p></li>
+<li><p><code>"diff"</code>: Print parameter estimates that are different between models
+(i.e., <code>&gt; equalityMargin["param"]</code>).</p></li>
+<li><p><code>"pdiff"</code>: Print parameter estimates where the p-values differ between
+models (i.e., <code>&gt; equalityMargin["pvalue"]</code>).</p></li>
+<li><p><code>"unique"</code>: Print parameter estimates that are unique to each model.</p></li>
+</ul><p>The <code>sort</code> parameter determines the order in which parameter estimates
+are displayed. The following options are available:</p><ul><li><p><code>"none"</code>: No sorting is performed, so parameters are output in the order
+presented in Mplus. (Default)</p></li>
+<li><p><code>"type"</code>: Sort parameters by their role in the model. This groups output
+by regression coefficient (ON), factor loadings (BY), covariances (WITH),
+and so on. Within each type, output is alphabetical.</p></li>
+<li><p><code>"alphabetical"</code>: Sort parameters in alphabetical order.</p></li>
+<li><p><code>"maxDiff"</code>: Sort parameter output by the largest differences between
+models (high to low).</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
     <p>Michael Hallquist</p>
