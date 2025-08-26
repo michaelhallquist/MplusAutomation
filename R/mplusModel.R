@@ -392,18 +392,47 @@ mplusModel_r6 <- R6::R6Class(
       submitModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command, ...)
     },
     
-    #' @description run this model locally using `runModels`
+    #' @description run this model locally using `runModels`. The method detects
+    #'   changes in the data and input syntax and only rewrites the corresponding
+    #'   files when updates are detected.
     #' @param replaceOutfile Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists; 
     #'   “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
     #'   file is more recent than the output file modified date (implying there have been updates to the model).
     #' @param ... additional arguments passed to `runModels`
     run = function(replaceOutfile = "modifiedDate", ...) {
-      # TODO: only write inp and dat files if things have changed compared to disk
-      self$write_dat()
-      self$write_inp()
+      # Only write input and data files when the current contents differ from those on disk
+
+      # check whether data have changed compared to existing .dat file
+      if (!private$pvt_is_montecarlo && !is.null(self$data)) {
+        write_dat <- TRUE
+        cols <- private$pvt_variables
+        if (is.null(cols)) cols <- names(self$data)
+        if (file.exists(self$dat_file)) {
+          new_hash <- digest::digest(self$data[, cols, drop = FALSE], algo = "md5")
+          existing <- tryCatch(
+            data.table::fread(self$dat_file, col.names = cols, data.table = FALSE),
+            error = function(e) NULL
+          )
+          if (!is.null(existing)) {
+            ext_hash <- digest::digest(existing, algo = "md5")
+            if (isTRUE(new_hash == ext_hash)) write_dat <- FALSE
+          }
+        }
+        if (write_dat) self$write_dat(quiet = TRUE)
+      }
+
+      # check whether the input file has changed
+      write_inp <- TRUE
+      if (file.exists(self$inp_file)) {
+        new_md5 <- digest::digest(self$syntax, algo = "md5", serialize = FALSE)
+        ext_md5 <- digest::digest(readLines(self$inp_file), algo = "md5", serialize = FALSE)
+        if (isTRUE(new_md5 == ext_md5)) write_inp <- FALSE
+      }
+      if (write_inp) self$write_inp(quiet = TRUE)
+
       runModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command, ...)
       self$read(force = TRUE) # read/re-read after estimation
-      
+
     }
   )
 )
