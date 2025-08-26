@@ -423,8 +423,8 @@ mplusModel_r6 <- R6::R6Class(
       # check whether the input file has changed
       write_inp <- TRUE
       if (file.exists(self$inp_file)) {
-        new_md5 <- digest::digest(self$syntax, algo = "md5", serialize = FALSE)
-        ext_md5 <- digest::digest(readLines(self$inp_file), algo = "md5", serialize = FALSE)
+        new_md5 <- digest::digest(self$syntax, algo = "md5", serialize = TRUE)
+        ext_md5 <- digest::digest(readLines(self$inp_file), algo = "md5", serialize = TRUE)
         if (isTRUE(new_md5 == ext_md5)) write_inp <- FALSE
       }
       if (write_inp) self$write_inp(quiet = TRUE)

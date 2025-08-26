@@ -220,7 +220,9 @@ file is more recent than the output file modified date (implying there have been
 \if{html}{\out{<a id="method-mplusModel_r6-run"></a>}}
 \if{latex}{\out{\hypertarget{method-mplusModel_r6-run}{}}}
 \subsection{Method \code{run()}}{
-run this model locally using \code{runModels}
+run this model locally using \code{runModels}. The method detects
+changes in the data and input syntax and only rewrites the corresponding
+files when updates are detected.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$run(replaceOutfile = "modifiedDate", ...)}\if{html}{\out{</div>}}
 }

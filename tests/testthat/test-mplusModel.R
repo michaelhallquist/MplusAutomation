@@ -65,3 +65,82 @@ test_that("mplusModel exposes readModels sections", {
   expect_true(length(m$errors) == 0L)
 })
 
+
+test_that("mplusModel only rewrites input and data when changed", {
+  syn <- "
+TITLE:  this is an example of a simple linear
+        regression for a continuous observed
+        dependent variable with two covariates
+DATA:   FILE IS ex3.1.dat;
+VARIABLE:       NAMES ARE y1 x1 x3;
+MODEL:  y1 ON x1 x3;
+"
+  dat <- as.data.frame(data.table::fread(
+    testthat::test_path("submitModels", "ex3.1.dat"),
+    data.table = FALSE
+  ))
+  names(dat) <- c("y1", "x1", "x3")
+  tmp <- tempfile()
+  dir.create(tmp)
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+  m <- mplusModel(
+    syntax = syn,
+    data = dat,
+    inp_file = file.path(tmp, "ex3.1.inp"),
+    Mplus_command = mplus_fake
+  )
+  
+  
+  fake_runModels <- function(target, ...) {
+    file.create(sub("\\.inp$", ".out", target))
+    invisible(NULL)
+  }
+  fake_readModels <- function(...) {
+    list()
+  }
+  
+  run_stub <- function() {
+    testthat::with_mocked_bindings(
+      m$run(replaceOutfile = "always"),
+      runModels = fake_runModels,
+      readModels = fake_readModels
+    )
+  }
+  
+  # run things the first time, get modified times
+  run_stub()
+  mtime_inp1 <- file.info(m$inp_file)$mtime
+  mtime_dat1 <- file.info(m$dat_file)$mtime
+  
+  # run again with no changes -- should not write files again
+  Sys.sleep(1)
+  run_stub()
+  mtime_inp2 <- file.info(m$inp_file)$mtime
+  mtime_dat2 <- file.info(m$dat_file)$mtime
+  
+  expect_equal(mtime_inp2, mtime_inp1)
+  expect_equal(mtime_dat2, mtime_dat1)
+  
+  # run again with new syntax -- inp changes, dat does not
+  Sys.sleep(1)
+  m$syntax <- c(m$syntax, "! new comment")
+  run_stub()
+  mtime_inp3 <- file.info(m$inp_file)$mtime
+  mtime_dat3 <- file.info(m$dat_file)$mtime
+  
+  expect_gt(mtime_inp3, mtime_inp2)
+  expect_equal(mtime_dat3, mtime_dat2)
+  
+  # run again with new data -- inp stays the same, dat changes
+  Sys.sleep(1)
+  dat2 <- m$data
+  dat2$y1[1] <- dat2$y1[1] + 1
+  m$data <- dat2
+  run_stub()
+  mtime_inp4 <- file.info(m$inp_file)$mtime
+  mtime_dat4 <- file.info(m$dat_file)$mtime
+  
+  expect_equal(mtime_inp4, mtime_inp3)
+  expect_gt(mtime_dat4, mtime_dat3)
+})
