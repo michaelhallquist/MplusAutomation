@@ -86,27 +86,29 @@ Defaults to \code{FALSE}.}
 }
 \value{
 A list of class \code{mplusObject} with elements
-\item{TITLE}{The title in Mplus (if defined)}
-\item{DATA}{The data section in Mplus (if defined)}
-\item{VARIABLE}{The variable section in Mplus (if defined)}
-\item{DEFINE}{The define section in Mplus (if defined)}
-\item{MONTECARLO}{The montecarlo section in Mplus (if defined)}
-\item{MODELPOPULATION}{The modelpopulation section in Mplus (if defined)}
-\item{MODELMISSING}{The modelmissing section in Mplus (if defined)}
-\item{ANALYSIS}{The analysis section in Mplus (if defined)}
-\item{MODEL}{The model section in Mplus (if defined)}
-\item{MODELINDIRECT}{The modelindirect section in Mplus (if defined)}
-\item{MODELCONSTRAINT}{The modelconstraint section in Mplus (if defined)}
-\item{MODELTEST}{The modeltest section in Mplus (if defined)}
-\item{MODELPRIORS}{The modelpriors section in Mplus (if defined)}
-\item{OUTPUT}{The output section in Mplus (if defined)}
-\item{SAVEDATA}{The savedata section in Mplus (if defined)}
-\item{PLOT}{The plot section in Mplus (if defined)}
-\item{results}{NULL by default, but can be later updated to include the results from the model run.}
-\item{usevariables}{A character vector of the variables from the \code{R} data set to be used.}
-\item{rdata}{The \code{R} data set to use for the model.}
-\item{imputed}{A logical whether the data are multiply imputed.}
-\item{autov}{A logical whether the data should have the usevariables detected automatically or not}
+\itemize{
+\item \code{TITLE}: The title in Mplus (if defined)
+\item \code{DATA}: The data section in Mplus (if defined)
+\item \code{VARIABLE}: The variable section in Mplus (if defined)
+\item \code{DEFINE}: The define section in Mplus (if defined)
+\item \code{MONTECARLO}: The montecarlo section in Mplus (if defined)
+\item \code{MODELPOPULATION}: The modelpopulation section in Mplus (if defined)
+\item \code{MODELMISSING}: The modelmissing section in Mplus (if defined)
+\item \code{ANALYSIS}: The analysis section in Mplus (if defined)
+\item \code{MODEL}: The model section in Mplus (if defined)
+\item \code{MODELINDIRECT}: The modelindirect section in Mplus (if defined)
+\item \code{MODELCONSTRAINT}: The modelconstraint section in Mplus (if defined)
+\item \code{MODELTEST}: The modeltest section in Mplus (if defined)
+\item \code{MODELPRIORS}: The modelpriors section in Mplus (if defined)
+\item \code{OUTPUT}: The output section in Mplus (if defined)
+\item \code{SAVEDATA}: The savedata section in Mplus (if defined)
+\item \code{PLOT}: The plot section in Mplus (if defined)
+\item \code{results}: NULL by default, but can be later updated to include the results from the model run.
+\item \code{usevariables}: A character vector of the variables from the \code{R} data set to be used.
+\item \code{rdata}: The \code{R} data set to use for the model.
+\item \code{imputed}: A logical whether the data are multiply imputed.
+\item \code{autov}: A logical whether the data should have the usevariables detected automatically or not
+}
 }
 \description{
 This is a function to create an Mplus model object in \code{R}.

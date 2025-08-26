@@ -10,7 +10,7 @@ expandCmd(cmd, expand_numeric = FALSE)
 \item{cmd}{A single character string containing Mplus syntax to expand.}
 
 \item{expand_numeric}{Logical. If \code{TRUE}, expand pure numeric ranges
-(e.g., \code{1-3} → \code{1 2 3}) in list-like contexts. Default: \code{FALSE}.}
+(e.g., \code{1-3} -> \verb{1 2 3}) in list-like contexts. Default: \code{FALSE}.}
 }
 \value{
 A character string with hyphenated ranges expanded to explicit
@@ -21,7 +21,7 @@ Expands Mplus shorthand expressions that specify sequences of variables
 using hyphenated ranges (e.g., \code{y1-y3}) into the full list of
 variables (e.g., \code{y1 y2 y3}). This function also propagates suffixes
 from the right-hand token (e.g., \code{@c}, \code{*c}, or bare \code{*})
-to every expanded variable (e.g., \code{y1-y3@1} → \code{y1@1 y2@1 y3@1}).
+to every expanded variable (e.g., \verb{y1-y3@1} -> \verb{y1@1 y2@1 y3@1}).
 }
 \details{
 By default, the function does \strong{not} expand pure numeric ranges (e.g.,
@@ -35,6 +35,7 @@ Hyphens in \code{MODEL CONSTRAINT} expressions such as
 \code{a = b1-b2} are explicitly protected and left untouched.
 }
 \examples{
+\dontrun{
 expandCmd("y1-y3 y5-y6")
 # "y1 y2 y3 y5 y6"
 
@@ -52,6 +53,6 @@ expandCmd("1 - 3", expand_numeric = TRUE)
 
 expandCmd("d = 1 - 3;", expand_numeric = TRUE)
 # "d = 1 - 3;" (unchanged because of '=')
-
+}
 }
 \keyword{internal}

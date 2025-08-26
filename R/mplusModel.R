@@ -194,7 +194,6 @@ mplusModel_r6 <- R6::R6Class(
     # Pass through the argument sec as a function attribute because R6 resets the function environment
     # to point to the R6 object itself (so self and private are visible)
     
-    #' @section Active bindings (from `readModels()`):
     #' @field input Read-only accessor for the `input` section returned by `readModels()`.
     #' @field warnings Read-only accessor for the `warnings` section returned by `readModels()`.
     #' @field errors Read-only accessor for the `errors` section returned by `readModels()`.
@@ -382,8 +381,8 @@ mplusModel_r6 <- R6::R6Class(
     },
     
     #' @description submit this model for estimation on an HPC using `submitModels`
-    #' @param replaceOutfile Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists; 
-    #'   “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
+    #' @param replaceOutfile Currently supports three settings: "always", which runs all models, regardless of whether an output file for the model exists; 
+    #'   "never", which does not run any model that has an existing output file; and "modifiedDate", which only runs a model if the modified date for the input
     #'   file is more recent than the output file modified date (implying there have been updates to the model).
     #' @param ... additional arguments passed to `submitModels`
     submit = function(replaceOutfile = "modifiedDate", ...) {
@@ -395,8 +394,8 @@ mplusModel_r6 <- R6::R6Class(
     #' @description run this model locally using `runModels`. The method detects
     #'   changes in the data and input syntax and only rewrites the corresponding
     #'   files when updates are detected.
-    #' @param replaceOutfile Currently supports three settings: “always”, which runs all models, regardless of whether an output file for the model exists; 
-    #'   “never”, which does not run any model that has an existing output file; and “modifiedDate”, which only runs a model if the modified date for the input
+    #' @param replaceOutfile Currently supports three settings: "always", which runs all models, regardless of whether an output file for the model exists; 
+    #'   "never", which does not run any model that has an existing output file; and "modifiedDate", which only runs a model if the modified date for the input
     #'   file is more recent than the output file modified date (implying there have been updates to the model).
     #' @param ... additional arguments passed to `runModels`
     run = function(replaceOutfile = "modifiedDate", ...) {
@@ -460,7 +459,7 @@ joinRegexExpand <- function(cmd, argExpand, matches, iterator, matchLength = "ma
 #' using hyphenated ranges (e.g., \code{y1-y3}) into the full list of
 #' variables (e.g., \code{y1 y2 y3}). This function also propagates suffixes
 #' from the right-hand token (e.g., \code{@c}, \code{*c}, or bare \code{*})
-#' to every expanded variable (e.g., \code{y1-y3@1} → \code{y1@1 y2@1 y3@1}).
+#' to every expanded variable (e.g., `y1-y3@1` -> `y1@1 y2@1 y3@1`).
 #'
 #' By default, the function does **not** expand pure numeric ranges (e.g.,
 #' \code{1-3}) to avoid confusion with arithmetic subtraction. If
@@ -474,12 +473,13 @@ joinRegexExpand <- function(cmd, argExpand, matches, iterator, matchLength = "ma
 #'
 #' @param cmd A single character string containing Mplus syntax to expand.
 #' @param expand_numeric Logical. If \code{TRUE}, expand pure numeric ranges
-#'   (e.g., \code{1-3} → \code{1 2 3}) in list-like contexts. Default: \code{FALSE}.
+#'   (e.g., `1-3` -> `1 2 3`) in list-like contexts. Default: \code{FALSE}.
 #'
 #' @return A character string with hyphenated ranges expanded to explicit
 #'   variable lists.
 #'
 #' @examples
+#' \dontrun{
 #' expandCmd("y1-y3 y5-y6")
 #' # "y1 y2 y3 y5 y6"
 #'
@@ -497,17 +497,17 @@ joinRegexExpand <- function(cmd, argExpand, matches, iterator, matchLength = "ma
 #'
 #' expandCmd("d = 1 - 3;", expand_numeric = TRUE)
 #' # "d = 1 - 3;" (unchanged because of '=')
-#'
+#' }
 #' @keywords internal
 expandCmd <- function(cmd, expand_numeric = FALSE) {
   x <- cmd
   
   # --- Protect constraint-style identifier subtraction (preserve spacing) ---
-  # Example: "a = b1-b2" becomes "a = b1‹MINUS›b2"
+  # Example: "a = b1-b2" becomes "a = b1<MINUS>b2"
   # The space after '=' is captured and restored unchanged.
   x <- gsub(
     "(=\\s*)([A-Za-z_][A-Za-z_0-9]*\\d+)\\s*-\\s*([A-Za-z_][A-Za-z_0-9]*\\d+)",
-    "\\1\\2‹MINUS›\\3",
+    "\\1\\2<MINUS>\\3",
     x, perl = TRUE
   )
   
@@ -565,7 +565,7 @@ expandCmd <- function(cmd, expand_numeric = FALSE) {
     }
   }
   
-  # --- Optional: expand pure numeric ranges (1 - 3 → 1 2 3) ---
+  # --- Optional: expand pure numeric ranges (1 - 3 -> 1 2 3) ---
   # Only applied if expand_numeric = TRUE and no '=' is present in the line
   # (to avoid arithmetic like "d = 1 - 3;").
   if (isTRUE(expand_numeric) && !grepl("=", x, fixed = TRUE)) {
@@ -599,7 +599,7 @@ expandCmd <- function(cmd, expand_numeric = FALSE) {
   }
   
   # --- Unprotect sentinels ---
-  x <- gsub("‹MINUS›", "-", x, fixed = TRUE)
+  x <- gsub("<MINUS>", "-", x, fixed = TRUE)
   
   x
 }

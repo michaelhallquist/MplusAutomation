@@ -126,7 +126,7 @@ extractModIndices_1file <- function(outfiletext, filename) {
 #' (DEPRECATED) Extract model modification indices.
 #'
 #' Extracts the model modification indices from the MODEL MODIFICATION INDICES section of one
-#' or more Mplus output files. If the \code{target} is a directory, all .out files therein will be parsed
+#' or more Mplus output files. If the `target` is a directory, all .out files therein will be parsed
 #' and a single list will be returned, where the list elements are named by the output file name.
 #' Returned parameters typically include the pairwise relationships between variables to be freed,
 #' the change in model chi-square (M.I.), and the expected parameter change (E.P.C.).
@@ -151,11 +151,11 @@ extractModIndices_1file <- function(outfiletext, filename) {
 #'   corresponding output file name. The basic \code{data.frame} containing
 #'   the MODEL MODIFICATION INDICES section of \code{outfile}. Variables include
 #' * `modV1`: The first variable in the pair to be freed according to the M.I.
-#' * `operator`: The suggested relationship between \code{modV1} and \code{modV2
-#'     (e.g., WITH for freeing the covariance between \code{modV1} and \code{modV2})}
+#' * `operator`: The suggested relationship between `modV1` and `modV2`
+#'     (e.g., WITH for freeing the covariance between `modV1` and `modV2`)
 #' * `modV2`: The first variable in the pair to be freed according to the M.I.
 #' * `MI`: The decrease in model chi-square if the specified relationship is freely estimated
-#' * `EPC`: The expected parameter estimate between \code{modV1} and \code{modV2} if freed.
+#' * `EPC`: The expected parameter estimate between `modV1` and `modV2` if freed.
 #' * `Std_EPC`: The EPC value standardized using the variances of the continuous latent variables.
 #' * `StdYX_EPC`: The EPC value standardized using the variances of the continuous latent variables as well as the variances of the background and/or outcome variables.
 #' @author Michael Hallquist

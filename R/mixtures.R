@@ -190,6 +190,18 @@ mixtureSummaryTable <- function(modelList,
   return(model_summaries)
 }
 
+# modelList,
+# variables = NULL,
+# coefficients = c("unstandardized",
+#                  "stdyx.standardized",
+#                  "stdy.standardized",
+#                  "stdy.standardized"),
+# parameter = c("Means", "Intercepts"),
+# ci = .95,
+# bw = FALSE,
+# rawdata = FALSE,
+# alpha_range = c(0, .1)
+
 
 #' Create latent profile plots
 #'
@@ -199,13 +211,13 @@ mixtureSummaryTable <- function(modelList,
 #' @param variables A character vectors with the names of the variables
 #' (included in the Mplus output) to be plotted.
 #' @param coefficients Which type of coefficients to plot on the y-axis; default
-#' is 'unstandardized'. Options include: c('stdyx.standardized',
-#' 'stdy.standardized', 'std.standardized')
+#' is 'unstandardized'. Options include: `c('stdyx.standardized',
+#' 'stdy.standardized', 'std.standardized')`
 #' @param parameter Which parameter to plot (from Mplus parameter estimate
 #' headings included in the output).
-#' Defaults to c('Means', 'Intercepts').
+#' Defaults to `c('Means', 'Intercepts')`.
 #' @param ci What confidence interval should the errorbars span? Defaults to
-#' a 95\% confidence interval. Set to NULL to remove errorbars.
+#' a 95% confidence interval. Set to NULL to remove errorbars.
 #' @param bw Logical. Should the plot be black and white (for print), or color?
 #' @param rawdata Should raw data be plotted in the background? Setting this to
 #' TRUE might result in long plotting times. Requires including the Mplus syntax
@@ -235,17 +247,6 @@ mixtureSummaryTable <- function(modelList,
 #' \dontrun{
 #' plotMixtures(res, coefficients = "stdyx.standardized")
 #' }
-# modelList,
-# variables = NULL,
-# coefficients = c("unstandardized",
-#                  "stdyx.standardized",
-#                  "stdy.standardized",
-#                  "stdy.standardized"),
-# parameter = c("Means", "Intercepts"),
-# ci = .95,
-# bw = FALSE,
-# rawdata = FALSE,
-# alpha_range = c(0, .1)
 plotMixtures <- function(modelList,
                          variables = NULL,
                          coefficients = c("unstandardized",
