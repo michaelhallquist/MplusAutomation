@@ -5,15 +5,15 @@ test_that("submitModels job ID check", {
   # checks on parsing of scheduling arguments and script setup
   mplus_fake <- tempfile()
   file.create(mplus_fake)
-  track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE, 
-                        max_time_per_job = "4:10:00", combine_jobs = TRUE, Mplus_command = mplus_fake)
+  track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE, replaceOutfile = "always",
+                        max_time_per_job = "4:10:00", combine_jobs = FALSE, Mplus_command = mplus_fake)
   
   expect_equal(track$jobid[1], "dummy_1")
   
   # job allocation checks
-  expect_equal(track$memgb[1], 4)
-  expect_equal(track$cores[1], 1)
-  expect_equal(track$wall_time[1], "3:00:00")
+  expect_equal(track$memgb[1], 16)
+  expect_equal(track$cores[1], 2)
+  expect_equal(track$wall_time[1], "0:30:00")
   
 })
 
