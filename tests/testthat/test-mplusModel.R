@@ -53,6 +53,27 @@ test_that("mplusModel reads existing output", {
   expect_equal(nrow(m$data), 500)
 })
 
+test_that("mplusModel falls back to basename for missing data file", {
+  tmp <- tempdir()
+  file.copy(testthat::test_path("submitModels", "ex3.1.dat"), tmp, overwrite = TRUE)
+  file.copy(testthat::test_path("submitModels", "ex3.1.inp"), tmp, overwrite = TRUE)
+  file.copy(testthat::test_path("ex3.1.out"), tmp, overwrite = TRUE)
+
+  bad_path <- normalizePath(file.path(tempdir(), "nonexistent", "path", "ex3.1.dat"),
+                            winslash = "/", mustWork = FALSE)
+  inp_lines <- readLines(file.path(tmp, "ex3.1.inp"))
+  inp_lines <- gsub("ex3.1.dat", bad_path, inp_lines, fixed = TRUE)
+  writeLines(inp_lines, file.path(tmp, "ex3.1.inp"))
+  out_lines <- readLines(file.path(tmp, "ex3.1.out"))
+  out_lines <- gsub("ex3.1.dat", bad_path, out_lines, fixed = TRUE)
+  writeLines(out_lines, file.path(tmp, "ex3.1.out"))
+
+  mplus_fake <- tempfile(); file.create(mplus_fake)
+  m <- mplusModel(inp_file = file.path(tmp, "ex3.1.inp"), read = TRUE, Mplus_command = mplus_fake)
+  expect_equal(nrow(m$data), 500)
+  expect_equal(m$dat_file, file.path(tmp, "ex3.1.dat"))
+})
+
 test_that("mplusModel exposes readModels sections", {
   tmp <- tempdir()
   file.copy(testthat::test_path("submitModels","ex3.1.inp"), tmp, overwrite = TRUE)

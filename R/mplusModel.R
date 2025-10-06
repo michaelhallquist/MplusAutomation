@@ -273,12 +273,40 @@ mplusModel_r6 <- R6::R6Class(
         if (is.null(data) && private$pvt_output_loaded && !is.null(self$input$data$file)) {
           dfile <- self$input$data$file
           private$pvt_dat_file <- self$input$data$file
-          
-          # if file cannot be loaded as is because of a relative path problem, look in the model directory
-          if (!file.exists(dfile)) dfile <- file.path(private$pvt_model_dir, dfile)
-          data <- tryCatch(data.table::fread(dfile, header = FALSE, na.strings=c("*", "."), strip.white=TRUE, data.table = FALSE),
-                           error=function(e) { warning("Could not load data file: ", dfile); return(NULL) })
-          
+
+          # If the data file cannot be loaded as-is, attempt to locate it in the
+          # directory of the input/output files.  This handles cases where the
+          # data file was specified with an absolute path on another machine but
+          # the .dat, .inp and .out files all reside in the same folder.
+          if (!file.exists(dfile)) {
+            # first, try using the provided path relative to the model directory
+            rel_dfile <- file.path(private$pvt_model_dir, dfile)
+            if (file.exists(rel_dfile)) {
+              dfile <- rel_dfile
+            } else {
+              # next, try just the basename of the data file in the model directory
+              base_dfile <- file.path(private$pvt_model_dir, basename(dfile))
+              if (file.exists(base_dfile)) {
+                dfile <- base_dfile
+                private$pvt_dat_file <- basename(dfile)
+              }
+            }
+          }
+
+          data <- tryCatch(
+            data.table::fread(
+              dfile,
+              header = FALSE,
+              na.strings = c("*", "."),
+              strip.white = TRUE,
+              data.table = FALSE
+            ),
+            error = function(e) {
+              warning("Could not load data file: ", dfile)
+              return(NULL)
+            }
+          )
+
           # set the names of the data if read succeeds
           if (!is.null(data)) names(data) <- strsplit(expandCmd(self$input$variable$names), "\\s+")[[1]]
         }
