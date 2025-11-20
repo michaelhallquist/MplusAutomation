@@ -1,0 +1,381 @@
+# MplusAutomation
+
+The `MplusAutomation` package leverages the flexibility of the `R`
+language to automate latent variable model estimation and interpretation
+using Mplus, a powerful latent variable modeling program developed by
+Muthén and Muthén (www.statmodel.com). Specifically, `MplusAutomation`
+provides routines for creating related groups of models, running batches
+of models, and extracting and tabulating model parameters and fit
+statistics.
+
+## Installation
+
+You can install the latest release of `MplusAutomation` directly from
+[CRAN](https://CRAN.R-project.org/package=MplusAutomation) by running
+
+``` R
+install.packages("MplusAutomation")
+```
+
+Alternately, if you want to try out the latest development
+`MplusAutomation` code, you can install it straight from github using
+Hadley Wickham’s `devtools` package. If you do not have `devtools`
+installed, first install it and then install `MplusAutomation`.
+
+``` R
+#install.packages("devtools")
+library(devtools)
+
+install_github("michaelhallquist/MplusAutomation")
+```
+
+## Questions
+
+For questions, answers, and updates on the status of the
+`MplusAutomation` package, email or subscribe to the Google group
+[list](https://groups.google.com/forum/#!forum/mplusautomation).
+
+## Examples
+
+You can find a detailed example of how to use the `MplusAutomation`
+package in the
+[vignette](https://michaelhallquist.github.io/MplusAutomation/articles/vignette.html)
+.
+
+Here is an example of using the package to run a simple path model using
+the `mtcars` dataset built into `R`.
+
+``` R
+library(MplusAutomation)
+
+pathmodel <- mplusObject(
+   TITLE = "MplusAutomation Example - Path Model;",
+   MODEL = "
+     mpg ON hp;
+     wt ON disp;",
+   OUTPUT = "CINTERVAL;",
+   rdata = mtcars)
+
+## R variables selected automatically as any variable name that occurs in the MODEL, VARIABLE, or DEFINE section.
+## If any issues, suggest explicitly specifying USEVARIABLES.
+## A starting point may be:
+## USEVARIABLES = mpg disp hp wt;
+
+fit <- mplusModeler(pathmodel, modelout = "model1.inp", run = 1L)
+```
+
+That is all it takes to run Mplus! `MplusAutomation` takes care of
+figuring out which variables from your `R` dataset are used in the model
+and which are not (if it get’s confused, you can also specify
+`usevariables`). It creates a dataset suitable for Mplus, calls Mplus to
+run the model on the dataset, and reads it back into `R`.
+
+There is even pretty printing now. To see the results:
+
+``` r
+library(texreg)
+screenreg(fit, summaries = c("Observations", "CFI", "SRMR"), single.row=TRUE)
+```
+
+    ==================================
+                      Model 1
+    ----------------------------------
+     MPG<-HP          -0.06 (0.01) ***
+     WT<-DISP          0.01 (0.00) ***
+     WT<->MPG         -1.02 (0.38) **
+     MPG<-Intercepts  29.59 (1.53) ***
+     WT<-Intercepts    1.82 (0.18) ***
+     MPG<->MPG        14.04 (3.52) ***
+     WT<->WT           0.21 (0.06) ***
+    ----------------------------------
+    Observations      32
+    CFI                0.87
+    SRMR               0.14
+    ==================================
+    *** p < 0.001, ** p < 0.01, * p < 0.05
+
+The fit is not great, to add some extra paths we can update the model.
+
+``` R
+pathmodel2 <- update(pathmodel, MODEL = ~ . + "
+    mpg ON disp;
+    wt ON hp;")
+
+fit2 <- mplusModeler(pathmodel2, modelout = "model2.inp", run = 1L)
+```
+
+We can make some pretty output of both models:
+
+``` r
+screenreg(list(
+  extract(fit, summaries = c("Observations", "CFI", "SRMR")),
+  extract(fit2, summaries = c("Observations", "CFI", "SRMR"))),
+  single.row=TRUE)
+```
+
+    ====================================================
+                      Model 1           Model 2
+    ----------------------------------------------------
+     MPG<-HP          -0.06 (0.01) ***  -0.02 (0.01)
+     WT<-DISP          0.01 (0.00) ***   0.01 (0.00) ***
+     WT<->MPG         -1.02 (0.38) **   -0.73 (0.26) **
+     MPG<-Intercepts  29.59 (1.53) ***  30.74 (1.27) ***
+     WT<-Intercepts    1.82 (0.18) ***   1.68 (0.19) ***
+     MPG<->MPG        14.04 (3.52) ***   8.86 (2.21) ***
+     WT<->WT           0.21 (0.06) ***   0.19 (0.05) ***
+     MPG<-DISP                          -0.03 (0.01) ***
+     WT<-HP                              0.00 (0.00)
+    ----------------------------------------------------
+    Observations      32                32
+    CFI                0.87              1.00
+    SRMR               0.14              0.00
+    ====================================================
+    *** p < 0.001, ** p < 0.01, * p < 0.05
+
+If you want confidence intervals, those can also be printed, so long as
+they were requested as part of the output (we did in the initial model,
+which propogates to later models that were updated()ed based on the
+original model):
+
+``` r
+screenreg(list(
+  extract(fit, cis=TRUE, summaries = c("Observations", "CFI", "SRMR")),
+  extract(fit2, cis=TRUE, summaries = c("Observations", "CFI", "SRMR"))),
+  single.row=TRUE)
+```
+
+    ================================================================
+                      Model 1                 Model 2
+    ----------------------------------------------------------------
+     MPG<-HP          -0.06 [-0.08; -0.05] *  -0.02 [-0.05;  0.00]
+     WT<-DISP          0.01 [ 0.00;  0.01] *   0.01 [ 0.01;  0.01] *
+     WT<->MPG         -1.02 [-1.77; -0.27] *  -0.73 [-1.25; -0.21] *
+     MPG<-Intercepts  29.59 [26.59; 32.58] *  30.74 [28.25; 33.22] *
+     WT<-Intercepts    1.82 [ 1.46;  2.17] *   1.68 [ 1.31;  2.04] *
+     MPG<->MPG        14.04 [ 7.14; 20.95] *   8.86 [ 4.52; 13.20] *
+     WT<->WT           0.21 [ 0.10;  0.32] *   0.19 [ 0.10;  0.28] *
+     MPG<-DISP                                -0.03 [-0.04; -0.02] *
+     WT<-HP                                   -0.00 [-0.00;  0.00]
+    ----------------------------------------------------------------
+    Observations      32                      32
+    CFI                0.87                    1.00
+    SRMR               0.14                    0.00
+    ================================================================
+    * 0 outside the confidence interval
+
+## How to Help
+
+If you have a tutorial or examples using `MplusAutomation`, please add
+them to the github
+[Wiki](https://github.com/michaelhallquist/MplusAutomation/wiki).
+
+In addition, on the
+[Wiki](https://github.com/michaelhallquist/MplusAutomation/wiki), is a
+list of publications that cite or use `MplusAutomation`. If you use
+`MplusAutomation` in your own work — papers, posters, presentations,
+etc. — please add a citation to the list, and if possible, include an
+abstract or link to the full text. This helps us get to know our users
+and how `MplusAutomation` is being used.
+
+Finally, if you find bugs or have suggestions for new features or ways
+to enhance `MplusAutomation`, please let us know! Just click the
+‘Issues’ button at the top of the github page or go
+[here](https://github.com/michaelhallquist/MplusAutomation/issues?state=open)
+and open a New Issue.
+
+Lastly, if you use `MplusAutomation` and have space, we greatly
+appreciating citations. In addition to being easier to track, the
+recognition and credit help make it easier for us to continue putting
+our time into developing and sharing this software!
+
+# Package index
+
+## All functions
+
+- [`HTMLSummaryTable()`](https://michaelhallquist.github.io/MplusAutomation/reference/HTMLSummaryTable.md)
+  : Create an HTML file containing a summary table of Mplus model
+  statistics
+
+- [`LatexSummaryTable()`](https://michaelhallquist.github.io/MplusAutomation/reference/LatexSummaryTable.md)
+  : Display summary table of Mplus model statistics in separate window
+
+- [`MplusAutomation`](https://michaelhallquist.github.io/MplusAutomation/reference/MplusAutomation.md)
+  : Automating Mplus Model Estimation and Interpretation
+
+- [`SummaryTable()`](https://michaelhallquist.github.io/MplusAutomation/reference/SummaryTable.md)
+  : Create a summary table of Mplus model statistics
+
+- [`cd()`](https://michaelhallquist.github.io/MplusAutomation/reference/cd.md)
+  : Change directory
+
+- [`checkSubmission()`](https://michaelhallquist.github.io/MplusAutomation/reference/checkSubmission.md)
+  : check on the status of submitted Mplus jobs on the cluster
+
+- [`coef(`*`<mplus.model>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/coef.mplus.model.md)
+  [`coef(`*`<mplusObject>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/coef.mplus.model.md)
+  : Return coefficients for an mplus.model object
+
+- [`compareModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/compareModels.md)
+  : Compare the output of two Mplus models
+
+- [`confint(`*`<mplus.model>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/confint.mplus.model.md)
+  [`confint(`*`<mplusObject>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/confint.mplus.model.md)
+  : Return confidence intervals for an mplus.model object
+
+- [`createMixtures()`](https://michaelhallquist.github.io/MplusAutomation/reference/createMixtures.md)
+  : Create syntax for a batch of mixture models
+
+- [`createModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/createModels.md)
+  : Create Mplus Input Files from Template
+
+- [`createSyntax()`](https://michaelhallquist.github.io/MplusAutomation/reference/createSyntax.md)
+  : Create the Mplus input text for an mplusObject
+
+- [`detectMplus()`](https://michaelhallquist.github.io/MplusAutomation/reference/detectMplus.md)
+  : Detect the location/name of the Mplus command
+
+- [`.mplusMultinomial()`](https://michaelhallquist.github.io/MplusAutomation/reference/dot-mplusMultinomial.md)
+  : Internal Function for Multinomial Regression in Mplus
+
+- [`extract.mplus.model()`](https://michaelhallquist.github.io/MplusAutomation/reference/extract.md)
+  [`extract.mplusObject()`](https://michaelhallquist.github.io/MplusAutomation/reference/extract.md)
+  [`extract(`*`<mplus.model>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/extract.md)
+  [`extract(`*`<mplusObject>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/extract.md)
+  :
+
+  Extract function to make Mplus output work with the texreg package
+
+- [`get_results()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_input()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_warn_err()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_data_summary()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_sampstat()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_covariance_coverage()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_summaries()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_invariance_testing()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_parameters()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_class_counts()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_indirect()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_mod_indices()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_residuals()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_savedata()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_bparameters()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_tech1()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_tech3()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_tech4()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_tech7()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_tech8()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_tech9()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_tech10()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_tech12()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_tech15()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_fac_score_stats()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_lcCondMeans()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_gh5()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  : Extract Mplus results
+
+- [`lcademo`](https://michaelhallquist.github.io/MplusAutomation/reference/lcademo.md)
+  : Latent Class Analysis Demonstration
+
+- [`long2LGMM()`](https://michaelhallquist.github.io/MplusAutomation/reference/long2LGMM.md)
+  : Long data to wide latent growth mixture model
+
+- [`lookupTech1Parameter()`](https://michaelhallquist.github.io/MplusAutomation/reference/lookupTech1Parameter.md)
+  : Lookup the matrix element for a give parameter number
+
+- [`mixtureSummaryTable()`](https://michaelhallquist.github.io/MplusAutomation/reference/mixtureSummaryTable.md)
+  : Create a summary table of Mplus mixture models
+
+- [`mplus.traceplot()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplus.traceplot.md)
+  : Plot the samples for each MCMC chain as a function of iterations
+
+- [`mplusAvailable()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusAvailable.md)
+  : Check whether Mplus can be found
+
+- [`mplusGLM()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusGLM.md)
+  : Function to fit GLMs in Mplus
+
+- [`mplusModel()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusModel.md)
+  : Create an mplusModel object for a given model
+
+- [`mplusModeler()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusModeler.md)
+  : Create, run, and read Mplus models.
+
+- [`mplusObject()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusObject.md)
+  : Create an Mplus model object
+
+- [`mplusRcov()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusRcov.md)
+  : Create Mplus code for various residual covariance structures.
+
+- [`paramExtract()`](https://michaelhallquist.github.io/MplusAutomation/reference/paramExtract.md)
+  : Extract parameters from a data frame of Mplus estimates
+
+- [`parseCatOutput()`](https://michaelhallquist.github.io/MplusAutomation/reference/parseCatOutput.md)
+  : Parse Categorical Output
+
+- [`parseMplus()`](https://michaelhallquist.github.io/MplusAutomation/reference/parseMplus.md)
+  : Check Mplus code for missing semicolons or too long lines.
+
+- [`plot(`*`<mplusObject>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/plot.mplusObject.md)
+  : Plot coefficients for an mplusObject
+
+- [`plotMixtureDensities()`](https://michaelhallquist.github.io/MplusAutomation/reference/plotMixtureDensities.md)
+  : Create density plots for mixture models
+
+- [`plotMixtures()`](https://michaelhallquist.github.io/MplusAutomation/reference/plotMixtures.md)
+  : Create latent profile plots
+
+- [`prepareMplusData()`](https://michaelhallquist.github.io/MplusAutomation/reference/prepareMplusData.md)
+  : Create tab-delimited file and Mplus input syntax from R data.frame
+
+- [`print(`*`<MplusRstructure>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/print.MplusRstructure.md)
+  : Print an Mplus Residual Structure object
+
+- [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md)
+  : Read Parameters, Summary Statistics, and Savedata from Mplus Output
+
+- [`runModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/runModels.md)
+  : Run Mplus Models
+
+- [`runModels_Interactive()`](https://michaelhallquist.github.io/MplusAutomation/reference/runModels_Interactive.md)
+  : Run Mplus Models Using Graphical Interface
+
+- [`separateHyphens()`](https://michaelhallquist.github.io/MplusAutomation/reference/separateHyphens.md)
+  : Separate Hyphenated Variable Strings
+
+- [`showSummaryTable()`](https://michaelhallquist.github.io/MplusAutomation/reference/showSummaryTable.md)
+  : Display summary table of Mplus model statistics in separate window
+
+- [`submitModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/submitModels.md)
+  : Submit Mplus models to a high-performance cluster scheduler
+
+- [`summary(`*`<mplusObject>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/summary.mplusObject.md)
+  : Summarize an mplusObject
+
+- [`summary(`*`<mplus_submission_df>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/summary.mplus_submission_df.md)
+  :
+
+  summary function for submission from `submitModels`
+
+- [`testBParamCompoundConstraint()`](https://michaelhallquist.github.io/MplusAutomation/reference/testBParamCompoundConstraint.md)
+  : Test inequality-constrained hypothesis for two or more parameters
+  based on iterations of MCMC chains
+
+- [`testBParamConstraint()`](https://michaelhallquist.github.io/MplusAutomation/reference/testBParamConstraint.md)
+  : Test inequality-constrained hypothesis for two parameters based on
+  iterations of MCMC chains
+
+- [`trainLGMM()`](https://michaelhallquist.github.io/MplusAutomation/reference/trainLGMM.md)
+  : Train a variety of latent growth mixture model
+
+- [`update(`*`<mplusObject>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/update.mplusObject.md)
+  : Update an Mplus model object
+
+# Articles
+
+### All vignettes
+
+- [Submitting Many Mplus Models to an HPC with
+  submitModels()](https://michaelhallquist.github.io/MplusAutomation/articles/submitModels.md):
+- [MplusAutomation
+  Examples](https://michaelhallquist.github.io/MplusAutomation/articles/vignette.md):

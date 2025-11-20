@@ -1,0 +1,233 @@
+# Train a variety of latent growth mixture model
+
+This function iterates through a grid of values to train LGMMs,
+optionally using a local or remote cluster.
+
+## Usage
+
+``` r
+trainLGMM(
+  data,
+  idvar,
+  assessmentvar,
+  newdata = FALSE,
+  tuneGrid,
+  cl,
+  ncores = 1L
+)
+```
+
+## Arguments
+
+- data:
+
+  A data frame or data table in long format (i.e., multiple rows per
+  ID).
+
+- idvar:
+
+  A character string of the variable name in the dataset that is the ID
+  variable.
+
+- assessmentvar:
+
+  A character string of the variable name in the dataset that indicates
+  the particular assessment point for each timepoint.
+
+- newdata:
+
+  A data frame of new values to use for generating predicted
+  trajectories by class or `FALSE` if no predictions to be made (the
+  default).
+
+- tuneGrid:
+
+  A dataframe or list. It should have names for the needed arguments for
+  [`long2LGMM()`](https://michaelhallquist.github.io/MplusAutomation/reference/long2LGMM.md).
+
+- cl:
+
+  Optional. An existing cluster to be used to estimate models. Can be a
+  local or remote cluster. In either case it needs MplusAUtomation and
+  Mplus available.
+
+- ncores:
+
+  If a cluster is not passed to `cl`, specify the number of cores to use
+  to create a local cluster. Must be an integer. Defaults to `1L`.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+## This example is not run by default because even with very limitted number of
+## random starts and iterations, it takes quite a few minutes
+setwd(tempdir())
+
+## Simulate Some Data from 3 classes
+library(MASS)
+set.seed(1234)
+allcoef <- rbind(
+  cbind(1, mvrnorm(n = 200,
+                   mu = c(0, 2, 0),
+                   Sigma = diag(c(.2, .1, .01)),
+                   empirical = TRUE)),
+  cbind(2, mvrnorm(n = 200,
+                   mu = c(-3.35, 2, 2),
+                   Sigma = diag(c(.2, .1, .1)),
+                   empirical = TRUE)),
+  cbind(3, mvrnorm(n = 200,
+                   mu = c(3.35, 2, -2),
+                   Sigma = diag(c(.2, .1, .1)),
+                   empirical = TRUE)))
+allcoef <- as.data.frame(allcoef)
+names(allcoef) <- c("Class", "I", "L", "Q")
+allcoef$ID <- 1:nrow(allcoef)
+d <- do.call(rbind, lapply(1:nrow(allcoef), function(i) {
+  out <- data.frame(
+    ID = allcoef$ID[i],
+    Class = allcoef$Class[i],
+    Assess = 1:11,
+    x = sort(runif(n = 11, min = -2, max = 2)))
+  out$y <- rnorm(11,
+    mean = allcoef$I[i] + allcoef$L[i] * out$x + allcoef$Q[i] * out$x^2,
+    sd = .1)
+  return(out)
+}))
+
+## create splines
+library(splines)
+time_splines <- ns(d$x, df = 3, Boundary.knots = quantile(d$x, probs = c(.02, .98)))
+d$t1 <- time_splines[, 1]
+d$t2 <- time_splines[, 2]
+d$t3 <- time_splines[, 3]
+d$xq <- d$x^2
+
+## create new data to be used for predictions
+nd <- data.frame(ID = 1,
+                 x = seq(from = -2, to = 2, by = .1))
+nd.splines <- with(attributes(time_splines),
+                   ns(nd$x, df = degree, knots = knots,
+                      Boundary.knots = Boundary.knots))
+nd$t1 <- nd.splines[, 1]
+nd$t2 <- nd.splines[, 2]
+nd$t3 <- nd.splines[, 3]
+nd$xq <- nd$x^2
+
+## create a tuning grid of models to try
+## all possible combinations are created of different time trends
+## different covariance structures of the random effects
+## and different number of classes
+tuneGrid <- expand.grid(
+  dv = "y",
+  timevars = list(c("t1", "t2", "t3"), "x", c("x", "xq")),
+  starts = "2 1",
+  cov = c("independent", "zero"),
+  k = c(1L, 3L),
+  processors = 1L, run = TRUE,
+  misstrick = TRUE, stringsAsFactors = FALSE)
+tuneGrid$title <- paste0(
+  c("linear", "quad", "spline")[sapply(tuneGrid$timevars, length)],
+  "_",
+  sapply(tuneGrid$cov, function(x) if(nchar(x)==4) substr(x, 1, 4) else substr(x, 1, 3)),
+  "_",
+  tuneGrid$k)
+tuneGrid$base <- paste0(
+  c("linear", "quad", "spline")[sapply(tuneGrid$timevars, length)],
+  "_",
+  sapply(tuneGrid$cov, function(x) if(nchar(x)==4) substr(x, 1, 4) else substr(x, 1, 3)))
+
+## example using long2LGMM to fit one model at a time
+mres <- long2LGMM(
+        data = d,
+        idvar = "ID",
+        assessmentvar = "Assess",
+        dv = tuneGrid$dv[1],
+        timevars = tuneGrid$timevars[[1]],
+        misstrick = tuneGrid$misstrick[1],
+        k = tuneGrid$k[1],
+        title = paste0(tuneGrid$title[1], tuneGrid$k[1]),
+        base = tuneGrid$base[1],
+        run = tuneGrid$run[1],
+        processors = tuneGrid$processors[1],
+        starts = tuneGrid$starts[1],
+        newdata = nd,
+        cov = tuneGrid$cov[1])
+
+## Example using trainLGMM to fit a whole set of models
+## can be distributed across a local or remote cluster
+## Defaults to creating a local cluster, but can also pass an
+## existing cluster
+AllRes <- trainLGMM(
+  data = d,
+  idvar = "ID",
+  assessmentvar = "Assess",
+  newdata = nd,
+  tuneGrid = tuneGrid,
+  ncores = 2L)
+
+
+tuneGridRes <- as.data.frame(
+  cbind(tuneGrid,
+        do.call(rbind, lapply(AllRes, function(x) {
+          if (is.null(x$Model$results$summaries)) {
+            NA
+          } else {
+            out <- x$Model$results$summaries
+            ## deal with missing summary information for k = 1
+            if (is.null(out$Entropy)) {
+              out$Entropy <- 1
+            }
+            if (is.null(out$NCategoricalLatentVars)) {
+              out$NCategoricalLatentVars <- 0
+            }
+            out[, sort(names(out)), drop = FALSE]
+          }
+        }))))
+
+tuneGridRes$Type <- gsub("([a-z]+)_.*$", "\\1", tuneGridRes$title)
+
+tuneGridRes$MinClass <- sapply(AllRes, function(x) {
+  n <- x$Model$results$class_counts$mostLikely$count
+  if(is.null(n)) {
+    length(unique(d$ID))
+  } else {
+    min(n, na.rm = TRUE)
+  }
+})
+
+## when trying many models, some may not converge
+## subset to omit any missing AICC and look only at those with some
+## minimum number of participants per class,
+## for demonstration only arbitrarily set at 30
+subset(tuneGridRes, !is.na(AICC) & MinClass >= 30,
+       select = c(title, aBIC, AICC, Entropy, MinClass, LL))
+
+## reshape data into long form which can make a very nice plot using ggplot2
+tuneGridResL <- reshape(
+  subset(tuneGridRes, select = c(Type, cov, k, Parameters, aBIC, AICC, AIC, BIC, Entropy)),
+  varying = c("Parameters", "aBIC", "AICC", "AIC", "BIC", "Entropy"),
+  v.names = "value",
+  times = c("Parameters", "aBIC", "AICC", "AIC", "BIC", "Entropy"),
+  timevar = "variable",
+  idvar = c("Type", "cov", "k"),
+  direction = "long")
+tuneGridResL$cov <- factor(tuneGridResL$cov, levels = c("zero", "independent"))
+
+## uncomment to run
+## library(ggplot2)
+## ggplot(tuneGridResL, aes(k, value, colour = Type, shape = Type)) +
+##   geom_point() +
+##   facet_grid(variable~cov, scales = "free")
+
+
+## nice plot of the average trajectories in each class
+## these are possible as trainLGMM exports predicted values for the
+## new data fed in
+## uncomment to run
+## ggplot(AllRes[[which(tuneGridRes$title=="quad_ind_3")]]$predictions, aes(x)) +
+##   geom_line(aes(y = y_1), colour = "black", size = 2) +
+##   geom_line(aes(y = y_2), colour = "red", size = 2) +
+##   geom_line(aes(y = y_3), colour = "blue", size = 2)
+} # }
+```

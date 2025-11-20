@@ -1,0 +1,32 @@
+# Finalize Init Collection
+
+this function should handle initTags that still contain tags once the
+initCollection is finalized, then process the deferred body tags the
+notion is that the substitutions will be handled in an inefficient
+manner – using lots of regular expression parsing, not using the matched
+tags data.frame
+
+## Usage
+
+``` r
+finalizeInitCollection(initCollection)
+```
+
+## Arguments
+
+- initCollection:
+
+  The list of all arguments parsed from the init section
+
+## Value
+
+Finalized initCollection
+
+## Details
+
+we only need to handle simple and array tags iterators should always be
+integers foreach and conditional are not relevant
+
+iterate over init tags until no tags are left here, the init collection
+should already have had most of its tags substituted by replaceInitTags
+above.

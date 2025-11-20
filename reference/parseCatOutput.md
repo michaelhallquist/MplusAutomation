@@ -1,0 +1,49 @@
+# Parse Categorical Output
+
+Helper function for parsing output with variables and categories.
+
+## Usage
+
+``` r
+parseCatOutput(text)
+```
+
+## Arguments
+
+- text:
+
+  The output to parse.
+
+## Value
+
+The parsed output
+
+## Author
+
+Michael Hallquist
+
+## Examples
+
+``` r
+"
+Example:
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+SOP2A
+  Category 1    0.254      631.000
+  Category 2    0.425     1056.000
+  Category 3    0.174      432.000
+  Category 4    0.147      365.000
+
+Or Item Categories in IRT Parameterization
+
+Item Categories
+ U1
+   Category 1         0.000      0.000      0.000      1.000
+   Category 2        -0.247      0.045     -5.534      0.000
+   Category 3         0.699      0.052     13.325      0.000
+   Category 4        -0.743      0.057    -12.938      0.000
+   Category 5         0.291      0.052      5.551      0.000
+"
+#> [1] "\nExample:\nUNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES\n\nSOP2A\n  Category 1    0.254      631.000\n  Category 2    0.425     1056.000\n  Category 3    0.174      432.000\n  Category 4    0.147      365.000\n\nOr Item Categories in IRT Parameterization\n\nItem Categories\n U1\n   Category 1         0.000      0.000      0.000      1.000\n   Category 2        -0.247      0.045     -5.534      0.000\n   Category 3         0.699      0.052     13.325      0.000\n   Category 4        -0.743      0.057    -12.938      0.000\n   Category 5         0.291      0.052      5.551      0.000\n"
+```

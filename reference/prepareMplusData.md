@@ -1,0 +1,269 @@
+# Create tab-delimited file and Mplus input syntax from R data.frame
+
+The `prepareMplusData` function converts an R data.frame (or a list of
+data frames), into a tab-delimited file (without header) to be used in
+an Mplus input file. The corresponding Mplus syntax, including the data
+file definition and variable names, is printed to the console or
+optionally to an input file.
+
+## Usage
+
+``` r
+prepareMplusData(
+  df,
+  filename = NULL,
+  inpfile = FALSE,
+  keepCols = NULL,
+  dropCols = NULL,
+  dummyCode = NULL,
+  interactive = TRUE,
+  overwrite = TRUE,
+  imputed = FALSE,
+  writeData = c("always", "ifmissing", "never"),
+  hashfilename = FALSE,
+  quiet = TRUE,
+  use_relative_path = FALSE
+)
+```
+
+## Arguments
+
+- df:
+
+  The R data.frame to be prepared for Mplus
+
+- filename:
+
+  The path and filename for the tab-delimited data file for use with
+  Mplus. Example: "C:/Mplusdata/data1.dat"
+
+- inpfile:
+
+  Logical value whether the Mplus syntax should be written to the
+  console or to an input file. Defaults to `FALSE`. If `TRUE`, the file
+  name will be the same as `filename` with the extension changed to
+  .inp. Alternately, this can be a character string giving the file name
+  to write the Mplus syntax to.
+
+- keepCols:
+
+  A character vector specifying the variable names within `df` to be
+  output to `filename` or a numeric vector of the column indices to be
+  output or a logical vector corresponding to the same.
+
+- dropCols:
+
+  A character vector specifying the variable names within `df` to be
+  omitted from the data output to `filename` or a numeric vector of the
+  column indices not to be output or a logical vector corresponding to
+  the same.
+
+- dummyCode:
+
+  An optional character vector of column names indicating categorical
+  variables in the dataset that should be converted into dummy codes
+  (using the `fastDummies` package). Note that one dummy code is
+  returned for *each level*, so no reference category is implied. Thus,
+  it is up to you to drop one of the dummy codes in the Mplus syntax to
+  denote the reference category and avoid multicollinearity.
+
+- interactive:
+
+  Logical value indicating whether file names should be selected
+  interactively. If `filename` is missing and `interative=TRUE`, then a
+  dialogue box will pop up to select a file or a console prompt if in a
+  non interactive context. Defaults to `TRUE`.
+
+- overwrite:
+
+  Logical value indicating whether data and input (if present) files
+  should be overwritten. Defaults to `TRUE` to be consistent with prior
+  behavior. If `FALSE` and the file to write the data to already exists,
+  it will throw an error.
+
+- imputed:
+
+  A logical whether data are multiply imputed. Defaults to `FALSE`. If
+  `TRUE`, the data should be a list, where each element of the list is a
+  multiply imputed dataset.
+
+- writeData:
+
+  A character vector, one of ‘always’, ‘ifmissing’, ‘never’ indicating
+  whether the data files (\*.dat) should be written to disk. Defaults to
+  ‘always’ for consistency with previous behavior. See details for
+  further information.
+
+- hashfilename:
+
+  A logical whether or not to add a hash of the raw data to the data
+  file name. Defaults to `FALSE` for consistency with previous behavior
+  where this feature was not available.
+
+- quiet:
+
+  optional. If `TRUE`, show status messages in the console.
+
+- use_relative_path:
+
+  If `TRUE`, only include the relative path in the `DATA: FILE =` syntax
+  returned by the function. This works well if the `.dat` file and the
+  `.inp` file are located in the same folder, as is common for `Mplus`.
+  Default: `FALSE`.
+
+## Value
+
+Invisibly returns a character vector of the Mplus input syntax.
+Primarily called for its side effect of creating Mplus data files and
+optionally input files.
+
+## Details
+
+The `writeData` argument is new and can be used to reduce overhead from
+repeatedly writing the same data from R to the disk. When using the
+‘always’ option, `prepareMplusData` behaves as before, always writing
+data from R to the disk. When ‘ifmissing’, R generates an md5 hash of
+the data prior to writing it out to the disk. The md5 hash is based on:
+(1) the dimensions of the dataset, (2) the variable names, (3) the class
+of every variable, and (4) the raw data from the first and last rows.
+This combination ensures that under most all circumstances, if the data
+changes, the hash will change. The hash is appended to the specified
+data file name (which is controlled by the logical `hashfilename`
+argument). Next R checks in the directory where the data would normally
+be written. If a data file exists in that directory that matches the
+hash generated from the data, R will use that existing data file instead
+of writing out the data again. A final option is ‘never’. If this option
+is used, R will not write the data out even if no file matching the hash
+is found.
+
+## Author
+
+Michael Hallquist
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+library(foreign)
+
+study5 <- read.spss("reanalysis-study-5-mt-fall-08.sav", to.data.frame=TRUE)
+ASData5 <- subset(study5, select=c("ppnum", paste("as", 1:33, sep="")))
+
+prepareMplusData(ASData5, "study5.dat")
+
+
+# basic example
+test01 <- prepareMplusData(mtcars, "test01.dat")
+
+
+
+# see that syntax was stored
+test01
+
+# example when there is a factor and logical
+tmpd <- mtcars
+tmpd$cyl <- factor(tmpd$cyl)
+tmpd$am <- as.logical(tmpd$am)
+prepareMplusData(tmpd, "test_type.dat")
+rm(tmpd)
+
+# by default, if re-run, data is re-written, with a note
+test01b <- prepareMplusData(mtcars, "test01.dat")
+
+# if we turn on hashing in the filename the first time,
+# we can avoid overwriting notes the second time
+test01c <- prepareMplusData(mtcars, "test01c.dat", hashfilename=TRUE)
+
+# now that the filename was hashed in test01c, future calls do not re-write data
+# as long as the hash matches
+test01d <- prepareMplusData(mtcars, "test01c.dat",
+  writeData = "ifmissing", hashfilename=TRUE)
+
+# now that the filename was hashed in test01c, future calls do not re-write data
+# as long as the hash matches
+test01db <- prepareMplusData(mtcars, "test01d.dat",
+  writeData = "ifmissing", hashfilename=TRUE)
+
+# however, if the data change, then the file is re-written
+test01e <- prepareMplusData(iris, "test01c.dat",
+  writeData = "ifmissing", hashfilename=TRUE)
+
+# tests for keeping and dropping variables
+prepareMplusData(mtcars, "test02.dat", keepCols = c("mpg", "hp"))
+prepareMplusData(mtcars, "test03.dat", keepCols = c(1, 2))
+prepareMplusData(mtcars, "test04.dat",
+  keepCols = c(TRUE, FALSE, FALSE, TRUE, FALSE,
+  FALSE, FALSE, FALSE, FALSE, FALSE, FALSE))
+
+prepareMplusData(mtcars, "test05.dat", dropCols = c("mpg", "hp"))
+prepareMplusData(mtcars, "test06.dat", dropCols = c(1, 2))
+prepareMplusData(mtcars, "test07.dat",
+  dropCols = c(TRUE, FALSE, FALSE, TRUE, FALSE,
+  FALSE, FALSE, FALSE, FALSE, FALSE, FALSE))
+
+
+# interactive (test08.dat)
+prepareMplusData(mtcars, interactive=TRUE)
+
+# write syntax to input file, not stdout
+prepareMplusData(mtcars, "test09.dat", inpfile=TRUE)
+
+# write syntax to alternate input file, not stdout
+prepareMplusData(mtcars, "test10.dat", inpfile="test10alt.inp")
+
+# should be error, no file
+prepareMplusData(mtcars, interactive=FALSE)
+
+# new warnings if it is going to overwrite files
+# (the default to be consistent with prior behavior)
+prepareMplusData(mtcars, "test10.dat")
+
+# new warnings if it is going to overwrite files
+# (the default to be consistent with prior behavior)
+prepareMplusData(mtcars, "test11.dat", inpfile="test10alt.inp")
+
+# new errors if files exist and overwrite=FALSE
+prepareMplusData(mtcars, "test10.dat",
+  inpfile="test10alt.inp", overwrite=FALSE)
+
+
+# can write multiply imputed data too
+# here are three "imputed" datasets
+idat <- list(
+  data.frame(mpg = mtcars$mpg, hp = c(100, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(110, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(120, mtcars$hp[-1])))
+
+# if we turn on hashing in the filename the first time,
+# we can avoid overwriting notes the second time
+testimp1 <- prepareMplusData(idat, "testi1.dat",
+  writeData = "ifmissing", hashfilename=TRUE,
+  imputed = TRUE)
+
+# now that the filename was hashed, future calls do not re-write data
+# as long as all the hashes match
+testimp2 <- prepareMplusData(idat, "testi2.dat",
+  writeData = "ifmissing", hashfilename=TRUE,
+  imputed = TRUE)
+
+# in fact, the number of imputations can decrease
+# and they still will not be re-written
+testimp3 <- prepareMplusData(idat[-3], "testi3.dat",
+  writeData = "ifmissing", hashfilename=TRUE,
+  imputed = TRUE)
+
+# however, if the data changes, then all are re-written
+# note that it warns for the two files that already exist
+# as these two are overwritten
+
+idat2 <- list(
+  data.frame(mpg = mtcars$mpg, hp = c(100, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(109, mtcars$hp[-1])),
+  data.frame(mpg = mtcars$mpg, hp = c(120, mtcars$hp[-1])))
+testimp4 <- prepareMplusData(idat2, "testi4.dat",
+  writeData = "ifmissing", hashfilename=TRUE,
+  imputed = TRUE)
+
+
+} # }
+```

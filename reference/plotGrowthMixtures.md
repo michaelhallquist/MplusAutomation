@@ -1,0 +1,121 @@
+# Plot growth mixture models
+
+Plots latent and observed trajectories for a list of growth mixture
+models, specified using Mplus' '\|' notation (e.g., i s \| ).
+
+## Usage
+
+``` r
+plotGrowthMixtures(
+  modelList,
+  bw = FALSE,
+  rawdata = FALSE,
+  estimated = TRUE,
+  poly = FALSE,
+  alpha_range = c(0, 0.1),
+  growth_variables = NULL,
+  time_scale = NULL,
+  jitter_lines = NULL,
+  coefficients = "unstandardized"
+)
+```
+
+## Arguments
+
+- modelList:
+
+  A list object of Mplus models, or a single Mplus model. This function
+  additionally requires the models to be growth mixture models.
+
+- bw:
+
+  Logical. Should the plot be black and white (for print), or color?
+
+- rawdata:
+
+  Logical. Should raw data (observed trajectories) be plotted in the
+  background? Setting this to TRUE might result in long plotting times.
+  Requires including the Mplus syntax 'SAVEDATA: FILE IS "filename";
+  SAVE = cprobabilities' in the Mplus input.
+
+- estimated:
+
+  Logical. Should the Mplus estimates growth trajectories be displayed?
+  Defaults to TRUE.
+
+- poly:
+
+  Logical. Should polynomial smooth lines be displayed for each group?
+  Defaults to FALSE. If set to TRUE, the order of the polynomial is
+  determined by taking the number of observed timepoints - 1 (e.g., 3
+  time points results in a quadratic polynomial). The data are weighted
+  according to their posterior class probabilities. Note that rawdata
+  must be TRUE in order to obtain polynomial smooth lines, because these
+  are calculated on the raw data.
+
+- alpha_range:
+
+  Numeric vector. The minimum and maximum values of alpha (transparancy)
+  for the raw data. Minimum should be 0; lower maximum values of alpha
+  can help reduce overplotting.
+
+- growth_variables:
+
+  Character vector. Indicate the names of the latent variables for the
+  growth trajectory to plot. If NULL (default), all latent growth
+  variables are used. Use this option to plot one trajectory when a
+  model contains multiple latent growth trajectories.
+
+- time_scale:
+
+  Numeric vector. In case some of the loadings of the growth model are
+  freely estimated, provide the correct time scale here (e.g., c(0, 1,
+  2)).
+
+- jitter_lines:
+
+  Numeric. Indicate the amount (expressed in fractions of a standard
+  deviation of all observed data) by which the observed trajectories
+  should be vertically jittered. Like alpha_range, this parameter helps
+  control overplotting.
+
+## Value
+
+An object of class 'ggplot'.
+
+## Author
+
+Caspar J. van Lissa
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+mydat <- read.csv(
+system.file("extdata", "ex8.2.csv", package = "MplusAutomation"))
+res <- createMixtures(classes = 1:3, filename_stem = "ex8.2",
+                      model_overall = 
+                                    "i s | V1@0 V2@1 V3@2 V4@3;  i s on V5;",
+                      rdata = mydat,
+                      OUTPUT = "tech11 tech14;", 
+                      usevariables = c("V1", "V2", "V3", "V4", "V5"),
+                      run = 1L)
+plotGrowthMixtures(res, estimated = TRUE, rawdata = TRUE, 
+                   time_scale = c(0, 1, 2, 3))
+plotGrowthMixtures(res, estimated = FALSE, rawdata = TRUE, poly = TRUE)
+
+res <- createMixtures(classes = 1:3, filename_stem = "ex8.2_free",
+                      model_overall = "i s | V1@0 V2* V3* V4@3;  i s on V5;",
+                      rdata = mydat,
+                      OUTPUT = "tech11 tech14;",
+                      usevariables = c("V1", "V2", "V3", "V4", "V5"),
+                      run = 1L)
+plotMixtureDensities(res, variables = c("V1", "V2", "V3", "V4"))
+plotGrowthMixtures(res, estimated = TRUE, rawdata = TRUE,
+                   bw = TRUE, time_scale = c(0, 1, 2, 3),
+                   alpha_range = c(0, .05))
+
+plotGrowthMixtures(res, estimated = FALSE, rawdata = TRUE,
+                   poly = TRUE, bw = TRUE, time_scale = c(0, 1, 2, 3))
+} # }
+```

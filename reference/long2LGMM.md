@@ -1,0 +1,212 @@
+# Long data to wide latent growth mixture model
+
+This function streamlines the process of converting long data into a
+format that Mplus can use for latent growth mixture models in wide form.
+It makes use of continuous time scores, and these time scores must be
+supplied as variables in the R dataset. For the conversion to wide form,
+it is assumed that although assessments may have happened in continuous
+time, a discrete number of assessments (likely ismilar for all
+participants) were collected.
+
+## Usage
+
+``` r
+long2LGMM(
+  data,
+  idvar,
+  assessmentvar,
+  dv,
+  timevars,
+  misstrick = TRUE,
+  k = 1L,
+  title = "Trajectory Model",
+  base = "trajmodel_",
+  run = FALSE,
+  processors = 1L,
+  starts = "500 100",
+  newdata,
+  cov = c("un", "independent", "intercept", "zero"),
+  model
+)
+```
+
+## Arguments
+
+- data:
+
+  A data frame in long format (i.e., multiple rows per ID).
+
+- idvar:
+
+  A character string of the variable name in the dataset that is the ID
+  variable.
+
+- assessmentvar:
+
+  A character string of the variable name in the dataset that indicates
+  the particular assessment point for each timepoint.
+
+- dv:
+
+  A character string of the dependent variable name.
+
+- timevars:
+
+  A character vector of the time variables. Can be a single variable or
+  more than one. By allowing more than one variable, it is easy to
+  include linear; linear and quadratic; it is also possible to calculate
+  splines in R and pass these. The variable names should be 7 characters
+  or fewer, each.
+
+- misstrick:
+
+  A logical value whether to set values of the DV where a time variable
+  is missing to missing as well. Defaults to `TRUE`.
+
+- k:
+
+  An integer indicating the number of distinct classes to test.
+  Currently must be greater than 0 and less than 10.
+
+- title:
+
+  A character string giving a title for the model
+
+- base:
+
+  A character string providing a base name for model outputs, that is
+  combined with the number of classes.
+
+- run:
+
+  A logical value whether or not to run the models or only create the
+  data and input files, but not run them.
+
+- processors:
+
+  An integer value indicating the number of processors to use.
+
+- starts:
+
+  A character string passed to Mplus providing the number of random
+  starts and iterations
+
+- newdata:
+
+  A data frame of new values to use for generating predicted
+  trajectories by class.
+
+- cov:
+
+  A character string indicating the random covariance structure to use
+
+- model:
+
+  An optional argument, can pass an existing model, the output from
+  mplusModeler().
+
+## Details
+
+One valuable feature of this function is that it makes it possible to
+feed any continuous time scores to Mplus for mixture modelling. For
+example, continuous linear time is straightforward, but so to are
+quadratic time models or piecewise models. Using facilities in R, spline
+models are also comparatively easy to specify.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+## Simulate Some Data from 3 classes
+library(MASS)
+set.seed(1234)
+allcoef <- rbind(
+  cbind(1, mvrnorm(n = 200,
+                   mu = c(0, 2, 0),
+                   Sigma = diag(c(.2, .1, .01)),
+                   empirical = TRUE)),
+  cbind(2, mvrnorm(n = 200,
+                   mu = c(-3.35, 2, 2),
+                   Sigma = diag(c(.2, .1, .1)),
+                   empirical = TRUE)),
+  cbind(3, mvrnorm(n = 200,
+                   mu = c(3.35, 2, -2),
+                   Sigma = diag(c(.2, .1, .1)),
+                   empirical = TRUE)))
+allcoef <- as.data.frame(allcoef)
+names(allcoef) <- c("Class", "I", "L", "Q")
+allcoef$ID <- 1:nrow(allcoef)
+d <- do.call(rbind, lapply(1:nrow(allcoef), function(i) {
+  out <- data.frame(
+    ID = allcoef$ID[i],
+    Class = allcoef$Class[i],
+    Assess = 1:11,
+    x = sort(runif(n = 11, min = -2, max = 2)))
+  out$y <- rnorm(11,
+    mean = allcoef$I[i] + allcoef$L[i] * out$x + allcoef$Q[i] * out$x^2,
+    sd = .1)
+  return(out)
+}))
+
+## create splines
+library(splines)
+time_splines <- ns(d$x, df = 3, Boundary.knots = quantile(d$x, probs = c(.02, .98)))
+d$t1 <- time_splines[, 1]
+d$t2 <- time_splines[, 2]
+d$t3 <- time_splines[, 3]
+d$xq <- d$x^2
+
+## create new data to be used for predictions
+nd <- data.frame(ID = 1,
+                 x = seq(from = -2, to = 2, by = .1))
+nd.splines <- with(attributes(time_splines),
+                   ns(nd$x, df = degree, knots = knots,
+                      Boundary.knots = Boundary.knots))
+nd$t1 <- nd.splines[, 1]
+nd$t2 <- nd.splines[, 2]
+nd$t3 <- nd.splines[, 3]
+nd$xq <- nd$x^2
+
+## create a tuning grid of models to try
+## all possible combinations are created of different time trends
+## different covariance structures of the random effects
+## and different number of classes
+tuneGrid <- expand.grid(
+  dv = "y",
+  timevars = list(c("t1", "t2", "t3"), "x", c("x", "xq")),
+  starts = "2 1",
+  cov = c("independent", "zero"),
+  k = c(1L, 3L),
+  processors = 1L, run = TRUE,
+  misstrick = TRUE, stringsAsFactors = FALSE)
+tuneGrid$title <- paste0(
+  c("linear", "quad", "spline")[sapply(tuneGrid$timevars, length)],
+  "_",
+  sapply(tuneGrid$cov, function(x) if(nchar(x)==4) substr(x, 1, 4) else substr(x, 1, 3)),
+  "_",
+  tuneGrid$k)
+tuneGrid$base <- paste0(
+  c("linear", "quad", "spline")[sapply(tuneGrid$timevars, length)],
+  "_",
+  sapply(tuneGrid$cov, function(x) if(nchar(x)==4) substr(x, 1, 4) else substr(x, 1, 3)))
+
+## example using long2LGMM to fit one model at a time
+mres <- long2LGMM(
+        data = d,
+        idvar = "ID",
+        assessmentvar = "Assess",
+        dv = tuneGrid$dv[1],
+        timevars = tuneGrid$timevars[[1]],
+        misstrick = tuneGrid$misstrick[1],
+        k = tuneGrid$k[1],
+        title = paste0(tuneGrid$title[1], tuneGrid$k[1]),
+        base = tuneGrid$base[1],
+        run = tuneGrid$run[1],
+        processors = tuneGrid$processors[1],
+        starts = tuneGrid$starts[1],
+        newdata = nd,
+        cov = tuneGrid$cov[1])
+
+rm(mres)
+} # }
+```
