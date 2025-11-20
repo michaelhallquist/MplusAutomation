@@ -1,0 +1,922 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+11/17/2025   4:52 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a LCA with three-
+  	category latent class indicators using
+  	user-specified starting values without
+  	random starts
+  DATA:	FILE IS ex7.6.dat;
+  VARIABLE:	NAMES ARE u1-u4 c;
+  	USEVARIABLES ARE u1-u4;
+  	CLASSES = c (2);
+  	CATEGORICAL = u1-u4;
+  ANALYSIS:	TYPE = MIXTURE;
+  	STARTS = 0;
+  MODEL:	
+  	%OVERALL%
+  	%c#1%
+  	[u1$1*.5 u2$1*.5 u3$1*-.5 u4$1*-.5];
+  	[u1$2*1 u2$2*1 u3$2*0 u4$2*0];
+  	%c#2%
+  	[u1$1*-.5 u2$1*-.5 u3$1*.5 u4$1*.5];
+  	[u1$2*0 u2$2*0 u3$2*1 u4$2*1];
+  OUTPUT:	TECH1 TECH8 TECH10;
+
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a LCA with three-
+category latent class indicators using
+user-specified starting values without
+random starts
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        5000
+
+Number of dependent variables                                    4
+Number of independent variables                                  0
+Number of continuous latent variables                            0
+Number of categorical latent variables                           1
+
+Observed dependent variables
+
+  Binary and ordered categorical (ordinal)
+   U1          U2          U3          U4
+
+Categorical latent variables
+   C
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-06
+    Relative loglikelihood change                        0.100D-06
+    Derivative                                           0.100D-05
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Optimization algorithm                                         EMA
+Link                                                         LOGIT
+
+Input data file(s)
+  ex7.6.dat
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    U1
+      Category 1    0.487         2435.000
+      Category 2    0.120          600.000
+      Category 3    0.393         1965.000
+    U2
+      Category 1    0.508         2540.000
+      Category 2    0.114          570.000
+      Category 3    0.378         1890.000
+    U3
+      Category 1    0.490         2452.000
+      Category 2    0.112          560.000
+      Category 3    0.398         1988.000
+    U4
+      Category 1    0.499         2496.000
+      Category 2    0.116          578.000
+      Category 3    0.385         1926.000
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       17
+
+Loglikelihood
+
+          H0 Value                      -19214.480
+          H0 Scaling Correction Factor      1.0208
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                   38462.961
+          Bayesian (BIC)                 38573.753
+          Sample-Size Adjusted BIC       38519.733
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit for the Binary and Ordered Categorical
+(Ordinal) Outcomes
+
+          Pearson Chi-Square
+
+          Value                             65.388
+          Degrees of Freedom                    63
+          P-Value                           0.3938
+
+          Likelihood Ratio Chi-Square
+
+          Value                             62.447
+          Degrees of Freedom                    63
+          P-Value                           0.4960
+
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON THE ESTIMATED MODEL
+
+    Latent
+   Classes
+
+       1       2072.13560          0.41443
+       2       2927.86440          0.58557
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON ESTIMATED POSTERIOR PROBABILITIES
+
+    Latent
+   Classes
+
+       1       2072.13560          0.41443
+       2       2927.86440          0.58557
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP
+
+Class Counts and Proportions
+
+    Latent
+   Classes
+
+       1             1889          0.37780
+       2             3111          0.62220
+
+
+CLASSIFICATION QUALITY
+
+     Entropy                         0.205
+
+
+Average Latent Class Probabilities for Most Likely Latent Class Membership (Row)
+by Latent Class (Column)
+
+           1        2
+
+    1   0.680    0.320
+    2   0.253    0.747
+
+
+Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+           1        2
+
+    1   0.620    0.380
+    2   0.206    0.794
+
+
+Logits for the Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+              1        2
+
+    1      0.489    0.000
+    2     -1.346    0.000
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Latent Class 1
+
+ Thresholds
+    U1$1               0.615      0.192      3.203      0.001
+    U1$2               1.147      0.224      5.123      0.000
+    U2$1               0.604      0.179      3.379      0.001
+    U2$2               1.144      0.214      5.339      0.000
+    U3$1              -0.713      0.182     -3.918      0.000
+    U3$2              -0.197      0.154     -1.284      0.199
+    U4$1              -0.556      0.174     -3.203      0.001
+    U4$2              -0.052      0.159     -0.327      0.744
+
+Latent Class 2
+
+ Thresholds
+    U1$1              -0.523      0.141     -3.702      0.000
+    U1$2              -0.002      0.128     -0.016      0.987
+    U2$1              -0.364      0.114     -3.203      0.001
+    U2$2               0.102      0.109      0.935      0.350
+    U3$1               0.425      0.147      2.888      0.004
+    U3$2               0.894      0.163      5.499      0.000
+    U4$1               0.383      0.109      3.503      0.000
+    U4$2               0.872      0.116      7.510      0.000
+
+Categorical Latent Variables
+
+ Means
+    C#1               -0.346      0.474     -0.730      0.466
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.788E-03
+       (ratio of smallest to largest eigenvalue)
+
+
+RESULTS IN PROBABILITY SCALE
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Latent Class 1
+
+ U1
+    Category 1         0.649      0.044     14.834      0.000
+    Category 2         0.110      0.015      7.417      0.000
+    Category 3         0.241      0.041      5.887      0.000
+ U2
+    Category 1         0.646      0.041     15.835      0.000
+    Category 2         0.112      0.014      8.031      0.000
+    Category 3         0.242      0.039      6.156      0.000
+ U3
+    Category 1         0.329      0.040      8.185      0.000
+    Category 2         0.122      0.014      8.729      0.000
+    Category 3         0.549      0.038     14.446      0.000
+ U4
+    Category 1         0.365      0.040      9.068      0.000
+    Category 2         0.123      0.014      8.912      0.000
+    Category 3         0.513      0.040     12.896      0.000
+
+Latent Class 2
+
+ U1
+    Category 1         0.372      0.033     11.281      0.000
+    Category 2         0.127      0.011     11.576      0.000
+    Category 3         0.501      0.032     15.617      0.000
+ U2
+    Category 1         0.410      0.027     14.918      0.000
+    Category 2         0.115      0.010     11.137      0.000
+    Category 3         0.474      0.027     17.428      0.000
+ U3
+    Category 1         0.605      0.035     17.184      0.000
+    Category 2         0.105      0.010     10.330      0.000
+    Category 3         0.290      0.033      8.671      0.000
+ U4
+    Category 1         0.595      0.026     22.571      0.000
+    Category 2         0.111      0.010     10.727      0.000
+    Category 3         0.295      0.024     12.207      0.000
+
+
+LATENT CLASS INDICATOR ODDS RATIOS FOR THE LATENT CLASSES
+
+                                                95% C.I.
+                    Estimate       S.E.  Lower 2.5% Upper 2.5%
+
+Latent Class 1 Compared to Latent Class 2
+
+ U1
+    Category > 1       0.320      0.055      0.229      0.448
+    Category > 2       0.317      0.063      0.214      0.469
+ U2
+    Category > 1       0.380      0.062      0.276      0.524
+    Category > 2       0.353      0.067      0.243      0.512
+ U3
+    Category > 1       3.122      0.520      2.252      4.327
+    Category > 2       2.977      0.479      2.171      4.081
+ U4
+    Category > 1       2.556      0.404      1.875      3.486
+    Category > 2       2.520      0.379      1.878      3.383
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS 1
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS 2
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS INDICATOR MODEL PART
+
+
+           TAU(U) FOR LATENT CLASS 1
+              U1$1          U1$2          U2$1          U2$2          U3$1
+              ________      ________      ________      ________      ________
+                    1             2             3             4             5
+
+
+           TAU(U) FOR LATENT CLASS 1
+              U3$2          U4$1          U4$2
+              ________      ________      ________
+                    6             7             8
+
+
+           TAU(U) FOR LATENT CLASS 2
+              U1$1          U1$2          U2$1          U2$2          U3$1
+              ________      ________      ________      ________      ________
+                    9            10            11            12            13
+
+
+           TAU(U) FOR LATENT CLASS 2
+              U3$2          U4$1          U4$2
+              ________      ________      ________
+                   14            15            16
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS REGRESSION MODEL PART
+
+
+           ALPHA(C)
+              C#1           C#2
+              ________      ________
+                   17             0
+
+
+     STARTING VALUES FOR LATENT CLASS 1
+
+
+     STARTING VALUES FOR LATENT CLASS 2
+
+
+     STARTING VALUES FOR LATENT CLASS INDICATOR MODEL PART
+
+
+           TAU(U) FOR LATENT CLASS 1
+              U1$1          U1$2          U2$1          U2$2          U3$1
+              ________      ________      ________      ________      ________
+                0.500         1.000         0.500         1.000        -0.500
+
+
+           TAU(U) FOR LATENT CLASS 1
+              U3$2          U4$1          U4$2
+              ________      ________      ________
+                0.000        -0.500         0.000
+
+
+           TAU(U) FOR LATENT CLASS 2
+              U1$1          U1$2          U2$1          U2$2          U3$1
+              ________      ________      ________      ________      ________
+               -0.500         0.000        -0.500         0.000         0.500
+
+
+           TAU(U) FOR LATENT CLASS 2
+              U3$2          U4$1          U4$2
+              ________      ________      ________
+                1.000         0.500         1.000
+
+
+     STARTING VALUES FOR LATENT CLASS REGRESSION MODEL PART
+
+
+           ALPHA(C)
+              C#1           C#2
+              ________      ________
+                0.000         0.000
+
+
+TECHNICAL 10 OUTPUT
+
+
+     MODEL FIT INFORMATION FOR THE LATENT CLASS INDICATOR MODEL PART
+
+
+     RESPONSE PATTERNS
+
+     No.  Pattern    No.  Pattern    No.  Pattern    No.  Pattern
+       1  0212         2  2020         3  0022         4  2220
+       5  0120         6  0210         7  2210         8  0000
+       9  2022        10  1010        11  2200        12  0001
+      13  1022        14  0102        15  1200        16  1002
+      17  2000        18  0200        19  0002        20  0110
+      21  1000        22  2202        23  2112        24  0020
+      25  2012        26  0010        27  0221        28  0121
+      29  2021        30  0202        31  0220        32  2001
+      33  0201        34  2212        35  2222        36  2102
+      37  1202        38  0222        39  0012        40  0100
+      41  2100        42  2101        43  2120        44  1020
+      45  2010        46  2201        47  0122        48  0101
+      49  0021        50  2002        51  1222        52  1220
+      53  1100        54  1221        55  1021        56  2122
+      57  1201        58  1001        59  1101        60  0211
+      61  2011        62  2110        63  0112        64  2121
+      65  2221        66  1121        67  0011        68  1210
+      69  1012        70  0111        71  2211        72  1212
+      73  1110        74  1120        75  1122        76  1011
+      77  1111        78  1112        79  1102        80  2111
+      81  1211
+
+
+     RESPONSE PATTERN FREQUENCIES AND CHI-SQUARE CONTRIBUTIONS
+
+    Response          Frequency     Standardized  Chi-square Contribution
+     Pattern    Observed  Estimated   Residual    Pearson   Loglikelihood  Deleted
+                                     (z-score)
+         1        32.00      36.34      -0.72       0.52        -8.13
+         2       185.00     168.36       1.30       1.64        34.87
+         3       294.00     283.22       0.66       0.41        21.97
+         4       128.00     144.20      -1.37       1.82       -30.51
+         5        49.00      51.85      -0.40       0.16        -5.55
+         6        40.00      46.71      -0.99       0.96       -12.41
+         7        62.00      48.74       1.91       3.60        29.83
+         8       246.00     264.89      -1.19       1.35       -36.40
+         9       143.00     142.40       0.05       0.00         1.21
+        10         8.00      16.07      -2.02       4.05       -11.16
+        11       265.00     264.47       0.03       0.00         1.07
+        12        71.00      64.95       0.76       0.56        12.65
+        13        54.00      54.48      -0.07       0.00        -0.97
+        14        51.00      47.83       0.46       0.21         6.55
+        15        67.00      70.15      -0.38       0.14        -6.16
+        16        51.00      52.03      -0.14       0.02        -2.04
+        17       265.00     254.73       0.66       0.41        20.95
+        18       223.00     224.88      -0.13       0.02        -3.74
+        19       230.00     226.36       0.25       0.06         7.34
+        20        13.00      14.54      -0.41       0.16        -2.92
+        21        73.00      72.55       0.05       0.00         0.91
+        22       147.00     144.31       0.23       0.05         5.43
+        23        11.00       8.73       0.77       0.59         5.08
+        24       241.00     251.20      -0.66       0.41       -19.97
+        25        39.00      38.79       0.03       0.00         0.41
+        26        80.00      66.54       1.66       2.72        29.47
+        27        46.00      38.49       1.22       1.47        16.40
+        28        13.00      14.17      -0.31       0.10        -2.24
+        29        36.00      41.04      -0.79       0.62        -9.43
+        30       148.00     147.01       0.08       0.01         1.98
+        31       166.00     154.33       0.95       0.88        24.20
+        32        42.00      53.24      -1.55       2.37       -19.92
+        33        53.00      47.72       0.77       0.58        11.13
+        34        26.00      29.06      -0.57       0.32        -5.79
+        35       103.00      93.52       0.99       0.96        19.90
+        36        38.00      39.60      -0.25       0.06        -3.13
+        37        42.00      40.78       0.19       0.04         2.47
+        38       130.00     135.83      -0.51       0.25       -11.41
+        39        62.00      68.24      -0.76       0.57       -11.90
+        40        67.00      63.29       0.47       0.22         7.62
+        41        60.00      67.55      -0.92       0.84       -14.22
+        42        21.00      13.58       2.01       4.05        18.30
+        43        39.00      40.41      -0.22       0.05        -2.76
+        44        58.00      55.80       0.30       0.09         4.49
+        45        53.00      51.84       0.16       0.03         2.34
+        46        54.00      51.42       0.36       0.13         5.29
+        47        52.00      53.17      -0.16       0.03        -2.32
+        48        12.00      14.49      -0.66       0.43        -4.53
+        49        66.00      72.86      -0.81       0.65       -13.06
+        50       158.00     161.58      -0.29       0.08        -7.08
+        51        23.00      30.61      -1.38       1.89       -13.15
+        52        46.00      41.52       0.70       0.48         9.43
+        53        23.00      18.52       1.04       1.08         9.96
+        54         9.00       9.38      -0.12       0.02        -0.74
+        55        13.00      14.80      -0.47       0.22        -3.37
+        56        26.00      30.23      -0.77       0.59        -7.84
+        57        12.00      14.05      -0.55       0.30        -3.79
+        58        16.00      16.15      -0.04       0.00        -0.30
+        59         5.00       3.91       0.55       0.31         2.47
+        60        13.00      10.87       0.65       0.42         4.66
+        61        17.00      11.81       1.51       2.28        12.40
+        62         8.00      13.04      -1.40       1.95        -7.82
+        63        14.00      13.31       0.19       0.04         1.41
+        64         5.00       9.20      -1.39       1.92        -6.10
+        65        27.00      30.47      -0.63       0.40        -6.54
+        66         9.00       3.09       3.36      11.27        19.21
+        67        21.00      18.19       0.66       0.44         6.04
+        68        11.00      13.47      -0.67       0.45        -4.46
+        69        14.00      13.92       0.02       0.00         0.15
+        70         2.00       3.71      -0.89       0.79        -2.47
+        71         5.00       9.88      -1.55       2.41        -6.81
+        72        10.00       8.91       0.37       0.13         2.32
+        73         5.00       3.82       0.61       0.37         2.70
+        74        15.00      12.52       0.70       0.49         5.42
+        75        12.00      10.85       0.35       0.12         2.42
+        76         4.00       3.97       0.01       0.00         0.06
+        77         2.00       0.88       1.19       1.42         3.28
+        78         4.00       2.92       0.63       0.40         2.51
+        79        12.00      11.96       0.01       0.00         0.07
+        80         2.00       2.80      -0.48       0.23        -1.35
+        81         2.00       2.88      -0.52       0.27        -1.45
+
+     THE TOTAL PEARSON CHI-SQUARE CONTRIBUTION FROM EMPTY CELLS IS         0.00
+
+
+     MOST FREQUENT RESPONSE PATTERNS AND CHI-SQUARE CONTRIBUTIONS
+
+    Response          Frequency     Standardized  Chi-square Contribution
+     Pattern    Observed  Estimated   Residual    Pearson   Loglikelihood
+                                     (z-score)
+         3       294.00     283.22       0.66       0.41        21.97
+        17       265.00     254.73       0.66       0.41        20.95
+        11       265.00     264.47       0.03       0.00         1.07
+         8       246.00     264.89      -1.19       1.35       -36.40
+        24       241.00     251.20      -0.66       0.41       -19.97
+        19       230.00     226.36       0.25       0.06         7.34
+        18       223.00     224.88      -0.13       0.02        -3.74
+         2       185.00     168.36       1.30       1.64        34.87
+        31       166.00     154.33       0.95       0.88        24.20
+        50       158.00     161.58      -0.29       0.08        -7.08
+        30       148.00     147.01       0.08       0.01         1.98
+        22       147.00     144.31       0.23       0.05         5.43
+         9       143.00     142.40       0.05       0.00         1.21
+        38       130.00     135.83      -0.51       0.25       -11.41
+         4       128.00     144.20      -1.37       1.82       -30.51
+        35       103.00      93.52       0.99       0.96        19.90
+        26        80.00      66.54       1.66       2.72        29.47
+        21        73.00      72.55       0.05       0.00         0.91
+        12        71.00      64.95       0.76       0.56        12.65
+        40        67.00      63.29       0.47       0.22         7.62
+     Number of Significant Standardized Residuals     0
+
+
+     UNIVARIATE MODEL FIT INFORMATION
+
+                               Estimated Probabilities
+                                                  Standardized
+     Variable              H1           H0          Residual
+                                                   (z-score)
+     U1
+       Category 1        0.487        0.487           0.000
+       Category 2        0.120        0.120           0.000
+       Category 3        0.393        0.393           0.000
+       Univariate Pearson Chi-Square                  0.000
+       Univariate Log-Likelihood Chi-Square           0.000
+       Number of Significant Standardized Residuals   0
+     U2
+       Category 1        0.508        0.508           0.000
+       Category 2        0.114        0.114           0.000
+       Category 3        0.378        0.378           0.000
+       Univariate Pearson Chi-Square                  0.000
+       Univariate Log-Likelihood Chi-Square           0.000
+       Number of Significant Standardized Residuals   0
+     U3
+       Category 1        0.490        0.490           0.000
+       Category 2        0.112        0.112           0.000
+       Category 3        0.398        0.398           0.000
+       Univariate Pearson Chi-Square                  0.000
+       Univariate Log-Likelihood Chi-Square           0.000
+       Number of Significant Standardized Residuals   0
+     U4
+       Category 1        0.499        0.499           0.000
+       Category 2        0.116        0.116           0.000
+       Category 3        0.385        0.385           0.000
+       Univariate Pearson Chi-Square                  0.000
+       Univariate Log-Likelihood Chi-Square           0.000
+       Number of Significant Standardized Residuals   0
+
+       Overall Univariate Pearson Chi-Square                         0.000
+       Overall Univariate Log-Likelihood Chi-Square                  0.000
+       Overall Number of Significant Standardized Residuals          0
+
+
+     BIVARIATE MODEL FIT INFORMATION
+
+                                              Estimated Probabilities
+                                                                 Standardized
+     Variable       Variable              H1           H0          Residual
+                                                                  (z-score)
+     U1             U2
+       Category 1     Category 1        0.262        0.263          -0.175
+       Category 1     Category 2        0.055        0.055          -0.209
+       Category 1     Category 3        0.170        0.168           0.333
+       Category 2     Category 1        0.058        0.060          -0.523
+       Category 2     Category 2        0.017        0.014           2.254
+       Category 2     Category 3        0.044        0.046          -0.656
+       Category 3     Category 1        0.188        0.185           0.518
+       Category 3     Category 2        0.042        0.045          -1.033
+       Category 3     Category 3        0.163        0.163           0.036
+       Bivariate Pearson Chi-Square                                  7.073
+       Bivariate Log-Likelihood Chi-Square                           6.704
+       Number of Significant Standardized Residuals                  1
+     U1             U3
+       Category 1     Category 1        0.220        0.220          -0.014
+       Category 1     Category 2        0.055        0.056          -0.090
+       Category 1     Category 3        0.211        0.211           0.065
+       Category 2     Category 1        0.060        0.060           0.053
+       Category 2     Category 2        0.012        0.013          -0.842
+       Category 2     Category 3        0.048        0.047           0.399
+       Category 3     Category 1        0.210        0.210          -0.016
+       Category 3     Category 2        0.045        0.043           0.579
+       Category 3     Category 3        0.138        0.140          -0.319
+       Bivariate Pearson Chi-Square                                  1.273
+       Bivariate Log-Likelihood Chi-Square                           1.293
+       Number of Significant Standardized Residuals                  0
+     U1             U4
+       Category 1     Category 1        0.225        0.228          -0.447
+       Category 1     Category 2        0.059        0.057           0.704
+       Category 1     Category 3        0.203        0.202           0.060
+       Category 2     Category 1        0.061        0.061           0.094
+       Category 2     Category 2        0.014        0.014           0.350
+       Category 2     Category 3        0.044        0.045          -0.305
+       Category 3     Category 1        0.213        0.211           0.404
+       Category 3     Category 2        0.042        0.045          -0.989
+       Category 3     Category 3        0.138        0.138           0.114
+       Bivariate Pearson Chi-Square                                  1.916
+       Bivariate Log-Likelihood Chi-Square                           1.930
+       Number of Significant Standardized Residuals                  0
+     U2             U3
+       Category 1     Category 1        0.230        0.233          -0.484
+       Category 1     Category 2        0.060        0.058           0.522
+       Category 1     Category 3        0.218        0.217           0.201
+       Category 2     Category 1        0.058        0.056           0.508
+       Category 2     Category 2        0.012        0.013          -0.349
+       Category 2     Category 3        0.044        0.045          -0.375
+       Category 3     Category 1        0.202        0.201           0.219
+       Category 3     Category 2        0.040        0.041          -0.416
+       Category 3     Category 3        0.136        0.136          -0.015
+       Bivariate Pearson Chi-Square                                  1.170
+       Bivariate Log-Likelihood Chi-Square                           1.170
+       Number of Significant Standardized Residuals                  0
+     U2             U4
+       Category 1     Category 1        0.242        0.240           0.233
+       Category 1     Category 2        0.057        0.059          -0.658
+       Category 1     Category 3        0.209        0.208           0.138
+       Category 2     Category 1        0.056        0.057          -0.399
+       Category 2     Category 2        0.014        0.013           0.640
+       Category 2     Category 3        0.044        0.044           0.096
+       Category 3     Category 1        0.202        0.202          -0.017
+       Category 3     Category 2        0.044        0.043           0.407
+       Category 3     Category 3        0.132        0.133          -0.223
+       Bivariate Pearson Chi-Square                                  1.230
+       Bivariate Log-Likelihood Chi-Square                           1.225
+       Number of Significant Standardized Residuals                  0
+     U3             U4
+       Category 1     Category 1        0.258        0.260          -0.388
+       Category 1     Category 2        0.057        0.056           0.400
+       Category 1     Category 3        0.175        0.174           0.206
+       Category 2     Category 1        0.056        0.055           0.323
+       Category 2     Category 2        0.014        0.013           0.377
+       Category 2     Category 3        0.042        0.044          -0.567
+       Category 3     Category 1        0.185        0.184           0.249
+       Category 3     Category 2        0.045        0.047          -0.638
+       Category 3     Category 3        0.167        0.167           0.102
+       Bivariate Pearson Chi-Square                                  1.291
+       Bivariate Log-Likelihood Chi-Square                           1.297
+       Number of Significant Standardized Residuals                  0
+
+       Overall Bivariate Pearson Chi-Square                         13.952
+       Overall Bivariate Log-Likelihood Chi-Square                  13.618
+       Overall Number of Significant Standardized Residuals          1
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR CLASS 1
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        0.649          0.649                  0.000                0.000
+       Category 2        0.110          0.110                  0.000                0.000
+       Category 3        0.241          0.241                  0.000                0.000
+     U2
+       Category 1        0.646          0.646                  0.000                0.000
+       Category 2        0.112          0.112                  0.000                0.000
+       Category 3        0.242          0.242                  0.000                0.000
+     U3
+       Category 1        0.329          0.329                  0.000                0.000
+       Category 2        0.122          0.122                  0.000                0.000
+       Category 3        0.549          0.549                  0.000                0.000
+     U4
+       Category 1        0.365          0.365                  0.000                0.000
+       Category 2        0.123          0.123                  0.000                0.000
+       Category 3        0.513          0.513                  0.000                0.000
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR CLASS 1
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        0.420       0.420             0.000           -0.009
+       Category 1     Category 2        0.071       0.073            -0.001           -0.253
+       Category 1     Category 3        0.158       0.157             0.002            0.193
+       Category 2     Category 1        0.069       0.071            -0.002           -0.348
+       Category 2     Category 2        0.016       0.012             0.004            1.495
+       Category 2     Category 3        0.025       0.027            -0.002           -0.469
+       Category 3     Category 1        0.158       0.156             0.002            0.258
+       Category 3     Category 2        0.025       0.027            -0.002           -0.610
+       Category 3     Category 3        0.058       0.058             0.000            0.022
+     U1             U3
+       Category 1     Category 1        0.214       0.213             0.001            0.074
+       Category 1     Category 2        0.079       0.079             0.000            0.003
+       Category 1     Category 3        0.356       0.356            -0.001           -0.065
+       Category 2     Category 1        0.036       0.036             0.000            0.030
+       Category 2     Category 2        0.012       0.013            -0.001           -0.396
+       Category 2     Category 3        0.061       0.060             0.001            0.167
+       Category 3     Category 1        0.078       0.079            -0.001           -0.133
+       Category 3     Category 2        0.030       0.029             0.001            0.264
+       Category 3     Category 3        0.132       0.132             0.000           -0.026
+     U1             U4
+       Category 1     Category 1        0.234       0.237            -0.003           -0.283
+       Category 1     Category 2        0.081       0.080             0.002            0.286
+       Category 1     Category 3        0.334       0.333             0.001            0.091
+       Category 2     Category 1        0.040       0.040             0.000            0.059
+       Category 2     Category 2        0.014       0.013             0.001            0.395
+       Category 2     Category 3        0.055       0.056            -0.001           -0.248
+       Category 3     Category 1        0.090       0.088             0.002            0.384
+       Category 3     Category 2        0.027       0.030            -0.003           -0.725
+       Category 3     Category 3        0.124       0.124             0.000            0.043
+     U2             U3
+       Category 1     Category 1        0.210       0.213            -0.002           -0.249
+       Category 1     Category 2        0.081       0.079             0.002            0.341
+       Category 1     Category 3        0.355       0.355             0.000            0.021
+       Category 2     Category 1        0.038       0.037             0.001            0.331
+       Category 2     Category 2        0.014       0.014             0.000           -0.025
+       Category 2     Category 3        0.060       0.061            -0.001           -0.247
+       Category 3     Category 1        0.080       0.079             0.001            0.146
+       Category 3     Category 2        0.028       0.029            -0.002           -0.527
+       Category 3     Category 3        0.134       0.133             0.001            0.146
+     U2             U4
+       Category 1     Category 1        0.235       0.236             0.000           -0.022
+       Category 1     Category 2        0.077       0.079            -0.002           -0.388
+       Category 1     Category 3        0.334       0.332             0.003            0.242
+       Category 2     Category 1        0.040       0.041            -0.001           -0.146
+       Category 2     Category 2        0.014       0.014             0.000            0.074
+       Category 2     Category 3        0.058       0.057             0.000            0.087
+       Category 3     Category 1        0.089       0.088             0.001            0.134
+       Category 3     Category 2        0.032       0.030             0.002            0.567
+       Category 3     Category 3        0.121       0.124            -0.003           -0.407
+     U3             U4
+       Category 1     Category 1        0.117       0.120            -0.003           -0.359
+       Category 1     Category 2        0.041       0.040             0.001            0.258
+       Category 1     Category 3        0.170       0.169             0.001            0.176
+       Category 2     Category 1        0.046       0.044             0.001            0.263
+       Category 2     Category 2        0.016       0.015             0.002            0.574
+       Category 2     Category 3        0.060       0.063            -0.003           -0.512
+       Category 3     Category 1        0.202       0.200             0.001            0.156
+       Category 3     Category 2        0.065       0.067            -0.003           -0.480
+       Category 3     Category 3        0.283       0.282             0.001            0.129
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR CLASS 2
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        0.372          0.372                  0.000                0.000
+       Category 2        0.127          0.127                  0.000                0.000
+       Category 3        0.501          0.501                  0.000                0.000
+     U2
+       Category 1        0.410          0.410                  0.000                0.000
+       Category 2        0.115          0.115                  0.000                0.000
+       Category 3        0.474          0.474                  0.000                0.000
+     U3
+       Category 1        0.605          0.605                  0.000                0.000
+       Category 2        0.105          0.105                  0.000                0.000
+       Category 3        0.290          0.290                  0.000                0.000
+     U4
+       Category 1        0.595          0.595                  0.000                0.000
+       Category 2        0.111          0.111                  0.000                0.000
+       Category 3        0.295          0.295                  0.000                0.000
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR CLASS 2
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        0.151       0.153            -0.002           -0.269
+       Category 1     Category 2        0.043       0.043             0.000           -0.035
+       Category 1     Category 3        0.179       0.177             0.002            0.273
+       Category 2     Category 1        0.051       0.052            -0.002           -0.391
+       Category 2     Category 2        0.018       0.015             0.004            1.694
+       Category 2     Category 3        0.058       0.060            -0.002           -0.490
+       Category 3     Category 1        0.209       0.205             0.003            0.455
+       Category 3     Category 2        0.054       0.058            -0.004           -0.843
+       Category 3     Category 3        0.238       0.237             0.000            0.030
+     U1             U3
+       Category 1     Category 1        0.224       0.225            -0.001           -0.080
+       Category 1     Category 2        0.039       0.039            -0.001           -0.143
+       Category 1     Category 3        0.109       0.108             0.001            0.196
+       Category 2     Category 1        0.077       0.077             0.000            0.044
+       Category 2     Category 2        0.012       0.013            -0.002           -0.767
+       Category 2     Category 3        0.038       0.037             0.001            0.405
+       Category 3     Category 1        0.303       0.303             0.000            0.047
+       Category 3     Category 2        0.055       0.053             0.002            0.519
+       Category 3     Category 3        0.143       0.145            -0.003           -0.390
+     U1             U4
+       Category 1     Category 1        0.219       0.221            -0.003           -0.346
+       Category 1     Category 2        0.044       0.041             0.003            0.747
+       Category 1     Category 3        0.110       0.110             0.000           -0.016
+       Category 2     Category 1        0.076       0.076             0.000            0.074
+       Category 2     Category 2        0.014       0.014             0.000            0.128
+       Category 2     Category 3        0.037       0.038            -0.001           -0.183
+       Category 3     Category 1        0.300       0.298             0.002            0.271
+       Category 3     Category 2        0.052       0.055            -0.003           -0.715
+       Category 3     Category 3        0.148       0.148             0.001            0.112
+     U2             U3
+       Category 1     Category 1        0.245       0.248            -0.003           -0.421
+       Category 1     Category 2        0.045       0.043             0.002            0.404
+       Category 1     Category 3        0.121       0.119             0.002            0.308
+       Category 2     Category 1        0.072       0.070             0.002            0.394
+       Category 2     Category 2        0.011       0.012            -0.001           -0.445
+       Category 2     Category 3        0.033       0.034            -0.001           -0.287
+       Category 3     Category 1        0.288       0.287             0.002            0.180
+       Category 3     Category 2        0.049       0.050            -0.001           -0.153
+       Category 3     Category 3        0.137       0.138            -0.001           -0.140
+     U2             U4
+       Category 1     Category 1        0.246       0.244             0.003            0.321
+       Category 1     Category 2        0.043       0.045            -0.002           -0.554
+       Category 1     Category 3        0.120       0.121             0.000           -0.069
+       Category 2     Category 1        0.067       0.069            -0.002           -0.383
+       Category 2     Category 2        0.014       0.013             0.002            0.784
+       Category 2     Category 3        0.034       0.034             0.000            0.048
+       Category 3     Category 1        0.281       0.282            -0.001           -0.091
+       Category 3     Category 2        0.053       0.053             0.001            0.122
+       Category 3     Category 3        0.140       0.140             0.000            0.039
+     U3             U4
+       Category 1     Category 1        0.357       0.360            -0.002           -0.259
+       Category 1     Category 2        0.068       0.067             0.001            0.310
+       Category 1     Category 3        0.179       0.178             0.001            0.122
+       Category 2     Category 1        0.063       0.062             0.001            0.209
+       Category 2     Category 2        0.012       0.012             0.000           -0.026
+       Category 2     Category 3        0.030       0.031            -0.001           -0.277
+       Category 3     Category 1        0.174       0.173             0.001            0.195
+       Category 3     Category 2        0.031       0.032            -0.001           -0.423
+       Category 3     Category 3        0.086       0.086             0.000            0.004
+
+
+TECHNICAL 8 OUTPUT
+
+
+   E STEP  ITER  LOGLIKELIHOOD    ABS CHANGE   REL CHANGE  ALGORITHM
+              1 -0.19220264D+05    0.0000000    0.0000000  EM
+              2 -0.19215521D+05    4.7428188    0.0002468  EM
+              3 -0.19215311D+05    0.2101882    0.0000109  EM
+              4 -0.19215164D+05    0.1468223    0.0000076  EM
+              5 -0.19215060D+05    0.1041606    0.0000054  EM
+              6 -0.19214985D+05    0.0749645    0.0000039  EM
+              7 -0.19214930D+05    0.0546586    0.0000028  EM
+              8 -0.19214890D+05    0.0403263    0.0000021  EM
+              9 -0.19214860D+05    0.0300803    0.0000016  EM
+             10 -0.19214837D+05    0.0226767    0.0000012  EM
+             11 -0.19214820D+05    0.0172794    0.0000009  EM
+             12 -0.19214807D+05    0.0133160    0.0000007  EM
+             13 -0.19214796D+05    0.0103883    0.0000005  EM
+             14 -0.19214788D+05    0.0082147    0.0000004  EM
+             15 -0.19214781D+05    0.0065943    0.0000003  EM
+             16 -0.19214776D+05    0.0053817    0.0000003  EM
+             17 -0.19214772D+05    0.0044714    0.0000002  EM
+             18 -0.19214768D+05    0.0037858    0.0000002  EM
+             19 -0.19214764D+05    0.0032679    0.0000002  EM
+             20 -0.19214762D+05    0.0028755    0.0000001  EM
+             21 -0.19214759D+05    0.0025771    0.0000001  EM
+             22 -0.19214757D+05    0.0023495    0.0000001  EM
+             23 -0.19214755D+05    0.0021750    0.0000001  EM
+             24 -0.19214752D+05    0.0020406    0.0000001  EM
+             25 -0.19214751D+05    0.0019365    0.0000001  EM
+             26 -0.19214749D+05    0.0018553    0.0000001  EM
+             27 -0.19214747D+05    0.0017913    0.0000001  EM
+             28 -0.19214745D+05    0.0017406    0.0000001  EM
+             29 -0.19214743D+05    0.0016997    0.0000001  EM
+             30 -0.19214742D+05    0.0016664    0.0000001  EM
+             31 -0.19214740D+05    0.0016389    0.0000001  EM
+             32 -0.19214739D+05    0.0016157    0.0000001  EM
+             33 -0.19214737D+05    0.0015959    0.0000001  EM
+             34 -0.19214735D+05    0.0015786    0.0000001  EM
+             35 -0.19214525D+05    0.2104860    0.0000110  FS
+             36 -0.19214481D+05    0.0441631    0.0000023  FS
+             37 -0.19214480D+05    0.0003261    0.0000000  FS
+             38 -0.19214480D+05    0.0000124    0.0000000  FS
+             39 -0.19214480D+05    0.0000006    0.0000000  FS
+             40 -0.19214480D+05    0.0000000    0.0000000  FS
+
+
+     Beginning Time:  16:52:57
+        Ending Time:  16:52:57
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

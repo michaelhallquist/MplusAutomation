@@ -1,0 +1,1025 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+11/17/2025   4:51 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a loglinear model for a three-way table with
+          conditional independence between the first two variables
+  DATA:	FILE IS ex7.15.dat;	
+  VARIABLE:	NAMES ARE u1 u2 u3 w;
+  	FREQWEIGHT = w;
+  	CATEGORICAL = u1-u3;
+  	CLASSES = c1 (2) c2 (2) c3 (2);
+  ANALYSIS:	TYPE = MIXTURE;
+  	STARTS = 0;
+  	PARAMETERIZATION = LOGLINEAR;
+  MODEL:
+  	%OVERALL%
+  	c1 WITH c3;
+  	c2 WITH c3;
+  MODEL c1:
+  	%c1#1%
+  	[u1$1@15];
+  	%c1#2%
+  	[u1$1@-15];
+  MODEL c2:
+  	%c2#1%
+  	[u2$1@15];
+  	%c2#2%
+  	[u2$1@-15];
+  MODEL c3:
+  	%c3#1%
+  	[u3$1@15];
+  	%c3#2%
+  	[u3$1@-15];
+  OUTPUT:	TECH1 TECH8 TECH10;
+
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a loglinear model for a three-way table with
+conditional independence between the first two variables
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         713
+Number of patterns                                             500
+
+Number of dependent variables                                    3
+Number of independent variables                                  0
+Number of continuous latent variables                            0
+Number of categorical latent variables                           3
+
+Observed dependent variables
+
+  Binary and ordered categorical (ordinal)
+   U1          U2          U3
+
+Categorical latent variables
+   C1          C2          C3
+
+Variables with special functions
+
+  Weight variable       W
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-06
+    Relative loglikelihood change                        0.100D-06
+    Derivative                                           0.100D-05
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Optimization algorithm                                         EMA
+Parameterization                                         LOGLINEAR
+Link                                                         LOGIT
+
+Input data file(s)
+  ex7.15.dat
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    U1
+      Category 1    0.403          287.000
+      Category 2    0.597          426.000
+    U2
+      Category 1    0.619          441.000
+      Category 2    0.381          272.000
+    U3
+      Category 1    0.686          489.000
+      Category 2    0.314          224.000
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        5
+
+Loglikelihood
+
+          H0 Value                       -1380.635
+          H0 Scaling Correction Factor      1.0000
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    2771.269
+          Bayesian (BIC)                  2794.117
+          Sample-Size Adjusted BIC        2778.241
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit for the Binary and Ordered Categorical
+(Ordinal) Outcomes
+
+          Pearson Chi-Square
+
+          Value                              1.472
+          Degrees of Freedom                     2
+          P-Value                           0.4791
+
+          Likelihood Ratio Chi-Square
+
+          Value                              1.470
+          Degrees of Freedom                     2
+          P-Value                           0.4794
+
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE
+BASED ON THE ESTIMATED MODEL
+
+  Latent Class
+    Variable    Class
+
+    C1             1       286.99994          0.40252
+                   2       426.00003          0.59748
+    C2             1       441.00006          0.61851
+                   2       271.99994          0.38149
+    C3             1       489.00009          0.68583
+                   2       223.99992          0.31417
+
+
+CLASSIFICATION QUALITY
+
+     Entropy                         1.000
+
+
+LATENT CLASS INDICATOR MEANS AND PROBABILITIES FOR EACH LATENT CLASS
+
+     MEAN/PROBABILITY PROFILES FOR C1
+                   Latent class
+                     1      2
+     U1
+       Category 1  1.000  0.000
+       Category 2  0.000  1.000
+
+     MEAN/PROBABILITY PROFILES FOR C2
+                   Latent class
+                     1      2
+     U2
+       Category 1  1.000  0.000
+       Category 2  0.000  1.000
+
+     MEAN/PROBABILITY PROFILES FOR C3
+                   Latent class
+                     1      2
+     U3
+       Category 1  1.000  0.000
+       Category 2  0.000  1.000
+
+
+C-SPECIFIC CLASSIFICATION RESULTS
+
+Classification Quality for C1
+
+     Entropy                         1.000
+
+Average Latent Class Probabilities for Most Likely Latent Class Membership (Row)
+by Latent Class (Column)
+
+           1        2
+
+    1   1.000    0.000
+    2   0.000    1.000
+
+
+Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+           1        2
+
+    1   1.000    0.000
+    2   0.000    1.000
+
+
+Logits for the Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+              1        2
+
+    1     13.816    0.000
+    2    -13.816    0.000
+
+Classification Quality for C2
+
+     Entropy                         1.000
+
+Average Latent Class Probabilities for Most Likely Latent Class Membership (Row)
+by Latent Class (Column)
+
+           1        2
+
+    1   1.000    0.000
+    2   0.000    1.000
+
+
+Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+           1        2
+
+    1   1.000    0.000
+    2   0.000    1.000
+
+
+Logits for the Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+              1        2
+
+    1     13.816    0.000
+    2    -13.816    0.000
+
+Classification Quality for C3
+
+     Entropy                         1.000
+
+Average Latent Class Probabilities for Most Likely Latent Class Membership (Row)
+by Latent Class (Column)
+
+           1        2
+
+    1   1.000    0.000
+    2   0.000    1.000
+
+
+Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+           1        2
+
+    1   1.000    0.000
+    2   0.000    1.000
+
+
+Logits for the Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+              1        2
+
+    1     13.816    0.000
+    2    -13.816    0.000
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Parameters for Class-specific Model Parts of C1
+
+Latent Class C1#1
+
+ Thresholds
+    U1$1              15.000      0.000    999.000    999.000
+
+Latent Class C1#2
+
+ Thresholds
+    U1$1             -15.000      0.000    999.000    999.000
+
+Parameters for Class-specific Model Parts of C2
+
+Latent Class C2#1
+
+ Thresholds
+    U2$1              15.000      0.000    999.000    999.000
+
+Latent Class C2#2
+
+ Thresholds
+    U2$1             -15.000      0.000    999.000    999.000
+
+Parameters for Class-specific Model Parts of C3
+
+Latent Class C3#1
+
+ Thresholds
+    U3$1              15.000      0.000    999.000    999.000
+
+Latent Class C3#2
+
+ Thresholds
+    U3$1             -15.000      0.000    999.000    999.000
+
+Categorical Latent Variables
+
+ C1#1     WITH
+    C3#1               0.168      0.166      1.014      0.311
+
+ C2#1     WITH
+    C3#1               0.967      0.166      5.824      0.000
+
+ Means
+    C1#1              -0.511      0.138     -3.701      0.000
+    C2#1              -0.161      0.134     -1.201      0.230
+    C3#1               0.155      0.140      1.110      0.267
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.475E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+RESULTS IN PROBABILITY SCALE
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Results for Class-specific Model Parts of C1
+
+Latent Class C1#1
+
+ U1
+    Category 1         1.000      0.000      0.000      1.000
+    Category 2         0.000      0.000      0.000      1.000
+
+Latent Class C1#2
+
+ U1
+    Category 1         0.000      0.000      0.000      1.000
+    Category 2         1.000      0.000      0.000      1.000
+
+Results for Class-specific Model Parts of C2
+
+Latent Class C2#1
+
+ U2
+    Category 1         1.000      0.000      0.000      1.000
+    Category 2         0.000      0.000      0.000      1.000
+
+Latent Class C2#2
+
+ U2
+    Category 1         0.000      0.000      0.000      1.000
+    Category 2         1.000      0.000      0.000      1.000
+
+Results for Class-specific Model Parts of C3
+
+Latent Class C3#1
+
+ U3
+    Category 1         1.000      0.000      0.000      1.000
+    Category 2         0.000      0.000      0.000      1.000
+
+Latent Class C3#2
+
+ U3
+    Category 1         0.000      0.000      0.000      1.000
+    Category 2         1.000      0.000      0.000      1.000
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS PATTERN 1 1 1
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS PATTERN 1 1 2
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS PATTERN 1 2 1
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS PATTERN 1 2 2
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS PATTERN 2 1 1
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS PATTERN 2 1 2
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS PATTERN 2 2 1
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS PATTERN 2 2 2
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS INDICATOR MODEL PART
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 1 1 1
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+                    0             0             0
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 1 1 2
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+                    0             0             0
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 1 2 1
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+                    0             0             0
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 1 2 2
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+                    0             0             0
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 2 1 1
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+                    0             0             0
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 2 1 2
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+                    0             0             0
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 2 2 1
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+                    0             0             0
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 2 2 2
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+                    0             0             0
+
+
+     PARAMETER SPECIFICATION FOR LATENT CLASS REGRESSION MODEL PART
+
+
+           ALPHA(C)
+              C1#1          C1#2          C2#1          C2#2          C3#1
+              ________      ________      ________      ________      ________
+                    1             0             2             0             3
+
+
+           ALPHA(C)
+              C3#2
+              ________
+                    0
+
+
+           PSI(C)
+              C1#1          C1#2
+              ________      ________
+ C3#1               4             0
+ C3#2               0             0
+
+
+           PSI(C)
+              C2#1          C2#2
+              ________      ________
+ C3#1               5             0
+ C3#2               0             0
+
+
+     STARTING VALUES FOR LATENT CLASS PATTERN 1 1 1
+
+
+     STARTING VALUES FOR LATENT CLASS PATTERN 1 1 2
+
+
+     STARTING VALUES FOR LATENT CLASS PATTERN 1 2 1
+
+
+     STARTING VALUES FOR LATENT CLASS PATTERN 1 2 2
+
+
+     STARTING VALUES FOR LATENT CLASS PATTERN 2 1 1
+
+
+     STARTING VALUES FOR LATENT CLASS PATTERN 2 1 2
+
+
+     STARTING VALUES FOR LATENT CLASS PATTERN 2 2 1
+
+
+     STARTING VALUES FOR LATENT CLASS PATTERN 2 2 2
+
+
+     STARTING VALUES FOR LATENT CLASS INDICATOR MODEL PART
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 1 1 1
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+               15.000        15.000        15.000
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 1 1 2
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+               15.000        15.000       -15.000
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 1 2 1
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+               15.000       -15.000        15.000
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 1 2 2
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+               15.000       -15.000       -15.000
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 2 1 1
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+              -15.000        15.000        15.000
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 2 1 2
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+              -15.000        15.000       -15.000
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 2 2 1
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+              -15.000       -15.000        15.000
+
+
+           TAU(U) FOR LATENT CLASS PATTERN 2 2 2
+              U1$1          U2$1          U3$1
+              ________      ________      ________
+              -15.000       -15.000       -15.000
+
+
+     STARTING VALUES FOR LATENT CLASS REGRESSION MODEL PART
+
+
+           ALPHA(C)
+              C1#1          C1#2          C2#1          C2#2          C3#1
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           ALPHA(C)
+              C3#2
+              ________
+                0.000
+
+
+           PSI(C)
+              C1#1          C1#2
+              ________      ________
+ C3#1           0.000         0.000
+ C3#2           0.000         0.000
+
+
+           PSI(C)
+              C2#1          C2#2
+              ________      ________
+ C3#1           0.000         0.000
+ C3#2           0.000         0.000
+
+
+TECHNICAL 10 OUTPUT
+
+
+     MODEL FIT INFORMATION FOR THE LATENT CLASS INDICATOR MODEL PART
+
+
+     RESPONSE PATTERNS
+
+     No.  Pattern    No.  Pattern    No.  Pattern    No.  Pattern
+       1  000          2  001          3  010          4  011
+       5  100          6  101          7  110          8  111
+
+
+
+     RESPONSE PATTERN FREQUENCIES AND CHI-SQUARE CONTRIBUTIONS
+
+    Response          Frequency     Standardized  Chi-square Contribution
+     Pattern    Observed  Estimated   Residual    Pearson   Loglikelihood  Deleted
+                                     (z-score)
+         1       140.00     140.31      -0.03       0.00        -0.63
+         2        43.00      38.62       0.72       0.50         9.23
+         3        63.00      62.69       0.04       0.00         0.63
+         4        41.00      45.37      -0.67       0.42        -8.31
+         5       198.00     197.69       0.03       0.00         0.63
+         6        60.00      64.37      -0.57       0.30        -8.45
+         7        88.00      88.31      -0.04       0.00        -0.63
+         8        80.00      75.63       0.53       0.25         9.00
+
+     THE TOTAL PEARSON CHI-SQUARE CONTRIBUTION FROM EMPTY CELLS IS         0.00
+
+
+     MOST FREQUENT RESPONSE PATTERNS AND CHI-SQUARE CONTRIBUTIONS
+
+    Response          Frequency     Standardized  Chi-square Contribution
+     Pattern    Observed  Estimated   Residual    Pearson   Loglikelihood
+                                     (z-score)
+         5       198.00     197.69       0.03       0.00         0.63
+         1       140.00     140.31      -0.03       0.00        -0.63
+         7        88.00      88.31      -0.04       0.00        -0.63
+         8        80.00      75.63       0.53       0.25         9.00
+         3        63.00      62.69       0.04       0.00         0.63
+         6        60.00      64.37      -0.57       0.30        -8.45
+         2        43.00      38.62       0.72       0.50         9.23
+         4        41.00      45.37      -0.67       0.42        -8.31
+     Number of Significant Standardized Residuals     0
+
+
+     UNIVARIATE MODEL FIT INFORMATION
+
+                               Estimated Probabilities
+                                                  Standardized
+     Variable              H1           H0          Residual
+                                                   (z-score)
+     U1
+       Category 1        0.403        0.403           0.000
+       Category 2        0.597        0.597           0.000
+       Univariate Pearson Chi-Square                  0.000
+       Univariate Log-Likelihood Chi-Square           0.000
+       Number of Significant Standardized Residuals   0
+     U2
+       Category 1        0.619        0.619           0.000
+       Category 2        0.381        0.381           0.000
+       Univariate Pearson Chi-Square                  0.000
+       Univariate Log-Likelihood Chi-Square           0.000
+       Number of Significant Standardized Residuals   0
+     U3
+       Category 1        0.686        0.686           0.000
+       Category 2        0.314        0.314           0.000
+       Univariate Pearson Chi-Square                  0.000
+       Univariate Log-Likelihood Chi-Square           0.000
+       Number of Significant Standardized Residuals   0
+
+       Overall Univariate Pearson Chi-Square                         0.000
+       Overall Univariate Log-Likelihood Chi-Square                  0.000
+       Overall Number of Significant Standardized Residuals          0
+
+
+     BIVARIATE MODEL FIT INFORMATION
+
+                                              Estimated Probabilities
+                                                                 Standardized
+     Variable       Variable              H1           H0          Residual
+                                                                  (z-score)
+     U1             U2
+       Category 1     Category 1        0.257        0.251           0.351
+       Category 1     Category 2        0.146        0.152          -0.424
+       Category 2     Category 1        0.362        0.368          -0.315
+       Category 2     Category 2        0.236        0.230           0.361
+       Bivariate Pearson Chi-Square                                  0.408
+       Bivariate Log-Likelihood Chi-Square                           0.409
+       Number of Significant Standardized Residuals                  0
+     U1             U3
+       Category 1     Category 1        0.285        0.285           0.000
+       Category 1     Category 2        0.118        0.118           0.000
+       Category 2     Category 1        0.401        0.401           0.000
+       Category 2     Category 2        0.196        0.196           0.000
+       Bivariate Pearson Chi-Square                                  0.000
+       Bivariate Log-Likelihood Chi-Square                           0.000
+       Number of Significant Standardized Residuals                  0
+     U2             U3
+       Category 1     Category 1        0.474        0.474           0.000
+       Category 1     Category 2        0.144        0.144           0.000
+       Category 2     Category 1        0.212        0.212           0.000
+       Category 2     Category 2        0.170        0.170           0.000
+       Bivariate Pearson Chi-Square                                  0.000
+       Bivariate Log-Likelihood Chi-Square                           0.000
+       Number of Significant Standardized Residuals                  0
+
+       Overall Bivariate Pearson Chi-Square                          0.408
+       Overall Bivariate Log-Likelihood Chi-Square                   0.409
+       Overall Number of Significant Standardized Residuals          0
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR PATTERN 1 1 1
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        1.000          1.000                  0.000               -0.004
+       Category 2        0.000          0.000                  0.000                0.004
+     U2
+       Category 1        1.000          1.000                  0.000               -0.004
+       Category 2        0.000          0.000                  0.000                0.004
+     U3
+       Category 1        1.000          1.000                  0.000               -0.004
+       Category 2        0.000          0.000                  0.000                0.004
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR PATTERN 1 1 1
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        1.000       1.000             0.000           -0.007
+       Category 1     Category 2        0.000       0.000             0.000            0.004
+       Category 2     Category 1        0.000       0.000             0.000            0.004
+       Category 2     Category 2        0.000       0.000             0.000            0.000
+     U1             U3
+       Category 1     Category 1        1.000       1.000             0.000           -0.008
+       Category 1     Category 2        0.000       0.000             0.000            0.004
+       Category 2     Category 1        0.000       0.000             0.000            0.004
+       Category 2     Category 2        0.000       0.000             0.000            0.000
+     U2             U3
+       Category 1     Category 1        1.000       1.000             0.000           -0.008
+       Category 1     Category 2        0.000       0.000             0.000            0.004
+       Category 2     Category 1        0.000       0.000             0.000            0.004
+       Category 2     Category 2        0.000       0.000             0.000            0.000
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR PATTERN 1 1 2
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        1.000          1.000                  0.000               -0.002
+       Category 2        0.000          0.000                  0.000                0.002
+     U2
+       Category 1        1.000          1.000                  0.000               -0.002
+       Category 2        0.000          0.000                  0.000                0.002
+     U3
+       Category 1        0.000          0.000                  0.000                0.002
+       Category 2        1.000          1.000                  0.000               -0.002
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR PATTERN 1 1 2
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        1.000       1.000             0.000           -0.003
+       Category 1     Category 2        0.000       0.000             0.000            0.002
+       Category 2     Category 1        0.000       0.000             0.000            0.002
+       Category 2     Category 2        0.000       0.000             0.000            0.000
+     U1             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.002
+       Category 1     Category 2        1.000       1.000             0.000           -0.003
+       Category 2     Category 1        0.000       0.000             0.000            0.000
+       Category 2     Category 2        0.000       0.000             0.000            0.002
+     U2             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.002
+       Category 1     Category 2        1.000       1.000             0.000           -0.003
+       Category 2     Category 1        0.000       0.000             0.000            0.000
+       Category 2     Category 2        0.000       0.000             0.000            0.002
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR PATTERN 1 2 1
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        1.000          1.000                  0.000               -0.002
+       Category 2        0.000          0.000                  0.000                0.002
+     U2
+       Category 1        0.000          0.000                  0.000                0.002
+       Category 2        1.000          1.000                  0.000               -0.002
+     U3
+       Category 1        1.000          1.000                  0.000               -0.002
+       Category 2        0.000          0.000                  0.000                0.002
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR PATTERN 1 2 1
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        0.000       0.000             0.000            0.002
+       Category 1     Category 2        1.000       1.000             0.000           -0.005
+       Category 2     Category 1        0.000       0.000             0.000            0.000
+       Category 2     Category 2        0.000       0.000             0.000            0.002
+     U1             U3
+       Category 1     Category 1        1.000       1.000             0.000           -0.005
+       Category 1     Category 2        0.000       0.000             0.000            0.002
+       Category 2     Category 1        0.000       0.000             0.000            0.002
+       Category 2     Category 2        0.000       0.000             0.000            0.000
+     U2             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.002
+       Category 1     Category 2        0.000       0.000             0.000            0.000
+       Category 2     Category 1        1.000       1.000             0.000           -0.005
+       Category 2     Category 2        0.000       0.000             0.000            0.002
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR PATTERN 1 2 2
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        1.000          1.000                  0.000               -0.002
+       Category 2        0.000          0.000                  0.000                0.002
+     U2
+       Category 1        0.000          0.000                  0.000                0.002
+       Category 2        1.000          1.000                  0.000               -0.002
+     U3
+       Category 1        0.000          0.000                  0.000                0.002
+       Category 2        1.000          1.000                  0.000               -0.002
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR PATTERN 1 2 2
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        0.000       0.000             0.000            0.002
+       Category 1     Category 2        1.000       1.000             0.000           -0.005
+       Category 2     Category 1        0.000       0.000             0.000            0.000
+       Category 2     Category 2        0.000       0.000             0.000            0.002
+     U1             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.002
+       Category 1     Category 2        1.000       1.000             0.000           -0.004
+       Category 2     Category 1        0.000       0.000             0.000            0.000
+       Category 2     Category 2        0.000       0.000             0.000            0.002
+     U2             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.000
+       Category 1     Category 2        0.000       0.000             0.000            0.002
+       Category 2     Category 1        0.000       0.000             0.000            0.002
+       Category 2     Category 2        1.000       1.000             0.000           -0.005
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR PATTERN 2 1 1
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        0.000          0.000                  0.000                0.004
+       Category 2        1.000          1.000                  0.000               -0.004
+     U2
+       Category 1        1.000          1.000                  0.000               -0.004
+       Category 2        0.000          0.000                  0.000                0.004
+     U3
+       Category 1        1.000          1.000                  0.000               -0.004
+       Category 2        0.000          0.000                  0.000                0.004
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR PATTERN 2 1 1
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        0.000       0.000             0.000            0.004
+       Category 1     Category 2        0.000       0.000             0.000            0.000
+       Category 2     Category 1        1.000       1.000             0.000           -0.009
+       Category 2     Category 2        0.000       0.000             0.000            0.004
+     U1             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.004
+       Category 1     Category 2        0.000       0.000             0.000            0.000
+       Category 2     Category 1        1.000       1.000             0.000           -0.008
+       Category 2     Category 2        0.000       0.000             0.000            0.004
+     U2             U3
+       Category 1     Category 1        1.000       1.000             0.000           -0.008
+       Category 1     Category 2        0.000       0.000             0.000            0.004
+       Category 2     Category 1        0.000       0.000             0.000            0.004
+       Category 2     Category 2        0.000       0.000             0.000            0.000
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR PATTERN 2 1 2
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        0.000          0.000                  0.000                0.003
+       Category 2        1.000          1.000                  0.000               -0.003
+     U2
+       Category 1        1.000          1.000                  0.000               -0.003
+       Category 2        0.000          0.000                  0.000                0.003
+     U3
+       Category 1        0.000          0.000                  0.000                0.003
+       Category 2        1.000          1.000                  0.000               -0.003
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR PATTERN 2 1 2
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        0.000       0.000             0.000            0.003
+       Category 1     Category 2        0.000       0.000             0.000            0.000
+       Category 2     Category 1        1.000       1.000             0.000           -0.006
+       Category 2     Category 2        0.000       0.000             0.000            0.003
+     U1             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.000
+       Category 1     Category 2        0.000       0.000             0.000            0.003
+       Category 2     Category 1        0.000       0.000             0.000            0.003
+       Category 2     Category 2        1.000       1.000             0.000           -0.005
+     U2             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.003
+       Category 1     Category 2        1.000       1.000             0.000           -0.005
+       Category 2     Category 1        0.000       0.000             0.000            0.000
+       Category 2     Category 2        0.000       0.000             0.000            0.003
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR PATTERN 2 2 1
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        0.000          0.000                  0.000                0.003
+       Category 2        1.000          1.000                  0.000               -0.003
+     U2
+       Category 1        0.000          0.000                  0.000                0.003
+       Category 2        1.000          1.000                  0.000               -0.003
+     U3
+       Category 1        1.000          1.000                  0.000               -0.003
+       Category 2        0.000          0.000                  0.000                0.003
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR PATTERN 2 2 1
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        0.000       0.000             0.000            0.000
+       Category 1     Category 2        0.000       0.000             0.000            0.003
+       Category 2     Category 1        0.000       0.000             0.000            0.003
+       Category 2     Category 2        1.000       1.000             0.000           -0.006
+     U1             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.003
+       Category 1     Category 2        0.000       0.000             0.000            0.000
+       Category 2     Category 1        1.000       1.000             0.000           -0.006
+       Category 2     Category 2        0.000       0.000             0.000            0.003
+     U2             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.003
+       Category 1     Category 2        0.000       0.000             0.000            0.000
+       Category 2     Category 1        1.000       1.000             0.000           -0.006
+       Category 2     Category 2        0.000       0.000             0.000            0.003
+
+
+     UNIVARIATE DISTRIBUTION FIT FOR PATTERN 2 2 2
+
+     Variable          Observed      Estimated      Residual (Obs.-Est.)    Stand. Residual
+     U1
+       Category 1        0.000          0.000                  0.000                0.002
+       Category 2        1.000          1.000                  0.000               -0.002
+     U2
+       Category 1        0.000          0.000                  0.000                0.002
+       Category 2        1.000          1.000                  0.000               -0.002
+     U3
+       Category 1        0.000          0.000                  0.000                0.003
+       Category 2        1.000          1.000                  0.000               -0.003
+
+
+     BIVARIATE DISTRIBUTIONS FIT FOR PATTERN 2 2 2
+
+     Variable       Variable          Observed     Estimated    Residual (Obs.-Est.)  Stand. Residual
+     U1             U2
+       Category 1     Category 1        0.000       0.000             0.000            0.000
+       Category 1     Category 2        0.000       0.000             0.000            0.002
+       Category 2     Category 1        0.000       0.000             0.000            0.002
+       Category 2     Category 2        1.000       1.000             0.000           -0.005
+     U1             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.000
+       Category 1     Category 2        0.000       0.000             0.000            0.002
+       Category 2     Category 1        0.000       0.000             0.000            0.003
+       Category 2     Category 2        1.000       1.000             0.000           -0.005
+     U2             U3
+       Category 1     Category 1        0.000       0.000             0.000            0.000
+       Category 1     Category 2        0.000       0.000             0.000            0.002
+       Category 2     Category 1        0.000       0.000             0.000            0.003
+       Category 2     Category 2        1.000       1.000             0.000           -0.005
+
+
+TECHNICAL 8 OUTPUT
+
+
+   E STEP  ITER  LOGLIKELIHOOD    ABS CHANGE   REL CHANGE  ALGORITHM
+              1 -0.14826418D+04    0.0000000    0.0000000  EM
+              2 -0.13865224D+04   96.1194308    0.0648298  EM
+              3 -0.13806407D+04    5.8817201    0.0042421  EM
+              4 -0.13806347D+04    0.0059747    0.0000043  EM
+              5 -0.13806347D+04    0.0000000    0.0000000  EM
+
+
+     Beginning Time:  16:51:30
+        Ending Time:  16:51:30
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen
