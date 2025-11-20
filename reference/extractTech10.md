@@ -25,9 +25,3 @@ An empty list
 ## See also
 
 [`matrixExtract`](https://michaelhallquist.github.io/MplusAutomation/reference/matrixExtract.md)
-
-## Examples
-
-``` r
-# make me!!!
-```
