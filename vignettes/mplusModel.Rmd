@@ -1,0 +1,202 @@
+---
+title: "Working with the mplusModel Object"
+author: "Michael Hallquist"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Working with the mplusModel Object}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(MplusAutomation)
+
+# Temporary working files for this vignette.
+tmp_dir <- tempfile("mplusModel_vignette_")
+dir.create(tmp_dir)
+
+# A placeholder path so this vignette can run without Mplus installed.
+fake_mplus <- tempfile("fake_mplus_")
+file.create(fake_mplus)
+```
+
+# Overview
+
+`mplusModel()` creates an R6 object that represents one Mplus model.
+It stores:
+
+- model syntax
+- model data
+- `.inp`, `.dat`, and `.out` paths
+- parsed output sections (after reading/running a model)
+
+Compared with the traditional `mplusObject`, `mplusModel` is designed around a single model lifecycle:
+create, update, write files, run/submit, and inspect results.
+
+# Create an `mplusModel`
+
+```{r}
+model_syntax <- "
+TITLE: OLS regression with mtcars data;
+DATA: FILE IS mtcars_demo.dat;
+VARIABLE:
+  NAMES = mpg wt hp cyl qsec;
+  USEVARIABLES = mpg wt hp;
+ANALYSIS:
+  ESTIMATOR = ML;
+MODEL:
+  mpg ON wt hp;
+OUTPUT:
+  STANDARDIZED;
+"
+
+model_data <- mtcars[, c("mpg", "wt", "hp", "cyl", "qsec")]
+
+m <- mplusModel(
+  syntax = model_syntax,
+  data = model_data,
+  inp_file = file.path(tmp_dir, "mtcars_demo.inp"),
+  Mplus_command = fake_mplus
+)
+
+m$model_dir
+m$inp_file
+m$dat_file
+m$variables
+```
+
+The object uses active bindings, so values like `m$inp_file` and `m$dat_file` are always synchronized with the current object state.
+
+# Write Mplus Files
+
+`write_dat()` writes the data file, and `write_inp()` writes the Mplus input syntax.
+
+```{r}
+m$write_dat()
+m$write_inp()
+
+file.exists(m$dat_file)
+file.exists(m$inp_file)
+```
+
+You can re-create an object from an existing `.inp` file:
+
+```{r}
+m_from_inp <- mplusModel(
+  inp_file = m$inp_file,
+  read = FALSE,
+  Mplus_command = fake_mplus
+)
+
+head(m_from_inp$syntax, n = 8)
+```
+
+# Update Syntax and Variables
+
+There are two update styles:
+
+- non-mutating: `update(m, ...)` returns an updated clone
+- in place: `m$update(...)` mutates the current object
+
+For syntax sections, formulas support replace and append semantics:
+
+- `~ "new text"` replaces
+- `~ . + "additional text"` appends
+
+```{r}
+m_clone <- update(
+  m,
+  MODEL = ~ . + "mpg ON cyl;",
+  ANALYSIS = ~ "ESTIMATOR = MLR;"
+)
+
+any(grepl("mpg ON cyl;", m$syntax, fixed = TRUE))
+any(grepl("mpg ON cyl;", m_clone$syntax, fixed = TRUE))
+```
+
+```{r}
+m$update(MODEL = ~ . + "mpg ON qsec;")
+any(grepl("mpg ON qsec;", m$syntax, fixed = TRUE))
+```
+
+The `variables` binding controls which columns are written to the `.dat` file:
+
+```{r}
+m$variables
+
+m$variables <- c("mpg", "wt", "hp", "cyl")
+m$variables
+
+m$variables <- NULL
+m$variables
+```
+
+# Read Existing Output into `mplusModel`
+
+This example uses an output file shipped with the package (`inst/extdata/ex3.1.out`).
+
+```{r}
+out_file <- system.file("extdata", "ex3.1.out", package = "MplusAutomation")
+file.copy(out_file, file.path(tmp_dir, "ex3.1.out"), overwrite = TRUE)
+
+writeLines(
+  c(
+    "TITLE: User's Guide Example 3.1;",
+    "DATA: FILE IS ex3.1.dat;",
+    "VARIABLE: NAMES ARE y1 x1 x3;",
+    "MODEL: y1 ON x1 x3;"
+  ),
+  con = file.path(tmp_dir, "ex3.1.inp")
+)
+
+m_out <- mplusModel(
+  inp_file = file.path(tmp_dir, "ex3.1.inp"),
+  data = data.frame(y1 = 0, x1 = 0, x3 = 0),
+  read = TRUE,
+  Mplus_command = fake_mplus
+)
+
+m_out$summaries[c("AIC", "BIC", "CFI", "RMSEA_Estimate")]
+head(m_out$parameters$unstandardized[, c("paramHeader", "param", "est", "se", "pval")])
+```
+
+`mplusModel` exposes all major sections returned by `readModels()`, including `input`, `summaries`, `parameters`, `mod_indices`, `errors`, and more.
+
+# Run Locally or Submit to HPC
+
+`mplusModel` wraps both local runs and scheduler submission.
+These commands require a real Mplus executable.
+
+```{r, eval=FALSE}
+# Run locally
+m$run(replaceOutfile = "modifiedDate")
+
+# Submit to SLURM/Torque (arguments passed through to submitModels())
+m$submit(
+  scheduler = "slurm",
+  replaceOutfile = "modifiedDate",
+  memgb_per_model = 8L,
+  cores_per_model = 1L,
+  time_per_model = "01:00:00"
+)
+```
+
+# Summary
+
+Use `mplusModel` when you want an object-oriented workflow for a single model:
+
+1. define syntax and data
+2. write `.inp` / `.dat`
+3. update syntax programmatically
+4. run or submit
+5. read and inspect results
+
+```{r cleanup, include=FALSE}
+unlink(tmp_dir, recursive = TRUE, force = TRUE)
+unlink(fake_mplus, force = TRUE)
+```

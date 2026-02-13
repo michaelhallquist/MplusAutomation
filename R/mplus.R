@@ -27,6 +27,7 @@
 #' example3$usevariables
 #' rm(example1, example2, example3)
 detectVariables <- function(object, quiet = TRUE) {
+  usevariables <- NULL
   if (isFALSE(is.null(object$MONTECARLO))) {
     stop("detectVariables() does not work with MONTECARLO models")
   }
@@ -37,62 +38,48 @@ detectVariables <- function(object, quiet = TRUE) {
     } else {
       v <- colnames(object$rdata)
     }
-   
-    tmpVARIABLE <- unlist(c(
-      tryCatch(unlist(strsplit(object$VARIABLE, split = ";")), error = function(e) ""),
-      tryCatch(unlist(strsplit(object$DEFINE, split = ";")), error = function(e) ""),
-      tryCatch(unlist(strsplit(object[["MODEL"]], split = ";")), error = function(e) "")))
-    tmpVARIABLE <- na.omit(tmpVARIABLE)
-    tmpVARIABLE <- tmpVARIABLE[nzchar(tmpVARIABLE)]
-    
-    if(length(tmpVARIABLE) == 0){
-      if(isFALSE(quiet)){
+
+    model_sections <- list(
+      model = object$MODEL,
+      model.population = object$MODELPOPULATION,
+      model.missing = object$MODELMISSING,
+      model.indirect = object$MODELINDIRECT,
+      model.constraint = object$MODELCONSTRAINT,
+      model.test = object$MODELTEST
+    )
+    model_sections <- model_sections[!vapply(model_sections, is.null, logical(1))]
+
+    usevariables <- extractMplusVariables(
+      variable = object$VARIABLE,
+      define = object$DEFINE,
+      model = object$MODEL,
+      model_sections = model_sections,
+      data_names = v
+    )
+
+    if (length(usevariables) == 0L) {
+      if (isFALSE(quiet)) {
         message("No variables extracted from VARIABLE, DEFINE, or MODEL sections. Using all variables in rdata.")
       }
       return(v)
     }
-    tmpVARIABLE <- gsub("\\s", "", unique(unlist(lapply(tmpVARIABLE, function(x) {
-      x <- gsub("\n|\t|\r", "", gsub("^(.*)(=| ARE | are | IS | is )(.*)$", "\\3", x))
-      xalt <- unique(unlist(strsplit(x, split = "\\s")))
 
-      y <- separateHyphens(x)
-      if (isTRUE(is.list(y))) {
-        lapply(y, function(z) {
-          if (isTRUE(all(sapply(z, function(var) any(grepl(var, x = v, ignore.case=TRUE)))))) {
-            i1 <- which(grepl(z[[1]], x = v, ignore.case = TRUE))
-            if (isTRUE(length(i1) > 1)) {
-              test <- tolower(z[[1]]) == tolower(v)
-              if (isTRUE(any(test))) {
-                i1 <- which(test)[1]
-              }
-            }
-            i2 <- which(grepl(z[[2]], x = v, ignore.case = TRUE))
-            if (length(i2) > 1) {
-              test <- tolower(z[[2]]) == tolower(v)
-              if (any(test)) {
-                i2 <- which(test)[1]
-              }
-            }
-            if (isTRUE(length(i1) && length(i2))) {
-              c(v[i1:i2], xalt)
-            }
-          } else  {
-            c(unlist(z), xalt)
-          }
-        })
-      } else {
-        xalt
-      }
-    }))))
+    if (isFALSE(quiet)) {
+      message("R variables selected automatically from Mplus syntax in VARIABLE, DEFINE, and MODEL sections.")
+    }
 
-    if(isFALSE(quiet)) message("R variables selected automatically as any variable name that\noccurs in the MODEL, VARIABLE, or DEFINE section.")
-    usevariables <- unique(v[sapply(v, function(var) any(grepl(var, x = tmpVARIABLE, ignore.case = TRUE)))])
+    has_usevariables <- if (is.list(object$VARIABLE)) {
+      "usevariables" %in% names(object$VARIABLE)
+    } else {
+      isTRUE(grepl("usevariables", object$VARIABLE, ignore.case = TRUE))
+    }
 
-    if (isFALSE(grepl("usevariables", object$VARIABLE, ignore.case=TRUE))) {
-
-      if(isFALSE(quiet)){
-        message(sprintf("If any issues, suggest explicitly specifying USEVARIABLES.\nA starting point may be:\nUSEVARIABLES = %s;",
-                        paste(usevariables, collapse = " ")))
+    if (!has_usevariables) {
+      if (isFALSE(quiet)) {
+        message(sprintf(
+          "If any issues, suggest explicitly specifying USEVARIABLES.\nA starting point may be:\nUSEVARIABLES = %s;",
+          paste(usevariables, collapse = " ")
+        ))
       }
     }
   }

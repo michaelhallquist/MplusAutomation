@@ -9,6 +9,37 @@
   "lcCondMeans", "r3step", "gh5", "h5results", "output"
 )
 
+.mplus_input_sections <- c(
+  "title", "data", "variable", "define", "montecarlo",
+  "model.population", "model.missing", "analysis", "model",
+  "model.indirect", "model.constraint", "model.test", "model.priors",
+  "output", "savedata", "plot"
+)
+
+.normalize_mplus_update_name <- function(name) {
+  key <- gsub("[[:space:]_.]+", "", tolower(name), perl = TRUE)
+  switch(
+    key,
+    title = "title",
+    data = "data",
+    variable = "variable",
+    define = "define",
+    montecarlo = "montecarlo",
+    modelpopulation = "model.population",
+    modelmissing = "model.missing",
+    analysis = "analysis",
+    model = "model",
+    modelindirect = "model.indirect",
+    modelconstraint = "model.constraint",
+    modeltest = "model.test",
+    modelpriors = "model.priors",
+    output = "output",
+    savedata = "savedata",
+    plot = "plot",
+    NA_character_
+  )
+}
+
 #' Create an mplusModel object for a given model
 #' @param syntax a character vector of Mplus input syntax for this model
 #' @param data a data.frame to be used for estimating the model
@@ -44,6 +75,7 @@ mplusModel_r6 <- R6::R6Class(
       pvt_model_dir = NULL,        # location of model files
       pvt_Mplus_command = NULL,    # location of Mplus binary
       pvt_variables = NULL,        # names of columns in data to be written to the .dat file
+      pvt_variables_manual = FALSE,# whether variables are manually set (not auto-detected)
       pvt_is_montecarlo = FALSE,   # whether this is a monte carlo model (in which case the data section is irrelevant)
       
       # private method to populate mplus output fields from readModels result
@@ -59,24 +91,158 @@ mplusModel_r6 <- R6::R6Class(
       },
       
       detect_variables = function() {
-        # both syntax and data must be present to attempt detection
-        if (is.null(private$pvt_syntax) || is.null(private$pvt_data)) return(invisible(NULL))
+        if (isTRUE(private$pvt_variables_manual)) return(invisible(NULL))
+        if (is.null(private$pvt_syntax)) return(invisible(NULL))
+
+        data_names <- if (!is.null(private$pvt_data)) names(private$pvt_data) else NULL
+        vars <- extractMplusVariables(
+          parsed_syntax = private$pvt_syntax,
+          data_names = data_names
+        )
+
+        if (length(vars) == 0L && !is.null(data_names)) vars <- data_names
+        private$pvt_variables <- if (length(vars) > 0L) vars else NULL
+      },
+      
+      sanitize_dat_file = function(path) {
+        if (is.null(path)) return(NULL)
+        path <- trimws(path) # remove leading and trailing white space
+        if (!nzchar(path)) return(NULL)
+        path <- gsub('^"|"$', "", path) # strip leading and trailing double quotes
+        # unwrap line-wrapped path continuations from DATA: FILE syntax
+        gsub("([/\\\\])\\s+", "\\1", path, perl = TRUE)
+      },
+      
+      is_absolute_path = function(path) {
+        if (is.null(path)) return(FALSE)
+        path <- trimws(path)
+        if (!nzchar(path)) return(FALSE)
+        startsWith(path, "/") || startsWith(path, "\\") || grepl("^[A-Za-z]:", path)
+      },
+      
+      set_dat_file = function(path) {
+        private$pvt_dat_file <- private$sanitize_dat_file(path)
+      },
+      
+      resolve_dat_file = function() {
+        spec <- private$sanitize_dat_file(private$pvt_dat_file)
+        if (is.null(spec)) return(NULL)
+        # return absolute path if dat file is absolute
+        if (private$is_absolute_path(spec)) return(private$normalize_path_safe(spec))
+        expanded <- path.expand(spec)
+        if (private$is_absolute_path(expanded)) return(private$normalize_path_safe(expanded))
+        if (is.null(private$pvt_model_dir)) return(spec)
+        private$normalize_path_safe(file.path(private$pvt_model_dir, spec))
+      },
+      
+      normalize_path_safe = function(path) {
+        if (is.null(path)) return(NULL)
+        out <- tryCatch(normalizePath(path, winslash = "/", mustWork = FALSE),
+                       error = function(e) path)
+        if (!nzchar(out)) return(path)
+        out <- gsub("(?<!^)//+", "/", out, perl = TRUE)
+        out
+      },
+      
+      dat_path_is_in_model_dir = function() {
+        if (is.null(private$pvt_model_dir)) return(FALSE)
+        resolved <- private$resolve_dat_file()
+        if (is.null(resolved)) return(FALSE)
+        model_norm <- private$normalize_path_safe(private$pvt_model_dir)
+        resolved_norm <- private$normalize_path_safe(resolved)
+        if (is.null(model_norm) || is.null(resolved_norm)) return(FALSE)
+        prefix <- paste0(model_norm, "/")
+        identical(resolved_norm, model_norm) || startsWith(resolved_norm, prefix)
+      },
+      
+      dat_path_in_model_dir_root = function() {
+        if (is.null(private$pvt_model_dir)) return(FALSE)
+        resolved <- private$resolve_dat_file()
+        if (is.null(resolved)) return(FALSE)
+        model_norm <- private$normalize_path_safe(private$pvt_model_dir)
+        resolved_norm <- private$normalize_path_safe(resolved)
+        if (is.null(model_norm) || is.null(resolved_norm)) return(FALSE)
+        dirname(resolved_norm) == model_norm
+      },
+      
+      dat_syntax_path = function() {
+        spec <- private$sanitize_dat_file(private$pvt_dat_file)
+        if (is.null(spec)) return(NULL)
+        if (private$dat_path_in_model_dir_root()) {
+          resolved <- private$resolve_dat_file()
+          return(basename(resolved))
+        }
+        spec
+      },
+      
+      format_data_file_for_syntax = function(path) {
+        if (is.null(path)) return(NULL)
+        wrapped <- trimws(gsub("(.{1,75})(\\s|$|/|\\\\)", "\\1\\2\n", path))
+        paste0("\"", wrapped, "\"")
+      },
+      
+      section_to_text = function(section_name) {
+        sec <- private$pvt_syntax[[section_name]]
+        if (is.null(sec)) return("")
         
-        # TODO: make variable detection better... detectVariables misses IDVARIABLE and CLUSTER, for example
-        # and we need to convert the pvt_syntax sections to strings to match detectVariables
+        if (is.list(sec)) {
+          out <- character(0)
+          for (nm in names(sec)) {
+            val <- sec[[nm]]
+            if (length(val) == 0L) next
+            out <- c(out, paste0(toupper(sub("\\.", " ", nm, fixed = TRUE)), " = ", paste(val, collapse = " "), ";"))
+          }
+          return(paste(out, collapse = "\n"))
+        }
         
-        # this is preferred for now: use user-specified names
-        if (!is.null(private$pvt_syntax$variable$names)) {
-          private$pvt_variables <- strsplit(private$pvt_syntax$variable$names, "\\s+")[[1L]]
+        paste(as.character(sec), collapse = "\n")
+      },
+      
+      resolve_update_text = function(spec, old_text) {
+        if (inherits(spec, "formula")) {
+          if (length(spec) < 2L) stop("Invalid formula specification in update().")
+          rhs <- spec[[2L]]
+          rhs_parts <- as.character(rhs)
+          append_mode <- any(grepl("^\\.$", rhs_parts))
+          new_text <- rhs_parts[length(rhs_parts)]
+          if (append_mode && nzchar(trimws(old_text))) {
+            return(paste(old_text, new_text, sep = "\n"))
+          }
+          return(new_text)
+        }
+        
+        if (is.character(spec)) return(paste(spec, collapse = "\n"))
+        stop("Update values must be either formulas or character vectors.")
+      },
+      
+      set_section_text = function(section_name, text) {
+        txt <- if (is.null(text)) "" else paste(text, collapse = "\n")
+        txt <- gsub("\r", "", txt, fixed = TRUE)
+        lines <- unlist(strsplit(txt, "\n", fixed = TRUE), use.names = FALSE)
+        lines <- lines[nzchar(trimws(lines))]
+        
+        if (length(lines) == 0L) {
+          private$pvt_syntax[[section_name]] <- NULL
+          if (identical(section_name, "data")) private$set_dat_file(NULL)
+          if (identical(section_name, "montecarlo")) private$pvt_is_montecarlo <- FALSE
+          return(invisible(NULL))
+        }
+        
+        if (section_name %in% c("data", "variable", "analysis", "montecarlo", "savedata")) {
+          parsed <- divideIntoFields(lines)
+          private$pvt_syntax[[section_name]] <- parsed
+          if (identical(section_name, "data")) {
+            if (!is.null(parsed$file)) private$set_dat_file(parsed$file)
+            else private$set_dat_file(NULL)
+          }
+        } else if (identical(section_name, "title")) {
+          private$pvt_syntax[[section_name]] <- paste(trimws(lines), collapse = " ")
         } else {
-          # mimic mplusObject to use detectVariables
-          obj <- list()
-          obj$MODEL <- private$pvt_syntax$model
-          obj$DEFINE <- private$pvt_syntax$define
-          obj$VARIABLE <- private$pvt_syntax$variable
-          obj$rdata <- private$pvt_data
-          
-          private$pvt_variables <- detectVariables(obj)
+          private$pvt_syntax[[section_name]] <- lines
+        }
+        
+        if (identical(section_name, "montecarlo")) {
+          private$pvt_is_montecarlo <- TRUE
         }
       }
     ),
@@ -110,7 +276,7 @@ mplusModel_r6 <- R6::R6Class(
       
       #' @field dat_file the location of the Mplus .dat (data) file for this model
       dat_file = function(value)  {
-        if (missing(value)) file.path(private$pvt_model_dir, private$pvt_dat_file)
+        if (missing(value)) private$resolve_dat_file()
         else stop("Cannot set read-only field", call. = FALSE)
       },
       
@@ -135,6 +301,9 @@ mplusModel_r6 <- R6::R6Class(
             message("Data has changed. Unloading model results from object.")
             private$clear_output()  
           }
+
+          # data updates can change case-insensitive matching of detected syntax variables
+          private$detect_variables()
           
           # if we are updating the dataset, make sure that all expected variables are present
           if (!is.null(value) && !is.null(private$pvt_variables)) {
@@ -142,6 +311,33 @@ mplusModel_r6 <- R6::R6Class(
             if (length(missing_vars) > 0L)
               warning("The following variables are mentioned in the model syntax, but missing in the data: ",
                       paste(missing_vars, collapse=", "))
+          }
+        }
+      },
+      
+      #' @field variables variables to write to the .dat file. Set NULL to restore automatic detection.
+      variables = function(value) {
+        if (missing(value)) {
+          private$pvt_variables
+        } else {
+          if (is.null(value)) {
+            private$pvt_variables_manual <- FALSE
+            private$detect_variables()
+          } else if (!checkmate::test_character(value, min.len = 1L)) {
+            stop("variables must be a non-empty character vector or NULL.")
+          } else {
+            private$pvt_variables <- unique(as.character(value))
+            private$pvt_variables_manual <- TRUE
+          }
+          
+          if (!is.null(private$pvt_data) && !is.null(private$pvt_variables)) {
+            missing_vars <- setdiff(private$pvt_variables, names(private$pvt_data))
+            if (length(missing_vars) > 0L) {
+              warning(
+                "The following variables are in `variables`, but missing in the data: ",
+                paste(missing_vars, collapse = ", ")
+              )
+            }
           }
         }
       },
@@ -172,6 +368,9 @@ mplusModel_r6 <- R6::R6Class(
             stop("Syntax must be a character vector")
           } else {
             private$pvt_syntax <- parseMplusSyntax(value, dropSectionNames = TRUE)
+            if (!is.null(private$pvt_syntax$data$file)) {
+              private$set_dat_file(private$pvt_syntax$data$file)
+            }
             
             # detect variables in syntax
             private$detect_variables()
@@ -272,11 +471,10 @@ mplusModel_r6 <- R6::R6Class(
         # if data is not provided, but the .out file is provided, attempt to read the data
         if (is.null(data) && private$pvt_output_loaded && !is.null(self$input$data$file)) {
           dfile <- self$input$data$file
-          private$pvt_dat_file <- self$input$data$file
+          private$set_dat_file(self$input$data$file)
 
-          # If the data file cannot be loaded as-is, attempt to locate it in the
-          # directory of the input/output files.  This handles cases where the
-          # data file was specified with an absolute path on another machine but
+          # If the data file cannot be loaded as-is, attempt to locate it in the directory of the input/output files.
+          # This handles cases where the data file was specified with an absolute path on another machine but
           # the .dat, .inp and .out files all reside in the same folder.
           if (!file.exists(dfile)) {
             # first, try using the provided path relative to the model directory
@@ -288,19 +486,13 @@ mplusModel_r6 <- R6::R6Class(
               base_dfile <- file.path(private$pvt_model_dir, basename(dfile))
               if (file.exists(base_dfile)) {
                 dfile <- base_dfile
-                private$pvt_dat_file <- basename(dfile)
+                private$set_dat_file(basename(dfile))
               }
             }
           }
 
           data <- tryCatch(
-            data.table::fread(
-              dfile,
-              header = FALSE,
-              na.strings = c("*", "."),
-              strip.white = TRUE,
-              data.table = FALSE
-            ),
+            data.table::fread(dfile, header = FALSE, na.strings = c("*", "."), strip.white = TRUE, data.table = FALSE),
             error = function(e) {
               warning("Could not load data file: ", dfile)
               return(NULL)
@@ -319,11 +511,19 @@ mplusModel_r6 <- R6::R6Class(
       self$data <- data
       
       # force syntax to be a character vector (convert \n to elements)
+      dat_spec_override <- private$pvt_dat_file
       self$syntax <- unlist(strsplit(syntax, "\\n"))
+      if (!is.null(dat_spec_override)) {
+        parsed_spec <- private$sanitize_dat_file(private$pvt_syntax$data$file)
+        override_spec <- private$sanitize_dat_file(dat_spec_override)
+        if (!is.null(override_spec) && !identical(parsed_spec, override_spec)) {
+          private$set_dat_file(override_spec)
+        }
+      }
       
       # set default data file name
       if (isFALSE(private$pvt_is_montecarlo) && is.null(private$pvt_dat_file) && !is.null(private$pvt_inp_file)) {
-        private$pvt_dat_file <- sub("\\.inp?$", ".dat", private$pvt_inp_file)
+        private$set_dat_file(sub("\\.inp?$", ".dat", private$pvt_inp_file))
       }
       
       # set Mplus command
@@ -353,17 +553,44 @@ mplusModel_r6 <- R6::R6Class(
       
       if (is.null(self$data)) stop("Cannot write data to file because this object has no data.")
       
-      if (file.exists(self$dat_file) && isFALSE(overwrite)) {
+      dat_path <- self$dat_file
+      if (is.null(dat_path)) {
+        stop("Cannot determine data file path for this model.")
+      }
+      if (file.exists(dat_path) && isFALSE(overwrite)) {
         if (!quiet) message("Not overwriting existing data file: ", self$dat_file)
         return(invisible(self))
       }
       
-      inp_syntax <- prepareMplusData(df = self$data, filename = self$dat_file, keepCols=private$pvt_variables, quiet = TRUE, use_relative_path = TRUE, ...)
+      if (!dir.exists(dirname(dat_path))) dir.create(dirname(dat_path), recursive = TRUE, showWarnings = FALSE)
+
+      # determine if data file is in the same directory of a subdirectory of the input file
+      use_relative <- private$dat_path_in_model_dir_root()
+      inp_syntax <- prepareMplusData(
+        df = self$data, filename = dat_path,
+        keepCols = private$pvt_variables,
+        quiet = TRUE, use_relative_path = use_relative, ...
+      )
       
       # ensure that the variable names in the syntax match what we detected
       private$pvt_syntax$variable$names <- attr(inp_syntax, "variable_names")
       private$pvt_syntax$variable$missing <- attr(inp_syntax, "missing")
-      private$pvt_syntax$data$file <- attr(inp_syntax, "data_file") # update FILE = in DATA section to match absolute/relative (NB, this is overridden in write_inp... need to unify)
+      attr_data_file <- private$sanitize_dat_file(attr(inp_syntax, "data_file"))
+      if (!is.null(attr_data_file)) {
+        current_spec <- private$sanitize_dat_file(private$pvt_dat_file)
+        if (!identical(attr_data_file, current_spec)) {
+          if (private$is_absolute_path(attr_data_file) && private$is_absolute_path(current_spec)) {
+            private$set_dat_file(attr_data_file)
+          } else if (!grepl("[/\\\\]", attr_data_file) && private$dat_path_is_in_model_dir()) {
+            private$set_dat_file(attr_data_file)
+          }
+        }
+      }
+      
+      data_spec <- private$dat_syntax_path()
+      if (!is.null(data_spec)) {
+        private$pvt_syntax$data$file <- private$format_data_file_for_syntax(data_spec)
+      }
       
       if (!quiet) message("Writing data to file: ", self$dat_file)
       return(invisible(self))
@@ -385,25 +612,28 @@ mplusModel_r6 <- R6::R6Class(
       # and apply wrapping at 75 characters to avoid > 90 errors
       # we also need to add quotations to get Mplus to handle multi-line read properly
       # currently forcing this to refer to the relative path (since the goal is always to have .dat files match location)
-      if (!is.null(private$pvt_syntax$data$file)) private$pvt_syntax$data$file <- paste0("\"", trimws(gsub('(.{1,75})(\\s|$|/|\\\\)', '\\1\\2\n', basename(self$dat_file))), "\"")
+      data_spec <- private$dat_syntax_path()
+      if (!is.null(data_spec)) {
+        private$pvt_syntax$data$file <- private$format_data_file_for_syntax(data_spec)
+      }
       
       # if the inp file exists, compare its contents against the user's syntax
-      if (file.exists(self$inp_file)) {
+      if (file.exists(inp_file)) {
         new_md5 <- digest::digest(self$syntax, algo="md5", serialize=FALSE)
         
         # for some reason, the file = TRUE approach fails under different variants
         # ext_md5 <- digest::digest(self$inp_file, algo="md5", file=TRUE, serialize=FALSE, ascii=TRUE)
-        ext_md5 <- digest::digest(readLines(self$inp_file), algo="md5", file=FALSE, serialize=FALSE)
+        ext_md5 <- digest::digest(readLines(inp_file), algo="md5", file=FALSE, serialize=FALSE)
         
         if (new_md5 != ext_md5 && isFALSE(overwrite)) {
           write <- FALSE
-          if (!quiet) message("Not overwriting existing .inp file: ", self$inp_file)
+          if (!quiet) message("Not overwriting existing .inp file: ", inp_file)
         }
       }
       
       if (write) {
-        if (!quiet) message("Writing Mplus syntax to file: ", self$inp_file)
-        writeLines(self$syntax, con = self$inp_file)
+        if (!quiet) message("Writing Mplus syntax to file: ", inp_file)
+        writeLines(self$syntax, con = inp_file)
       }
       return(invisible(self))
     },
@@ -460,9 +690,82 @@ mplusModel_r6 <- R6::R6Class(
       runModels(target = self$inp_file, replaceOutfile = replaceOutfile, Mplus_command = self$Mplus_command, ...)
       self$read(force = TRUE) # read/re-read after estimation
 
+    },
+    
+    #' @description Update model sections using `update()`-style formula semantics.
+    #' @param ... Named updates. For Mplus input sections, use formulas:
+    #'   `~ "new text"` replaces, `~ . + "additional text"` appends.
+    #' @param in_place If `TRUE` (default), mutate this object. If `FALSE`, return an updated clone.
+    #' @param quiet If `TRUE`, suppress status messages.
+    update = function(..., in_place = TRUE, quiet = TRUE) {
+      checkmate::assert_flag(in_place)
+      checkmate::assert_flag(quiet)
+      
+      if (isFALSE(in_place)) {
+        obj <- self$clone(deep = TRUE)
+        obj$update(..., in_place = TRUE, quiet = quiet)
+        return(obj)
+      }
+      
+      dots <- list(...)
+      if (length(dots) == 0L) return(invisible(self))
+      if (is.null(names(dots)) || any(!nzchar(names(dots)))) {
+        stop("All update arguments must be named.")
+      }
+      
+      syntax_changed <- FALSE
+      for (nm in names(dots)) {
+        key_lc <- tolower(nm)
+        val <- dots[[nm]]
+        
+        if (identical(key_lc, "rdata") ||
+            (identical(key_lc, "data") &&
+             (is.null(val) || checkmate::test_data_frame(val) || checkmate::test_data_table(val)))) {
+          self$data <- val
+          next
+        }
+        
+        if (key_lc %in% c("usevariables", "variables")) {
+          self$variables <- val
+          next
+        }
+        
+        section_name <- .normalize_mplus_update_name(nm)
+        if (is.na(section_name) || !section_name %in% .mplus_input_sections) {
+          stop("Unknown update field: ", nm)
+        }
+        
+        old_text <- private$section_to_text(section_name)
+        new_text <- private$resolve_update_text(val, old_text)
+        if (!identical(new_text, old_text)) {
+          private$set_section_text(section_name, new_text)
+          syntax_changed <- TRUE
+        }
+      }
+      
+      if (isTRUE(syntax_changed)) {
+        # normalize sections through parser/stringifier path
+        self$syntax <- mplusInpToString(private$pvt_syntax)
+        if (isTRUE(private$pvt_output_loaded)) {
+          private$clear_output()
+          if (!quiet) message("Syntax has changed. Unloading model results from object.")
+        }
+      }
+      
+      invisible(self)
     }
   )
 )
+
+#' @method update mplusModel_r6
+#' @export
+update.mplusModel_r6 <- function(object, ..., .in_place = FALSE, quiet = TRUE) {
+  checkmate::assert_flag(.in_place)
+  checkmate::assert_flag(quiet)
+  out <- if (isTRUE(.in_place)) object else object$clone(deep = TRUE)
+  out$update(..., in_place = TRUE, quiet = quiet)
+  out
+}
 
 # small utility function to join strings in a regexp loop
 joinRegexExpand <- function(cmd, argExpand, matches, iterator, matchLength = "match.length") {

@@ -23,6 +23,8 @@ Wrapped by \code{mplusModel}
 
 \item{\code{data}}{the dataset used for estimating this model}
 
+\item{\code{variables}}{variables to write to the .dat file. Set NULL to restore automatic detection.}
+
 \item{\code{Mplus_command}}{the location of the Mplus program}
 
 \item{\code{syntax}}{the Mplus syntax for this model as a character vector}
@@ -100,6 +102,7 @@ Wrapped by \code{mplusModel}
 \item \href{#method-mplusModel_r6-write_inp}{\code{mplusModel_r6$write_inp()}}
 \item \href{#method-mplusModel_r6-submit}{\code{mplusModel_r6$submit()}}
 \item \href{#method-mplusModel_r6-run}{\code{mplusModel_r6$run()}}
+\item \href{#method-mplusModel_r6-update}{\code{mplusModel_r6$update()}}
 \item \href{#method-mplusModel_r6-clone}{\code{mplusModel_r6$clone()}}
 }
 }
@@ -235,6 +238,28 @@ files when updates are detected.
 file is more recent than the output file modified date (implying there have been updates to the model).}
 
 \item{\code{...}}{additional arguments passed to \code{runModels}}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-mplusModel_r6-update"></a>}}
+\if{latex}{\out{\hypertarget{method-mplusModel_r6-update}{}}}
+\subsection{Method \code{update()}}{
+Update model sections using \code{update()}-style formula semantics.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$update(..., in_place = TRUE, quiet = TRUE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Named updates. For Mplus input sections, use formulas:
+\code{~ "new text"} replaces, \code{~ . + "additional text"} appends.}
+
+\item{\code{in_place}}{If \code{TRUE} (default), mutate this object. If \code{FALSE}, return an updated clone.}
+
+\item{\code{quiet}}{If \code{TRUE}, suppress status messages.}
 }
 \if{html}{\out{</div>}}
 }
