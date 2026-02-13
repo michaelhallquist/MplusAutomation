@@ -317,7 +317,7 @@ str(example3)
 #>  $ SAVEDATA       : NULL
 #>  $ PLOT           : NULL
 #>  $ results        : NULL
-#>  $ usevariables   : chr [1:4] "mpg" "wt" "qsec" "vs"
+#>  $ usevariables   : chr [1:3] "mpg" "wt" "vs"
 #>  $ rdata          :'data.frame': 32 obs. of  11 variables:
 #>   ..$ mpg : num [1:32] 21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
 #>   ..$ cyl : num [1:32] 6 6 4 6 8 6 8 4 4 6 ...

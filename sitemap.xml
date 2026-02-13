@@ -1,6 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/404.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/articles/index.html</loc></url>
+<url><loc>https://michaelhallquist.github.io/MplusAutomation/articles/mplusModel.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/articles/submitModels.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/articles/vignette.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/authors.html</loc></url>
@@ -49,6 +50,7 @@
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/extractModIndices_1file.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/extractModelParameters.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/extractModelSummaries.html</loc></url>
+<url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/extractMplusVariables.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/extractParameters_1chunk.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/extractParameters_1file.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/extractParameters_1section.html</loc></url>

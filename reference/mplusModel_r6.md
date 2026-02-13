@@ -28,6 +28,11 @@ Wrapped by `mplusModel`
 
   the dataset used for estimating this model
 
+- `variables`:
+
+  variables to write to the .dat file. Set NULL to restore automatic
+  detection.
+
 - `Mplus_command`:
 
   the location of the Mplus program
@@ -207,6 +212,8 @@ Wrapped by `mplusModel`
 
 - [`mplusModel_r6$run()`](#method-mplusModel_r6-run)
 
+- [`mplusModel_r6$update()`](#method-mplusModel_r6-update)
+
 - [`mplusModel_r6$clone()`](#method-mplusModel_r6-clone)
 
 ------------------------------------------------------------------------
@@ -371,6 +378,34 @@ updates are detected.
 - `...`:
 
   additional arguments passed to `runModels`
+
+------------------------------------------------------------------------
+
+### Method [`update()`](https://rdrr.io/r/stats/update.html)
+
+Update model sections using
+[`update()`](https://rdrr.io/r/stats/update.html)-style formula
+semantics.
+
+#### Usage
+
+    mplusModel_r6$update(..., in_place = TRUE, quiet = TRUE)
+
+#### Arguments
+
+- `...`:
+
+  Named updates. For Mplus input sections, use formulas: `~ "new text"`
+  replaces, `~ . + "additional text"` appends.
+
+- `in_place`:
+
+  If `TRUE` (default), mutate this object. If `FALSE`, return an updated
+  clone.
+
+- `quiet`:
+
+  If `TRUE`, suppress status messages.
 
 ------------------------------------------------------------------------
 

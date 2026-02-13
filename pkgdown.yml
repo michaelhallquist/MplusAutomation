@@ -2,9 +2,10 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  mplusModel: mplusModel.html
   submitModels: submitModels.html
   vignette: vignette.html
-last_built: 2025-11-20T20:24Z
+last_built: 2026-02-13T18:18Z
 urls:
   reference: https://michaelhallquist.github.io/MplusAutomation/reference
   article: https://michaelhallquist.github.io/MplusAutomation/articles

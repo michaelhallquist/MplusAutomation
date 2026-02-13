@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">MplusAutomation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,8 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/submitModels.html">Submitting Many Mplus Models to an HPC with submitModels()</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mplusModel.html">Working with the mplusModel Object</a></li>
+    <li><a class="dropdown-item" href="../articles/submitModels.html">Submitting Many Mplus Models to an HPC with submitModels()</a></li>
     <li><a class="dropdown-item" href="../articles/vignette.html">MplusAutomation Examples</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -66,6 +67,10 @@
 
 <dt><code>data</code></dt>
 <dd><p>the dataset used for estimating this model</p></dd>
+
+
+<dt><code>variables</code></dt>
+<dd><p>variables to write to the .dat file. Set NULL to restore automatic detection.</p></dd>
 
 
 <dt><code>Mplus_command</code></dt>
@@ -214,6 +219,7 @@
 <li><p><a href="#method-mplusModel_r6-write_inp"><code>mplusModel_r6$write_inp()</code></a></p></li>
 <li><p><a href="#method-mplusModel_r6-submit"><code>mplusModel_r6$submit()</code></a></p></li>
 <li><p><a href="#method-mplusModel_r6-run"><code>mplusModel_r6$run()</code></a></p></li>
+<li><p><a href="#method-mplusModel_r6-update"><code>mplusModel_r6$update()</code></a></p></li>
 <li><p><a href="#method-mplusModel_r6-clone"><code>mplusModel_r6$clone()</code></a></p></li>
 </ul></div><p></p><hr><a id="method-mplusModel_r6-new"></a><div class="section">
 <h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
@@ -365,15 +371,40 @@ file is more recent than the output file modified date (implying there have been
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-mplusModel_r6-clone"></a><div class="section">
-<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
-<p>The objects of this class are cloneable with this method.</p><div class="section">
+</div><p></p><hr><a id="method-mplusModel_r6-update"></a><div class="section">
+<h3 id="method-update-">Method <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code><a class="anchor" aria-label="anchor" href="#method-update-"></a></h3>
+<p>Update model sections using <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code>-style formula semantics.</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">mplusModel_r6</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">mplusModel_r6</span><span class="op">$</span><span class="fu">update</span><span class="op">(</span><span class="va">...</span>, in_place <span class="op">=</span> <span class="cn">TRUE</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
 <h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>...</code></dt>
+<dd><p>Named updates. For Mplus input sections, use formulas:
+<code>~ "new text"</code> replaces, <code>~ . + "additional text"</code> appends.</p></dd>
+
+
+<dt><code>in_place</code></dt>
+<dd><p>If <code>TRUE</code> (default), mutate this object. If <code>FALSE</code>, return an updated clone.</p></dd>
+
+
+<dt><code>quiet</code></dt>
+<dd><p>If <code>TRUE</code>, suppress status messages.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+
+</div><p></p><hr><a id="method-mplusModel_r6-clone"></a><div class="section">
+<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+<p>The objects of this class are cloneable with this method.</p><div class="section">
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">mplusModel_r6</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 

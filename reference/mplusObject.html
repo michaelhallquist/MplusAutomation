@@ -15,7 +15,7 @@ for the update function."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MplusAutomation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,7 +26,8 @@ for the update function."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/submitModels.html">Submitting Many Mplus Models to an HPC with submitModels()</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mplusModel.html">Working with the mplusModel Object</a></li>
+    <li><a class="dropdown-item" href="../articles/submitModels.html">Submitting Many Mplus Models to an HPC with submitModels()</a></li>
     <li><a class="dropdown-item" href="../articles/vignette.html">MplusAutomation Examples</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -335,7 +336,7 @@ estimator, all you have to do is change it in the model object once, and re run 
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ SAVEDATA       : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ PLOT           : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ results        : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ usevariables   : chr [1:4] "mpg" "wt" "qsec" "vs"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ usevariables   : chr [1:3] "mpg" "wt" "vs"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ rdata          :'data.frame':	32 obs. of  11 variables:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ mpg : num [1:32] 21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ cyl : num [1:32] 6 6 4 6 8 6 8 4 4 6 ...</span>
