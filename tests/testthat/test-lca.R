@@ -88,3 +88,19 @@ test_that("Test LCA manual 3rd step", {
   expect_equal(nrow(m$parameters$unstandardized.alt$ref.cat.1), 6)
   expect_equal(m$parameters$unstandardized.alt$ref.cat.1$est[[1]], 0.294)
 })
+
+# Mplus 9 uses different header: "LOGISTIC REGRESSION ODDS RATIO RESULTS FOR LATENT CLASS VARIABLES"
+test_that("Mplus 9 - LCA with covariates odds ratios are parsed", {
+  m <- readModels(target = testthat::test_path("three_cov.out"))
+  
+  # odds ratios should be present
+  expect_false(is.null(m$parameters$odds))
+  expect_equal(nrow(m$parameters$odds), 3L)
+  expect_equal(m$parameters$odds$est[1L], 1.309)
+  expect_equal(m$parameters$odds$lower_2.5ci[1L], 1.078)
+  expect_equal(m$parameters$odds$upper_2.5ci[1L], 1.589)
+  
+  # alternative parameterizations should be present
+  expect_false(is.null(m$parameters$unstandardized.alt))
+  expect_equal(length(m$parameters$unstandardized.alt), 3L)
+})

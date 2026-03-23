@@ -1,0 +1,529 @@
+Mplus VERSION 9
+MUTHEN & MUTHEN
+01/21/2026  10:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:
+  Step3 - 3step LSAY
+  DATA:
+  FILE = Step3.dat;
+  VARIABLE:
+  NAMES = ENJOY USEFUL LOGICAL JOB ADULT MOTHED CPROB1 CPROB2 CPROB3 CPROB4 N;
+   MISSING=.;
+   nominal=N;
+    usevar = n;
+
+    classes = c(4);
+
+    usevar = mothed;
+  DEFINE:
+  center mothed (grandmean);
+  ANALYSIS:
+  estimator = mlr;
+    type = mixture;
+    starts = 0;
+  MODEL:
+  %OVERALL%
+
+  C on mothed;        ! covariate as predictor of C
+
+     %C#1%
+  [n#1@3.52]; ! MUST EDIT if you do not have a 4-class model.
+  [n#2@-6.756];
+  [n#3@-0.808];
+
+  %C#2%
+  [n#1@7.237];
+  [n#2@13.687];
+  [n#3@11.689];
+
+
+  %C#3%
+  [n#1@0.991];
+  [n#2@-0.255];
+  [n#3@2.051];
+
+
+  %C#4%
+  [n#1@-1.516];
+  [n#2@-5.321];
+  [n#3@-6.56];
+
+
+
+*** WARNING
+  Data set contains cases with missing on x-variables.
+  These cases were not included in the analysis.
+  Number of cases with missing on x-variables:  58
+   1 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+
+Step3 - 3step LSAY
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        2617
+
+Number of dependent variables                                    1
+Number of independent variables                                  1
+Number of continuous latent variables                            0
+Number of categorical latent variables                           1
+
+Observed dependent variables
+
+  Unordered categorical (nominal)
+   N
+
+Observed independent variables
+   MOTHED
+
+Categorical latent variables
+   C
+
+Variables with special functions
+
+  Centering (GRANDMEAN)
+   MOTHED
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-06
+    Relative loglikelihood change                        0.100D-06
+    Derivative                                           0.100D-05
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent Variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+
+Input data file(s)
+  C:/Users/dnajiarch/Box/lca-bookdown/three_step/manual_3step/Step3.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    N
+      Category 1    0.566         1480.000
+      Category 2    0.138          360.000
+      Category 3    0.182          476.000
+      Category 4    0.115          301.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     MOTHED                0.000       1.095      -1.318   14.75%      -0.318     -0.318     -0.318
+            2617.000       1.033       0.634       2.682    4.78%      -0.318      0.682
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        6
+
+Loglikelihood
+
+          H0 Value                       -3015.531
+          H0 Scaling Correction Factor      1.0046
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    6043.062
+          Bayesian (BIC)                  6078.281
+          Sample-Size Adjusted BIC        6059.217
+            (n* = (n + 2) / 24)
+
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON THE ESTIMATED MODEL
+
+    Latent
+   Classes
+
+       1       1344.67881          0.51382
+       2        361.08266          0.13798
+       3        654.33317          0.25003
+       4        256.90536          0.09817
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON ESTIMATED POSTERIOR PROBABILITIES
+
+    Latent
+   Classes
+
+       1       1344.67845          0.51382
+       2        361.08213          0.13798
+       3        654.33491          0.25003
+       4        256.90451          0.09817
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP
+
+Class Counts and Proportions
+
+    Latent
+   Classes
+
+       1             1480          0.56553
+       2              360          0.13756
+       3              476          0.18189
+       4              301          0.11502
+
+
+CLASSIFICATION QUALITY
+
+     Entropy                         0.649
+
+
+Average Latent Class Probabilities for Most Likely Latent Class Membership (Row)
+by Latent Class (Column)
+
+           1        2        3        4
+
+    1   0.871    0.000    0.097    0.031
+    2   0.000    0.882    0.115    0.003
+    3   0.036    0.090    0.873    0.001
+    4   0.126    0.000    0.177    0.696
+
+
+Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+           1        2        3        4
+
+    1   0.959    0.000    0.013    0.028
+    2   0.001    0.879    0.119    0.000
+    3   0.220    0.063    0.635    0.082
+    4   0.179    0.004    0.001    0.816
+
+
+Logits for the Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+              1        2        3        4
+
+    1      3.523   -6.753   -0.805    0.000
+    2      7.237   13.687   11.689    0.000
+    3      0.993   -0.253    2.053    0.000
+    4     -1.517   -5.320   -6.559    0.000
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Latent Class 1
+
+ Means
+    N#1                3.520      0.000    999.000    999.000
+    N#2               -6.756      0.000    999.000    999.000
+    N#3               -0.808      0.000    999.000    999.000
+
+Latent Class 2
+
+ Means
+    N#1                7.237      0.000    999.000    999.000
+    N#2               13.687      0.000    999.000    999.000
+    N#3               11.689      0.000    999.000    999.000
+
+Latent Class 3
+
+ Means
+    N#1                0.991      0.000    999.000    999.000
+    N#2               -0.255      0.000    999.000    999.000
+    N#3                2.051      0.000    999.000    999.000
+
+Latent Class 4
+
+ Means
+    N#1               -1.516      0.000    999.000    999.000
+    N#2               -5.321      0.000    999.000    999.000
+    N#3               -6.560      0.000    999.000    999.000
+
+Categorical Latent Variables
+
+ C#1        ON
+    MOTHED             0.269      0.099      2.719      0.007
+
+ C#2        ON
+    MOTHED             0.158      0.111      1.419      0.156
+
+ C#3        ON
+    MOTHED             0.237      0.112      2.109      0.035
+
+ Intercepts
+    C#1                1.678      0.096     17.402      0.000
+    C#2                0.362      0.105      3.438      0.001
+    C#3                0.958      0.109      8.771      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.363E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+RESULTS IN PROBABILITY SCALE
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Latent Class 1
+
+ N
+    Category 1         0.959      0.000      0.000      1.000
+    Category 2         0.000      0.000      0.000      1.000
+    Category 3         0.013      0.000      0.000      1.000
+    Category 4         0.028      0.000      0.000      1.000
+
+Latent Class 2
+
+ N
+    Category 1         0.001      0.000      0.000      1.000
+    Category 2         0.879      0.000      0.000      1.000
+    Category 3         0.119      0.000      0.000      1.000
+    Category 4         0.000      0.000      0.000      1.000
+
+Latent Class 3
+
+ N
+    Category 1         0.220      0.000      0.000      1.000
+    Category 2         0.063      0.000      0.000      1.000
+    Category 3         0.635      0.000      0.000      1.000
+    Category 4         0.082      0.000      0.000      1.000
+
+Latent Class 4
+
+ N
+    Category 1         0.179      0.000      0.000      1.000
+    Category 2         0.004      0.000      0.000      1.000
+    Category 3         0.001      0.000      0.000      1.000
+    Category 4         0.816      0.000      0.000      1.000
+
+
+LATENT CLASS INDICATOR ODDS RATIOS FOR THE LATENT CLASSES
+
+                                                95% C.I.
+                    Estimate       S.E.  Lower 2.5% Upper 2.5%
+
+Latent Class 1 Compared to Latent Class 2
+
+ N
+    Category = 1   16776.520      0.000  16776.520  16776.520
+    Category = 2       0.000      0.000      0.000      0.000
+    Category = 3       0.095      0.000      0.095      0.095
+    Category = 4   29214.381      0.000  29214.379  29214.379
+
+Latent Class 1 Compared to Latent Class 3
+
+ N
+    Category = 1      82.779      0.000     82.779     82.779
+    Category = 2       0.000      0.000      0.000      0.000
+    Category = 3       0.007      0.000      0.007      0.007
+    Category = 4       0.328      0.000      0.328      0.328
+
+Latent Class 1 Compared to Latent Class 4
+
+ N
+    Category = 1     107.002      0.000    107.002    107.002
+    Category = 2       0.008      0.000      0.008      0.008
+    Category = 3      11.082      0.000     11.082     11.082
+    Category = 4       0.007      0.000      0.007      0.007
+
+Latent Class 2 Compared to Latent Class 3
+
+ N
+    Category = 1       0.005      0.000      0.005      0.005
+    Category = 2     107.889      0.000    107.889    107.889
+    Category = 3       0.078      0.000      0.078      0.078
+    Category = 4       0.000      0.000      0.000      0.000
+
+Latent Class 2 Compared to Latent Class 4
+
+ N
+    Category = 1       0.006      0.000      0.006      0.006
+    Category = 2    1820.885      0.000   1820.885   1820.885
+    Category = 3     117.089      0.000    117.089    117.089
+    Category = 4       0.000      0.000      0.000      0.000
+
+Latent Class 3 Compared to Latent Class 4
+
+ N
+    Category = 1       1.293      0.000      1.293      1.293
+    Category = 2      16.877      0.000     16.877     16.877
+    Category = 3    1504.753      0.000   1504.753   1504.753
+    Category = 4       0.020      0.000      0.020      0.020
+
+
+LOGISTIC REGRESSION ODDS RATIO RESULTS FOR LATENT CLASS VARIABLES
+
+                                                95% C.I.
+                    Estimate       S.E.  Lower 2.5% Upper 2.5%
+
+ C#1      ON
+    MOTHED             1.309      0.130      1.078      1.589
+
+ C#2      ON
+    MOTHED             1.171      0.130      0.942      1.457
+
+ C#3      ON
+    MOTHED             1.268      0.143      1.017      1.580
+
+
+ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Parameterization using Reference Class 1
+
+ C#2      ON
+    MOTHED            -0.111      0.072     -1.540      0.124
+
+ C#3      ON
+    MOTHED            -0.032      0.066     -0.483      0.629
+
+ C#4      ON
+    MOTHED            -0.269      0.099     -2.719      0.007
+
+ Intercepts
+    C#2               -1.316      0.067    -19.552      0.000
+    C#3               -0.719      0.067    -10.692      0.000
+    C#4               -1.678      0.096    -17.402      0.000
+
+Parameterization using Reference Class 2
+
+ C#1      ON
+    MOTHED             0.111      0.072      1.540      0.124
+
+ C#3      ON
+    MOTHED             0.079      0.097      0.815      0.415
+
+ C#4      ON
+    MOTHED            -0.158      0.111     -1.419      0.156
+
+ Intercepts
+    C#1                1.316      0.067     19.552      0.000
+    C#3                0.597      0.090      6.608      0.000
+    C#4               -0.362      0.105     -3.438      0.001
+
+Parameterization using Reference Class 3
+
+ C#1      ON
+    MOTHED             0.032      0.066      0.483      0.629
+
+ C#2      ON
+    MOTHED            -0.079      0.097     -0.815      0.415
+
+ C#4      ON
+    MOTHED            -0.237      0.112     -2.109      0.035
+
+ Intercepts
+    C#1                0.719      0.067     10.692      0.000
+    C#2               -0.597      0.090     -6.608      0.000
+    C#4               -0.958      0.109     -8.771      0.000
+
+
+ODDS RATIOS FOR THE ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION
+
+                                                95% C.I.
+                    Estimate       S.E.  Lower 2.5% Upper 2.5%
+
+Parameterization using Reference Class 1
+
+ C#2      ON
+    MOTHED             0.895      0.065      0.777      1.031
+
+ C#3      ON
+    MOTHED             0.968      0.064      0.850      1.103
+
+ C#4      ON
+    MOTHED             0.764      0.076      0.629      0.928
+
+Parameterization using Reference Class 2
+
+ C#1      ON
+    MOTHED             1.118      0.081      0.970      1.287
+
+ C#3      ON
+    MOTHED             1.082      0.105      0.895      1.309
+
+ C#4      ON
+    MOTHED             0.854      0.095      0.686      1.062
+
+Parameterization using Reference Class 3
+
+ C#1      ON
+    MOTHED             1.033      0.069      0.907      1.176
+
+ C#2      ON
+    MOTHED             0.924      0.090      0.764      1.118
+
+ C#4      ON
+    MOTHED             0.789      0.089      0.633      0.983
+
+
+     Beginning Time:  10:53:58
+        Ending Time:  10:53:58
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2025 Muthen & Muthen

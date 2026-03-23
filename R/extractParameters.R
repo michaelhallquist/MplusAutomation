@@ -627,7 +627,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
   }
   
   # odds ratios
-  oddsSection <- getSection("^LOGISTIC REGRESSION ODDS RATIO RESULTS$", outfiletext)
+  oddsSection <- getSection("^LOGISTIC REGRESSION ODDS RATIO RESULTS.*$", outfiletext)
   if (!is.null(oddsSection)) {
     allSections <- appendListElements(allSections, extractParameters_1section(filename, oddsSection, "odds"))
   }
@@ -654,7 +654,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
   }
   
   # when the confidence intervals for logistic regression odds are present, the header line is not reprinted and must be copied from the 
-  ciOddsSection <- getSection("^CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS$", outfiletext)
+  ciOddsSection <- getSection("^CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS.*$", outfiletext)
   if (!is.null(ciOddsSection)) {
     ciOddsSection <- c(ciSection[attr(hline, "header_lines")], ciOddsSection)
     allSections <- appendListElements(allSections, extractParameters_1section(filename, ciOddsSection, "ci.odds")) 
