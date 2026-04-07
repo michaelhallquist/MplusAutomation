@@ -476,6 +476,11 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #' You can even use loops or the \code{*apply} constructs to fit the same
 #' sort of model with little variants.
 #'
+#' \code{mplusModeler()} is intended for workflows where the analysis data live
+#' in \R and are written out for Mplus automatically. If you already have Mplus
+#' syntax that points to an existing data file, use \code{\link{runModels}}
+#' instead of \code{mplusModeler()}.
+#'
 #' The \code{writeData} argument is new and can be used to reduce overhead
 #' from repeatedly writing the same data from R to the disk.  When using the
 #' \sQuote{always} option, \code{mplusModeler} behaves as before, always writing
@@ -494,7 +499,9 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
 #' A final option is \sQuote{never}.  If this option is used, R will not write
 #' the data out even if no file matching the hash is found.
 #'
-#' @param object An object of class mplusObject
+#' @param object An object of class mplusObject. For non-MONTECARLO models,
+#'   this must include \code{rdata} because \code{mplusModeler()} writes the
+#'   Mplus data file from an \R data frame.
 #' @template mplusmodeler_args
 #' @seealso \code{\link{runModels}} and \code{\link{readModels}}
 #' @import boot
@@ -731,6 +738,18 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
   writeData <- match.arg(writeData)
 
   simulation <- isFALSE(is.null(object$MONTECARLO))
+
+  if (isFALSE(simulation) && is.null(object$rdata)) {
+    stop(
+      paste(
+        "mplusModeler() requires `object$rdata` for non-MONTECARLO models.",
+        "It writes the Mplus data file from an R data.frame.",
+        "If you want to run existing Mplus syntax that already points to a data file, use runModels() instead."
+      ),
+      call. = FALSE
+    )
+  }
+
   # Check arguments
   if(!is.null(object[["check"]])){
     if(!check == object[["check"]]){

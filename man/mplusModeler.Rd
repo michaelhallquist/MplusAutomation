@@ -20,7 +20,9 @@ mplusModeler(
 )
 }
 \arguments{
-\item{object}{An object of class mplusObject}
+\item{object}{An object of class mplusObject. For non-MONTECARLO models,
+this must include \code{rdata} because \code{mplusModeler()} writes the
+Mplus data file from an \R data frame.}
 
 \item{dataout}{the name of the file to output the data to for Mplus.
 If missing, defaults to \code{modelout} changing .inp to .dat.}
@@ -96,6 +98,11 @@ create one basic set of input, store it in a vector, and then just
 modify that (e.g., using regular expressions) and pass it to Mplus.
 You can even use loops or the \code{*apply} constructs to fit the same
 sort of model with little variants.
+
+\code{mplusModeler()} is intended for workflows where the analysis data live
+in \R and are written out for Mplus automatically. If you already have Mplus
+syntax that points to an existing data file, use \code{\link{runModels}}
+instead of \code{mplusModeler()}.
 
 The \code{writeData} argument is new and can be used to reduce overhead
 from repeatedly writing the same data from R to the disk.  When using the

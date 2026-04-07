@@ -221,3 +221,25 @@ test_that("mplusModeler rejects NAMES in VARIABLE when rdata is used", {
     regexp = "do not specify NAMES in the VARIABLE section"
   )
 })
+
+test_that("mplusModeler rejects objects without rdata for non-montecarlo models", {
+  obj <- mplusObject(
+    DATA = "FILE IS schools.dat;",
+    VARIABLE = "
+      NAMES = id class y1-y3;
+      USEVARIABLES = y1-y3;
+      CLUSTER = class;
+    ",
+    MODEL = "f BY y1-y3;"
+  )
+
+  expect_error(
+    mplusModeler(
+      object = obj,
+      modelout = tempfile(fileext = ".inp"),
+      run = 0L,
+      quiet = TRUE
+    ),
+    regexp = "requires `object\\$rdata`.*use runModels\\(\\) instead"
+  )
+})
