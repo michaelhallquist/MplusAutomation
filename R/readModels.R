@@ -104,6 +104,13 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
   outfiles <- getOutFileList(target, recursive, filefilter)
 
   allFiles <- list()
+  parse_or_empty <- function(expr, fallback, message_prefix, file) {
+    tryCatch(expr, error=function(e) {
+      message(message_prefix, file)
+      print(e)
+      fallback
+    })
+  }
   
   ## Loop over files and add the results of each to the allFiles list
   for (curfile in outfiles) {
@@ -120,22 +127,28 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     ### COMPULSORY SECTIONS NEEDED FOR DOWNSTREAM FUNCTIONS: input, summaries, savedata_info
     
     ### Parse Mplus input into a list by section
-    inp <- tryCatch(extractInput_1file(rawtext, curfile), error=function(e) {
-      message("Error parsing input section of output file: ", curfile); print(e)
-      return(list())
-    })
+    inp <- parse_or_empty(
+      extractInput_1file(rawtext, curfile),
+      list(),
+      "Error parsing input section of output file: ",
+      curfile
+    )
     
     #Model summary output (including MODEL FIT INFORMATION)
-    summaries <- tryCatch(extractSummaries_1file(outfiletext, curfile, input=inp), error=function(e) {
-      message("Error extracting model summaries in output file: ", curfile); print(e)
-      return(list())
-    })
+    summaries <- parse_or_empty(
+      extractSummaries_1file(outfiletext, curfile, input=inp),
+      list(),
+      "Error extracting model summaries in output file: ",
+      curfile
+    )
     
     #SAVEDATA file information -- always extract so that downstream code (e.g., bparameters and h5results) can find info if needed
-    savedata_info <- tryCatch(l_getSavedata_Fileinfo(curfile, outfiletext, summaries), error=function(e) {
-      message("Error extracting SAVEDATA file information in output file: ", curfile); print(e)
-      return(list())
-    })
+    savedata_info <- parse_or_empty(
+      l_getSavedata_Fileinfo(curfile, outfiletext, summaries),
+      list(),
+      "Error extracting SAVEDATA file information in output file: ",
+      curfile
+    )
     
     if (isTRUE("warn_err" %in% what)) {
       #Parse warnings and errors in output file
@@ -152,7 +165,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
       #SUMMARY OF DATA output
       allFiles[[listID]]$data_summary <- tryCatch(extractDataSummary(outfiletext, curfile), error=function(e) {
           message("Error extracting SUMMARY OF DATA in output file: ", curfile); print(e)
-          return(list())
+          return(new_mplus_data_summary())
         })
     }
 
@@ -160,16 +173,18 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
       #SAMPSTAT output
       allFiles[[listID]]$sampstat <- tryCatch(extractSampstat(outfiletext, curfile), error=function(e) {
             message("Error extracting SAMPSTAT in output file: ", curfile); print(e)
-            return(list())
+            return(new_mplus_sampstat())
           })
     }
 
     if (isTRUE("covariance_coverage" %in% what)) {
       #COVARIANCE COVERAGE OF DATA output
-      allFiles[[listID]]$covariance_coverage <- tryCatch(extractCovarianceCoverage(outfiletext, curfile), error=function(e) {
-            message("Error extracting COVARIANCE COVERAGE OF DATA in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$covariance_coverage <- parse_or_empty(
+        extractCovarianceCoverage(outfiletext, curfile),
+        list(),
+        "Error extracting COVARIANCE COVERAGE OF DATA in output file: ",
+        curfile
+      )
     }
 
     if (isTRUE("summaries" %in% what)) {
@@ -195,18 +210,22 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     }
 
     if (isTRUE("random_starts" %in% what)) {
-      allFiles[[listID]]$random_starts <- tryCatch(extractRandomStarts(outfiletext, curfile), error=function(e) {
-        message("Error extracting random starts output in output file: ", curfile); print(e)
-        return(list())
-      })
+      allFiles[[listID]]$random_starts <- parse_or_empty(
+        extractRandomStarts(outfiletext, curfile),
+        list(),
+        "Error extracting random starts output in output file: ",
+        curfile
+      )
     }
 
     if (isTRUE("invariance_testing" %in% what)) {
       #Invariance Testing output (v8)
-      allFiles[[listID]]$invariance_testing <- tryCatch(extractInvarianceTesting(outfiletext, curfile), error=function(e) {
-          message("Error extracting invarinace testing in output file: ", curfile); print(e)
-          return(list())
-        })
+      allFiles[[listID]]$invariance_testing <- parse_or_empty(
+        extractInvarianceTesting(outfiletext, curfile),
+        list(),
+        "Error extracting invarinace testing in output file: ",
+        curfile
+      )
     }
 
     is_efa <- any(grepl(
@@ -217,10 +236,12 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     
     if (isTRUE("parameters" %in% what)) {
       #Model parameters (MODEL RESULTS section)
-      allFiles[[listID]]$parameters <- tryCatch(extractParameters_1file(outfiletext, curfile, efa = is_efa), error=function(e) {
-            message("Error extracting MODEL RESULTS in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$parameters <- parse_or_empty(
+        extractParameters_1file(outfiletext, curfile, efa = is_efa),
+        list(),
+        "Error extracting MODEL RESULTS in output file: ",
+        curfile
+      )
     }
     
     if (isTRUE(any(c("parameters", "svalues") %in% what))) {
@@ -241,10 +262,12 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
 
     if (isTRUE("class_counts" %in% what)) {
       #Latent class counts
-      allFiles[[listID]]$class_counts <- tryCatch(extractClassCounts(outfiletext, curfile, summaries), error=function(e) {
-            message("Error extracting latent class counts in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$class_counts <- parse_or_empty(
+        extractClassCounts(outfiletext, curfile, summaries),
+        list(),
+        "Error extracting latent class counts in output file: ",
+        curfile
+      )
       
       #add total number of latent classes to summaries (in case of multiple categorical latent variables, this is just the product)
       if (isTRUE("summaries" %in% what) && !is.null(allFiles[[listID]]$class_counts$modelEstimated)) {
@@ -256,24 +279,28 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
       #MODEL INDIRECT
       allFiles[[listID]]$indirect <- tryCatch(extractIndirect(outfiletext, curfile), error=function(e) {
             message("Error extracting MODEL INDIRECT in output file: ", curfile); print(e)
-            return(list())
+            return(new_mplus_indirect())
           })
     }
 
     if (isTRUE("mod_indices" %in% what)) {
       #MODINDICES
-      allFiles[[listID]]$mod_indices <- tryCatch(extractModIndices_1file(outfiletext, curfile), error=function(e) {
-            message("Error extracting MODINDICES in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$mod_indices <- parse_or_empty(
+        extractModIndices_1file(outfiletext, curfile),
+        list(),
+        "Error extracting MODINDICES in output file: ",
+        curfile
+      )
     }
 
     if (isTRUE("residuals" %in% what)) {
       #Extract model residuals (RESIDUAL)
-      allFiles[[listID]]$residuals <- tryCatch(extractResiduals(outfiletext, curfile), error=function(e) {
-            message("Error extracting RESIDUAL section in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$residuals <- parse_or_empty(
+        extractResiduals(outfiletext, curfile),
+        new_mplus_residuals(),
+        "Error extracting RESIDUAL section in output file: ",
+        curfile
+      )
     }
 
     if (isTRUE("savedata" %in% what)) {
@@ -304,51 +331,60 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     #TECHNICAL OUTPUT
     if (isTRUE("tech1" %in% what)) {
       #TECH1: parameter specification and starting values
-      allFiles[[listID]]$tech1 <- tryCatch(extractTech1(outfiletext, curfile), error=function(e) {
-            message("Error extracting TECH1 in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$tech1 <- parse_or_empty(
+        extractTech1(outfiletext, curfile),
+        new_mplus_tech1(),
+        "Error extracting TECH1 in output file: ",
+        curfile
+      )
     }
 
     #TECH3: covariance/correlation matrix of parameter estimates
     if (isTRUE("tech3" %in% what)) {
-      allFiles[[listID]]$tech3 <- tryCatch(extractTech3(outfiletext, savedata_info, curfile), error=function(e) {
-            message("Error extracting TECH3 in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$tech3 <- parse_or_empty(
+        extractTech3(outfiletext, savedata_info, curfile),
+        new_mplus_tech3(),
+        "Error extracting TECH3 in output file: ",
+        curfile
+      )
     }
 
     #TECH4: latent means
     if (isTRUE("tech4" %in% what)) {
-      allFiles[[listID]]$tech4 <- tryCatch(extractTech4(outfiletext, curfile), error=function(e) {
-            message("Error extracting TECH4 in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$tech4 <- parse_or_empty(
+        extractTech4(outfiletext, curfile),
+        new_mplus_tech4(),
+        "Error extracting TECH4 in output file: ",
+        curfile
+      )
     }
 
     #TECH7: sample stats for each class
     if (isTRUE("tech7" %in% what)) {
-      allFiles[[listID]]$tech7 <- tryCatch(extractTech7(outfiletext, curfile), error=function(e) {
-            message("Error extracting TECH7 in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$tech7 <- parse_or_empty(
+        extractTech7(outfiletext, curfile),
+        new_mplus_tech7(),
+        "Error extracting TECH7 in output file: ",
+        curfile
+      )
     }
 
     #TECH8: optimization history and chain tests in Bayes
     if (isTRUE("tech8" %in% what)) {
       allFiles[[listID]]$tech8 <- tryCatch(extractTech8(outfiletext, curfile), error=function(e) {
             message("Error extracting TECH8 in output file: ", curfile); print(e)
-            lempty <- list(); class(lempty) <- c("mplus.tech8", "list")
-            return(lempty)
+            return(new_mplus_tech8())
           })
     }
 
     #TECH9: errors and warnings for Monte Carlo output
     if (isTRUE("tech9" %in% what)) {
-      allFiles[[listID]]$tech9 <- tryCatch(extractTech9(outfiletext, curfile), error=function(e) {
-            message("Error extracting TECH9 in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$tech9 <- parse_or_empty(
+        extractTech9(outfiletext, curfile),
+        new_mplus_tech9(),
+        "Error extracting TECH9 in output file: ",
+        curfile
+      )
     }
 
     #TECH10: errors and warnings for model fit info
@@ -361,23 +397,32 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     
     ### TECH12: observed versus estimated sample stats for TYPE=MIXTURE
     if (isTRUE("tech12" %in% what)) {
-      allFiles[[listID]]$tech12 <- tryCatch(extractTech12(outfiletext, curfile), error=function(e) {
-            message("Error extracting TECH12 in output file: ", curfile); print(e)
-            return(list())
-          })
+      allFiles[[listID]]$tech12 <- parse_or_empty(
+        extractTech12(outfiletext, curfile),
+        new_mplus_tech12(),
+        "Error extracting TECH12 in output file: ",
+        curfile
+      )
     }
 
     ### TECH15: CONDITIONAL PROBABILITIES FOR THE CLASS VARIABLES for TYPE=MIXTURE
     if (isTRUE("tech15" %in% what)) {
-      allFiles[[listID]]$tech15 <- tryCatch(extractTech15(outfiletext, curfile), error=function(e) {
-        message("Error extracting TECH15 in output file: ", curfile); print(e)
-        return(list())
-      })
+      allFiles[[listID]]$tech15 <- parse_or_empty(
+        extractTech15(outfiletext, curfile),
+        new_mplus_tech15(),
+        "Error extracting TECH15 in output file: ",
+        curfile
+      )
     }
     
     ### Factor score statistics
     if (isTRUE("fac_score_stats" %in% what)) {
-      allFiles[[listID]]$fac_score_stats <- extractFacScoreStats(outfiletext, curfile) #factor scores mean, cov, corr assoc with PLOT3
+      allFiles[[listID]]$fac_score_stats <- parse_or_empty(
+        extractFacScoreStats(outfiletext, curfile),
+        new_mplus_facscorestats(),
+        "Error extracting factor score statistics in output file: ",
+        curfile
+      ) #factor scores mean, cov, corr assoc with PLOT3
     }
 
     if (isTRUE("lcCondMeans" %in% what)) {

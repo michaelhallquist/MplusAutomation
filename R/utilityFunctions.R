@@ -323,6 +323,95 @@ section_matchlines <- function(section) {
   attr(section, "matchlines", exact=TRUE)
 }
 
+new_mplus_sampstat <- function(x = list()) {
+  class(x) <- c("mplus.sampstat", "list")
+  x
+}
+
+new_mplus_psr <- function(x = data.frame()) {
+  class(x) <- c("mplus.psr.data.frame", "data.frame")
+  x
+}
+
+new_mplus_tech8 <- function(psr = new_mplus_psr(), psr_pppp = NULL) {
+  out <- list(psr = psr)
+  if (!is.null(psr_pppp)) out$psr_pppp <- psr_pppp
+  class(out) <- c("mplus.tech8", "list")
+  out
+}
+
+new_mplus_indirect <- function(overall = data.frame(), specific = data.frame()) {
+  out <- list(overall = overall, specific = specific)
+  class(out) <- c("mplus.indirect", "list")
+  out
+}
+
+new_mplus_data_summary <- function(x = list()) {
+  class(x) <- c("mplus.data_summary", "list")
+  x
+}
+
+new_mplus_residuals <- function(x = list()) {
+  class(x) <- c("mplus.residuals", "list")
+  x
+}
+
+new_mplus_parameter_specification <- function(x = list()) {
+  class(x) <- c("mplus.parameterSpecification", "list")
+  x
+}
+
+new_mplus_starting_values <- function(x = list()) {
+  class(x) <- c("mplus.startingValues", "list")
+  x
+}
+
+new_mplus_tech1 <- function(parameterSpecification = new_mplus_parameter_specification(),
+                            startingValues = new_mplus_starting_values()) {
+  out <- list(
+    parameterSpecification = parameterSpecification,
+    startingValues = startingValues
+  )
+  class(out) <- c("mplus.tech1", "list")
+  out
+}
+
+new_mplus_tech3 <- function(x = list()) {
+  class(x) <- c("mplus.tech3", "list")
+  x
+}
+
+new_mplus_tech4 <- function(x = list()) {
+  class(x) <- c("mplus.tech4", "list")
+  x
+}
+
+new_mplus_tech7 <- function(x = list()) {
+  class(x) <- c("mplus.tech7", "list")
+  x
+}
+
+new_mplus_tech9 <- function(x = list()) {
+  class(x) <- c("mplus.tech9", "list")
+  x
+}
+
+new_mplus_tech12 <- function(x = list()) {
+  class(x) <- c("mplus.tech12", "list")
+  x
+}
+
+new_mplus_tech15 <- function(conditional.probabilities = character()) {
+  out <- list(conditional.probabilities = conditional.probabilities)
+  class(out) <- c("mplus.tech15", "list")
+  out
+}
+
+new_mplus_facscorestats <- function(x = list()) {
+  class(x) <- c("mplus.facscorestats", "list")
+  x
+}
+
 #IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC (or PROBIT) METRIC
 #LOGISTIC REGRESSION ODDS RATIO RESULTS
 

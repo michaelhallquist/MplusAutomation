@@ -53,6 +53,7 @@ extractIndirect <- function(outfiletext, curfile) {
     "stdy.standardized", "ci.stdy.standardized",
     "std.standardized", "ci.std.standardized")
   listOrder <- listOrder[listOrder %in% names(indirect_results)]
+  if (length(listOrder) == 0L) return(new_mplus_indirect())
   
   #only re-order if out of order
   if(!identical(names(indirect_results), listOrder)) indirect_results <- indirect_results[listOrder]
@@ -242,17 +243,21 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
   #names(indirectOutput) <- sapply(indirectOutput, function(el) { paste(el$pred, el$outcome, sep=".") })
   
   #change format to return two data.frames, one with all summaries, the other with all specific
-  summarydf <- do.call(rbind, lapply(indirectOutput, function(i_out) {
-        do.call(rbind, lapply(i_out, function(el) { el$summaries }))
-      }))
+  bind_effect_rows <- function(outputs, field) {
+    pieces <- unlist(lapply(outputs, function(i_out) {
+      if (is.null(i_out) || length(i_out) == 0L) return(list())
+      lapply(i_out, function(el) el[[field]])
+    }), recursive = FALSE)
+    pieces <- Filter(Negate(is.null), pieces)
+    if (length(pieces) == 0L) return(data.frame())
+    do.call(rbind, pieces)
+  }
   
-  specificdf <- do.call(rbind, lapply(indirectOutput, function(i_out) {
-        do.call(rbind, lapply(i_out, function(el) { el$specific }))
-      }))
+  summarydf <- bind_effect_rows(indirectOutput, "summaries")
+  specificdf <- bind_effect_rows(indirectOutput, "specific")
   
-  row.names(summarydf) <- NULL; row.names(specificdf) <- NULL 
-  toreturn <- list(overall=summarydf, specific=specificdf)
-  class(toreturn) <- "mplus.indirect"
+  if (nrow(summarydf) > 0L) row.names(summarydf) <- NULL
+  if (nrow(specificdf) > 0L) row.names(specificdf) <- NULL
   
-  return(toreturn)
+  new_mplus_indirect(overall = summarydf, specific = specificdf)
 }

@@ -1154,7 +1154,7 @@ extractResiduals_1section <- function(residSection, filename) {
 
   if (section_is_missing(residSubsections)) {
     warning("No sections found within residuals output.")
-    return(list())
+    return(new_mplus_residuals())
   }
 
   matchlines <- section_matchlines(residSubsections)
@@ -1190,7 +1190,7 @@ extractResiduals_1section <- function(residSection, filename) {
     
   }
   
-  class(residList) <- c("mplus.residuals", "list")
+  residList <- new_mplus_residuals(residList)
   if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
   
   return(residList)
@@ -1224,7 +1224,7 @@ extractResiduals <- function(outfiletext, filename) {
     }
   } else {
     residSection <- getSection("^RESIDUAL OUTPUT$", outfiletext)
-    if (is.null(residSection)) { return(list()) } #no residuals output
+    if (is.null(residSection)) { return(new_mplus_residuals()) } #no residuals output
     
     residList <- extractResiduals_1section(residSection, filename) #[[1]]
   }
@@ -1232,7 +1232,7 @@ extractResiduals <- function(outfiletext, filename) {
   # class(residList) <- c("mplus.residuals", "list")
   # if (length(residSubsections) > 1) { attr(residList, "group.names") <- groupNames }
   
-  return(residList)
+  return(new_mplus_residuals(residList))
 }
 
 #' Extract Technical 1 matrix from Mplus
@@ -1248,7 +1248,7 @@ extractResiduals <- function(outfiletext, filename) {
 #' # make me!!!
 extractTech1 <- function(outfiletext, filename) {
   tech1Section <- getSection("^TECHNICAL 1 OUTPUT$", outfiletext)
-  if (is.null(tech1Section)) return(list()) #no tech1 output
+  if (is.null(tech1Section)) return(new_mplus_tech1()) #no tech1 output
   
   tech1List <- list()
   
@@ -1297,7 +1297,7 @@ extractTech1 <- function(outfiletext, filename) {
       paramSpecList <- targetList
   }
   
-  class(paramSpecList) <- c("mplus.parameterSpecification", "list")
+  paramSpecList <- new_mplus_parameter_specification(paramSpecList)
   if (length(paramSpecSubsections) > 1) attr(paramSpecList, "group.names") <- groupNames
   
   startValSubsections <- getMultilineSection("STARTING VALUES( FOR [\\w\\d\\s\\.,_]+)*",
@@ -1345,11 +1345,13 @@ extractTech1 <- function(outfiletext, filename) {
       startValList <- targetList
   }
   
-  class(startValList) <- c("mplus.startingValues", "list")
+  startValList <- new_mplus_starting_values(startValList)
   if (length(startValSubsections) > 1) attr(startValList, "group.names") <- groupNames
   
-  tech1List <- list(parameterSpecification=paramSpecList, startingValues=startValList)
-  class(tech1List) <- c("mplus.tech1", "list")
+  tech1List <- new_mplus_tech1(
+    parameterSpecification = paramSpecList,
+    startingValues = startValList
+  )
   
   return(tech1List)
   
@@ -1368,6 +1370,15 @@ extractSampstat <- function(outfiletext, filename) {
     #try output from TYPE=BASIC, which places these in a section of a different name
     sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
   }
+  univariateCountsSection <- getSection("^UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES$", outfiletext)
+  univariate_sampstat <- getSection("^UNIVARIATE SAMPLE STATISTICS$", outfiletext)
+  
+  sampstatList <- list()
+  if (is.null(sampstatSection) &&
+      is.null(univariateCountsSection) &&
+      is.null(univariate_sampstat)) {
+    return(new_mplus_sampstat())
+  }
   
   if(!is.null(sampstatSection) & all(sampstatSection == "")){
     first_line <- (attr(outfiletext, "headerlines")[attr(outfiletext, "headerlines") > tail(attr(sampstatSection, "lines"), 1)][1]+1)
@@ -1375,7 +1386,6 @@ extractSampstat <- function(outfiletext, filename) {
     sampstatSection <- outfiletext[first_line:final_line]
   }
   
-  sampstatList <- list()
   sampstatSubsections <- getMultilineSection("(ESTIMATED )*SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
     sampstatSection, filename, allowMultiple=TRUE)
 
@@ -1430,8 +1440,6 @@ extractSampstat <- function(outfiletext, filename) {
   }
   
   ##Extract Univariate counts and proportions
-  univariateCountsSection <- getSection("^UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES$", outfiletext)
-  
   #remove warning lines, which throw off the parser (e.g., ex6.15.out)
   univariateCountsSection <- univariateCountsSection[!grepl("\\s*WARNING:.*", univariateCountsSection, perl=TRUE)]
   
@@ -1478,7 +1486,6 @@ extractSampstat <- function(outfiletext, filename) {
 
   # Extract univariate sample statistics ------------------------------------
 
-  univariate_sampstat <- getSection("^UNIVARIATE SAMPLE STATISTICS$", outfiletext)
   if (!is.null(univariate_sampstat)) {
     
     #group-wise headings don't follow Mplus indentation conventions. Hack these by prefixing with X, then use getMultilineSection to parse
@@ -1537,7 +1544,7 @@ extractSampstat <- function(outfiletext, filename) {
     }
     
   }
-  class(sampstatList) <- c("mplus.sampstat", "list")
+  sampstatList <- new_mplus_sampstat(sampstatList)
   if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
   
   return(sampstatList)
@@ -1670,7 +1677,7 @@ extractFreeFile <- function(filename, outfile, make_symmetric=TRUE) {
 #' # make me!!!
 extractTech3 <- function(outfiletext, savedata_info, filename) {
   tech3Section <- getSection("^TECHNICAL 3 OUTPUT$", outfiletext)
-  if (is.null(tech3Section)) return(list()) #no tech3 output
+  if (is.null(tech3Section)) return(new_mplus_tech3()) #no tech3 output
   
   tech3List <- list()
   tech3List[["paramCov"]] <- matrixExtract(tech3Section, "ESTIMATED COVARIANCE MATRIX FOR PARAMETER ESTIMATES", filename)
@@ -1682,7 +1689,7 @@ extractTech3 <- function(outfiletext, savedata_info, filename) {
     tech3List[["paramCov.savedata"]] <- NULL
   }
   
-  class(tech3List) <- c("mplus.tech3", "list")
+  tech3List <- new_mplus_tech3(tech3List)
   
   return(tech3List)
 }
@@ -1699,9 +1706,8 @@ extractTech3 <- function(outfiletext, savedata_info, filename) {
 #' @examples
 #' # make me!!!
 extractTech4 <- function(outfiletext, filename) {
-  #TODO: have empty list use mplus.tech4 class
   tech4Section <- getSection("^TECHNICAL 4 OUTPUT$", outfiletext)
-  if (is.null(tech4Section)) return(list()) #no tech4 output
+  if (is.null(tech4Section)) return(new_mplus_tech4()) #no tech4 output
   
   tech4List <- list()
   
@@ -1710,7 +1716,7 @@ extractTech4 <- function(outfiletext, filename) {
 
   if (section_is_missing(tech4Subsections)) {
     warning("No sections found within TECH4 output.")
-    return(list())
+    return(new_mplus_tech4())
   }
   else if (length(tech4Subsections) > 1) {
     matchlines <- section_matchlines(tech4Subsections)
@@ -1733,7 +1739,7 @@ extractTech4 <- function(outfiletext, filename) {
     
   }
   
-  class(tech4List) <- c("mplus.tech4", "list")
+  tech4List <- new_mplus_tech4(tech4List)
   
   return(tech4List)
 }
@@ -1751,10 +1757,9 @@ extractTech4 <- function(outfiletext, filename) {
 #' @examples
 #' # make me!!!
 extractTech7 <- function(outfiletext, filename) {
-  #TODO: have empty list use mplus.tech7 class
   #not sure whether there are sometimes multiple groups within this section.
   tech7Section <- getSection("^TECHNICAL 7 OUTPUT$", outfiletext)
-  if (is.null(tech7Section)) return(list()) #no tech7 output
+  if (is.null(tech7Section)) return(new_mplus_tech7()) #no tech7 output
   
   tech7List <- list()
   
@@ -1763,7 +1768,7 @@ extractTech7 <- function(outfiletext, filename) {
 
   if (section_is_missing(tech7Subsections)) {
     warning("No sections found within tech7 output.")
-    return(list())
+    return(new_mplus_tech7())
   }
   else if (length(tech7Subsections) > 1) {
     matchlines <- section_matchlines(tech7Subsections)
@@ -1784,7 +1789,7 @@ extractTech7 <- function(outfiletext, filename) {
       tech7List <- targetList
   }
   
-  class(tech7List) <- c("mplus.tech7", "list")
+  tech7List <- new_mplus_tech7(tech7List)
   
   return(tech7List)
 }
@@ -1806,9 +1811,7 @@ extractTech8 <- function(outfiletext, filename) {
   #not sure whether there are sometimes multiple groups within this section.
   #for now, this function only extract PSR in Bayes models
   tech8Section <- getSection("^TECHNICAL 8 OUTPUT$", outfiletext)
-  tech8List <- list()
-  class(tech8List) <- c("mplus.tech8", "list")
-  psr <- data.frame(); class(psr) <- c("mplus.psr.data.frame", "data.frame"); tech8List[["psr"]] <- psr
+  tech8List <- new_mplus_tech8()
   
   if (is.null(tech8Section)) return(tech8List) #no tech8 output
 
@@ -1820,8 +1823,7 @@ extractTech8 <- function(outfiletext, filename) {
       firstBlank <- firstBlank[firstBlank > startline][1L] #first blank after starting line
       toparse <- text[(startline+1):firstBlank]
       psr <- data.frame(matrix(as.numeric(unlist(strsplit(trimSpace(toparse), "\\s+", perl=TRUE))), ncol=3, byrow=TRUE, dimnames=list(NULL, c("iteration", "psr", "param.highest.psr"))))
-      class(psr) <- c("mplus.psr.data.frame", "data.frame")
-      return(psr)
+      return(new_mplus_psr(psr))
     } else {
       return(NULL)
     }
@@ -1857,8 +1859,7 @@ extractTech8 <- function(outfiletext, filename) {
 #' @examples
 #' # make me!!!
 extractTech9 <- function(outfiletext, filename) {
-  tech9List <- list()
-  class(tech9List) <- c("mplus.tech9", "list")
+  tech9List <- new_mplus_tech9()
   
   tech9Section <- getSection("^TECHNICAL 9 OUTPUT$", outfiletext)
   if (is.null(tech9Section)) return(tech9List) #no tech9 output
@@ -1899,8 +1900,7 @@ extractTech9 <- function(outfiletext, filename) {
 extractTech12 <- function(outfiletext, filename) {
   #not sure whether there are sometimes multiple groups within this section.
   tech12Section <- getSection("^TECHNICAL 12 OUTPUT$", outfiletext)
-  tech12List <- list()
-  class(tech12List) <- c("mplus.tech12", "list")
+  tech12List <- new_mplus_tech12()
   
   if (is.null(tech12Section)) return(tech12List) #no tech12 output
   
@@ -1909,7 +1909,7 @@ extractTech12 <- function(outfiletext, filename) {
 
   if (section_is_missing(tech12Subsections)) {
     warning("No sections found within tech12 output.")
-    return(list())
+    return(new_mplus_tech12())
   }
   else if (length(tech12Subsections) > 1) {
     warning("extractTech12 does not yet know how to handle multiple sections (if such exist)")
@@ -1939,7 +1939,7 @@ extractTech12 <- function(outfiletext, filename) {
       tech12List <- targetList
   }
   
-  class(tech12List) <- c("mplus.tech12", "list")
+  tech12List <- new_mplus_tech12(tech12List)
   
   return(tech12List)
 }
@@ -1960,8 +1960,9 @@ extractTech12 <- function(outfiletext, filename) {
 #' # make me!!!
 extractTech15 <- function(outfiletext, filename) {
   tech15Section <- getSection("^TECHNICAL 15 OUTPUT$", outfiletext)
-  tech15List <- list(conditional.probabilities = trimws(tech15Section[grepl("^\\s+?P\\(", tech15Section)]))
-  class(tech15List) <- c("mplus.tech15", "list")
+  tech15List <- new_mplus_tech15(
+    conditional.probabilities = trimws(tech15Section[grepl("^\\s+?P\\(", tech15Section)])
+  )
   
   if (is.null(tech15Section)) return(tech15List) #no tech15 output
   
@@ -1985,8 +1986,7 @@ extractFacScoreStats <- function(outfiletext, filename) {
   
   fssSection <- getMultilineSection("SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES::SAMPLE STATISTICS",
     outfiletext, filename, allowMultiple=FALSE)
-  fssList <- list()
-  class(fssList) <- c("mplus.facscorestats", "list")
+  fssList <- new_mplus_facscorestats()
   
   if (section_is_missing(fssSection)) return(fssList) #no factor scores output
   
@@ -2458,9 +2458,7 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE, 
 extractDataSummary <- function(outfiletext, filename) {
   dataSummarySection <- getSection("^\\s*SUMMARY OF DATA( FOR THE FIRST DATA SET)*\\s*$", outfiletext)
   if (is.null(dataSummarySection)) {
-    empty <- list()
-    class(empty) <- c("mplus.data_summary", "list")
-    return(empty)
+    return(new_mplus_data_summary())
   }
   
   #detect three-level outputs, which have 2 cluster size sections, ICCs, etc.
