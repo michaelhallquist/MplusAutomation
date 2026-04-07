@@ -135,7 +135,12 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
         direct <- direct[-2] #drop 'line' element for matching column names
         names(direct) <- columnNames; direct$summary <- "Direct"; direct$outcome <- NULL
       } else {
-        directSection <- strsplit(trimSpace(getMultilineSection("Direct", esection, curfile)), "\\s+")
+        directText <- getMultilineSection("Direct", esection, curfile)
+        if (section_is_missing(directText)) {
+          directSection <- list()
+        } else {
+          directSection <- strsplit(trimSpace(directText), "\\s+")
+        }
         useful <- which(sapply(directSection, length) > 1L)
         if (length(useful) == 1L) {
           direct <- as.list(directSection[[useful]])
@@ -174,18 +179,25 @@ extractIndirect_section <- function(indirectSection, curfile, sectionType) {
       #        FODTMND           -0.003      0.002     -1.113      0.266
       
       if (any(grepl("Specific indirect\\s+\\d+", esection, perl=TRUE))) { #numbered subsections
-        specSection <- trimSpace(getMultilineSection("Specific indirect(\\s+\\d+)*", esection, curfile, allowMultiple=TRUE))
+        specSection <- getMultilineSection("Specific indirect(\\s+\\d+)*", esection, curfile, allowMultiple=TRUE)
         
         #specSection is now a list of matches, where each element is a match-lines vector with the headers dumped (which is useful)
         #flatten this into a vector so that parsing below proceeds as usual
-        if (is.list(specSection)) { specSection <- unlist(specSection) }
+        if (section_is_missing(specSection)) {
+          specSection <- character(0)
+        } else {
+          specSection <- trimSpace(specSection)
+          if (is.list(specSection)) { specSection <- unlist(specSection) }
+        }
         
         #N.B. The parser below depends on the first line of the section being blank to demarcate the first effect.
         #  The new format, however, starts with Specific indirect 1, then goes straight to the effect.
         #  Thus, add a blank line to the section before proceeding
-        if (specSection[1L] != "") specSection <- c("", specSection)
+        if (length(specSection) > 0L && specSection[1L] != "") specSection <- c("", specSection)
       } else { #single section
-        specSection <- trimSpace(getMultilineSection("Specific indirect", esection, curfile))
+        specText <- getMultilineSection("Specific indirect", esection, curfile)
+        if (section_is_missing(specText)) specSection <- character(0)
+        else specSection <- trimSpace(specText)
       }
       
       blanks <- which(specSection=="")

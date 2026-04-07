@@ -68,8 +68,13 @@ extractAux <- function(outfiletext, filename) {
 
   #obtain any section that begins with no spaces (i.e., each variable)
   variableSections <- getMultilineSection("\\S+", sectionToParse, filename, allowMultiple=TRUE, allowSpace=FALSE)
+  if (section_is_missing(variableSections)) {
+    ret <- list()
+    class(ret) <- c("mplus.auxE", "list")
+    return(ret)
+  }
 
-  varnames <- sectionToParse[attr(variableSections, "matchlines")]
+  varnames <- sectionToParse[section_matchlines(variableSections)]
 
   vc <- list()
   vcat <- list()

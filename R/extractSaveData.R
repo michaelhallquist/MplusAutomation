@@ -253,7 +253,7 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
 
   orderFormat.text <- getMultilineSection("Order and format of variables", savedataSection, outfile, allowMultiple=FALSE)
 
-  if (!is.na(orderFormat.text[1L])) {
+  if (!section_is_missing(orderFormat.text)) {
     variablesToParse <- orderFormat.text[orderFormat.text != ""]
     
     #Mplus v8: remove + sign in front of variables that plausible values from SAVE=FSCORES (XX) in BSEM.
@@ -326,7 +326,7 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
   #Monte carlo and multiple imputation output: contains only order of variables, not their format
   order.text <- getMultilineSection("Order of variables", savedataSection, outfile, allowMultiple=FALSE)
 
-  if (!is.na(order.text[1L])) {
+  if (!section_is_missing(order.text)) {
 	  #dump any blank fields because they will cause nulls in the names, formats, widths.
 	  #This is handled by blank.lines.skip=TRUE in wrappers, but readModels needs to retain blank lines
 	  #for other functions, so strip here.
@@ -674,4 +674,3 @@ getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileNa
 
   return(dataset)
 }
-

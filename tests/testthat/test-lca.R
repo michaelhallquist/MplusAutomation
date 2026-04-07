@@ -104,3 +104,15 @@ test_that("Mplus 9 - LCA with covariates odds ratios are parsed", {
   expect_false(is.null(m$parameters$unstandardized.alt))
   expect_equal(length(m$parameters$unstandardized.alt), 3L)
 })
+
+test_that("TECH11 VLMR values are parsed when warning text interrupts the section", {
+  m <- readModels(target = testthat::test_path("threeclass1.out"))
+  
+  expect_equal(m$summaries$T11_VLMR_PValue, 0.6519, tolerance = 1e-4)
+  expect_equal(m$summaries$T11_LMR_PValue, 0.6515, tolerance = 1e-4)
+  
+  section_alerts <- attr(m$summaries, "section_alerts")
+  expect_true("T11_VLMR" %in% names(section_alerts))
+  expect_length(section_alerts$T11_VLMR, 1L)
+  expect_true(grepl("DID NOT\\s+TERMINATE NORMALLY", section_alerts$T11_VLMR[[1L]], perl = TRUE))
+})

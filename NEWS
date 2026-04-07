@@ -1,6 +1,7 @@
 Version 1.3
  - feature:     TECH10 section is now parsed into $tech10 by readModels
  - feature:     mplusModel now supports update() semantics like mplusObject and base R objects
+ - bugfix:      support extraction of TECH11 and other sections when they are interrupted by warnings or errors
 
 Version 1.2
  - notice:      MplusAutomation examples vignette updated to refer to readModels, not outmoded extract* functions

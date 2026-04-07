@@ -295,6 +295,34 @@ getSection_Blanklines <- function(sectionHeader, outfiletext) {
 }
 
 
+new_mplus_section <- function(text, lines=NULL, header_line=NULL, alerts=NULL, header=NULL) {
+  if (is.null(text)) return(NULL)
+  section <- as.character(text)
+  class(section) <- c("mplus.section", "character")
+  if (!is.null(lines)) attr(section, "lines") <- as.integer(lines)
+  if (!is.null(header_line)) attr(section, "header.line") <- as.integer(header_line)
+  if (!is.null(alerts) && length(alerts) > 0L) attr(section, "section_alerts") <- alerts
+  if (!is.null(header)) attr(section, "header") <- header
+  section
+}
+
+new_mplus_section_list <- function(sections, matchlines=NULL) {
+  sections <- unname(sections)
+  class(sections) <- c("mplus.section.list", "list")
+  if (!is.null(matchlines)) attr(sections, "matchlines") <- as.integer(matchlines)
+  alerts <- lapply(sections, function(x) attr(x, "section_alerts", exact=TRUE))
+  if (length(alerts) > 0L && any(lengths(alerts) > 0L)) attr(sections, "section_alerts") <- alerts
+  sections
+}
+
+section_is_missing <- function(section) {
+  is.null(section) || length(section) == 0L
+}
+
+section_matchlines <- function(section) {
+  attr(section, "matchlines", exact=TRUE)
+}
+
 #IRT PARAMETERIZATION IN TWO-PARAMETER LOGISTIC (or PROBIT) METRIC
 #LOGISTIC REGRESSION ODDS RATIO RESULTS
 
@@ -346,8 +374,12 @@ getSection <- function(sectionHeader, outfiletext, headers="standard") {
   if (length(subsequentHeaders) == 0) nextHeader <- length(outfiletext) #just return the whole enchilada
   else nextHeader <- h[subsequentHeaders[1]] - 1
   
-  section.found <- outfiletext[(beginSection+1):nextHeader]
-  attr(section.found, "lines") <- beginSection:nextHeader
+  section.found <- new_mplus_section(
+    outfiletext[(beginSection+1):nextHeader],
+    lines=beginSection:nextHeader,
+    header_line=beginSection,
+    header=sectionHeader
+  )
   
   return(section.found)
 }
@@ -466,9 +498,9 @@ parse_into_sections <- function(outfiletext) {
 #' @keywords internal
 #' @examples
 #' # make me!!!
-getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FALSE, allowSpace=TRUE, ignore.case=FALSE) {
-  # TODO: May2017: update this function to return an empty list in the case of match failure instead of NA_character_.
-  #                Will also need to update behavior of all calls accordingly
+getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FALSE, allowSpace=TRUE,
+    ignore.case=FALSE, continue_on_alert=FALSE,
+    alert_pattern="^\\s*(WARNING|ERROR|FATAL ERROR)\\b") {
   # Apr2015: Need greater flexibility in how a section is defined. For certain sections, indentation is unhelpful. Example:
   
   # Chi-Square Test of Model Fit for the Binary and Ordered Categorical
@@ -499,102 +531,149 @@ getMultilineSection <- function(header, outfiletext, filename, allowMultiple=FAL
   #will just extract from deepest depth
   header <- strsplit(header, "::", fixed=TRUE)[[1]]
   
-  sectionList <- list()
-  targetText <- outfiletext
-  for (level in 1:length(header)) {
-    if ((searchCmd <- regexpr("^\\{(\\+\\d+)*([ib])*\\}", header[level], perl=TRUE)) > 0) {
+  parse_header_spec <- function(header_text) {
+    if ((searchCmd <- regexpr("^\\{(\\+\\d+)*([ib])*\\}", header_text, perl=TRUE)) > 0) {
       if ((o_start <- attr(searchCmd, "capture.start")[1]) > 0) {
-        offset <- substr(header[level], o_start, o_start + attr(searchCmd, "capture.length")[1] - 1)
+        offset <- substr(header_text, o_start, o_start + attr(searchCmd, "capture.length")[1] - 1)
         offset <- as.integer(sub("+", "", offset, fixed=TRUE)) #remove + sign
       } else {
         offset <- 1
       }
       
       if ((s_start <- attr(searchCmd, "capture.start")[2]) > 0) {
-        stype <- substr(header[level], s_start, s_start + attr(searchCmd, "capture.length")[2] - 1)
+        stype <- substr(header_text, s_start, s_start + attr(searchCmd, "capture.length")[2] - 1)
         stopifnot(nchar(stype) == 1 && stype %in% c("i", "b"))
       } else {
         stype <- "i"
       }
       
       #remove search type information from header
-      header[level] <- substr(header[level], searchCmd[1] + attr(searchCmd, "match.length"), nchar(header[level]))
+      header_text <- substr(header_text, searchCmd[1] + attr(searchCmd, "match.length"), nchar(header_text))
     } else {
       offset <- 1
       stype <- "i"
     }
     
-    if (allowSpace==TRUE) headerRow <- grep(paste("^\\s*", header[level], "\\s*$", sep=""), targetText, perl=TRUE, ignore.case=ignore.case)
-    else headerRow <- grep(paste("^", header[level], "$", sep=""), targetText, perl=TRUE, ignore.case=ignore.case) #useful for equality of means where we just want anything with 0 spaces
-    
-    if (length(headerRow) == 1L || (length(headerRow) > 0L && allowMultiple==TRUE)) {
-      for (r in 1:length(headerRow)) {
-        #locate the position of the first non-space character
-        numSpacesHeader <- regexpr("\\S+.*$", targetText[headerRow[r]], perl=TRUE) - 1
-        
-        sectionStart <- headerRow[r] + offset #skip header row itself
-        
-        if (stype == "i") {
-          sameLevelMatch <- FALSE
-          readStart <- sectionStart #counter variable to chunk through output
-          while(sameLevelMatch == FALSE) {
-            #read 20-line chunks of text to find next line with identical identation
-            #more efficient than running gregexpr on whole output
-            #match position of first non-space character, subtract 1 to get num spaces.
-            #blank lines will generate a value of -2, so shouldn't throw off top-level match
-            firstNonspaceCharacter <- lapply(gregexpr("\\S+.*$", targetText[readStart:(readStart+19)], perl=TRUE), FUN=function(x) x - 1)
-            samelevelMatches <- which(firstNonspaceCharacter == numSpacesHeader)
-            if (length(samelevelMatches) > 0) {
-              sameLevelMatch <- TRUE
-              sectionEnd <- readStart+samelevelMatches[1] - 2 #-1 for going to line before next header, another -1 for readStart
-            } else if (readStart+19 >= length(targetText)) {
-              sameLevelMatch <- TRUE
-              sectionEnd <- length(targetText)
-            } else { readStart <- readStart + 20 } #process next batch
-            
-            #if (readStart > 100000) browser()#stop ("readStart exceeded 100000. Must be formatting problem.")
-          }
-        } else if (stype == "b") {
-          blankFound <- FALSE
-          i <- 0
-          while(!grepl("^\\s*$", targetText[sectionStart+i], perl=T) && i <= length(targetText) - sectionStart) { #ensure that i doesn't go beyond length of section
-            i <- i + 1
-            if (i > 10000) { stop("searched for next blank line on 10000 rows without success.") }
-          }
-          if (i == 0) {
-            #first line of section was blank, so just set start and end to same
-            #could force search to look beyond first line since it would be rare that a blank line after header match should count as empty
-            sectionEnd <- sectionStart
-          } else {
-            sectionEnd <- sectionStart + i - 1 #line prior to blank
-          }
-          
-        }
-        
-        #there will probably be collisions between use of nested headers :: and use of allowMultiple
-        #I haven't attempted to get both to work together as they're currently used for different purposes
-        if (isTRUE(allowMultiple))
-          sectionList[[r]] <- targetText[sectionStart:sectionEnd]
-        else
-          #set targetText as chunk from start to end. If there are multiple subsections, then the
-          #next iteration of the for loop will process within the subsetted targetText.
-          targetText <- targetText[sectionStart:sectionEnd]
-        
-      }
-      
-    } else {
-      targetText <- NA_character_
-      if (length(headerRow) > 1L) warning(paste("Multiple matches for header: ", header, "\n  ", filename, sep=""))
-      break
-      #else if (length(headerRow) < 1) warning(paste("Could not locate section based on header: ", header, "\n  ", filename, sep=""))
-    }
-    
+    list(header=header_text, offset=offset, stype=stype)
   }
   
-  if (length(sectionList) > 0L && allowMultiple) {
-    attr(sectionList, "matchlines") <- headerRow
-    return(sectionList)
-  } else { return(targetText) }
+  extract_section_match <- function(targetText, targetLines, headerRow, headerSpec) {
+    sectionStart <- headerRow + headerSpec$offset
+    if (sectionStart > length(targetText)) {
+      return(new_mplus_section(character(0), lines=integer(0),
+        header_line=targetLines[headerRow], header=headerSpec$header))
+    }
+    
+    sectionAlerts <- character(0)
+    
+    if (headerSpec$stype == "i") {
+      numSpacesHeader <- regexpr("\\S+.*$", targetText[headerRow], perl=TRUE) - 1
+      sameLevelMatch <- FALSE
+      readStart <- sectionStart
+      while(sameLevelMatch == FALSE) {
+        chunkEnd <- min(readStart + 19L, length(targetText))
+        firstNonspaceCharacter <- vapply(
+          gregexpr("\\S+.*$", targetText[readStart:chunkEnd], perl=TRUE),
+          FUN=function(x) as.integer(x[1L]) - 1L,
+          FUN.VALUE=integer(1)
+        )
+        samelevelMatches <- which(firstNonspaceCharacter == numSpacesHeader)
+        if (length(samelevelMatches) > 0) {
+          candidateLine <- readStart + samelevelMatches[1] - 1L
+          
+          if (isTRUE(continue_on_alert) &&
+              grepl(alert_pattern, targetText[candidateLine], perl=TRUE, ignore.case=TRUE)) {
+            alertEnd <- candidateLine
+            while (alertEnd < length(targetText) &&
+                !grepl("^\\s*$", targetText[alertEnd + 1L], perl=TRUE)) {
+              alertEnd <- alertEnd + 1L
+            }
+            sectionAlerts <- c(sectionAlerts, paste(targetText[candidateLine:alertEnd], collapse="\n"))
+            readStart <- alertEnd + 1L
+            if (readStart > length(targetText)) {
+              sameLevelMatch <- TRUE
+              sectionEnd <- length(targetText)
+            }
+          } else {
+            sameLevelMatch <- TRUE
+            sectionEnd <- candidateLine - 1L
+          }
+        } else if (chunkEnd >= length(targetText)) {
+          sameLevelMatch <- TRUE
+          sectionEnd <- length(targetText)
+        } else { readStart <- chunkEnd + 1L }
+      }
+    } else {
+      i <- 0L
+      while(sectionStart + i <= length(targetText) &&
+          !grepl("^\\s*$", targetText[sectionStart+i], perl=TRUE)) {
+        i <- i + 1L
+        if (i > 10000L) stop("searched for next blank line on 10000 rows without success.")
+      }
+      if (i == 0L) sectionEnd <- sectionStart
+      else sectionEnd <- sectionStart + i - 1L
+    }
+    
+    if (sectionEnd < sectionStart) {
+      sectionText <- character(0)
+      sectionLines <- integer(0)
+    } else {
+      sectionText <- targetText[sectionStart:sectionEnd]
+      sectionLines <- targetLines[sectionStart:sectionEnd]
+    }
+    
+    new_mplus_section(
+      sectionText,
+      lines=sectionLines,
+      header_line=targetLines[headerRow],
+      alerts=sectionAlerts,
+      header=headerSpec$header
+    )
+  }
+  
+  currentTargets <- list(list(text=as.character(outfiletext), lines=seq_along(outfiletext)))
+  currentMatchlines <- integer(0)
+  
+  for (level in seq_along(header)) {
+    headerSpec <- parse_header_spec(header[level])
+    nextTargets <- list()
+    matchlines <- integer(0)
+    
+    for (target in currentTargets) {
+      targetText <- target$text
+      targetLines <- target$lines
+      
+      if (allowSpace==TRUE) headerRow <- grep(paste("^\\s*", headerSpec$header, "\\s*$", sep=""), targetText, perl=TRUE, ignore.case=ignore.case)
+      else headerRow <- grep(paste("^", headerSpec$header, "$", sep=""), targetText, perl=TRUE, ignore.case=ignore.case)
+      
+      if (length(headerRow) == 0L) next
+      if (!isTRUE(allowMultiple) && length(headerRow) > 1L) {
+        warning(paste("Multiple matches for header: ", headerSpec$header, "\n  ", filename, sep=""))
+        return(NULL)
+      }
+      
+      for (r in seq_along(headerRow)) {
+        section <- extract_section_match(targetText, targetLines, headerRow[r], headerSpec)
+        nextTargets[[length(nextTargets) + 1L]] <- list(
+          text=section,
+          lines=attr(section, "lines", exact=TRUE)
+        )
+        matchlines <- c(matchlines, attr(section, "header.line", exact=TRUE))
+      }
+    }
+    
+    if (length(nextTargets) == 0L) return(NULL)
+    if (!isTRUE(allowMultiple) && length(nextTargets) > 1L) {
+      warning(paste("Multiple matches for header: ", headerSpec$header, "\n  ", filename, sep=""))
+      return(NULL)
+    }
+    
+    currentTargets <- nextTargets
+    currentMatchlines <- matchlines
+  }
+  
+  if (isTRUE(allowMultiple)) return(new_mplus_section_list(lapply(currentTargets, `[[`, "text"), matchlines=currentMatchlines))
+  currentTargets[[1L]]$text
 }
 
 

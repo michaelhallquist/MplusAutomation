@@ -23,6 +23,7 @@ extractValue <- function(pattern, textToScan, filename, type="int") {
   #locate the matching line in the output file
   matchpos <- grep(pattern, textToScan, ignore.case=TRUE)
   matchlines <- textToScan[(matchpos+offset)]
+  typePrefix <- substr(type, 1, 3)
   
   if (length(matchlines) > 1) {
     stop("More than one match found for parameter: ", pattern, "\n  ", filename)
@@ -31,15 +32,14 @@ extractValue <- function(pattern, textToScan, filename, type="int") {
   else if (length(matchlines) == 0) {
     #if the parameter of interest not found in this file, then return NA
     #warning(paste("Parameter not found: ", pattern, "\n  ", filename, sep=""))
-    if (type == "int") return(NA_integer_)
-    else if (type == "dec") return(NA_real_)
-    else if (type == "str") return(NA_character_)
+    if (typePrefix == "int") return(NA_integer_)
+    else if (typePrefix == "dec" || typePrefix == "cal") return(NA_real_)
+    else if (typePrefix == "str") return(NA_character_)
+    else return(NA_character_)
   }
   
   #different idea: concatenate pattern with var type and match on that
   #then sub just the pattern part from the larger line
-  
-  typePrefix <- substr(type, 1, 3)
   
   if (typePrefix == "int") {
     regexp <- "-*\\d+" #optional negative sign in front
@@ -87,7 +87,8 @@ extractValue <- function(pattern, textToScan, filename, type="int") {
 #' @keywords internal
 #' @examples
 #' # make me!!!
-extractSummaries_1plan <- function(arglist, sectionHeaders, sectionFields, textToParse, filename) {
+extractSummaries_1plan <- function(arglist, sectionHeaders, sectionFields, textToParse, filename,
+    allowSectionAlerts=FALSE) {
   #make this a more generic function that accepts headers and fields in case it is useful outside the MODEL FIT section
   if (length(sectionHeaders) < 1) stop("No section headers provided.")
   if (length(sectionHeaders) != length(sectionFields)) stop("Section headers and section fields have different lengths.")
@@ -100,7 +101,22 @@ extractSummaries_1plan <- function(arglist, sectionHeaders, sectionFields, textT
     } else {
       #could be pretty inefficient if the same section header is repeated several times.
       #could build a list with divided output and check whether a section is present in the list before extracting
-      sectionText <- getMultilineSection(sectionHeaders[header], textToParse, filename)
+      sectionText <- getMultilineSection(
+        sectionHeaders[header], textToParse, filename,
+        continue_on_alert=allowSectionAlerts
+      )
+      
+      sectionAlerts <- attr(sectionText, "section_alerts", exact=TRUE)
+      if (length(sectionAlerts) > 0L) {
+        headerNames <- names(sectionHeaders)
+        alertKey <- if (!is.null(headerNames) &&
+            !is.na(headerNames[header]) &&
+            nzchar(headerNames[header])) headerNames[header] else sectionHeaders[header]
+        argAlerts <- attr(arglist, "section_alerts", exact=TRUE)
+        if (is.null(argAlerts)) argAlerts <- list()
+        argAlerts[[alertKey]] <- unique(c(argAlerts[[alertKey]], sectionAlerts))
+        attr(arglist, "section_alerts") <- argAlerts
+      }
     }
     
     #process all fields for this section
@@ -924,9 +940,9 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   
   if (!is.null(tech11Output)) {
     tech11headers <- c(
-      "Random Starts Specifications for the k-1 Class Analysis Model",
-      "VUONG-LO-MENDELL-RUBIN LIKELIHOOD RATIO TEST FOR \\d+ \\(H0\\) VERSUS \\d+ CLASSES",
-      "LO-MENDELL-RUBIN ADJUSTED LRT TEST"
+      T11_KM1="Random Starts Specifications for the k-1 Class Analysis Model",
+      T11_VLMR="VUONG-LO-MENDELL-RUBIN LIKELIHOOD RATIO TEST FOR \\d+ \\(H0\\) VERSUS \\d+ CLASSES",
+      T11_LMR="LO-MENDELL-RUBIN ADJUSTED LRT TEST"
     )
     tech11fields <- list(
       data.frame(
@@ -946,7 +962,10 @@ extractSummaries_1file <- function(outfiletext, filename, input)
       )
     )
     
-    arglist <- extractSummaries_1plan(arglist, tech11headers, tech11fields, tech11Output, filename)
+    arglist <- extractSummaries_1plan(
+      arglist, tech11headers, tech11fields, tech11Output, filename,
+      allowSectionAlerts=TRUE
+    )
   }
   
   
@@ -1020,10 +1039,12 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   #for now, skip including input instructions in the returned data.frame. Makes the output too cluttered.
   #arglist$InputInstructions <- paste((outfiletext[(startInput+1):(endInput-1)]), collapse="\n")
   arglist$Filename <- splitFilePath(filename)$filename #only retain filename, not path
+  section_alerts <- attr(arglist, "section_alerts", exact=TRUE)
   
   arglist <- as.data.frame(arglist, stringsAsFactors=FALSE)
   class(arglist) <- c("mplus.summaries", "data.frame")
   attr(arglist, "filename") <- arglist$Filename
+  if (!is.null(section_alerts)) attr(arglist, "section_alerts") <- section_alerts
   
   return(arglist)
 }
@@ -1124,13 +1145,15 @@ extractResiduals_1section <- function(residSection, filename) {
   #allow for multiple groups
   residSubsections <- getMultilineSection("ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR .+)*",
                                           residSection, filename, allowMultiple=TRUE)
-  
-  matchlines <- attr(residSubsections, "matchlines")
-  
-  if (length(residSubsections) == 0) {
+
+  if (section_is_missing(residSubsections)) {
     warning("No sections found within residuals output.")
     return(list())
-  } else if (length(residSubsections) > 1) {
+  }
+
+  matchlines <- section_matchlines(residSubsections)
+
+  if (length(residSubsections) > 1) {
     groupNames <- make.names(gsub("^\\s*ESTIMATED MODEL AND RESIDUALS \\(OBSERVED - ESTIMATED\\)( FOR (.+))*\\s*$", "\\2", residSection[matchlines], perl=TRUE))
   }
   
@@ -1197,7 +1220,7 @@ extractResiduals <- function(outfiletext, filename) {
     residSection <- getSection("^RESIDUAL OUTPUT$", outfiletext)
     if (is.null(residSection)) { return(list()) } #no residuals output
     
-    residList <- extractResiduals_1section(residSection) #[[1]]
+    residList <- extractResiduals_1section(residSection, filename) #[[1]]
   }
   
   # class(residList) <- c("mplus.residuals", "list")
@@ -1225,15 +1248,14 @@ extractTech1 <- function(outfiletext, filename) {
   
   paramSpecSubsections <- getMultilineSection("PARAMETER SPECIFICATION( FOR [\\w\\d\\s\\.,_]+)*",
     tech1Section, filename, allowMultiple=TRUE)
-  
-  matchlines <- attr(paramSpecSubsections, "matchlines")
-  
+
   paramSpecList <- list()
-  if (length(paramSpecSubsections) == 0)
+  if (section_is_missing(paramSpecSubsections))
     warning ("No parameter specfication sections found within TECH1 output.")
-  else if (length(paramSpecSubsections) > 1)
+  else if (length(paramSpecSubsections) > 1) {
+    matchlines <- section_matchlines(paramSpecSubsections)
     groupNames <- make.names(gsub("^\\s*PARAMETER SPECIFICATION( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", tech1Section[matchlines], perl=TRUE))
-  else #just one section, no groups
+  } else #just one section, no groups
     groupNames <- ""
   
   for (g in 1:length(paramSpecSubsections)) {
@@ -1274,15 +1296,14 @@ extractTech1 <- function(outfiletext, filename) {
   
   startValSubsections <- getMultilineSection("STARTING VALUES( FOR [\\w\\d\\s\\.,_]+)*",
     tech1Section, filename, allowMultiple=TRUE)
-  
-  matchlines <- attr(startValSubsections, "matchlines")
-  
+
   startValList <- list()
-  if (length(startValSubsections) == 0)
+  if (section_is_missing(startValSubsections))
     warning ("No starting value sections found within TECH1 output.")
-  else if (length(startValSubsections) > 1)
+  else if (length(startValSubsections) > 1) {
+    matchlines <- section_matchlines(startValSubsections)
     groupNames <- make.names(gsub("^\\s*STARTING VALUES( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", tech1Section[matchlines], perl=TRUE))
-  else
+  } else
     groupNames <- ""
   
   for (g in 1:length(startValSubsections)) {
@@ -1351,17 +1372,15 @@ extractSampstat <- function(outfiletext, filename) {
   sampstatList <- list()
   sampstatSubsections <- getMultilineSection("(ESTIMATED )*SAMPLE STATISTICS( FOR [\\w\\d\\s\\.,_]+)*",
     sampstatSection, filename, allowMultiple=TRUE)
-  
-  matchlines <- attr(sampstatSubsections, "matchlines")
-  
-  if(is.na(sampstatSubsections[1])){
-    sampstatSubsections <- list(sampstatSection)
-    matchlines <- attr(sampstatSubsections, "lines")
+
+  if (section_is_missing(sampstatSubsections)) {
+    sampstatSubsections <- new_mplus_section_list(list(sampstatSection))
   }
-  
+
   if (length(sampstatSubsections) == 0) {
     warning ("No sample statistics sections found within SAMPSTAT output.")
   } else if (length(sampstatSubsections) > 1) {
+    matchlines <- section_matchlines(sampstatSubsections)
     groupNames <- make.names(gsub("^\\s*(?:ESTIMATED )*SAMPLE STATISTICS( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", sampstatSection[matchlines], perl=TRUE))
   } else { #just one section, no groups
     groupNames <- ""
@@ -1413,15 +1432,15 @@ extractSampstat <- function(outfiletext, filename) {
   if (!is.null(univariateCountsSection)) {
     countSubsections <- getMultilineSection("Group\\s+([\\w\\d\\.,_]+)*",
       univariateCountsSection, filename, allowMultiple=TRUE)
-    
-    matchlines <- attr(countSubsections, "matchlines")
-    
-    if (!is.list(countSubsections) && is.na(countSubsections[1])) {
-      countSubsections <- list(univariateCountsSection) #no sublists by group
-    } else if (length(countSubsections) > 1)
+
+    if (section_is_missing(countSubsections)) {
+      countSubsections <- new_mplus_section_list(list(univariateCountsSection)) #no sublists by group
+    } else if (length(countSubsections) > 1) {
+      matchlines <- section_matchlines(countSubsections)
       groupNames <- make.names(gsub("^\\s*Group\\s+([\\w\\d\\s\\.,_]+)\\s*$", "\\1", univariateCountsSection[matchlines], perl=TRUE))
-    else #just one section, no groups
-      stop("not sure how we got here")
+    } else {
+      groupNames <- ""
+    }
     
     for (g in 1:length(countSubsections)) {
       targetList <- list()
@@ -1463,19 +1482,17 @@ extractSampstat <- function(outfiletext, filename) {
       univariateSubsections <- getMultilineSection("X.*UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS(?: FOR [\\w\\d\\s\\.,_]+)*",
                                               univariate_sampstat, filename, allowMultiple=TRUE)
     } else {
-      univariateSubsections <- NA
+      univariateSubsections <- NULL
     }
 
-    matchlines <- attr(univariateSubsections, "matchlines")
-    
-    if(is.na(univariateSubsections[1])) {
-      univariateSubsections <- list(univariate_sampstat)
-      matchlines <- attr(univariateSubsections, "lines")
+    if(section_is_missing(univariateSubsections)) {
+      univariateSubsections <- new_mplus_section_list(list(univariate_sampstat))
     }
     
     if (length(univariateSubsections) == 0L) {
       warning ("No univariate statistics sections found within SAMPSTAT output.")
     } else if (length(univariateSubsections) > 1) {
+      matchlines <- section_matchlines(univariateSubsections)
       groupNames <- make.names(gsub("^X\\s*UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", univariate_sampstat[matchlines], perl=TRUE))
     } else { #just one section, no groups
       groupNames <- ""
@@ -1530,13 +1547,12 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
   
   covcoverageSubsections <- getMultilineSection("PROPORTION OF DATA PRESENT( FOR [\\w\\d\\s\\.,_]+)*",
     covcoverageSection, filename, allowMultiple=TRUE)
-  
-  matchlines <- attr(covcoverageSubsections, "matchlines")
-  
-  if (length(covcoverageSubsections) == 0 || all(is.na(covcoverageSubsections))) { #See UG ex9.7.out
+
+  if (section_is_missing(covcoverageSubsections)) { #See UG ex9.7.out
     message("No PROPORTION OF DATA PRESENT sections found within COVARIANCE COVERAGE OF DATA output.")
     return(covcoverageList)
   } else if (length(covcoverageSubsections) > 1) {
+    matchlines <- section_matchlines(covcoverageSubsections)
     groupNames <- make.names(gsub("^\\s*PROPORTION OF DATA PRESENT( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", covcoverageSection[matchlines], perl=TRUE))
   } else { #just one section, no groups
     groupNames <- ""
@@ -1685,14 +1701,13 @@ extractTech4 <- function(outfiletext, filename) {
   
   tech4Subsections <- getMultilineSection("ESTIMATES DERIVED FROM THE MODEL( FOR [\\w\\d\\s\\.,_]+)*",
     tech4Section, filename, allowMultiple=TRUE)
-  
-  matchlines <- attr(tech4Subsections, "matchlines")
-  
-  if (length(tech4Subsections) == 0) {
+
+  if (section_is_missing(tech4Subsections)) {
     warning("No sections found within TECH4 output.")
     return(list())
   }
   else if (length(tech4Subsections) > 1) {
+    matchlines <- section_matchlines(tech4Subsections)
     groupNames <- make.names(gsub("^\\s*ESTIMATES DERIVED FROM THE MODEL( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", tech4Section[matchlines], perl=TRUE))
   }
   
@@ -1739,14 +1754,13 @@ extractTech7 <- function(outfiletext, filename) {
   
   tech7Subsections <- getMultilineSection("SAMPLE STATISTICS WEIGHTED BY ESTIMATED CLASS PROBABILITIES FOR CLASS \\d+",
     tech7Section, filename, allowMultiple=TRUE)
-  
-  matchlines <- attr(tech7Subsections, "matchlines")
-  
-  if (length(tech7Subsections) == 0) {
+
+  if (section_is_missing(tech7Subsections)) {
     warning("No sections found within tech7 output.")
     return(list())
   }
   else if (length(tech7Subsections) > 1) {
+    matchlines <- section_matchlines(tech7Subsections)
     groupNames <- make.names(gsub("^\\s*SAMPLE STATISTICS WEIGHTED BY ESTIMATED CLASS PROBABILITIES FOR (CLASS \\d+)\\s*$", "\\1", tech7Section[matchlines], perl=TRUE))
   }
   
@@ -1809,7 +1823,7 @@ extractTech8 <- function(outfiletext, filename) {
   
   bayesPSR <- getMultilineSection("TECHNICAL 8 OUTPUT FOR BAYES ESTIMATION", tech8Section, filename, allowMultiple=FALSE)
   
-  if (!is.na(bayesPSR[1L])) {
+  if (!section_is_missing(bayesPSR)) {
     #new outputs have "Iterations for model estimation" and "Iterations for computing PPPP"
     if (any(grepl("Iterations for computing PPPP", bayesPSR))) {
       pppp_text <- getSection("Iterations for computing PPPP", bayesPSR, headers = c("Iterations for computing PPPP", "Iterations for model estimation"))
@@ -1886,10 +1900,8 @@ extractTech12 <- function(outfiletext, filename) {
   
   tech12Subsections <- getMultilineSection("ESTIMATED MIXED MODEL AND RESIDUALS \\(OBSERVED - EXPECTED\\)",
     tech12Section, filename, allowMultiple=TRUE)
-  
-  matchlines <- attr(tech12Subsections, "matchlines")
-  
-  if (length(tech12Subsections) == 0) {
+
+  if (section_is_missing(tech12Subsections)) {
     warning("No sections found within tech12 output.")
     return(list())
   }
@@ -1970,7 +1982,7 @@ extractFacScoreStats <- function(outfiletext, filename) {
   fssList <- list()
   class(fssList) <- c("mplus.facscorestats", "list")
   
-  if (is.na(fssSection[1L])) return(fssList) #no factor scores output
+  if (section_is_missing(fssSection)) return(fssList) #no factor scores output
   
   fssList[["Means"]] <- matrixExtract(fssSection, "Means", filename)
   fssList[["Covariances"]] <- matrixExtract(fssSection, "Covariances", filename)
@@ -2316,7 +2328,7 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE, 
   
   matLines <- getMultilineSection(headerLine, outfiletext, filename, allowMultiple=TRUE, ignore.case=ignore.case)
   
-  if (!is.na(matLines[1])) {
+  if (!section_is_missing(matLines)) {
     numBlocks <- length(matLines)
     blockList <- list()
     for (m in 1:numBlocks) {
@@ -2485,9 +2497,9 @@ extractDataSummary <- function(outfiletext, filename) {
       stopifnot(length(crossclass_sections) == length(level_names))
       for (ll in seq_along(level_names)) {
         sum_list[[paste0("NClusters_", level_names[ll])]] <- extractValue(pattern=paste("^\\s*Number of clusters\\s*"), crossclass_sections[[ll]], filename, type="int")
-        clus_size_section <- getMultilineSection("^\\s*Size \\(s\\)\\s+Cluster ID with Size s\\s*$", crossclass_sections[[ll]], allowMultiple = TRUE)
+        clus_size_section <- getMultilineSection("^\\s*Size \\(s\\)\\s+Cluster ID with Size s\\s*$", crossclass_sections[[ll]], filename, allowMultiple = TRUE)
         for (ii in seq_along(clus_size_section)) {
-          clus_nums <- unlist(strsplit(trimSpace(clus_size_section), "\\s+"))
+          clus_nums <- unlist(strsplit(trimSpace(clus_size_section[[ii]]), "\\s+"))
           clus_nums <- clus_nums[clus_nums != ""] # make sure any blanks are skipped (trimSpace should generally get them)
           sum_list[[paste0("ClusterSize_", level_names[ll], "_", ii)]] <- as.integer(clus_nums[1L])
           
