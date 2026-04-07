@@ -193,3 +193,31 @@ test_that("mplusObject explicit usevariables takes precedence over autov", {
 
   expect_equal(obj[["usevariables"]], c("id", "y"))
 })
+
+test_that("mplusModeler rejects NAMES in VARIABLE when rdata is used", {
+  dat <- data.frame(
+    y = rnorm(10),
+    x = rnorm(10),
+    z = rnorm(10)
+  )
+
+  obj <- mplusObject(
+    VARIABLE = "
+      NAMES = y x z;
+      USEVARIABLES = y x;
+    ",
+    MODEL = "y ON x;",
+    rdata = dat,
+    autov = TRUE
+  )
+
+  expect_error(
+    mplusModeler(
+      object = obj,
+      modelout = tempfile(fileext = ".inp"),
+      run = 0L,
+      quiet = TRUE
+    ),
+    regexp = "do not specify NAMES in the VARIABLE section"
+  )
+})

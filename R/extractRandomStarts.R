@@ -96,9 +96,10 @@ extractRandomStarts <- function(outfiletext, filename) {
       }
 
       if (length(rowFields) > 0L) {
+        seedValues <- parseRandomStartsSeed(vapply(rowFields, `[`, "", 2L))
         out$final_stage <- data.frame(
           log_likelihood = mplus_as.numeric(vapply(rowFields, `[`, "", 1L)),
-          seed = as.integer(mplus_as.numeric(vapply(rowFields, `[`, "", 2L))),
+          seed = seedValues,
           initial_stage_start_number = as.integer(mplus_as.numeric(vapply(rowFields, `[`, "", 3L))),
           stringsAsFactors = FALSE
         )
@@ -136,4 +137,16 @@ extractRandomStartsValue <- function(section, label, type = c("integer", "numeri
   value <- mplus_as.numeric(trimSpace(valueText))
 
   if (identical(type, "integer")) as.integer(value) else value
+}
+
+parseRandomStartsSeed <- function(seedText) {
+  seedText <- trimSpace(seedText)
+  out <- rep(NA_integer_, length(seedText))
+  needs_numeric <- !tolower(seedText) %in% "unperturbed"
+
+  if (any(needs_numeric)) {
+    out[needs_numeric] <- as.integer(mplus_as.numeric(seedText[needs_numeric]))
+  }
+
+  out
 }

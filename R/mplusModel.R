@@ -16,7 +16,7 @@
   "output", "savedata", "plot"
 )
 
-.normalize_mplus_update_name <- function(name) {
+normalizeMplusUpdateName <- function(name) {
   key <- gsub("[[:space:]_.]+", "", tolower(name), perl = TRUE)
   switch(
     key,
@@ -427,7 +427,7 @@ mplusModel_r6 <- R6::R6Class(
     #' @field h5results Read-only accessor for the `h5results` section returned by `readModels()`.
     #' @field output Read-only accessor for the `output` section returned by `readModels()`.
     {
-      .make_ro_binding <- function(section) {
+      makeRoBinding <- function(section) {
         f <- function(value) {
           s <- attr(sys.function(), "section")
           if (missing(value)) {
@@ -439,7 +439,7 @@ mplusModel_r6 <- R6::R6Class(
         attr(f, "section") <- section
         f
       }
-      setNames(lapply(.mplus_sections, .make_ro_binding), .mplus_sections)
+      setNames(lapply(.mplus_sections, makeRoBinding), .mplus_sections)
     }
   ),
   public=list(
@@ -732,7 +732,7 @@ mplusModel_r6 <- R6::R6Class(
           next
         }
         
-        section_name <- .normalize_mplus_update_name(nm)
+        section_name <- normalizeMplusUpdateName(nm)
         if (is.na(section_name) || !section_name %in% .mplus_input_sections) {
           stop("Unknown update field: ", nm)
         }

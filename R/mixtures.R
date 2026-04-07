@@ -1004,7 +1004,7 @@ plotMixtureDensities <-
     cl[["variables"]] <- variables
     cl[["x"]] <- modelList
     cl_dens <- cl
-    cl_dens[[1L]] <- str2lang("MplusAutomation:::.extract_density_data")
+    cl_dens[[1L]] <- str2lang("MplusAutomation:::extractDensityData")
     cl_dens <- cl_dens[c(1, which(names(cl_dens) %in% c("x", "variables")))]
     cl[["x"]] <- eval.parent(cl_dens)
     cl[["x"]] <- cl[["x"]][!is.na(cl[["x"]]$Value), ]
@@ -1672,7 +1672,7 @@ plot_density_default <-
     Args <- as.list(match.call()[-1])
     Args <- Args[which(names(Args) %in% c("variables", "bw", "conditional", "alpha"))]
     Args <- c(Args, list(plot_df = plot_df))
-    density_plot <- do.call(.plot_density_fun, Args)
+    density_plot <- do.call(plotDensityFun, Args)
     # Relabel facets
     label_facets <- c(levels(plot_df$Variable), levels(plot_df$Title))
     names(label_facets) <- label_facets
@@ -1704,8 +1704,8 @@ plot_density_default <-
     return(invisible(density_plot))
   }
 
-.extract_density_data <- function(x,
-                                  variables = NULL, longform = TRUE){
+extractDensityData <- function(x,
+                               variables = NULL, longform = TRUE){
   if(inherits(x, "tidyProfile")){
     x <- list(x)
   }
@@ -1782,7 +1782,7 @@ plot_density_default <-
   plot_df
 }
 
-.plot_density_fun <- function(plot_df, variables, bw = FALSE, conditional = FALSE, alpha = .2){
+plotDensityFun <- function(plot_df, variables, bw = FALSE, conditional = FALSE, alpha = .2){
   if (conditional) {
     if (bw) {
       plot_df <- plot_df[-which(plot_df$Class == "Total"),]
@@ -1799,7 +1799,7 @@ plot_density_default <-
         geom_density(position = "fill")
     }
   } else {
-    densities <- .get_dens_for_plot(plot_df)
+    densities <- getDensForPlot(plot_df)
     densities$alpha <- alpha
     densities$alpha[densities$Class == "Total"] <- 0
     densities$Class <- ordered(densities$Class, levels = c(levels(plot_df$Class)[-1][order(as.numeric(levels(plot_df$Class)[-1]))], levels(plot_df$Class)[1]))
@@ -1842,7 +1842,7 @@ plot_density_default <-
 }
 
 #' @importFrom stats density
-.get_dens_for_plot <- function(plot_df){
+getDensForPlot <- function(plot_df){
   vars <- unique(plot_df[["Variable"]])
   titles <- unique(plot_df[["Title"]])
   if(is.null(vars)) vars <- ""
@@ -1860,12 +1860,12 @@ plot_density_default <-
       do.call(rbind, densities)
     } else {
       do.call(rbind, lapply(vars, function(thisvar){
-        .get_dens_for_plot(plot_df[plot_df$Variable == thisvar, ])
+        getDensForPlot(plot_df[plot_df$Variable == thisvar, ])
       }))
     }
   } else {
     do.call(rbind, lapply(titles, function(thistit){
-      .get_dens_for_plot(plot_df[plot_df$Title == thistit, ])
+      getDensForPlot(plot_df[plot_df$Title == thistit, ])
     }))
   }
   

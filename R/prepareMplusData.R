@@ -59,21 +59,21 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' \dontrun{
 #'
 #' ## basic example
-#' MplusAutomation:::.cleanHashData(mtcars)
+#' MplusAutomation:::cleanHashData(mtcars)
 #'
 #' ## has changes when data changes
-#' MplusAutomation:::.cleanHashData(mtcars[-15,])
+#' MplusAutomation:::cleanHashData(mtcars[-15,])
 #'
 #' ## example on a list (e.g., for multiply imputed data)
 #'
-#' MplusAutomation:::.cleanHashData(
+#' MplusAutomation:::cleanHashData(
 #'  list(
 #'    data.frame(a = 1:4),
 #'    data.frame(a = c(2, 2, 3, 4))),
 #'   imputed = TRUE)
 #'
 #' }
-.cleanHashData <- function(df, keepCols=NULL, dropCols=NULL, imputed=FALSE) {
+cleanHashData <- function(df, keepCols=NULL, dropCols=NULL, imputed=FALSE) {
   if(!imputed) checkmate::assert_data_frame(df)
   #checkmate::assert_character(keepCols, null.ok = TRUE, all.missing = FALSE)
   #checkmate::assert_character(dropCols, null.ok = TRUE, all.missing = FALSE)
@@ -161,8 +161,8 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' @keywords internal
 #' @rdname MplusAutomationUtils
 #' @examples
-#' MplusAutomation:::.hashifyFile("testit.dat", "abc")
-.hashifyFile <- function(filename, hash, useexisting = FALSE) {
+#' MplusAutomation:::hashifyFile("testit.dat", "abc")
+hashifyFile <- function(filename, hash, useexisting = FALSE) {
   fileonly <- basename(filename)
   allfiles <- list.files(path = dirname(filename))
   existingfile <- grep(hash, allfiles, value=TRUE)[1]
@@ -209,23 +209,23 @@ prepareMplusData_Mat <- function(covMatrix, meansMatrix, nobs) {
 #' df7 <- as.list(mtcars)
 #'
 #'
-#' MplusAutomation:::.convertData(df1)
+#' MplusAutomation:::convertData(df1)
 #'
-#' MplusAutomation:::.convertData(df2)
+#' MplusAutomation:::convertData(df2)
 #'
-#' MplusAutomation:::.convertData(df3)
+#' MplusAutomation:::convertData(df3)
 #'
-#' MplusAutomation:::.convertData(df4)
+#' MplusAutomation:::convertData(df4)
 #'
-#' MplusAutomation:::.convertData(df5)
+#' MplusAutomation:::convertData(df5)
 #'
-#' MplusAutomation:::.convertData(df6)
+#' MplusAutomation:::convertData(df6)
 #'
-#' MplusAutomation:::.convertData(df7)
+#' MplusAutomation:::convertData(df7)
 #'
 #' rm(df1, df2, df3, df4, df5, df6, df7)
 #' }
-.convertData <- function(df, dummyCode=NULL) {
+convertData <- function(df, dummyCode=NULL) {
   checkmate::assert_subset(dummyCode, names(df), empty.ok = TRUE)
   
   if (isTRUE(is.matrix(df))) {
@@ -542,7 +542,7 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
     message("When hashfilename = FALSE, writeData cannot be 'ifmissing', setting to 'always'")
   }
   
-  cleand <- .cleanHashData(df = df, keepCols = keepCols,
+  cleand <- cleanHashData(df = df, keepCols = keepCols,
                            dropCols = dropCols, imputed = imputed)
   
   df <- cleand$data
@@ -565,7 +565,7 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
   
   if (isTRUE(imputed) && isTRUE(hashfilename)) {
     tmp <- lapply(1:length(md5), function(i) {
-      .hashifyFile(filename, md5[[i]],
+      hashifyFile(filename, md5[[i]],
                    useexisting = identical(writeData, "ifmissing"))
     })
     filename <- unlist(lapply(tmp, function(x) x$filename))
@@ -577,7 +577,7 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
       paste0(filename.base, "_imp_", i, ".dat")
     }))
   } else {
-    tmp <- .hashifyFile(filename, md5,
+    tmp <- hashifyFile(filename, md5,
                         useexisting = identical(writeData, "ifmissing"))
     allfilesexist <- tmp$fileexists
     if (isTRUE(hashfilename)) {
@@ -605,13 +605,13 @@ prepareMplusData <- function(df, filename=NULL, inpfile=FALSE, keepCols=NULL, dr
     if (isTRUE(imputed)) {
       df <- lapply(1:length(df), function(i) {
         if (i == 1) {
-          .convertData(df[[i]], dummyCode = dummyCode)
+          convertData(df[[i]], dummyCode = dummyCode)
         } else {
-          suppressMessages(.convertData(df[[i]], dummyCode = dummyCode))
+          suppressMessages(convertData(df[[i]], dummyCode = dummyCode))
         }
       })
     } else {
-      df <- .convertData(df, dummyCode = dummyCode)
+      df <- convertData(df, dummyCode = dummyCode)
     }
     
     if (any(vapply(filename, file.exists, FUN.VALUE = NA))) {

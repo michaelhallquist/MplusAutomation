@@ -83,6 +83,23 @@ test_that("Random starts output is parsed when the best loglikelihood is not rep
   )
 })
 
+test_that("Unperturbed random start seeds are mapped to NA without warnings", {
+  expect_no_warning({
+    m <- readModels(target = testthat::test_path("iris_2_class.out"))
+  })
+
+  expect_s3_class(m$random_starts, "mplus.random_starts")
+  expect_equal(
+    m$random_starts$final_stage,
+    data.frame(
+      log_likelihood = c(-567.606, -567.606, -567.606, -567.606),
+      seed = c(NA_integer_, 253358L, 68985L, 650371L),
+      initial_stage_start_number = c(0L, 2L, 17L, 14L),
+      stringsAsFactors = FALSE
+    )
+  )
+})
+
 test_that("Mplus User Guide 7.3 - LCA results can be read in (tech10 error)", {
   m <- readModels(target = testthat::test_path("ex7.3_error.out"))
   expect_equal(m$summaries$LL, -965.244)

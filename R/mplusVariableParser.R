@@ -1,6 +1,6 @@
 # Internal helpers for extracting observed variable names from Mplus syntax.
 
-.mplus_append_unique_ci <- function(base, add) {
+mplusAppendUniqueCi <- function(base, add) {
   if (length(add) == 0L) return(base)
   out <- base
   out_lc <- tolower(base)
@@ -15,32 +15,32 @@
   out
 }
 
-.mplus_match_ci <- function(x, reference) {
+mplusMatchCi <- function(x, reference) {
   if (length(x) == 0L || length(reference) == 0L) return(character(0))
   ref_lc <- tolower(reference)
   out <- character(0)
   for (token in x) {
     idx <- match(tolower(token), ref_lc)
-    if (!is.na(idx)) out <- .mplus_append_unique_ci(out, reference[idx])
+    if (!is.na(idx)) out <- mplusAppendUniqueCi(out, reference[idx])
   }
   out
 }
 
-.mplus_strip_comments <- function(x) {
+mplusStripComments <- function(x) {
   if (length(x) == 0L) return(x)
   gsub("\\s*!.*$", "", x, perl = TRUE)
 }
 
-.mplus_flatten_section <- function(x) {
+mplusFlattenSection <- function(x) {
   if (is.null(x)) return("")
   if (is.list(x)) x <- unlist(x, use.names = FALSE)
   x <- as.character(x)
   x <- gsub("\r", "", x, fixed = TRUE)
-  x <- .mplus_strip_comments(x)
+  x <- mplusStripComments(x)
   paste(x, collapse = " ")
 }
 
-.mplus_clean_var_token <- function(token) {
+mplusCleanVarToken <- function(token) {
   tok <- trimws(token)
   if (!nzchar(tok)) return("")
   tok <- gsub("^[\\[\\]\\(\\)\\{\\},;]+", "", tok, perl = TRUE)
@@ -56,7 +56,7 @@
   tok
 }
 
-.mplus_filter_identifier_keywords <- function(tokens) {
+mplusFilterIdentifierKeywords <- function(tokens) {
   if (length(tokens) == 0L) return(tokens)
   keywords <- c(
     "title", "data", "file", "variable", "define", "analysis", "model", "output",
@@ -82,8 +82,8 @@
   tokens[!tolower(tokens) %in% drop]
 }
 
-.mplus_parse_var_list <- function(text) {
-  x <- .mplus_flatten_section(text)
+mplusParseVarList <- function(text) {
+  x <- mplusFlattenSection(text)
   if (!nzchar(x)) return(character(0))
   x <- gsub("%[^%]*%", " ", x, perl = TRUE)
   x <- gsub("\"[^\"]*\"|'[^']*'", " ", x, perl = TRUE)
@@ -91,13 +91,13 @@
   x <- expandCmd(x, expand_numeric = FALSE)
   x <- gsub("[,|]", " ", x, perl = TRUE)
   tokens <- unlist(strsplit(x, "\\s+", perl = TRUE), use.names = FALSE)
-  tokens <- vapply(tokens, .mplus_clean_var_token, character(1), USE.NAMES = FALSE)
+  tokens <- vapply(tokens, mplusCleanVarToken, character(1), USE.NAMES = FALSE)
   tokens <- tokens[nzchar(tokens)]
-  .mplus_filter_identifier_keywords(tokens)
+  mplusFilterIdentifierKeywords(tokens)
 }
 
-.mplus_parse_missing_vars <- function(text) {
-  x <- .mplus_flatten_section(text)
+mplusParseMissingVars <- function(text) {
+  x <- mplusFlattenSection(text)
   if (!nzchar(x)) return(character(0))
   x <- gsub("(?i)\\ball\\s*\\([^\\)]*\\)", " ", x, perl = TRUE)
   x <- expandCmd(x, expand_numeric = FALSE)
@@ -108,16 +108,16 @@
     lens <- attr(hits, "capture.length")
     for (i in seq_along(hits)) {
       term <- substr(x, caps[i, 1L], caps[i, 1L] + lens[i, 1L] - 1L)
-      out <- .mplus_append_unique_ci(out, .mplus_parse_var_list(term))
+      out <- mplusAppendUniqueCi(out, mplusParseVarList(term))
     }
   } else {
-    out <- .mplus_parse_var_list(x)
+    out <- mplusParseVarList(x)
   }
   out
 }
 
-.mplus_parse_knownclass_vars <- function(text) {
-  x <- .mplus_flatten_section(text)
+mplusParseKnownclassVars <- function(text) {
+  x <- mplusFlattenSection(text)
   if (!nzchar(x)) return(character(0))
   out <- character(0)
   parens <- gregexpr("\\(([^\\)]*)\\)", x, perl = TRUE)[[1L]]
@@ -131,34 +131,34 @@
         ecaps <- attr(eqs, "capture.start")
         elens <- attr(eqs, "capture.length")
         for (j in seq_along(eqs)) {
-          out <- .mplus_append_unique_ci(
+          out <- mplusAppendUniqueCi(
             out,
             substr(inside, ecaps[j, 1L], ecaps[j, 1L] + elens[j, 1L] - 1L)
           )
         }
       } else {
-        out <- .mplus_append_unique_ci(out, .mplus_parse_var_list(inside))
+        out <- mplusAppendUniqueCi(out, mplusParseVarList(inside))
       }
     }
   }
-  .mplus_filter_identifier_keywords(out)
+  mplusFilterIdentifierKeywords(out)
 }
 
-.mplus_parse_grouping_var <- function(text) {
-  x <- .mplus_flatten_section(text)
+mplusParseGroupingVar <- function(text) {
+  x <- mplusFlattenSection(text)
   if (!nzchar(x)) return(character(0))
   m <- regexpr("^[[:space:]]*([A-Za-z_][A-Za-z0-9_\\.]*)", x, perl = TRUE)
   if (m[1L] < 0L) return(character(0))
   caps <- attr(m, "capture.start")
   lens <- attr(m, "capture.length")
   token <- substr(x, caps[1L], caps[1L] + lens[1L] - 1L)
-  token <- .mplus_clean_var_token(token)
+  token <- mplusCleanVarToken(token)
   if (!nzchar(token)) return(character(0))
-  .mplus_filter_identifier_keywords(token)
+  mplusFilterIdentifierKeywords(token)
 }
 
-.mplus_extract_identifiers <- function(text) {
-  x <- .mplus_flatten_section(text)
+mplusExtractIdentifiers <- function(text) {
+  x <- mplusFlattenSection(text)
   if (!nzchar(x)) return(character(0))
   x <- gsub("%[^%]*%", " ", x, perl = TRUE)
   x <- gsub("\"[^\"]*\"|'[^']*'", " ", x, perl = TRUE)
@@ -166,23 +166,43 @@
   hits <- gregexpr("[A-Za-z_][A-Za-z0-9_\\.#$]*", x, perl = TRUE)[[1L]]
   if (hits[1L] < 0L) return(character(0))
   tokens <- regmatches(x, list(hits))[[1L]]
-  tokens <- vapply(tokens, .mplus_clean_var_token, character(1), USE.NAMES = FALSE)
+  tokens <- vapply(tokens, mplusCleanVarToken, character(1), USE.NAMES = FALSE)
   tokens <- tokens[nzchar(tokens)]
-  .mplus_filter_identifier_keywords(tokens)
+  mplusFilterIdentifierKeywords(tokens)
 }
 
-.mplus_as_variable_fields <- function(variable) {
+mplusAsVariableFields <- function(variable) {
   if (is.null(variable)) return(NULL)
   if (is.list(variable)) return(variable)
   if (!is.character(variable)) return(NULL)
   lines <- unlist(strsplit(variable, "\n", fixed = TRUE), use.names = FALSE)
   if (length(lines) == 0L) return(NULL)
   lines <- gsub("\r", "", lines, fixed = TRUE)
-  lines <- .mplus_strip_comments(lines)
+  lines <- mplusStripComments(lines)
   lines[1L] <- sub("^[^:]+:(.*)$", "\\1", lines[1L], perl = TRUE)
   lines <- lines[nzchar(trimws(lines))]
   if (length(lines) == 0L) return(NULL)
   tryCatch(divideIntoFields(lines), error = function(e) NULL)
+}
+
+mplusHasNamesStatement <- function(variable) {
+  if (is.null(variable)) return(FALSE)
+
+  variable_fields <- mplusAsVariableFields(variable)
+  if (!is.null(variable_fields) && !is.null(variable_fields$names)) {
+    return(TRUE)
+  }
+
+  if (is.list(variable)) {
+    return("names" %in% tolower(names(variable)))
+  }
+
+  x <- as.character(variable)
+  x <- gsub("\r", "", x, fixed = TRUE)
+  x <- mplusStripComments(x)
+  x <- paste(x, collapse = "\n")
+
+  grepl("(^|[;\n])\\s*NAMES\\s*(ARE|=)", x, ignore.case = TRUE, perl = TRUE)
 }
 
 #' Extract observed variable names from Mplus syntax
@@ -216,17 +236,17 @@ extractMplusVariables <- function(parsed_syntax = NULL, variable = NULL, define 
   }
   if (is.null(model_sections)) model_sections <- list(model)
 
-  variable_fields <- .mplus_as_variable_fields(variable)
+  variable_fields <- mplusAsVariableFields(variable)
 
   declared <- character(0)
   if (!is.null(variable_fields$names)) {
-    declared <- .mplus_parse_var_list(variable_fields$names)
+    declared <- mplusParseVarList(variable_fields$names)
   }
 
   detected <- character(0)
 
   if (!is.null(variable_fields$usevariables)) {
-    detected <- .mplus_append_unique_ci(detected, .mplus_parse_var_list(variable_fields$usevariables))
+    detected <- mplusAppendUniqueCi(detected, mplusParseVarList(variable_fields$usevariables))
   }
 
   role_fields <- c(
@@ -238,45 +258,45 @@ extractMplusVariables <- function(parsed_syntax = NULL, variable = NULL, define 
   )
   for (field in role_fields) {
     if (!is.null(variable_fields[[field]])) {
-      detected <- .mplus_append_unique_ci(detected, .mplus_parse_var_list(variable_fields[[field]]))
+      detected <- mplusAppendUniqueCi(detected, mplusParseVarList(variable_fields[[field]]))
     }
   }
 
   if (!is.null(variable_fields$grouping)) {
-    detected <- .mplus_append_unique_ci(detected, .mplus_parse_grouping_var(variable_fields$grouping))
+    detected <- mplusAppendUniqueCi(detected, mplusParseGroupingVar(variable_fields$grouping))
   }
   if (!is.null(variable_fields$knownclass)) {
-    detected <- .mplus_append_unique_ci(detected, .mplus_parse_knownclass_vars(variable_fields$knownclass))
+    detected <- mplusAppendUniqueCi(detected, mplusParseKnownclassVars(variable_fields$knownclass))
   }
   if (!is.null(variable_fields$missing)) {
-    detected <- .mplus_append_unique_ci(detected, .mplus_parse_missing_vars(variable_fields$missing))
+    detected <- mplusAppendUniqueCi(detected, mplusParseMissingVars(variable_fields$missing))
   }
 
   expr_fields <- c("useobservations", "subpopulation")
   for (field in expr_fields) {
     if (!is.null(variable_fields[[field]])) {
-      detected <- .mplus_append_unique_ci(detected, .mplus_extract_identifiers(variable_fields[[field]]))
+      detected <- mplusAppendUniqueCi(detected, mplusExtractIdentifiers(variable_fields[[field]]))
     }
   }
 
   if (!is.null(define)) {
-    detected <- .mplus_append_unique_ci(detected, .mplus_extract_identifiers(define))
+    detected <- mplusAppendUniqueCi(detected, mplusExtractIdentifiers(define))
   }
   for (sec in model_sections) {
-    detected <- .mplus_append_unique_ci(detected, .mplus_extract_identifiers(sec))
+    detected <- mplusAppendUniqueCi(detected, mplusExtractIdentifiers(sec))
   }
 
   if (!is.null(data_names) && length(data_names) > 0L) {
     data_names <- as.character(data_names)
-    out <- .mplus_match_ci(detected, data_names)
+    out <- mplusMatchCi(detected, data_names)
     if (length(out) == 0L && length(declared) > 0L) {
-      out <- .mplus_match_ci(declared, data_names)
+      out <- mplusMatchCi(declared, data_names)
     }
     return(out)
   }
 
   if (length(declared) > 0L) {
-    out <- .mplus_match_ci(detected, declared)
+    out <- mplusMatchCi(detected, declared)
     if (length(out) == 0L) out <- declared
     return(out)
   }

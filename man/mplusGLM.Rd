@@ -18,7 +18,7 @@ work.}
 of the ID variable. Not currently used but may be used in future.}
 
 \item{...}{Additional arguments passed to helper functions.
-For example \code{.mplusMultinomial()}.}
+For example \code{mplusMultinomial()}.}
 }
 \value{
 A list of results and Mplus model object.

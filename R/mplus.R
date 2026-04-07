@@ -420,6 +420,16 @@ createSyntax <- function(object, filename, check=TRUE, add=FALSE, imputed=FALSE)
     object$DATA <- paste(dFile, object$DATA, collapse = "\n")
   }
 
+  if (isFALSE(is.null(object$rdata)) && mplusHasNamesStatement(object$VARIABLE)) {
+    stop(
+      paste(
+        "When using mplusModeler() with rdata, do not specify NAMES in the VARIABLE section.",
+        "mplusModeler() generates the NAMES statement automatically."
+      ),
+      call. = FALSE
+    )
+  }
+
   if (isFALSE(is.null(object$rdata)) && isFALSE(is.null(object$usevariables))) {
     if (isTRUE(object$imputed)) {
       vNames <- createVarSyntax(object$rdata[[1]][, object$usevariables, drop = FALSE])
@@ -783,11 +793,11 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
     }
 
     if (isTRUE(hashfilename) && isFALSE(object$imputed)) {
-      md5 <- .cleanHashData(
+      md5 <- cleanHashData(
         df = object$rdata,
         keepCols = object$usevariables,
         imputed = object$imputed)$md5
-      tmp <- .hashifyFile(dataout, md5,
+      tmp <- hashifyFile(dataout, md5,
                           useexisting = identical(writeData, "ifmissing"))
       dataout2 <- tmp$filename
     } else {
@@ -795,7 +805,7 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
     }
   }
 
-  .run <- function(data, i, boot = TRUE, imputed = FALSE, ...) {
+  runSingleModel <- function(data, i, boot = TRUE, imputed = FALSE, ...) {
     if (isFALSE(simulation)) {
       if (isTRUE(imputed)) {
         if (isTRUE(boot)) stop("Cannot use imputed data and bootstrap")
@@ -861,14 +871,14 @@ mplusModeler <- function(object, dataout, modelout, run = 0L,
 
   if (isFALSE(simulation)) {
     if (isTRUE(run > 1) && isFALSE(object$imputed)) {
-      bootres <- boot(object$rdata, .run, R = run, sim = "ordinary")
+      bootres <- boot(object$rdata, runSingleModel, R = run, sim = "ordinary")
       finalres$boot <- bootres
       class(finalres) <- c("boot.mplus.model", "list")
     }
   }
 
   if (isTRUE(run>0)) {
-    results <- .run(data = object$rdata, boot = FALSE, imputed = object$imputed, ...)
+    results <- runSingleModel(data = object$rdata, boot = FALSE, imputed = object$imputed, ...)
     finalres$model <- results
   } else if (isFALSE(simulation)) {
     prepareMplusData(df = object$rdata,

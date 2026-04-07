@@ -33,26 +33,26 @@
 #'               breaks = c(-Inf, -.5, 1, Inf),
 #'               labels = c("L", "M", "H"))
 #'
-#' tmpres <- MplusAutomation:::.mplusMultinomial(
+#' tmpres <- MplusAutomation:::mplusMultinomial(
 #'   dv = "y",
 #'   iv = c("x1", "x2"),
 #'   data = tmpd,
 #'   pairwise = TRUE)
-#' tmpres2 <- MplusAutomation:::.mplusMultinomial(
+#' tmpres2 <- MplusAutomation:::mplusMultinomial(
 #'   dv = "y",
 #'   iv = c("x1", "x2"),
 #'   data = tmpd,
 #'   pairwise = FALSE)
-#' tmpres3 <- MplusAutomation:::.mplusMultinomial(
+#' tmpres3 <- MplusAutomation:::mplusMultinomial(
 #'   dv = "y",
 #'   iv = c("x1@0", "x2@0"),
 #'   data = tmpd,
 #'   pairwise = FALSE)
 #'
 #' }
-.mplusMultinomial <- function(dv, iv, data, idvar = "",
-                              integration = 1000, processors = 2,
-                              OR = TRUE, pairwise = TRUE, ...) {
+mplusMultinomial <- function(dv, iv, data, idvar = "",
+                             integration = 1000, processors = 2,
+                             OR = TRUE, pairwise = TRUE, ...) {
   ivclean <- gsub("^(.+)(@.*)$", "\\1", iv)
 
   m <- mplusObject(
@@ -175,7 +175,7 @@
 #' @param idvar Optional. A character string indicating the name
 #'  of the ID variable. Not currently used but may be used in future.
 #' @param ... Additional arguments passed to helper functions.
-#'   For example \code{.mplusMultinomial()}.
+#'   For example \code{mplusMultinomial()}.
 #' @return A list of results and Mplus model object.
 #' @export
 #' @author Joshua F. Wiley <jwiley.psych@@gmail.com>
@@ -238,7 +238,7 @@ mplusGLM <- function(formula, data, idvar = "", ...) {
     }
   }
 
-  res1 <- .mplusMultinomial(
+  res1 <- mplusMultinomial(
     dv = dv,
     iv = unlist(ivexpanded),
     data = mf,
@@ -252,7 +252,7 @@ mplusGLM <- function(formula, data, idvar = "", ...) {
     tmpivexpanded <- ivexpanded
     tmpivexpanded[[i]] <- paste0(tmpivexpanded[[i]], "@0")
 
-  res0 <- .mplusMultinomial(
+  res0 <- mplusMultinomial(
     dv = dv,
     iv = unlist(tmpivexpanded),
     data = mf,
