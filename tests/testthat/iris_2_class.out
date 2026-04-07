@@ -1,0 +1,397 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/07/2026   2:08 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE:
+  2 classes
+  DATA:
+  FILE = "data_iris_1c191ab8015e5d6588352d42877bce1e.dat";
+  VARIABLE:
+  NAMES = Sepal_Length Sepal_Width Petal_Length Petal_Width Species;
+   MISSING=.;
+   CLASSES = c1(2);
+
+  ANALYSIS:
+  TYPE = mixture;
+
+  MODEL:
+  %OVERALL%
+
+
+
+  OUTPUT:
+  TECH11 TECH14;
+  SAVEDATA:
+  FILE IS iris_2.dat;
+  SAVE = cprobabilities;
+
+
+
+*** WARNING in VARIABLE command
+  Note that only the first 8 characters of variable names are used in the output.
+  Shorten variable names to avoid any confusion.
+*** WARNING in MODEL command
+  All variables are uncorrelated with all other variables within class.
+  Check that this is what is intended.
+   2 WARNING(S) FOUND IN THE INPUT INSTRUCTIONS
+
+
+
+
+2 classes
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         150
+
+Number of dependent variables                                    5
+Number of independent variables                                  0
+Number of continuous latent variables                            0
+Number of categorical latent variables                           1
+
+Observed dependent variables
+
+  Continuous
+   SEPAL_LENG  SEPAL_WIDT  PETAL_LENG  PETAL_WIDT  SPECIES
+
+Categorical latent variables
+   C1
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-06
+    Relative loglikelihood change                        0.100D-06
+    Derivative                                           0.100D-05
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-05
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+Random Starts Specifications
+  Number of initial stage random starts                         20
+  Number of final stage optimizations                            4
+  Number of initial stage iterations                            10
+  Initial stage convergence criterion                    0.100D+01
+  Random starts scale                                    0.500D+01
+  Random seed for generating random starts                       0
+
+Input data file(s)
+  data_iris_1c191ab8015e5d6588352d42877bce1e.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns             1
+     Number of y missing data patterns           1
+     Number of u missing data patterns           0
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              SEPAL_LE      SEPAL_WI      PETAL_LE      PETAL_WI      SPECIES
+              ________      ________      ________      ________      ________
+ SEPAL_LE       1.000
+ SEPAL_WI       1.000         1.000
+ PETAL_LE       1.000         1.000         1.000
+ PETAL_WI       1.000         1.000         1.000         1.000
+ SPECIES        1.000         1.000         1.000         1.000         1.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     SEPAL_LENGTH          5.843       0.312       4.300    0.67%       5.000      5.600      5.800
+             150.000       0.681      -0.574       7.900    0.67%       6.100      6.500
+     SEPAL_WIDTH           3.057       0.316       2.000    0.67%       2.700      3.000      3.000
+             150.000       0.189       0.181       4.400    0.67%       3.100      3.400
+     PETAL_LENGTH          3.758      -0.272       1.000    0.67%       1.500      3.900      4.350
+             150.000       3.096      -1.396       6.900    0.67%       4.600      5.300
+     PETAL_WIDTH           1.199      -0.102       0.100    3.33%       0.200      1.100      1.300
+             150.000       0.577      -1.336       2.500    2.00%       1.500      1.900
+     SPECIES               2.000       0.000       1.000   33.33%       1.000      2.000      2.000
+             150.000       0.667      -1.500       3.000   33.33%       2.000      3.000
+
+RANDOM STARTS RESULTS RANKED FROM THE BEST TO THE WORST LOGLIKELIHOOD VALUES
+
+Final stage loglikelihood values at local maxima, seeds, and initial stage start numbers:
+
+            -567.606  unperturbed      0
+            -567.606  253358           2
+            -567.606  68985            17
+            -567.606  650371           14
+
+
+
+THE BEST LOGLIKELIHOOD VALUE HAS BEEN REPLICATED.  RERUN WITH AT LEAST TWICE THE
+RANDOM STARTS TO CHECK THAT THE BEST LOGLIKELIHOOD IS STILL OBTAINED AND REPLICATED.
+
+     THE STANDARD ERRORS OF THE MODEL PARAMETER ESTIMATES MAY NOT BE
+     TRUSTWORTHY FOR SOME PARAMETERS DUE TO A NON-POSITIVE DEFINITE
+     FIRST-ORDER DERIVATIVE PRODUCT MATRIX.  THIS MAY BE DUE TO THE STARTING
+     VALUES BUT MAY ALSO BE AN INDICATION OF MODEL NONIDENTIFICATION.  THE
+     CONDITION NUMBER IS      -0.125D-16.  PROBLEM INVOLVING THE FOLLOWING PARAMETER:
+     Parameter 16, [ C1#1 ]
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       16
+
+Loglikelihood
+
+          H0 Value                        -567.606
+          H0 Scaling Correction Factor      0.9013
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    1167.213
+          Bayesian (BIC)                  1215.383
+          Sample-Size Adjusted BIC        1164.746
+            (n* = (n + 2) / 24)
+
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON THE ESTIMATED MODEL
+
+    Latent
+   Classes
+
+       1         50.02643          0.33351
+       2         99.97357          0.66649
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON ESTIMATED POSTERIOR PROBABILITIES
+
+    Latent
+   Classes
+
+       1         50.02643          0.33351
+       2         99.97357          0.66649
+
+
+FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES
+BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP
+
+Class Counts and Proportions
+
+    Latent
+   Classes
+
+       1               50          0.33333
+       2              100          0.66667
+
+
+CLASSIFICATION QUALITY
+
+     Entropy                         0.999
+
+
+Average Latent Class Probabilities for Most Likely Latent Class Membership (Row)
+by Latent Class (Column)
+
+           1        2
+
+    1   1.000    0.000
+    2   0.000    1.000
+
+
+Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+           1        2
+
+    1   0.999    0.001
+    2   0.000    1.000
+
+
+Logits for the Classification Probabilities for the Most Likely Latent Class Membership (Column)
+by Latent Class (Row)
+
+              1        2
+
+    1      7.545    0.000
+    2    -13.816    0.000
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Latent Class 1
+
+ Means
+    SEPAL_LENG         5.006      0.049    101.501      0.000
+    SEPAL_WIDT         3.427      0.053     64.366      0.000
+    PETAL_LENG         1.463      0.024     60.103      0.000
+    PETAL_WIDT         0.246      0.015     16.675      0.000
+    SPECIES            1.001      0.001   1733.863      0.000
+
+ Variances
+    SEPAL_LENG         0.330      0.042      7.873      0.000
+    SEPAL_WIDT         0.120      0.016      7.556      0.000
+    PETAL_LENG         0.460      0.063      7.338      0.000
+    PETAL_WIDT         0.123      0.013      9.137      0.000
+    SPECIES            0.167      0.010     17.348      0.000
+
+Latent Class 2
+
+ Means
+    SEPAL_LENG         6.262      0.066     94.678      0.000
+    SEPAL_WIDT         2.872      0.033     86.586      0.000
+    PETAL_LENG         4.906      0.082     59.505      0.000
+    PETAL_WIDT         1.676      0.042     39.544      0.000
+    SPECIES            2.500      0.050     49.907      0.000
+
+ Variances
+    SEPAL_LENG         0.330      0.042      7.873      0.000
+    SEPAL_WIDT         0.120      0.016      7.556      0.000
+    PETAL_LENG         0.460      0.063      7.338      0.000
+    PETAL_WIDT         0.123      0.013      9.137      0.000
+    SPECIES            0.167      0.010     17.348      0.000
+
+Categorical Latent Variables
+
+ Means
+    C1#1              -0.692      0.173     -3.997      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix             -0.125E-16
+       (ratio of smallest to largest eigenvalue)
+
+
+TECHNICAL 11 OUTPUT
+
+     Random Starts Specifications for the k-1 Class Analysis Model
+        Number of initial stage random starts                  20
+        Number of final stage optimizations                     4
+
+
+
+     VUONG-LO-MENDELL-RUBIN LIKELIHOOD RATIO TEST FOR 1 (H0) VERSUS 2 CLASSES
+
+          H0 Loglikelihood Value                         -923.448
+          2 Times the Loglikelihood Difference            711.684
+          Difference in the Number of Parameters                6
+          Mean                                             20.567
+          Standard Deviation                               36.471
+          P-Value                                          0.0000
+
+     LO-MENDELL-RUBIN ADJUSTED LRT TEST
+
+          Value                                           688.774
+          P-Value                                          0.0000
+
+
+TECHNICAL 14 OUTPUT
+
+     Random Starts Specifications for the k-1 Class Analysis Model
+        Number of initial stage random starts                  20
+        Number of final stage optimizations                     4
+
+     Random Starts Specification for the k-1 Class Model for Generated Data
+        Number of initial stage random starts                   0
+        Number of final stage optimizations for the
+           initial stage random starts                          0
+     Random Starts Specification for the k Class Model for Generated Data
+        Number of initial stage random starts                  40
+        Number of final stage optimizations                     8
+     Number of bootstrap draws requested                   Varies
+
+
+     PARAMETRIC BOOTSTRAPPED LIKELIHOOD RATIO TEST FOR 1 (H0) VERSUS 2 CLASSES
+
+          H0 Loglikelihood Value                         -923.448
+          2 Times the Loglikelihood Difference            711.684
+          Difference in the Number of Parameters                6
+          Approximate P-Value                              0.0000
+          Successful Bootstrap Draws                            5
+
+
+SAVEDATA INFORMATION
+
+
+  Save file
+    iris_2.dat
+
+  Order and format of variables
+
+    SEPAL_LE       F10.3
+    SEPAL_WI       F10.3
+    PETAL_LE       F10.3
+    PETAL_WI       F10.3
+    SPECIES        F10.3
+    CPROB1         F10.3
+    CPROB2         F10.3
+    C1             F10.3
+
+  Save file format
+    8F10.3
+
+  Save file record length    10000
+
+  Save missing symbol        *
+
+
+     Beginning Time:  14:08:06
+        Ending Time:  14:08:07
+       Elapsed Time:  00:00:01
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen
