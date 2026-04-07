@@ -1706,7 +1706,7 @@ extractTech4 <- function(outfiletext, filename) {
   tech4List <- list()
   
   tech4Subsections <- getMultilineSection("ESTIMATES DERIVED FROM THE MODEL( FOR [\\w\\d\\s\\.,_]+)*",
-    tech4Section, filename, allowMultiple=TRUE)
+    tech4Section, filename, allowMultiple=TRUE, ignore.case=TRUE)
 
   if (section_is_missing(tech4Subsections)) {
     warning("No sections found within TECH4 output.")
@@ -1714,15 +1714,15 @@ extractTech4 <- function(outfiletext, filename) {
   }
   else if (length(tech4Subsections) > 1) {
     matchlines <- section_matchlines(tech4Subsections)
-    groupNames <- make.names(gsub("^\\s*ESTIMATES DERIVED FROM THE MODEL( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", tech4Section[matchlines], perl=TRUE))
+    groupNames <- make.names(gsub("^\\s*ESTIMATES DERIVED FROM THE MODEL( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", tech4Section[matchlines], perl=TRUE, ignore.case=TRUE))
   }
   
   for (g in 1:length(tech4Subsections)) {
     targetList <- list()
     
-    targetList[["latMeansEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED MEANS FOR THE LATENT VARIABLES", filename)
-    targetList[["latCovEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES", filename)
-    targetList[["latCorEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES", filename)
+    targetList[["latMeansEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED MEANS FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latCovEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latCorEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
     
     if (length(tech4Subsections) > 1) {
       class(targetList) <- c("mplus.tech4", "list")

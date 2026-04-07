@@ -1,0 +1,861 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/07/2026  11:27 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of modeling with data
+  		not missing at random (NMAR) using the
+  		Diggle-Kenward selection model
+  DATA:		FILE = ex11.3.dat;
+  VARIABLE:	NAMES = z1-z5 y0 y1-y5;
+  		USEVARIABLES = y0-y5 d1-d5;
+  		MISSING = ALL (999);
+  		CATEGORICAL = d1-d5;
+  DATA MISSING:	
+  		NAMES = y0-y5;
+  		TYPE = SDROPOUT;
+  		BINARY = d1-d5;
+  ANALYSIS:	ESTIMATOR = ML;
+  		ALGORITHM = INTEGRATION;
+  		INTEGRATION = MONTECARLO;
+  		PROCESSORS = 2;
+  MODEL:	i s | y0@0 y1@1 y2@2 y3@3 y4@4 y5@5;
+  		d1 ON y0 (1)
+  		y1 (2);
+  		d2 ON y1 (1)
+  		y2 (2);
+  		d3 ON y2 (1)
+  		y3 (2);
+  		d4 ON y3 (1)
+  		y4 (2);
+  		d5 ON y4 (1)
+  		y5 (2);
+  OUTPUT:	TECH1 SVALUES;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of modeling with data
+not missing at random (NMAR) using the
+Diggle-Kenward selection model
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        1000
+
+Number of dependent variables                                   11
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   Y0          Y1          Y2          Y3          Y4          Y5
+
+  Binary and ordered categorical (ordinal)
+   D1          D2          D3          D4          D5
+
+Continuous latent variables
+   I           S
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Maximum number of iterations for H1                           2000
+Convergence criterion for H1                             0.100D-03
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                  MONTECARLO
+  Number of integration points                                1250
+  Dimensions of numerical integration                            5
+  Adaptive quadrature                                           ON
+  Monte Carlo integration seed                                   0
+Link                                                         LOGIT
+Cholesky                                                       OFF
+
+Input data file(s)
+  ex11.3.dat
+Input data format  FREE
+
+
+SUMMARY OF DATA
+
+     Number of missing data patterns            32
+     Number of y missing data patterns          32
+     Number of u missing data patterns           5
+
+
+COVARIANCE COVERAGE OF DATA
+
+Minimum covariance coverage value   0.100
+
+
+     PROPORTION OF DATA PRESENT
+
+
+           Covariance Coverage
+              D1            D2            D3            D4            D5
+              ________      ________      ________      ________      ________
+ D1             1.000
+ D2             0.967         0.967
+ D3             0.932         0.932         0.932
+ D4             0.878         0.878         0.878         0.878
+ D5             0.838         0.838         0.838         0.838         0.838
+ Y0             1.000         0.967         0.932         0.878         0.838
+ Y1             0.736         0.736         0.701         0.671         0.645
+ Y2             0.693         0.693         0.693         0.639         0.621
+ Y3             0.615         0.615         0.615         0.615         0.575
+ Y4             0.724         0.724         0.724         0.724         0.724
+ Y5             0.687         0.687         0.687         0.687         0.687
+
+
+           Covariance Coverage
+              Y0            Y1            Y2            Y3            Y4
+              ________      ________      ________      ________      ________
+ Y0             1.000
+ Y1             0.736         0.736
+ Y2             0.693         0.535         0.693
+ Y3             0.615         0.491         0.469         0.615
+ Y4             0.724         0.562         0.555         0.516         0.724
+ Y5             0.687         0.541         0.530         0.501         0.573
+
+
+           Covariance Coverage
+              Y5
+              ________
+ Y5             0.687
+
+
+     PROPORTION OF DATA PRESENT FOR U
+
+
+           Covariance Coverage
+              D1            D2            D3            D4            D5
+              ________      ________      ________      ________      ________
+ D1             1.000
+ D2             0.967         0.967
+ D3             0.932         0.932         0.932
+ D4             0.878         0.878         0.878         0.878
+ D5             0.838         0.838         0.838         0.838         0.838
+
+
+     PROPORTION OF DATA PRESENT FOR Y
+
+
+           Covariance Coverage
+              Y0            Y1            Y2            Y3            Y4
+              ________      ________      ________      ________      ________
+ Y0             1.000
+ Y1             0.736         0.736
+ Y2             0.693         0.535         0.693
+ Y3             0.615         0.491         0.469         0.615
+ Y4             0.724         0.562         0.555         0.516         0.724
+ Y5             0.687         0.541         0.530         0.501         0.573
+
+
+           Covariance Coverage
+              Y5
+              ________
+ Y5             0.687
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    D1
+      Category 1    0.967          967.000
+      Category 2    0.033           33.000
+    D2
+      Category 1    0.964          932.000
+      Category 2    0.036           35.000
+    D3
+      Category 1    0.942          878.000
+      Category 2    0.058           54.000
+    D4
+      Category 1    0.954          838.000
+      Category 2    0.046           40.000
+    D5
+      Category 1    0.820          687.000
+      Category 2    0.180          151.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y0                    2.038       0.067      -0.371    0.10%       1.306      1.816      2.017
+            1000.000       0.692      -0.158       4.779    0.10%       2.256      2.736
+     Y1                    0.900      -0.067      -1.759    0.14%       0.238      0.717      0.914
+             736.000       0.648       0.094       3.132    0.14%       1.083      1.553
+     Y2                   -0.224      -0.076      -3.059    0.14%      -1.061     -0.443     -0.234
+             693.000       0.969       0.081       2.838    0.14%       0.006      0.617
+     Y3                   -1.437      -0.149      -4.833    0.16%      -2.293     -1.670     -1.428
+             615.000       1.168      -0.008       1.487    0.16%      -1.133     -0.508
+     Y4                   -2.476      -0.154      -6.979    0.14%      -3.566     -2.734     -2.424
+             724.000       1.969       0.430       3.148    0.14%      -2.142     -1.315
+     Y5                   -3.685      -0.222      -9.753    0.15%      -4.903     -4.009     -3.650
+             687.000       2.383       0.737       0.907    0.15%      -3.285     -2.465
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       18
+
+Loglikelihood
+
+          H0 Value                       -6526.797
+
+Information Criteria
+
+          Akaike (AIC)                   13089.595
+          Bayesian (BIC)                 13177.934
+          Sample-Size Adjusted BIC       13120.765
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ I        |
+    Y0                 1.000      0.000    999.000    999.000
+    Y1                 1.000      0.000    999.000    999.000
+    Y2                 1.000      0.000    999.000    999.000
+    Y3                 1.000      0.000    999.000    999.000
+    Y4                 1.000      0.000    999.000    999.000
+    Y5                 1.000      0.000    999.000    999.000
+
+ S        |
+    Y0                 0.000      0.000    999.000    999.000
+    Y1                 1.000      0.000    999.000    999.000
+    Y2                 2.000      0.000    999.000    999.000
+    Y3                 3.000      0.000    999.000    999.000
+    Y4                 4.000      0.000    999.000    999.000
+    Y5                 5.000      0.000    999.000    999.000
+
+ D1         ON
+    Y0                 0.359      0.160      2.239      0.025
+    Y1                 0.586      0.179      3.265      0.001
+
+ D2         ON
+    Y1                 0.359      0.160      2.239      0.025
+    Y2                 0.586      0.179      3.265      0.001
+
+ D3         ON
+    Y2                 0.359      0.160      2.239      0.025
+    Y3                 0.586      0.179      3.265      0.001
+
+ D4         ON
+    Y3                 0.359      0.160      2.239      0.025
+    Y4                 0.586      0.179      3.265      0.001
+
+ D5         ON
+    Y4                 0.359      0.160      2.239      0.025
+    Y5                 0.586      0.179      3.265      0.001
+
+ S        WITH
+    I                  0.000      0.009      0.030      0.976
+
+ Means
+    I                  1.998      0.023     88.323      0.000
+    S                 -1.045      0.013    -77.985      0.000
+
+ Intercepts
+    Y0                 0.000      0.000    999.000    999.000
+    Y1                 0.000      0.000    999.000    999.000
+    Y2                 0.000      0.000    999.000    999.000
+    Y3                 0.000      0.000    999.000    999.000
+    Y4                 0.000      0.000    999.000    999.000
+    Y5                 0.000      0.000    999.000    999.000
+
+ Thresholds
+    D1$1               4.848      0.260     18.621      0.000
+    D2$1               3.803      0.221     17.196      0.000
+    D3$1               2.410      0.192     12.555      0.000
+    D4$1               1.790      0.214      8.345      0.000
+    D5$1              -0.842      0.240     -3.503      0.000
+
+ Variances
+    I                  0.235      0.025      9.575      0.000
+    S                  0.090      0.006     14.249      0.000
+
+ Residual Variances
+    Y0                 0.462      0.030     15.322      0.000
+    Y1                 0.353      0.023     15.107      0.000
+    Y2                 0.333      0.022     14.849      0.000
+    Y3                 0.255      0.021     12.017      0.000
+    Y4                 0.454      0.035     12.840      0.000
+    Y5                 0.435      0.046      9.412      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.218E-03
+       (ratio of smallest to largest eigenvalue)
+
+
+LOGISTIC REGRESSION ODDS RATIO RESULTS
+
+                                                95% C.I.
+                    Estimate       S.E.  Lower 2.5% Upper 2.5%
+
+ D1         ON
+    Y0                 1.432      0.230      1.046      1.962
+    Y1                 1.796      0.322      1.264      2.553
+
+ D2         ON
+    Y1                 1.432      0.230      1.046      1.962
+    Y2                 1.796      0.322      1.264      2.553
+
+ D3         ON
+    Y2                 1.432      0.230      1.046      1.962
+    Y3                 1.796      0.322      1.264      2.553
+
+ D4         ON
+    Y3                 1.432      0.230      1.046      1.962
+    Y4                 1.796      0.322      1.264      2.553
+
+ D5         ON
+    Y4                 1.432      0.230      1.046      1.962
+    Y5                 1.796      0.322      1.264      2.553
+
+
+MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES
+
+     i s | y0@0 y1@1 y2@2 y3@3 y4@4 y5@5;
+
+     d1 ON y0*0.35937 (3);
+     d1 ON y1*0.58573 (4);
+     d2 ON y1*0.35937 (3);
+     d2 ON y2*0.58573 (4);
+     d3 ON y2*0.35937 (3);
+     d3 ON y3*0.58573 (4);
+     d4 ON y3*0.35937 (3);
+     d4 ON y4*0.58573 (4);
+     d5 ON y4*0.35937 (3);
+     d5 ON y5*0.58573 (4);
+
+     s WITH i*0.00027;
+
+     [ y0@0 ];
+     [ y1@0 ];
+     [ y2@0 ];
+     [ y3@0 ];
+     [ y4@0 ];
+     [ y5@0 ];
+     [ i*1.99770 ];
+     [ s*-1.04485 ];
+
+     [ d1$1*4.84805 ];
+     [ d2$1*3.80331 ];
+     [ d3$1*2.41042 ];
+     [ d4$1*1.78969 ];
+     [ d5$1*-0.84212 ];
+
+     y0*0.46206;
+     y1*0.35295;
+     y2*0.33342;
+     y3*0.25489;
+     y4*0.45388;
+     y5*0.43484;
+     i*0.23527;
+     s*0.08981;
+
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           TAU
+              D1$1          D2$1          D3$1          D4$1          D5$1
+              ________      ________      ________      ________      ________
+                   14            15            16            17            18
+
+
+           NU
+              D1            D2            D3            D4            D5
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              Y0            Y1            Y2            Y3            Y4
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              Y5
+              ________
+                    0
+
+
+           LAMBDA
+              I             S             D1            D2            D3
+              ________      ________      ________      ________      ________
+ D1                 0             0             0             0             0
+ D2                 0             0             0             0             0
+ D3                 0             0             0             0             0
+ D4                 0             0             0             0             0
+ D5                 0             0             0             0             0
+ Y0                 0             0             0             0             0
+ Y1                 0             0             0             0             0
+ Y2                 0             0             0             0             0
+ Y3                 0             0             0             0             0
+ Y4                 0             0             0             0             0
+ Y5                 0             0             0             0             0
+
+
+           LAMBDA
+              D4            D5            Y0            Y1            Y2
+              ________      ________      ________      ________      ________
+ D1                 0             0             0             0             0
+ D2                 0             0             0             0             0
+ D3                 0             0             0             0             0
+ D4                 0             0             0             0             0
+ D5                 0             0             0             0             0
+ Y0                 0             0             0             0             0
+ Y1                 0             0             0             0             0
+ Y2                 0             0             0             0             0
+ Y3                 0             0             0             0             0
+ Y4                 0             0             0             0             0
+ Y5                 0             0             0             0             0
+
+
+           LAMBDA
+              Y3            Y4            Y5
+              ________      ________      ________
+ D1                 0             0             0
+ D2                 0             0             0
+ D3                 0             0             0
+ D4                 0             0             0
+ D5                 0             0             0
+ Y0                 0             0             0
+ Y1                 0             0             0
+ Y2                 0             0             0
+ Y3                 0             0             0
+ Y4                 0             0             0
+ Y5                 0             0             0
+
+
+           THETA
+              D1            D2            D3            D4            D5
+              ________      ________      ________      ________      ________
+ D1                 0
+ D2                 0             0
+ D3                 0             0             0
+ D4                 0             0             0             0
+ D5                 0             0             0             0             0
+ Y0                 0             0             0             0             0
+ Y1                 0             0             0             0             0
+ Y2                 0             0             0             0             0
+ Y3                 0             0             0             0             0
+ Y4                 0             0             0             0             0
+ Y5                 0             0             0             0             0
+
+
+           THETA
+              Y0            Y1            Y2            Y3            Y4
+              ________      ________      ________      ________      ________
+ Y0                 0
+ Y1                 0             0
+ Y2                 0             0             0
+ Y3                 0             0             0             0
+ Y4                 0             0             0             0             0
+ Y5                 0             0             0             0             0
+
+
+           THETA
+              Y5
+              ________
+ Y5                 0
+
+
+           ALPHA
+              I             S             D1            D2            D3
+              ________      ________      ________      ________      ________
+                    1             2             0             0             0
+
+
+           ALPHA
+              D4            D5            Y0            Y1            Y2
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           ALPHA
+              Y3            Y4            Y5
+              ________      ________      ________
+                    0             0             0
+
+
+           BETA
+              I             S             D1            D2            D3
+              ________      ________      ________      ________      ________
+ I                  0             0             0             0             0
+ S                  0             0             0             0             0
+ D1                 0             0             0             0             0
+ D2                 0             0             0             0             0
+ D3                 0             0             0             0             0
+ D4                 0             0             0             0             0
+ D5                 0             0             0             0             0
+ Y0                 0             0             0             0             0
+ Y1                 0             0             0             0             0
+ Y2                 0             0             0             0             0
+ Y3                 0             0             0             0             0
+ Y4                 0             0             0             0             0
+ Y5                 0             0             0             0             0
+
+
+           BETA
+              D4            D5            Y0            Y1            Y2
+              ________      ________      ________      ________      ________
+ I                  0             0             0             0             0
+ S                  0             0             0             0             0
+ D1                 0             0             3             4             0
+ D2                 0             0             0             3             4
+ D3                 0             0             0             0             3
+ D4                 0             0             0             0             0
+ D5                 0             0             0             0             0
+ Y0                 0             0             0             0             0
+ Y1                 0             0             0             0             0
+ Y2                 0             0             0             0             0
+ Y3                 0             0             0             0             0
+ Y4                 0             0             0             0             0
+ Y5                 0             0             0             0             0
+
+
+           BETA
+              Y3            Y4            Y5
+              ________      ________      ________
+ I                  0             0             0
+ S                  0             0             0
+ D1                 0             0             0
+ D2                 0             0             0
+ D3                 4             0             0
+ D4                 3             4             0
+ D5                 0             3             4
+ Y0                 0             0             0
+ Y1                 0             0             0
+ Y2                 0             0             0
+ Y3                 0             0             0
+ Y4                 0             0             0
+ Y5                 0             0             0
+
+
+           PSI
+              I             S             D1            D2            D3
+              ________      ________      ________      ________      ________
+ I                  5
+ S                  6             7
+ D1                 0             0             0
+ D2                 0             0             0             0
+ D3                 0             0             0             0             0
+ D4                 0             0             0             0             0
+ D5                 0             0             0             0             0
+ Y0                 0             0             0             0             0
+ Y1                 0             0             0             0             0
+ Y2                 0             0             0             0             0
+ Y3                 0             0             0             0             0
+ Y4                 0             0             0             0             0
+ Y5                 0             0             0             0             0
+
+
+           PSI
+              D4            D5            Y0            Y1            Y2
+              ________      ________      ________      ________      ________
+ D4                 0
+ D5                 0             0
+ Y0                 0             0             8
+ Y1                 0             0             0             9
+ Y2                 0             0             0             0            10
+ Y3                 0             0             0             0             0
+ Y4                 0             0             0             0             0
+ Y5                 0             0             0             0             0
+
+
+           PSI
+              Y3            Y4            Y5
+              ________      ________      ________
+ Y3                11
+ Y4                 0            12
+ Y5                 0             0            13
+
+
+     STARTING VALUES
+
+
+           TAU
+              D1$1          D2$1          D3$1          D4$1          D5$1
+              ________      ________      ________      ________      ________
+                3.378         3.282         2.789         3.042         1.515
+
+
+           NU
+              D1            D2            D3            D4            D5
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           NU
+              Y0            Y1            Y2            Y3            Y4
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           NU
+              Y5
+              ________
+                0.000
+
+
+           LAMBDA
+              I             S             D1            D2            D3
+              ________      ________      ________      ________      ________
+ D1             0.000         0.000         1.000         0.000         0.000
+ D2             0.000         0.000         0.000         1.000         0.000
+ D3             0.000         0.000         0.000         0.000         1.000
+ D4             0.000         0.000         0.000         0.000         0.000
+ D5             0.000         0.000         0.000         0.000         0.000
+ Y0             0.000         0.000         0.000         0.000         0.000
+ Y1             0.000         0.000         0.000         0.000         0.000
+ Y2             0.000         0.000         0.000         0.000         0.000
+ Y3             0.000         0.000         0.000         0.000         0.000
+ Y4             0.000         0.000         0.000         0.000         0.000
+ Y5             0.000         0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              D4            D5            Y0            Y1            Y2
+              ________      ________      ________      ________      ________
+ D1             0.000         0.000         0.000         0.000         0.000
+ D2             0.000         0.000         0.000         0.000         0.000
+ D3             0.000         0.000         0.000         0.000         0.000
+ D4             1.000         0.000         0.000         0.000         0.000
+ D5             0.000         1.000         0.000         0.000         0.000
+ Y0             0.000         0.000         1.000         0.000         0.000
+ Y1             0.000         0.000         0.000         1.000         0.000
+ Y2             0.000         0.000         0.000         0.000         1.000
+ Y3             0.000         0.000         0.000         0.000         0.000
+ Y4             0.000         0.000         0.000         0.000         0.000
+ Y5             0.000         0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              Y3            Y4            Y5
+              ________      ________      ________
+ D1             0.000         0.000         0.000
+ D2             0.000         0.000         0.000
+ D3             0.000         0.000         0.000
+ D4             0.000         0.000         0.000
+ D5             0.000         0.000         0.000
+ Y0             0.000         0.000         0.000
+ Y1             0.000         0.000         0.000
+ Y2             0.000         0.000         0.000
+ Y3             1.000         0.000         0.000
+ Y4             0.000         1.000         0.000
+ Y5             0.000         0.000         1.000
+
+
+           THETA
+              D1            D2            D3            D4            D5
+              ________      ________      ________      ________      ________
+ D1             0.000
+ D2             0.000         0.000
+ D3             0.000         0.000         0.000
+ D4             0.000         0.000         0.000         0.000
+ D5             0.000         0.000         0.000         0.000         0.000
+ Y0             0.000         0.000         0.000         0.000         0.000
+ Y1             0.000         0.000         0.000         0.000         0.000
+ Y2             0.000         0.000         0.000         0.000         0.000
+ Y3             0.000         0.000         0.000         0.000         0.000
+ Y4             0.000         0.000         0.000         0.000         0.000
+ Y5             0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              Y0            Y1            Y2            Y3            Y4
+              ________      ________      ________      ________      ________
+ Y0             0.000
+ Y1             0.000         0.000
+ Y2             0.000         0.000         0.000
+ Y3             0.000         0.000         0.000         0.000
+ Y4             0.000         0.000         0.000         0.000         0.000
+ Y5             0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              Y5
+              ________
+ Y5             0.000
+
+
+           ALPHA
+              I             S             D1            D2            D3
+              ________      ________      ________      ________      ________
+                2.084        -0.942         0.000         0.000         0.000
+
+
+           ALPHA
+              D4            D5            Y0            Y1            Y2
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           ALPHA
+              Y3            Y4            Y5
+              ________      ________      ________
+                0.000         0.000         0.000
+
+
+           BETA
+              I             S             D1            D2            D3
+              ________      ________      ________      ________      ________
+ I              0.000         0.000         0.000         0.000         0.000
+ S              0.000         0.000         0.000         0.000         0.000
+ D1             0.000         0.000         0.000         0.000         0.000
+ D2             0.000         0.000         0.000         0.000         0.000
+ D3             0.000         0.000         0.000         0.000         0.000
+ D4             0.000         0.000         0.000         0.000         0.000
+ D5             0.000         0.000         0.000         0.000         0.000
+ Y0             1.000         0.000         0.000         0.000         0.000
+ Y1             1.000         1.000         0.000         0.000         0.000
+ Y2             1.000         2.000         0.000         0.000         0.000
+ Y3             1.000         3.000         0.000         0.000         0.000
+ Y4             1.000         4.000         0.000         0.000         0.000
+ Y5             1.000         5.000         0.000         0.000         0.000
+
+
+           BETA
+              D4            D5            Y0            Y1            Y2
+              ________      ________      ________      ________      ________
+ I              0.000         0.000         0.000         0.000         0.000
+ S              0.000         0.000         0.000         0.000         0.000
+ D1             0.000         0.000         0.000         0.000         0.000
+ D2             0.000         0.000         0.000         0.000         0.000
+ D3             0.000         0.000         0.000         0.000         0.000
+ D4             0.000         0.000         0.000         0.000         0.000
+ D5             0.000         0.000         0.000         0.000         0.000
+ Y0             0.000         0.000         0.000         0.000         0.000
+ Y1             0.000         0.000         0.000         0.000         0.000
+ Y2             0.000         0.000         0.000         0.000         0.000
+ Y3             0.000         0.000         0.000         0.000         0.000
+ Y4             0.000         0.000         0.000         0.000         0.000
+ Y5             0.000         0.000         0.000         0.000         0.000
+
+
+           BETA
+              Y3            Y4            Y5
+              ________      ________      ________
+ I              0.000         0.000         0.000
+ S              0.000         0.000         0.000
+ D1             0.000         0.000         0.000
+ D2             0.000         0.000         0.000
+ D3             0.000         0.000         0.000
+ D4             0.000         0.000         0.000
+ D5             0.000         0.000         0.000
+ Y0             0.000         0.000         0.000
+ Y1             0.000         0.000         0.000
+ Y2             0.000         0.000         0.000
+ Y3             0.000         0.000         0.000
+ Y4             0.000         0.000         0.000
+ Y5             0.000         0.000         0.000
+
+
+           PSI
+              I             S             D1            D2            D3
+              ________      ________      ________      ________      ________
+ I              0.530
+ S              0.000         0.232
+ D1             0.000         0.000         1.000
+ D2             0.000         0.000         0.000         1.000
+ D3             0.000         0.000         0.000         0.000         1.000
+ D4             0.000         0.000         0.000         0.000         0.000
+ D5             0.000         0.000         0.000         0.000         0.000
+ Y0             0.000         0.000         0.000         0.000         0.000
+ Y1             0.000         0.000         0.000         0.000         0.000
+ Y2             0.000         0.000         0.000         0.000         0.000
+ Y3             0.000         0.000         0.000         0.000         0.000
+ Y4             0.000         0.000         0.000         0.000         0.000
+ Y5             0.000         0.000         0.000         0.000         0.000
+
+
+           PSI
+              D4            D5            Y0            Y1            Y2
+              ________      ________      ________      ________      ________
+ D4             1.000
+ D5             0.000         1.000
+ Y0             0.000         0.000         0.346
+ Y1             0.000         0.000         0.000         0.324
+ Y2             0.000         0.000         0.000         0.000         0.484
+ Y3             0.000         0.000         0.000         0.000         0.000
+ Y4             0.000         0.000         0.000         0.000         0.000
+ Y5             0.000         0.000         0.000         0.000         0.000
+
+
+           PSI
+              Y3            Y4            Y5
+              ________      ________      ________
+ Y3             0.584
+ Y4             0.000         0.985
+ Y5             0.000         0.000         1.191
+
+
+     Beginning Time:  11:27:31
+        Ending Time:  11:27:47
+       Elapsed Time:  00:00:16
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

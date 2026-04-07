@@ -28,8 +28,8 @@ products
 *.dgm
 !inst/extdata/*.out
 !inst/extdata/*.csv
-!tests/testthast/*.csv
-!tests/testthast/*.out
+!tests/testthat/*.csv
+!tests/testthat/*.out
 !tests/testthat/*.out
 !tests/testthat/*.csv
 !tests/testthat/mplus_ug
