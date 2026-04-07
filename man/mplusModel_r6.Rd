@@ -43,9 +43,13 @@ Wrapped by \code{mplusModel}
 
 \item{\code{summaries}}{Read-only accessor for the \code{summaries} section returned by \code{readModels()}.}
 
+\item{\code{random_starts}}{Read-only accessor for the \code{random_starts} section returned by \code{readModels()}.}
+
 \item{\code{invariance_testing}}{Read-only accessor for the \code{invariance_testing} section returned by \code{readModels()}.}
 
 \item{\code{parameters}}{Read-only accessor for the \code{parameters} section returned by \code{readModels()}.}
+
+\item{\code{svalues}}{Read-only accessor for the \code{svalues} section returned by \code{readModels()}.}
 
 \item{\code{class_counts}}{Read-only accessor for the \code{class_counts} section returned by \code{readModels()}.}
 

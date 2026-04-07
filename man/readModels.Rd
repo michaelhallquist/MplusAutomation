@@ -52,7 +52,9 @@ a single mplus.model object, not a list of files. Specific elements are:
 \item \code{sampstat}: Sample statistics provided by OUTPUT: SAMPSTAT, if specified
 \item \code{covariance_coverage}: Covariance coverage matrix for checking missingness patterns
 \item \code{summaries}: Summary statistics from \code{extractModelSummaries}, having structure as specified by that function
+\item \code{random_starts}: Parsed random starts results, including final-stage loglikelihoods and random start specifications
 \item \code{parameters}: Model parameters from \code{extractModelParameters}, having structure as specified by that function
+\item \code{svalues}: Raw text from the SVALUES section, if present
 \item \code{class_counts}: Latent class counts and proportions for models that include a categorical latent variable
 \item \code{indirect}: Output of MODEL INDIRECT if available in output. Contains \code{$overall} and \code{$specific} data.frames for each indirect effect section
 \item \code{mod_indices}: Model modification indices from \code{extractModIndices}, having structure as specified by that function
@@ -87,7 +89,7 @@ reduced set of output sections (especially to speed up the function when reading
 as a character vector from the following options:
 
 c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-"parameters", "class_counts", "indirect", "mod_indices", "residuals",
+"random_starts", "parameters", "svalues", "class_counts", "indirect", "mod_indices", "residuals",
 "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
 "output")

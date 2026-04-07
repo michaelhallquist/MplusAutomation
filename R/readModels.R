@@ -31,7 +31,7 @@
 #' as a character vector from the following options:
 #'
 #' c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-#'      "parameters", "class_counts", "indirect", "mod_indices", "residuals",
+#'      "random_starts", "parameters", "svalues", "class_counts", "indirect", "mod_indices", "residuals",
 #'      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 #'      "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
 #'      "output")
@@ -48,7 +48,9 @@
 #' * `sampstat`: Sample statistics provided by OUTPUT: SAMPSTAT, if specified
 #' * `covariance_coverage`: Covariance coverage matrix for checking missingness patterns
 #' * `summaries`: Summary statistics from \code{extractModelSummaries}, having structure as specified by that function
+#' * `random_starts`: Parsed random starts results, including final-stage loglikelihoods and random start specifications
 #' * `parameters`: Model parameters from \code{extractModelParameters}, having structure as specified by that function
+#' * `svalues`: Raw text from the SVALUES section, if present
 #' * `class_counts`: Latent class counts and proportions for models that include a categorical latent variable
 #' * `indirect`: Output of MODEL INDIRECT if available in output. Contains \code{$overall} and \code{$specific} data.frames for each indirect effect section
 #' * `mod_indices`: Model modification indices from \code{extractModIndices}, having structure as specified by that function
@@ -84,7 +86,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
   ## enforce quiet being logical and length 1 as used in if else statements
   stopifnot(identical(length(quiet), 1L) && is.logical(quiet))
   allsections <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-      "invariance_testing", "parameters", "class_counts", "indirect", "mod_indices", "residuals",
+      "random_starts", "invariance_testing", "parameters", "svalues", "class_counts", "indirect", "mod_indices", "residuals",
       "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
       "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "r3step", 
       "gh5", "h5results", "output")
@@ -192,6 +194,13 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
       }
     }
 
+    if (isTRUE("random_starts" %in% what)) {
+      allFiles[[listID]]$random_starts <- tryCatch(extractRandomStarts(outfiletext, curfile), error=function(e) {
+        message("Error extracting random starts output in output file: ", curfile); print(e)
+        return(list())
+      })
+    }
+
     if (isTRUE("invariance_testing" %in% what)) {
       #Invariance Testing output (v8)
       allFiles[[listID]]$invariance_testing <- tryCatch(extractInvarianceTesting(outfiletext, curfile), error=function(e) {
@@ -212,6 +221,22 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
             message("Error extracting MODEL RESULTS in output file: ", curfile); print(e)
             return(list())
           })
+    }
+    
+    if (isTRUE(any(c("parameters", "svalues") %in% what))) {
+      svalues <- tryCatch(extractSvalues(outfiletext, curfile, input = inp), error=function(e) {
+        message("Error extracting SVALUES in output file: ", curfile); print(e)
+        return(list(text = NULL, parameters = NULL))
+      })
+      
+      if (isTRUE("svalues" %in% what) && !is.null(svalues$text)) {
+        allFiles[[listID]]$svalues <- svalues$text
+      }
+      
+      if (isTRUE(any(c("parameters", "svalues") %in% what)) && !is.null(svalues$parameters)) {
+        if (is.null(allFiles[[listID]]$parameters)) allFiles[[listID]]$parameters <- list()
+        allFiles[[listID]]$parameters$svalues <- svalues$parameters
+      }
     }
 
     if (isTRUE("class_counts" %in% what)) {

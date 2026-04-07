@@ -1,8 +1,8 @@
 # sections returned by readModels (used for dynamic active bindings)
 .mplus_sections <- c(
   "input", "warnings", "errors", "data_summary", "sampstat",
-  "covariance_coverage", "summaries", "invariance_testing",
-  "parameters", "class_counts", "indirect", "mod_indices",
+  "covariance_coverage", "summaries", "random_starts", "invariance_testing",
+  "parameters", "svalues", "class_counts", "indirect", "mod_indices",
   "residuals", "savedata", "savedata_info", "bparameters",
   "tech1", "tech3", "tech4", "tech7", "tech8", "tech9",
   "tech10", "tech12", "tech15", "fac_score_stats",
@@ -400,8 +400,10 @@ mplusModel_r6 <- R6::R6Class(
     #' @field sampstat Read-only accessor for the `sampstat` section returned by `readModels()`.
     #' @field covariance_coverage Read-only accessor for the `covariance_coverage` section returned by `readModels()`.
     #' @field summaries Read-only accessor for the `summaries` section returned by `readModels()`.
+    #' @field random_starts Read-only accessor for the `random_starts` section returned by `readModels()`.
     #' @field invariance_testing Read-only accessor for the `invariance_testing` section returned by `readModels()`.
     #' @field parameters Read-only accessor for the `parameters` section returned by `readModels()`.
+    #' @field svalues Read-only accessor for the `svalues` section returned by `readModels()`.
     #' @field class_counts Read-only accessor for the `class_counts` section returned by `readModels()`.
     #' @field indirect Read-only accessor for the `indirect` section returned by `readModels()`.
     #' @field mod_indices Read-only accessor for the `mod_indices` section returned by `readModels()`.

@@ -3,6 +3,8 @@ Version 1.3
  - feature:     mplusModel now supports update() semantics like mplusObject and base R objects
  - bugfix:      support extraction of TECH11 and other sections when they are interrupted by warnings or errors
  - bugfix:      handle non-UTF8 inputs using sanitize_mplus_text function. Closes #215
+ - feature:     readModels parses final estimates as starting values section (produced by OUTPUT: SVALUES) into $svalues and $parameters$svalues. Closes #214
+ - feature:     readModels extracts information about random starts, including final stage log-likelihoods into $random_starts. Closes #214
  
 Version 1.2
  - notice:      MplusAutomation examples vignette updated to refer to readModels, not outmoded extract* functions

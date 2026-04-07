@@ -1,6 +1,22 @@
 test_that("Mplus User Guide 7.3 - LCA results can be read in", {
   m <- readModels(target = testthat::test_path("ex7.3.out"))
   expect_equal(m$summaries$LL, -965.244)
+  expect_s3_class(m$random_starts, "mplus.random_starts")
+  expect_equal(m$random_starts$initial_stage_random_starts, 20L)
+  expect_equal(m$random_starts$final_stage_optimizations, 4L)
+  expect_equal(m$random_starts$initial_stage_iterations, 10L)
+  expect_equal(m$random_starts$initial_stage_convergence_criterion, 1)
+  expect_equal(m$random_starts$random_starts_scale, 5)
+  expect_equal(m$random_starts$random_seed, 0L)
+  expect_equal(
+    m$random_starts$final_stage,
+    data.frame(
+      log_likelihood = c(-965.244, -965.244, -965.244, -965.244),
+      seed = c(253358L, 93468L, 939021L, 76974L),
+      initial_stage_start_number = c(2L, 3L, 8L, 16L),
+      stringsAsFactors = FALSE
+    )
+  )
   
   expect_equal(nrow(m$tech10$bivar_model_fit_info), 24)
   expect_equal(m$tech10$bivar_model_fit_info[1,], data.frame(
@@ -46,6 +62,25 @@ test_that("Mplus User Guide 7.3 - LCA results can be read in", {
     stand_resid = 0.974,
     LatentClass = 1
   ))
+})
+
+test_that("Random starts output is parsed when the best loglikelihood is not replicated", {
+  m <- readModels(target = testthat::test_path("iris_3_class.out"))
+
+  expect_s3_class(m$random_starts, "mplus.random_starts")
+  expect_equal(m$random_starts$initial_stage_random_starts, 20L)
+  expect_equal(m$random_starts$final_stage_optimizations, 4L)
+  expect_equal(m$random_starts$initial_stage_convergence_criterion, 1)
+  expect_equal(m$random_starts$random_starts_scale, 5)
+  expect_equal(
+    m$random_starts$final_stage,
+    data.frame(
+      log_likelihood = -565.244,
+      seed = 573096L,
+      initial_stage_start_number = 20L,
+      stringsAsFactors = FALSE
+    )
+  )
 })
 
 test_that("Mplus User Guide 7.3 - LCA results can be read in (tech10 error)", {
