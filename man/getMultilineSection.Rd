@@ -10,7 +10,9 @@ getMultilineSection(
   filename,
   allowMultiple = FALSE,
   allowSpace = TRUE,
-  ignore.case = FALSE
+  ignore.case = FALSE,
+  continue_on_alert = FALSE,
+  alert_pattern = "^\\\\s*(WARNING|ERROR|FATAL ERROR)\\\\b"
 )
 }
 \arguments{

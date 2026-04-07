@@ -110,8 +110,9 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     #if not recursive, then each element is uniquely identified (we hope!) by filename alone
     if (isFALSE(recursive))	listID <- make.names(splitFilePath(curfile)$filename) #each list element is named by the respective file
     else listID <- make.names(curfile) #each list element is named by the respective file
+    allFiles[[listID]] <- list()
 
-    rawtext <- readLines(curfile)
+    rawtext <- sanitize_mplus_text(readLines(curfile), filename=curfile)
     outfiletext <- parse_into_sections(rawtext) #identify and cache top-level header section
 
     ### COMPULSORY SECTIONS NEEDED FOR DOWNSTREAM FUNCTIONS: input, summaries, savedata_info

@@ -9,7 +9,8 @@ extractSummaries_1plan(
   sectionHeaders,
   sectionFields,
   textToParse,
-  filename
+  filename,
+  allowSectionAlerts = FALSE
 )
 }
 \arguments{

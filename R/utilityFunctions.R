@@ -384,6 +384,49 @@ getSection <- function(sectionHeader, outfiletext, headers="standard") {
   return(section.found)
 }
 
+#' Normalize output text to UTF-8 where possible
+#'
+#' Mplus output occasionally contains non-UTF-8 bytes in echoed input blocks,
+#' especially when the source syntax was saved with a legacy single-byte
+#' encoding. Recover common encodings line-by-line so downstream regex and
+#' tokenization logic do not fail on invalid strings.
+#'
+#' @param text Character vector of file contents
+#' @param filename Optional filename used in warnings
+#' @return A UTF-8-safe character vector
+#' @keywords internal
+sanitize_mplus_text <- function(text, filename=NA_character_) {
+  if (length(text) == 0L) return(text)
+  
+  out <- iconv(text, from = "", to = "UTF-8", sub = NA)
+  bad <- is.na(out) & !is.na(text)
+  if (!any(bad)) return(out)
+  
+  # Try common legacy encodings seen in Mplus projects before falling back to
+  # a byte-preserving representation that keeps parsing stable.
+  cp1252 <- iconv(text[bad], from = "CP1252", to = "UTF-8", sub = NA)
+  latin1 <- iconv(text[bad], from = "latin1", to = "UTF-8", sub = NA)
+  
+  recovered <- cp1252
+  need_latin1 <- is.na(recovered)
+  recovered[need_latin1] <- latin1[need_latin1]
+  
+  need_bytes <- is.na(recovered)
+  if (any(need_bytes)) {
+    recovered[need_bytes] <- iconv(text[bad][need_bytes], from = "", to = "UTF-8", sub = "byte")
+  }
+  
+  out[bad] <- recovered
+  
+  warning(
+    "Recovered ", sum(bad), " line(s) with invalid text encoding",
+    if (!is.na(filename)) paste0(" in ", filename) else "",
+    "."
+  )
+  
+  out
+}
+
 #master function to parse text into sections
 parse_into_sections <- function(outfiletext) {
   headers <- c("INPUT INSTRUCTIONS", "SUMMARY OF ANALYSIS", "SUMMARY OF DATA",

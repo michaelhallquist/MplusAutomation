@@ -469,11 +469,14 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
 divideIntoFields <- function(section.text, required) {
   
   if (is.null(section.text)) { return(NULL) }
+  section.text <- sanitize_mplus_text(section.text)
   section.split <- strsplit(paste(section.text, collapse=" "), ";", fixed=TRUE)[[1]]
   
   section.divide <- list()
   
   for (cmd in section.split) {
+    cmdName <- NULL
+    cmdArgs <- NULL
     if (grepl("^\\s*!.*", cmd, perl=TRUE)) next #skip comment lines
     if (grepl("^\\s+$", cmd, perl=TRUE)) next #skip blank lines
     
@@ -482,7 +485,8 @@ divideIntoFields <- function(section.text, required) {
     #thus, split on spaces and assume that first element is lhs, drop second element if IS/ARE/=, and assume remainder is rhs
     
     #but if user uses equals sign, then spaces will not always be present (e.g., usevariables=x1-x10)
-    if ( (leadingEquals <- regexpr("^\\s*[A-Za-z]+[A-Za-z_\\-\\d]*\\s*(=)", cmd[1L], perl=TRUE))[1L] > 0) {
+    leadingEquals <- regexpr("^\\s*[A-Za-z]+[A-Za-z_\\-\\d]*\\s*(=)", cmd[1L], perl=TRUE)
+    if (isTRUE(!is.na(leadingEquals[1L]) && leadingEquals[1L] > 0L)) {
       cmdName <- trimSpace(substr(cmd[1L], 1, attr(leadingEquals, "capture.start") - 1))
       cmdArgs <- trimSpace(substr(cmd[1L], attr(leadingEquals, "capture.start") + 1, nchar(cmd[1L])))
     } else {
@@ -501,6 +505,8 @@ divideIntoFields <- function(section.text, required) {
       
     }
     
+    if (is.null(cmdName) || !nzchar(cmdName)) next
+    if (is.null(cmdArgs)) cmdArgs <- ""
     section.divide[[make.names(tolower(cmdName))]] <- cmdArgs
   }
   
@@ -2381,14 +2387,33 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE, 
         dimnames=list(rowHeaders, colHeaders))
       
       if (isTRUE(expect_sig)) { attr(mat, "sig") <- array(NA, dim=dim(mat)) }
+      truncated_rows <- integer(0L)
       
       for (r in 1:length(splitData)) {
         #use mplus_as.numeric to handle D+XX scientific notation in output and sig values
         line <- mplus_as.numeric(splitData[[r]][-1], expect_sig=expect_sig)
         if (length(line) == 0L) { next } #occasionally have blank rows, skip assignment into mat
+        if (length(line) > ncol(mat)) {
+          truncated_rows <- c(truncated_rows, r)
+          if (isTRUE(expect_sig)) {
+            sig <- attr(line, "sig")
+            line <- line[seq_len(ncol(mat))]
+            attr(line, "sig") <- sig[seq_len(ncol(mat))]
+          } else {
+            line <- line[seq_len(ncol(mat))]
+          }
+        }
         
         mat[r,1:length(line)] <- line
         if (isTRUE(expect_sig)) { attr(mat, "sig")[r,1:length(line)] <- attr(line, "sig") }
+      }
+      
+      if (length(truncated_rows) > 0L) {
+        warning(
+          "Matrix rows exceeded detected column headers for section ",
+          sQuote(headerLine), " in ", filename,
+          "; truncated rows: ", paste(truncated_rows, collapse=", ")
+        )
       }
       
       blockList[[m]] <- mat

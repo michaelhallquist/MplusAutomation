@@ -2,7 +2,8 @@ Version 1.3
  - feature:     TECH10 section is now parsed into $tech10 by readModels
  - feature:     mplusModel now supports update() semantics like mplusObject and base R objects
  - bugfix:      support extraction of TECH11 and other sections when they are interrupted by warnings or errors
-
+ - bugfix:      handle non-UTF8 inputs using sanitize_mplus_text function. Closes #215
+ 
 Version 1.2
  - notice:      MplusAutomation examples vignette updated to refer to readModels, not outmoded extract* functions
  - feature:     New pathfilter argument to readModels allows for selection of outputs to read based both on path name (pathfilter) and file name (filefilter)
