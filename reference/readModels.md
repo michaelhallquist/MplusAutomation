@@ -80,8 +80,13 @@ a single mplus.model object, not a list of files. Specific elements are:
 - `summaries`: Summary statistics from `extractModelSummaries`, having
   structure as specified by that function
 
+- `random_starts`: Parsed random starts results, including final-stage
+  loglikelihoods and random start specifications
+
 - `parameters`: Model parameters from `extractModelParameters`, having
   structure as specified by that function
+
+- `svalues`: Raw text from the SVALUES section, if present
 
 - `class_counts`: Latent class counts and proportions for models that
   include a categorical latent variable
@@ -155,10 +160,11 @@ output. If you would like to extract a reduced set of output sections
 the sections as a character vector from the following options:
 
 c("input", "warn_err", "data_summary", "sampstat",
-"covariance_coverage", "summaries", "parameters", "class_counts",
-"indirect", "mod_indices", "residuals", "savedata", "bparameters",
-"tech1", "tech3", "tech4", "tech7", "tech8", "tech9", "tech10",
-"tech12", "fac_score_stats", "lcCondMeans", "gh5", "output")
+"covariance_coverage", "summaries", "random_starts", "parameters",
+"svalues", "class_counts", "indirect", "mod_indices", "residuals",
+"savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
+"tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
+"output")
 
 ## Author
 

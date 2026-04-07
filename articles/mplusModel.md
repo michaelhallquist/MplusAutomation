@@ -41,11 +41,11 @@ m <- mplusModel(
 )
 
 m$model_dir
-#> [1] "/tmp/RtmpuxvvTJ/mplusModel_vignette_277040972088"
+#> [1] "/tmp/RtmpVe9Plv/mplusModel_vignette_275d5a05ddc7"
 m$inp_file
-#> [1] "/tmp/RtmpuxvvTJ/mplusModel_vignette_277040972088/mtcars_demo.inp"
+#> [1] "/tmp/RtmpVe9Plv/mplusModel_vignette_275d5a05ddc7/mtcars_demo.inp"
 m$dat_file
-#> [1] "/tmp/RtmpuxvvTJ/mplusModel_vignette_277040972088/mtcars_demo.dat"
+#> [1] "/tmp/RtmpVe9Plv/mplusModel_vignette_275d5a05ddc7/mtcars_demo.dat"
 m$variables
 #> [1] "mpg" "wt"  "hp"
 ```
@@ -60,9 +60,9 @@ input syntax.
 
 ``` r
 m$write_dat()
-#> Writing data to file: /tmp/RtmpuxvvTJ/mplusModel_vignette_277040972088/mtcars_demo.dat
+#> Writing data to file: /tmp/RtmpVe9Plv/mplusModel_vignette_275d5a05ddc7/mtcars_demo.dat
 m$write_inp()
-#> Writing Mplus syntax to file: /tmp/RtmpuxvvTJ/mplusModel_vignette_277040972088/mtcars_demo.inp
+#> Writing Mplus syntax to file: /tmp/RtmpVe9Plv/mplusModel_vignette_275d5a05ddc7/mtcars_demo.inp
 
 file.exists(m$dat_file)
 #> [1] TRUE

@@ -113,7 +113,9 @@ a single mplus.model object, not a list of files. Specific elements are:</p><ul>
 <li><p><code>sampstat</code>: Sample statistics provided by OUTPUT: SAMPSTAT, if specified</p></li>
 <li><p><code>covariance_coverage</code>: Covariance coverage matrix for checking missingness patterns</p></li>
 <li><p><code>summaries</code>: Summary statistics from <code>extractModelSummaries</code>, having structure as specified by that function</p></li>
+<li><p><code>random_starts</code>: Parsed random starts results, including final-stage loglikelihoods and random start specifications</p></li>
 <li><p><code>parameters</code>: Model parameters from <code>extractModelParameters</code>, having structure as specified by that function</p></li>
+<li><p><code>svalues</code>: Raw text from the SVALUES section, if present</p></li>
 <li><p><code>class_counts</code>: Latent class counts and proportions for models that include a categorical latent variable</p></li>
 <li><p><code>indirect</code>: Output of MODEL INDIRECT if available in output. Contains <code>$overall</code> and <code>$specific</code> data.frames for each indirect effect section</p></li>
 <li><p><code>mod_indices</code>: Model modification indices from <code>extractModIndices</code>, having structure as specified by that function</p></li>
@@ -142,7 +144,7 @@ a single mplus.model object, not a list of files. Specific elements are:</p><ul>
 reduced set of output sections (especially to speed up the function when reading many files), specify the sections
 as a character vector from the following options:</p>
 <p>c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-"parameters", "class_counts", "indirect", "mod_indices", "residuals",
+"random_starts", "parameters", "svalues", "class_counts", "indirect", "mod_indices", "residuals",
 "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
 "output")</p>

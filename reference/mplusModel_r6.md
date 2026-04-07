@@ -76,6 +76,11 @@ Wrapped by `mplusModel`
   Read-only accessor for the `summaries` section returned by
   [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md).
 
+- `random_starts`:
+
+  Read-only accessor for the `random_starts` section returned by
+  [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md).
+
 - `invariance_testing`:
 
   Read-only accessor for the `invariance_testing` section returned by
@@ -84,6 +89,11 @@ Wrapped by `mplusModel`
 - `parameters`:
 
   Read-only accessor for the `parameters` section returned by
+  [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md).
+
+- `svalues`:
+
+  Read-only accessor for the `svalues` section returned by
   [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md).
 
 - `class_counts`:
