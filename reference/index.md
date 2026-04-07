@@ -44,9 +44,6 @@
 - [`detectMplus()`](https://michaelhallquist.github.io/MplusAutomation/reference/detectMplus.md)
   : Detect the location/name of the Mplus command
 
-- [`.mplusMultinomial()`](https://michaelhallquist.github.io/MplusAutomation/reference/dot-mplusMultinomial.md)
-  : Internal Function for Multinomial Regression in Mplus
-
 - [`extract.mplus.model()`](https://michaelhallquist.github.io/MplusAutomation/reference/extract.md)
   [`extract.mplusObject()`](https://michaelhallquist.github.io/MplusAutomation/reference/extract.md)
   [`extract(`*`<mplus.model>`*`)`](https://michaelhallquist.github.io/MplusAutomation/reference/extract.md)
@@ -110,6 +107,9 @@
 
 - [`mplusModeler()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusModeler.md)
   : Create, run, and read Mplus models.
+
+- [`mplusMultinomial()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusMultinomial.md)
+  : Internal Function for Multinomial Regression in Mplus
 
 - [`mplusObject()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusObject.md)
   : Create an Mplus model object

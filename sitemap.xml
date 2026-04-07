@@ -21,6 +21,7 @@
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/compareModels.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/confint.mplus.model.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/connectNodes.html</loc></url>
+<url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/convertData.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/convert_to_filelist.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/createMixtures.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/createModels.html</loc></url>
@@ -31,8 +32,6 @@
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/detectVariables.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/dhms_to_hours.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/divideIntoFields.html</loc></url>
-<url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/dot-convertData.html</loc></url>
-<url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/dot-mplusMultinomial.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/evaluateConditional.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/expandCmd.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/extract.html</loc></url>
@@ -109,6 +108,7 @@
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/mplusModel.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/mplusModel_r6.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/mplusModeler.html</loc></url>
+<url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/mplusMultinomial.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/mplusObject.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/mplusRcov.html</loc></url>
 <url><loc>https://michaelhallquist.github.io/MplusAutomation/reference/mplus_as.numeric.html</loc></url>

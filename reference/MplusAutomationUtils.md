@@ -7,9 +7,9 @@ Internal utility function, primarily for `prepareMplusData`.
 ## Usage
 
 ``` r
-.cleanHashData(df, keepCols = NULL, dropCols = NULL, imputed = FALSE)
+cleanHashData(df, keepCols = NULL, dropCols = NULL, imputed = FALSE)
 
-.hashifyFile(filename, hash, useexisting = FALSE)
+hashifyFile(filename, hash, useexisting = FALSE)
 ```
 
 ## Arguments
@@ -64,21 +64,21 @@ filename with the hash already existed or not.
 if (FALSE) { # \dontrun{
 
 ## basic example
-MplusAutomation:::.cleanHashData(mtcars)
+MplusAutomation:::cleanHashData(mtcars)
 
 ## has changes when data changes
-MplusAutomation:::.cleanHashData(mtcars[-15,])
+MplusAutomation:::cleanHashData(mtcars[-15,])
 
 ## example on a list (e.g., for multiply imputed data)
 
-MplusAutomation:::.cleanHashData(
+MplusAutomation:::cleanHashData(
  list(
    data.frame(a = 1:4),
    data.frame(a = c(2, 2, 3, 4))),
   imputed = TRUE)
 
 } # }
-MplusAutomation:::.hashifyFile("testit.dat", "abc")
+MplusAutomation:::hashifyFile("testit.dat", "abc")
 #> $filename
 #> [1] "testit_abc.dat"
 #> 

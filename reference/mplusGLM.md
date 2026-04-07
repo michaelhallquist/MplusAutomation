@@ -35,7 +35,7 @@ mplusGLM(formula, data, idvar = "", ...)
 - ...:
 
   Additional arguments passed to helper functions. For example
-  [`.mplusMultinomial()`](https://michaelhallquist.github.io/MplusAutomation/reference/dot-mplusMultinomial.md).
+  [`mplusMultinomial()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusMultinomial.md).
 
 ## Value
 
