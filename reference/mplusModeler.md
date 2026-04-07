@@ -27,7 +27,9 @@ mplusModeler(
 
 - object:
 
-  An object of class mplusObject
+  An object of class mplusObject. For non-MONTECARLO models, this must
+  include `rdata` because `mplusModeler()` writes the Mplus data file
+  from an R data frame.
 
 - dataout:
 
@@ -129,6 +131,12 @@ This can be tedius in Mplus, but using R you can create one basic set of
 input, store it in a vector, and then just modify that (e.g., using
 regular expressions) and pass it to Mplus. You can even use loops or the
 `*apply` constructs to fit the same sort of model with little variants.
+
+`mplusModeler()` is intended for workflows where the analysis data live
+in R and are written out for Mplus automatically. If you already have
+Mplus syntax that points to an existing data file, use
+[`runModels`](https://michaelhallquist.github.io/MplusAutomation/reference/runModels.md)
+instead of `mplusModeler()`.
 
 The `writeData` argument is new and can be used to reduce overhead from
 repeatedly writing the same data from R to the disk. When using the

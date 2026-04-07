@@ -71,7 +71,9 @@ on functions from the MplusAutomation package.</p>
 
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
-<dd><p>An object of class mplusObject</p></dd>
+<dd><p>An object of class mplusObject. For non-MONTECARLO models,
+this must include <code>rdata</code> because <code>mplusModeler()</code> writes the
+Mplus data file from an <span style="R">R</span> data frame.</p></dd>
 
 
 <dt id="arg-dataout">dataout<a class="anchor" aria-label="anchor" href="#arg-dataout"></a></dt>
@@ -167,6 +169,10 @@ create one basic set of input, store it in a vector, and then just
 modify that (e.g., using regular expressions) and pass it to Mplus.
 You can even use loops or the <code>*apply</code> constructs to fit the same
 sort of model with little variants.</p>
+<p><code>mplusModeler()</code> is intended for workflows where the analysis data live
+in <span style="R">R</span> and are written out for Mplus automatically. If you already have Mplus
+syntax that points to an existing data file, use <code><a href="runModels.html">runModels</a></code>
+instead of <code>mplusModeler()</code>.</p>
 <p>The <code>writeData</code> argument is new and can be used to reduce overhead
 from repeatedly writing the same data from R to the disk.  When using the
 ‘always’ option, <code>mplusModeler</code> behaves as before, always writing
