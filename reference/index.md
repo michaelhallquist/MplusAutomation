@@ -54,6 +54,7 @@
 
 - [`get_results()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
   [`get_input()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
+  [`get_model_table()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
   [`get_warn_err()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
   [`get_data_summary()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)
   [`get_sampstat()`](https://michaelhallquist.github.io/MplusAutomation/reference/get_results.md)

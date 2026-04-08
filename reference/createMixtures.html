@@ -59,6 +59,7 @@ passed on using <code>...</code>. For instance, passing the argument
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">createMixtures</span><span class="op">(</span></span>
 <span>  classes <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  filename_stem <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outputDirectory <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  model_overall <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  model_class_specific <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rdata <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -83,6 +84,11 @@ generate. Defaults to 1L. E.g., <code>classes = 1:6</code>,
 <dt id="arg-filename-stem">filename_stem<a class="anchor" aria-label="anchor" href="#arg-filename-stem"></a></dt>
 <dd><p>Character. A stem for the automatically generated filenames of
 the syntax and data files.</p></dd>
+
+
+<dt id="arg-outputdirectory">outputDirectory<a class="anchor" aria-label="anchor" href="#arg-outputdirectory"></a></dt>
+<dd><p>Character. Directory where generated input, output,
+and data files should be written. Defaults to the current working directory.</p></dd>
 
 
 <dt id="arg-model-overall">model_overall<a class="anchor" aria-label="anchor" href="#arg-model-overall"></a></dt>

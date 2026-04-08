@@ -10,6 +10,8 @@ get_results(x, element, simplify = FALSE, ...)
 
 get_input(x, simplify = FALSE, ...)
 
+get_model_table(x, simplify = FALSE, ...)
+
 get_warn_err(x, simplify = FALSE, ...)
 
 get_data_summary(x, simplify = FALSE, ...)
@@ -102,6 +104,7 @@ if (FALSE) { # \dontrun{
  unlink("model1.out")
 } # }
 out <- get_input(res)
+out <- get_model_table(res)
 out <- get_warn_err(res)
 out <- get_data_summary(res)
 out <- get_sampstat(res)

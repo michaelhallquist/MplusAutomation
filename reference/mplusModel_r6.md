@@ -46,6 +46,11 @@ Wrapped by `mplusModel`
   Read-only accessor for the `input` section returned by
   [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md).
 
+- `model_table`:
+
+  Read-only accessor for the `model_table` section returned by
+  [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md).
+
 - `warnings`:
 
   Read-only accessor for the `warnings` section returned by

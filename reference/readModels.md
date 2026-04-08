@@ -88,6 +88,9 @@ a single mplus.model object, not a list of files. Specific elements are:
 
 - `svalues`: Raw text from the SVALUES section, if present
 
+- `model_table`: Parsed model syntax from the input `MODEL` sections as
+  a data.frame
+
 - `class_counts`: Latent class counts and proportions for models that
   include a categorical latent variable
 
@@ -117,8 +120,9 @@ a single mplus.model object, not a list of files. Specific elements are:
 - `tech3`: a list containing parameter covariance and correlation
   matrices from OUTPUT: TECH3
 
-- `tech4`: a list containing means, covariances, and correlations for
-  latent variables from OUTPUT: TECH4
+- `tech4`: a list containing estimates, standard errors, Est./S.E.
+  values, and p-values for latent variable means, covariances, and
+  correlations from OUTPUT: TECH4
 
 - `tech7`: a list containing sample statistics for each latent class
   from OUTPUT: TECH7
@@ -161,10 +165,10 @@ the sections as a character vector from the following options:
 
 c("input", "warn_err", "data_summary", "sampstat",
 "covariance_coverage", "summaries", "random_starts", "parameters",
-"svalues", "class_counts", "indirect", "mod_indices", "residuals",
-"savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
-"tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
-"output")
+"svalues", "model_table", "class_counts", "indirect", "mod_indices",
+"residuals", "savedata", "bparameters", "tech1", "tech3", "tech4",
+"tech7", "tech8", "tech9", "tech10", "tech12", "fac_score_stats",
+"lcCondMeans", "gh5", "output")
 
 ## Author
 

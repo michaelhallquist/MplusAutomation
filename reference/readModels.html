@@ -116,6 +116,7 @@ a single mplus.model object, not a list of files. Specific elements are:</p><ul>
 <li><p><code>random_starts</code>: Parsed random starts results, including final-stage loglikelihoods and random start specifications</p></li>
 <li><p><code>parameters</code>: Model parameters from <code>extractModelParameters</code>, having structure as specified by that function</p></li>
 <li><p><code>svalues</code>: Raw text from the SVALUES section, if present</p></li>
+<li><p><code>model_table</code>: Parsed model syntax from the input <code>MODEL</code> sections as a data.frame</p></li>
 <li><p><code>class_counts</code>: Latent class counts and proportions for models that include a categorical latent variable</p></li>
 <li><p><code>indirect</code>: Output of MODEL INDIRECT if available in output. Contains <code>$overall</code> and <code>$specific</code> data.frames for each indirect effect section</p></li>
 <li><p><code>mod_indices</code>: Model modification indices from <code>extractModIndices</code>, having structure as specified by that function</p></li>
@@ -125,7 +126,7 @@ a single mplus.model object, not a list of files. Specific elements are:</p><ul>
 <li><p><code>bparameters</code>: an <code>mcmc.list</code> object containing the draws from the MCMC chains for a Bayesian model that uses the SAVEDATA: BPARAMETERS command</p></li>
 <li><p><code>tech1</code>: a list containing parameter specification and starting values from OUTPUT: TECH1</p></li>
 <li><p><code>tech3</code>: a list containing parameter covariance and correlation matrices from OUTPUT: TECH3</p></li>
-<li><p><code>tech4</code>: a list containing means, covariances, and correlations for latent variables from OUTPUT: TECH4</p></li>
+<li><p><code>tech4</code>: a list containing estimates, standard errors, Est./S.E. values, and p-values for latent variable means, covariances, and correlations from OUTPUT: TECH4</p></li>
 <li><p><code>tech7</code>: a list containing sample statistics for each latent class from OUTPUT: TECH7</p></li>
 <li><p><code>tech8</code>: a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8</p></li>
 <li><p><code>tech9</code>: a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9</p></li>
@@ -144,7 +145,7 @@ a single mplus.model object, not a list of files. Specific elements are:</p><ul>
 reduced set of output sections (especially to speed up the function when reading many files), specify the sections
 as a character vector from the following options:</p>
 <p>c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-"random_starts", "parameters", "svalues", "class_counts", "indirect", "mod_indices", "residuals",
+"random_starts", "parameters", "svalues", "model_table", "class_counts", "indirect", "mod_indices", "residuals",
 "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
 "output")</p>

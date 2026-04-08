@@ -12,6 +12,7 @@ means that the models will be evaluated and returned.
 createMixtures(
   classes = 1L,
   filename_stem = NULL,
+  outputDirectory = getwd(),
   model_overall = NULL,
   model_class_specific = NULL,
   rdata = NULL,
@@ -34,6 +35,11 @@ createMixtures(
 
   Character. A stem for the automatically generated filenames of the
   syntax and data files.
+
+- outputDirectory:
+
+  Character. Directory where generated input, output, and data files
+  should be written. Defaults to the current working directory.
 
 - model_overall:
 

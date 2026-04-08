@@ -51,6 +51,8 @@ by name from different types of objects returned by <code>MplusAutomation</code>
 <span></span>
 <span><span class="fu">get_input</span><span class="op">(</span><span class="va">x</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">get_model_table</span><span class="op">(</span><span class="va">x</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">get_warn_err</span><span class="op">(</span><span class="va">x</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">get_data_summary</span><span class="op">(</span><span class="va">x</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
@@ -145,6 +147,7 @@ list &lt; expression, after coercion of pairlists to lists.</p>
 <span class="r-in"><span> <span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="st">"model1.out"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">get_input</span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">get_model_table</span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">get_warn_err</span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">get_data_summary</span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">get_sampstat</span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
