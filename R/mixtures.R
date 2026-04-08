@@ -1034,6 +1034,8 @@ plotMixtureDensities <-
 #' \code{classes = c(1:4, 6:8)}.
 #' @param filename_stem Character. A stem for the automatically generated filenames of
 #' the syntax and data files.
+#' @param outputDirectory Character. Directory where generated input, output,
+#' and data files should be written. Defaults to the current working directory.
 #' @param model_overall Character. Mplus syntax for the overall model (across
 #' classes).
 #' @param model_class_specific Character vector. Mplus syntax for the 
@@ -1085,6 +1087,7 @@ plotMixtureDensities <-
 #' }
 createMixtures <- function(classes = 1L,
                            filename_stem = NULL,
+                           outputDirectory = getwd(),
                            model_overall = NULL,
                            model_class_specific = NULL,
                            rdata = NULL,
@@ -1097,7 +1100,7 @@ createMixtures <- function(classes = 1L,
 
   dots <- list(...)
   cl <- match.call()
-  cl[c("classes", "filename_stem", "model_overall", "model_class_specific")] <- NULL
+  cl[c("classes", "filename_stem", "outputDirectory", "model_overall", "model_class_specific")] <- NULL
   if (hasArg("MODEL")) {
     warning(
       "MODEL argument was dropped: createMixtures constructs its own MODEL argument from model_overall and model_class_specific."
@@ -1231,14 +1234,14 @@ createMixtures <- function(classes = 1L,
     out <- lapply(1:n_classes, function(class) {
       cl_mplusmodeler[["object"]] <- input_list[[class]]
       cl_mplusmodeler[["dataout"]] <- if (is.null(filename_stem)) {
-        "data.dat"
+        file.path(outputDirectory, "data.dat")
       } else {
-        paste(c("data_", filename_stem, ".dat"), collapse = "")
+        file.path(outputDirectory, paste(c("data_", filename_stem, ".dat"), collapse = ""))
       }
       cl_mplusmodeler[["modelout"]] <- if (is.null(filename_stem)) {
-        paste0(filename_stem, "_class.inp")
+        file.path(outputDirectory, paste0(filename_stem, "_class.inp"))
       } else {
-        paste(c(filename_stem, "_", class, "_class.inp"), collapse = "")
+        file.path(outputDirectory, paste(c(filename_stem, "_", class, "_class.inp"), collapse = ""))
       }
       
       eval.parent(cl_mplusmodeler)
@@ -1930,7 +1933,7 @@ create_all_output_fun <- function(filename = "R/mixtures.R"){
   txt <- readLines(filename)
   out <- txt[1:grep("^# Automatically generated functions below here$", txt)]
   # Prepare lists
-  fun_list <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
+  fun_list <- c("input", "model_table", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
                 "invariance_testing", "parameters", "class_counts", "indirect", "mod_indices", "residuals",
                 "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
                 "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "gh5")
@@ -2035,6 +2038,16 @@ get_results <- function(x, element, simplify = FALSE, ...){
 get_input <- function(x, simplify = FALSE, ...){
   cl <- match.call()
   cl[["element"]] = "input"
+  cl[[1L]] <- quote(get_results)
+  eval.parent(cl)
+}
+#' @export
+#' @rdname get_results
+#' @examples
+#' out <- get_model_table(res)
+get_model_table <- function(x, simplify = FALSE, ...){
+  cl <- match.call()
+  cl[["element"]] = "model_table"
   cl[[1L]] <- quote(get_results)
   eval.parent(cl)
 }

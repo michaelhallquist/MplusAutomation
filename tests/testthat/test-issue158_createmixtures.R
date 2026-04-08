@@ -11,8 +11,11 @@
 test_that("createmixtures works", {
   skip_on_cran()
   skip_if_not(mplusAvailable() == 0L)
+  tmp <- tempfile("createmixtures-")
+  dir.create(tmp)
+  on.exit(unlink(tmp, recursive = TRUE, force = TRUE), add = TRUE)
   expect_error({
-    out <- createMixtures(classes = 1:3, filename_stem = "iris", rdata = iris)
+    out <- createMixtures(classes = 1:3, filename_stem = "iris", outputDirectory = tmp, rdata = iris)
     suppressWarnings(print(out))
   }, NA)
 })

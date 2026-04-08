@@ -1,0 +1,229 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:54 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a second-order
+  	factor analysis
+  DATA:	FILE IS ex5.6.dat;
+  VARIABLE:	NAMES ARE y1-y12;
+  MODEL:	f1 BY y1-y3;
+  	f2 BY y4-y6;
+  	f3 BY y7-y9;
+  	f4 BY y10-y12;
+  	f5 BY f1-f4;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a second-order
+factor analysis
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                   12
+Number of independent variables                                  0
+Number of continuous latent variables                            5
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2          Y3          Y4          Y5          Y6
+   Y7          Y8          Y9          Y10         Y11         Y12
+
+Continuous latent variables
+   F1          F2          F3          F4          F5
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex5.6.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                    0.011      -0.037      -3.873    0.20%      -1.115     -0.330      0.018
+             500.000       1.725      -0.259       3.393    0.20%       0.309      1.172
+     Y2                    0.028       0.005      -2.933    0.20%      -0.829     -0.268      0.006
+             500.000       1.047      -0.184       2.750    0.20%       0.327      0.914
+     Y3                    0.005       0.165      -2.221    0.20%      -0.903     -0.307      0.011
+             500.000       0.936      -0.368       2.791    0.20%       0.274      0.805
+     Y4                    0.100      -0.067      -3.912    0.20%      -0.909     -0.273      0.043
+             500.000       1.815       0.032       4.194    0.20%       0.408      1.241
+     Y5                    0.078      -0.119      -3.342    0.20%      -0.802     -0.130      0.106
+             500.000       1.015       0.170       3.701    0.20%       0.323      0.913
+     Y6                    0.076       0.162      -2.462    0.20%      -0.754     -0.240      0.019
+             500.000       1.047      -0.210       2.953    0.20%       0.253      0.940
+     Y7                    0.024      -0.060      -3.782    0.20%      -1.153     -0.328      0.046
+             500.000       1.889      -0.130       4.158    0.20%       0.444      1.149
+     Y8                    0.025      -0.107      -3.168    0.20%      -0.942     -0.210      0.082
+             500.000       1.080      -0.039       2.993    0.20%       0.339      0.844
+     Y9                    0.034       0.038      -2.979    0.20%      -0.818     -0.263     -0.031
+             500.000       1.049      -0.203       2.925    0.20%       0.289      0.958
+     Y10                  -0.016       0.005      -4.795    0.20%      -1.218     -0.342      0.049
+             500.000       1.913      -0.055       3.946    0.20%       0.341      1.067
+     Y11                   0.010      -0.005      -2.624    0.20%      -0.901     -0.249      0.009
+             500.000       1.119      -0.168       3.460    0.20%       0.313      0.918
+     Y12                   0.006       0.057      -3.178    0.20%      -0.853     -0.232     -0.068
+             500.000       1.018      -0.082       2.882    0.20%       0.208      0.943
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       40
+
+Loglikelihood
+
+          H0 Value                       -7211.373
+          H1 Value                       -7188.001
+
+Information Criteria
+
+          Akaike (AIC)                   14502.746
+          Bayesian (BIC)                 14671.330
+          Sample-Size Adjusted BIC       14544.368
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                             46.743
+          Degrees of Freedom                    50
+          P-Value                           0.6049
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.026
+          Probability RMSEA <= .05           1.000
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           4012.035
+          Degrees of Freedom                    66
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.019
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1                 1.000      0.000    999.000    999.000
+    Y2                 0.760      0.031     24.275      0.000
+    Y3                 0.669      0.030     22.309      0.000
+
+ F2       BY
+    Y4                 1.000      0.000    999.000    999.000
+    Y5                 0.718      0.030     23.976      0.000
+    Y6                 0.703      0.031     22.853      0.000
+
+ F3       BY
+    Y7                 1.000      0.000    999.000    999.000
+    Y8                 0.702      0.026     26.955      0.000
+    Y9                 0.691      0.026     26.764      0.000
+
+ F4       BY
+    Y10                1.000      0.000    999.000    999.000
+    Y11                0.742      0.029     25.350      0.000
+    Y12                0.669      0.029     23.461      0.000
+
+ F5       BY
+    F1                 1.000      0.000    999.000    999.000
+    F2                 0.944      0.148      6.397      0.000
+    F3                 1.168      0.179      6.516      0.000
+    F4                 0.854      0.139      6.142      0.000
+
+ Intercepts
+    Y1                 0.011      0.059      0.183      0.855
+    Y2                 0.028      0.046      0.617      0.537
+    Y3                 0.005      0.043      0.109      0.913
+    Y4                 0.100      0.060      1.652      0.099
+    Y5                 0.078      0.045      1.730      0.084
+    Y6                 0.076      0.046      1.671      0.095
+    Y7                 0.024      0.061      0.390      0.697
+    Y8                 0.025      0.046      0.545      0.585
+    Y9                 0.034      0.046      0.741      0.458
+    Y10               -0.016      0.062     -0.261      0.794
+    Y11                0.010      0.047      0.202      0.840
+    Y12                0.006      0.045      0.134      0.894
+
+ Variances
+    F5                 0.464      0.100      4.657      0.000
+
+ Residual Variances
+    Y1                 0.348      0.043      8.132      0.000
+    Y2                 0.251      0.027      9.465      0.000
+    Y3                 0.320      0.026     12.271      0.000
+    Y4                 0.366      0.045      8.187      0.000
+    Y5                 0.268      0.026     10.303      0.000
+    Y6                 0.330      0.028     11.636      0.000
+    Y7                 0.272      0.038      7.094      0.000
+    Y8                 0.282      0.025     11.445      0.000
+    Y9                 0.276      0.024     11.416      0.000
+    Y10                0.362      0.045      8.107      0.000
+    Y11                0.266      0.027      9.854      0.000
+    Y12                0.323      0.027     11.991      0.000
+    F1                 0.913      0.103      8.855      0.000
+    F2                 1.036      0.107      9.672      0.000
+    F3                 0.984      0.119      8.237      0.000
+    F4                 1.213      0.115     10.567      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.558E-02
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  09:54:29
+        Ending Time:  09:54:29
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

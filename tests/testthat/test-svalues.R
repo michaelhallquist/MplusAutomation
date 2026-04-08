@@ -108,3 +108,39 @@ test_that("SVALUES parser matches ordinary parameter tables on dedicated fixture
     expect_equal(nrow(mism), 0L, info = basename(f))
   }
 })
+
+test_that("readModels extracts grouped SVALUES rows and labels from ex5.16", {
+  m <- MplusAutomation::readModels(
+    target = get_mplus_file("ch5/ex5.16.out", mplus_version = "8.11"),
+    what = c("parameters", "svalues"),
+    quiet = TRUE
+  )
+  
+  expect_true("svalues" %in% names(m))
+  expect_true("svalues" %in% names(m$parameters))
+  expect_s3_class(m$parameters$svalues, "mplus.params")
+  expect_equal(
+    names(m$parameters$svalues),
+    c("paramHeader", "param", "est", "fixed", "label", "Group")
+  )
+  
+  male_u2 <- subset(m$parameters$svalues, Group == "MALE" & paramHeader == "F1.BY" & param == "U2")
+  expect_equal(nrow(male_u2), 1L)
+  expect_equal(male_u2$est, 0.95730, tolerance = 1e-7)
+  expect_false(male_u2$fixed)
+  expect_equal(male_u2$label, "7")
+  
+  female_u3 <- subset(m$parameters$svalues, Group == "FEMALE" & paramHeader == "F1.BY" & param == "U3")
+  expect_equal(nrow(female_u3), 1L)
+  expect_equal(female_u3$est, 0.77675, tolerance = 1e-7)
+  expect_false(female_u3$fixed)
+  expect_true(is.na(female_u3$label))
+  
+  female_u1_threshold <- subset(
+    m$parameters$svalues,
+    Group == "FEMALE" & paramHeader == "Thresholds" & param == "U1$1"
+  )
+  expect_equal(nrow(female_u1_threshold), 1L)
+  expect_equal(female_u1_threshold$est, -0.90507, tolerance = 1e-7)
+  expect_equal(female_u1_threshold$label, "1")
+})

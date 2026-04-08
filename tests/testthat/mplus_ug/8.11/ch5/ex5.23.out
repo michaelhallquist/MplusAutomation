@@ -1,0 +1,138 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a QTL sibling model
+  for a continuous outcome using parameter constraints
+  DATA:	FILE = ex5.23.dat;
+  VARIABLE:	NAMES = y1 y2 pihat;
+  	USEVARIABLES = y1 y2;
+  	CONSTRAINT = pihat;
+  MODEL:	[y1-y2] (1);
+  	y1-y2 (var);
+  	y1 WITH y2 (cov);
+  MODEL CONSTRAINT:
+  	NEW(a e q);
+  	var = a**2 + e**2 + q**2;
+  	cov = 0.5*a**2 + pihat*q**2;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a QTL sibling model
+for a continuous outcome using parameter constraints
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        2000
+
+Number of dependent variables                                    2
+Number of independent variables                                  0
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex5.23.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                   -0.003      -0.005      -4.338    0.05%      -1.006     -0.325     -0.019
+            2000.000       1.482      -0.124       4.221    0.05%       0.290      1.047
+     Y2                    0.029       0.054      -4.840    0.05%      -1.028     -0.293     -0.022
+            2000.000       1.572       0.012       4.059    0.05%       0.328      1.049
+     PIHAT                 0.508      -0.038       0.000   19.95%       0.250      0.500      0.500
+            2000.000       0.127      -1.318       1.000   20.90%       0.750      1.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        4
+
+Loglikelihood
+
+          H0 Value                       -6355.741
+
+Information Criteria
+
+          Akaike (AIC)                   12719.482
+          Bayesian (BIC)                 12741.885
+          Sample-Size Adjusted BIC       12729.177
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ Y1       WITH
+    Y2               999.000      0.000    999.000    999.000
+
+ Means
+    Y1                 0.012      0.023      0.546      0.585
+    Y2                 0.012      0.023      0.546      0.585
+
+ Variances
+    Y1                 1.528      0.037     41.774      0.000
+    Y2                 1.528      0.037     41.774      0.000
+
+New/Additional Parameters
+    A                  0.848      0.064     13.218      0.000
+    E                  0.622      0.045     13.822      0.000
+    Q                  0.649      0.059     11.078      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.188E-03
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  09:53:45
+        Ending Time:  09:53:45
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

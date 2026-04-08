@@ -1,0 +1,190 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a two-group twin
+  	model for categorical outcomes using parameter
+      constraints
+  DATA:	FILE = ex5.22.dat;
+  VARIABLE:	NAMES = u1 u2 g;
+  	GROUPING = g(1=mz 2=dz);
+  	CATEGORICAL = u1 u2;
+  MODEL:	[u1$1-u2$1](1);
+  	u1 WITH u2(covmz);
+  MODEL dz:	u1 WITH u2(covdz);
+  MODEL CONSTRAINT:
+  	NEW(a c e h);
+  	covmz = a**2 + c**2;
+  	covdz = 0.5*a**2 + c**2;
+  	e = 1 - (a**2 + c**2);
+  	h = a**2/1;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a two-group twin
+model for categorical outcomes using parameter
+constraints
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 2
+Number of observations
+   Group MZ                                                   1000
+   Group DZ                                                   1000
+   Total sample size                                          2000
+
+Number of dependent variables                                    2
+Number of independent variables                                  0
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Binary and ordered categorical (ordinal)
+   U1          U2
+
+Variables with special functions
+
+  Grouping variable     G
+
+Estimator                                                    WLSMV
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Parameterization                                             DELTA
+Link                                                        PROBIT
+
+Input data file(s)
+  ex5.22.dat
+
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+  Group MZ
+    U1
+      Category 1    0.502          502.000
+      Category 2    0.498          498.000
+    U2
+      Category 1    0.494          494.000
+      Category 2    0.506          506.000
+
+  Group DZ
+    U1
+      Category 1    0.504          504.000
+      Category 2    0.496          496.000
+    U2
+      Category 1    0.511          511.000
+      Category 2    0.489          489.000
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        3
+
+Chi-Square Test of Model Fit
+
+          Value                              0.905*
+          Degrees of Freedom                     3
+          P-Value                           0.8242
+
+Chi-Square Contribution From Each Group
+
+          MZ                                 0.476
+          DZ                                 0.429
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.032
+          Probability RMSEA <= .05           0.992
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            952.816
+          Degrees of Freedom                     2
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.005
+
+Optimum Function Value for Weighted Least-Squares Estimator
+
+          Value                     0.14675240D-03
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Group MZ
+
+ U1       WITH
+    U2                 0.771      0.026     29.391      0.000
+
+ Thresholds
+    U1$1               0.007      0.024      0.292      0.770
+    U2$1               0.007      0.024      0.292      0.770
+
+Group DZ
+
+ U1       WITH
+    U2                 0.411      0.044      9.437      0.000
+
+ Thresholds
+    U1$1               0.007      0.024      0.292      0.770
+    U2$1               0.007      0.024      0.292      0.770
+
+New/Additional Parameters
+    A                  0.848      0.060     14.123      0.000
+    C                  0.228      0.199      1.146      0.252
+    E                  0.229      0.026      8.744      0.000
+    H                  0.719      0.102      7.061      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.469E-02
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  09:53:45
+        Ending Time:  09:53:45
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

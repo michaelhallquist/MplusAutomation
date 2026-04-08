@@ -31,7 +31,7 @@
 #' as a character vector from the following options:
 #'
 #' c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-#'      "random_starts", "parameters", "svalues", "class_counts", "indirect", "mod_indices", "residuals",
+#'      "random_starts", "parameters", "svalues", "model_table", "class_counts", "indirect", "mod_indices", "residuals",
 #'      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 #'      "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
 #'      "output")
@@ -51,6 +51,7 @@
 #' * `random_starts`: Parsed random starts results, including final-stage loglikelihoods and random start specifications
 #' * `parameters`: Model parameters from \code{extractModelParameters}, having structure as specified by that function
 #' * `svalues`: Raw text from the SVALUES section, if present
+#' * `model_table`: Parsed model syntax from the input `MODEL` sections as a data.frame
 #' * `class_counts`: Latent class counts and proportions for models that include a categorical latent variable
 #' * `indirect`: Output of MODEL INDIRECT if available in output. Contains \code{$overall} and \code{$specific} data.frames for each indirect effect section
 #' * `mod_indices`: Model modification indices from \code{extractModIndices}, having structure as specified by that function
@@ -60,7 +61,7 @@
 #' * `bparameters`: an \code{mcmc.list} object containing the draws from the MCMC chains for a Bayesian model that uses the SAVEDATA: BPARAMETERS command
 #' * `tech1`: a list containing parameter specification and starting values from OUTPUT: TECH1
 #' * `tech3`: a list containing parameter covariance and correlation matrices from OUTPUT: TECH3
-#' * `tech4`: a list containing means, covariances, and correlations for latent variables from OUTPUT: TECH4
+#' * `tech4`: a list containing estimates, standard errors, Est./S.E. values, and p-values for latent variable means, covariances, and correlations from OUTPUT: TECH4
 #' * `tech7`: a list containing sample statistics for each latent class from OUTPUT: TECH7
 #' * `tech8`: a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8
 #' * `tech9`: a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9
@@ -86,7 +87,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
   ## enforce quiet being logical and length 1 as used in if else statements
   stopifnot(identical(length(quiet), 1L) && is.logical(quiet))
   allsections <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-      "random_starts", "invariance_testing", "parameters", "svalues", "class_counts", "indirect", "mod_indices", "residuals",
+      "random_starts", "invariance_testing", "parameters", "svalues", "model_table", "class_counts", "indirect", "mod_indices", "residuals",
       "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
       "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "r3step", 
       "gh5", "h5results", "output")
@@ -133,6 +134,15 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
       "Error parsing input section of output file: ",
       curfile
     )
+    
+    if (isTRUE("model_table" %in% what)) {
+      allFiles[[listID]]$model_table <- parse_or_empty(
+        extractModelTable(inp, curfile),
+        NULL,
+        "Error extracting model syntax table from input section of output file: ",
+        curfile
+      )
+    }
     
     #Model summary output (including MODEL FIT INFORMATION)
     summaries <- parse_or_empty(

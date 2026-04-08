@@ -1710,6 +1710,16 @@ extractTech4 <- function(outfiletext, filename) {
   if (is.null(tech4Section)) return(new_mplus_tech4()) #no tech4 output
   
   tech4List <- list()
+  merge_tech4_target <- function(existing, incoming) {
+    if (length(existing) == 0L) return(incoming)
+    if (length(incoming) == 0L) return(existing)
+    
+    for (nm in names(incoming)) {
+      if (is.null(existing[[nm]])) existing[[nm]] <- incoming[[nm]]
+    }
+    
+    existing
+  }
   
   tech4Subsections <- getMultilineSection("ESTIMATES DERIVED FROM THE MODEL( FOR [\\w\\d\\s\\.,_]+)*",
     tech4Section, filename, allowMultiple=TRUE, ignore.case=TRUE)
@@ -1720,22 +1730,47 @@ extractTech4 <- function(outfiletext, filename) {
   }
   else if (length(tech4Subsections) > 1) {
     matchlines <- section_matchlines(tech4Subsections)
-    groupNames <- make.names(gsub("^\\s*ESTIMATES DERIVED FROM THE MODEL( FOR ([\\w\\d\\s\\.,_]+))*\\s*$", "\\2", tech4Section[matchlines], perl=TRUE, ignore.case=TRUE))
+    rawGroupNames <- trimws(gsub(
+      "^\\s*ESTIMATES DERIVED FROM THE MODEL( FOR ([\\w\\d\\s\\.,_]+))*\\s*$",
+      "\\2", tech4Section[matchlines], perl=TRUE, ignore.case=TRUE
+    ))
+    hasNamedGroups <- any(nzchar(rawGroupNames))
+    if (isTRUE(hasNamedGroups)) {
+      fallbackNames <- paste0("section.", seq_along(rawGroupNames))
+      groupNames <- make.names(ifelse(nzchar(rawGroupNames), rawGroupNames, fallbackNames))
+    }
   }
   
   for (g in 1:length(tech4Subsections)) {
     targetList <- list()
     
     targetList[["latMeansEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED MEANS FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latMeansSE"]] <- matrixExtract(tech4Subsections[[g]], "S\\.E\\. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latMeansEstSE"]] <- matrixExtract(tech4Subsections[[g]], "EST\\./S\\.E\\. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latMeansPValue"]] <- matrixExtract(tech4Subsections[[g]], "TWO-TAILED P-VALUE FOR ESTIMATED MEANS FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
     targetList[["latCovEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latCovSE"]] <- matrixExtract(tech4Subsections[[g]], "S\\.E\\. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latCovEstSE"]] <- matrixExtract(tech4Subsections[[g]], "EST\\./S\\.E\\. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latCovPValue"]] <- matrixExtract(tech4Subsections[[g]], "TWO-TAILED P-VALUE FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
     targetList[["latCorEst"]] <- matrixExtract(tech4Subsections[[g]], "ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latCorSE"]] <- matrixExtract(tech4Subsections[[g]], "S\\.E\\. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latCorEstSE"]] <- matrixExtract(tech4Subsections[[g]], "EST\\./S\\.E\\. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
+    targetList[["latCorPValue"]] <- matrixExtract(tech4Subsections[[g]], "TWO-TAILED P-VALUE FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES", filename, ignore.case=TRUE)
     
-    if (length(tech4Subsections) > 1) {
+    if (length(tech4Subsections) > 1 && isTRUE(hasNamedGroups)) {
       class(targetList) <- c("mplus.tech4", "list")
-      tech4List[[groupNames[g]]] <- targetList
-    }
-    else
+      existing <- tech4List[[groupNames[g]]]
+      if (is.null(existing)) {
+        tech4List[[groupNames[g]]] <- targetList
+      } else {
+        tech4List[[groupNames[g]]] <- merge_tech4_target(existing, targetList)
+        class(tech4List[[groupNames[g]]]) <- c("mplus.tech4", "list")
+      }
+    } else if (length(tech4Subsections) > 1) {
+      tech4List <- merge_tech4_target(tech4List, targetList)
+    } else {
       tech4List <- targetList
+    }
     
   }
   

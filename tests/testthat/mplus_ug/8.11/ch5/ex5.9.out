@@ -1,0 +1,187 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:54 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a mean structure CFA
+  	for continuous factor indicators
+  	DATA:	FILE IS ex5.9.dat;
+  VARIABLE:	NAMES ARE y1a-y1c y2a-y2c;
+  MODEL:	f1 BY y1a y1b@1 y1c@1;
+  	f2 BY y2a y2b@1 y2c@1;
+  	[y1a y1b y1c] (1);	
+  	[y2a y2b y2c] (2);
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a mean structure CFA
+for continuous factor indicators
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   Y1A         Y1B         Y1C         Y2A         Y2B         Y2C
+
+Continuous latent variables
+   F1          F2
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex5.9.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1A                   1.981      -0.050      -1.428    0.20%       0.930      1.658      1.966
+             500.000       1.478      -0.363       5.107    0.20%       2.284      3.074
+     Y1B                   2.015      -0.092      -1.996    0.20%       0.999      1.693      2.017
+             500.000       1.477      -0.086       5.371    0.20%       2.364      3.043
+     Y1C                   2.022       0.187      -1.367    0.20%       0.907      1.659      1.967
+             500.000       1.458      -0.137       5.550    0.20%       2.333      3.080
+     Y2A                   2.985      -0.048      -0.555    0.20%       2.074      2.690      2.994
+             500.000       1.513       0.115       6.613    0.20%       3.281      3.941
+     Y2B                   2.986      -0.147      -1.112    0.20%       2.002      2.769      3.023
+             500.000       1.499       0.086       6.968    0.20%       3.333      4.041
+     Y2C                   3.033       0.163      -0.241    0.20%       2.070      2.639      2.898
+             500.000       1.516      -0.175       6.352    0.20%       3.233      4.106
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       11
+
+Loglikelihood
+
+          H0 Value                       -4150.048
+          H1 Value                       -4143.626
+
+Information Criteria
+
+          Akaike (AIC)                    8322.096
+          Bayesian (BIC)                  8368.456
+          Sample-Size Adjusted BIC        8333.542
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                             12.844
+          Degrees of Freedom                    16
+          P-Value                           0.6841
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.033
+          Probability RMSEA <= .05           0.997
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           1422.735
+          Degrees of Freedom                    15
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.022
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1A                1.000      0.000    999.000    999.000
+    Y1B                1.000      0.000    999.000    999.000
+    Y1C                1.000      0.000    999.000    999.000
+
+ F2       BY
+    Y2A                1.000      0.000    999.000    999.000
+    Y2B                1.000      0.000    999.000    999.000
+    Y2C                1.000      0.000    999.000    999.000
+
+ F2       WITH
+    F1                 0.471      0.056      8.453      0.000
+
+ Intercepts
+    Y1A                2.007      0.048     41.795      0.000
+    Y1B                2.007      0.048     41.795      0.000
+    Y1C                2.007      0.048     41.795      0.000
+    Y2A                3.001      0.048     62.385      0.000
+    Y2B                3.001      0.048     62.385      0.000
+    Y2C                3.001      0.048     62.385      0.000
+
+ Variances
+    F1                 0.992      0.073     13.543      0.000
+    F2                 0.980      0.074     13.302      0.000
+
+ Residual Variances
+    Y1A                0.512      0.045     11.448      0.000
+    Y1B                0.442      0.041     10.804      0.000
+    Y1C                0.489      0.043     11.250      0.000
+    Y2A                0.590      0.050     11.714      0.000
+    Y2B                0.478      0.044     10.799      0.000
+    Y2C                0.531      0.047     11.279      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.941E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  09:54:29
+        Ending Time:  09:54:29
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

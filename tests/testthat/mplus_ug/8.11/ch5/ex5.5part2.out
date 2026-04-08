@@ -1,0 +1,756 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:          this is an example of a two-parameter logistic
+                  item response theory (IRT) model
+  DATA:           FILE = ex5.5part2.dat;
+  VARIABLE:       NAMES ARE u1-u20;
+                  CATEGORICAL ARE u1-u20;
+  ANALYSIS:       ESTIMATOR = MLR;
+  MODEL:          f BY u1-u20*;
+                  f@1;
+  OUTPUT:	        TECH1 TECH8;
+  PLOT:           TYPE = PLOT3;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a two-parameter logistic
+item response theory (IRT) model
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                   20
+Number of independent variables                                  0
+Number of continuous latent variables                            1
+
+Observed dependent variables
+
+  Binary and ordered categorical (ordinal)
+   U1          U2          U3          U4          U5          U6
+   U7          U8          U9          U10         U11         U12
+   U13         U14         U15         U16         U17         U18
+   U19         U20
+
+Continuous latent variables
+   F
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Optimization Specifications for the Quasi-Newton Algorithm for
+Continuous Outcomes
+  Maximum number of iterations                                 100
+  Convergence criterion                                  0.100D-05
+Optimization Specifications for the EM Algorithm
+  Maximum number of iterations                                 500
+  Convergence criteria
+    Loglikelihood change                                 0.100D-02
+    Relative loglikelihood change                        0.100D-05
+    Derivative                                           0.100D-02
+Optimization Specifications for the M step of the EM Algorithm for
+Categorical Latent variables
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+Optimization Specifications for the M step of the EM Algorithm for
+Censored, Binary or Ordered Categorical (Ordinal), Unordered
+Categorical (Nominal) and Count Outcomes
+  Number of M step iterations                                    1
+  M step convergence criterion                           0.100D-02
+  Basis for M step termination                           ITERATION
+  Maximum value for logit thresholds                            15
+  Minimum value for logit thresholds                           -15
+  Minimum expected cell size for chi-square              0.100D-01
+Optimization algorithm                                         EMA
+Integration Specifications
+  Type                                                    STANDARD
+  Number of integration points                                  15
+  Dimensions of numerical integration                            1
+  Adaptive quadrature                                           ON
+Link                                                         LOGIT
+Cholesky                                                        ON
+
+Input data file(s)
+  ex5.5part2.dat
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    U1
+      Category 1    0.426          213.000
+      Category 2    0.574          287.000
+    U2
+      Category 1    0.412          206.000
+      Category 2    0.588          294.000
+    U3
+      Category 1    0.432          216.000
+      Category 2    0.568          284.000
+    U4
+      Category 1    0.436          218.000
+      Category 2    0.564          282.000
+    U5
+      Category 1    0.410          205.000
+      Category 2    0.590          295.000
+    U6
+      Category 1    0.400          200.000
+      Category 2    0.600          300.000
+    U7
+      Category 1    0.412          206.000
+      Category 2    0.588          294.000
+    U8
+      Category 1    0.416          208.000
+      Category 2    0.584          292.000
+    U9
+      Category 1    0.412          206.000
+      Category 2    0.588          294.000
+    U10
+      Category 1    0.408          204.000
+      Category 2    0.592          296.000
+    U11
+      Category 1    0.614          307.000
+      Category 2    0.386          193.000
+    U12
+      Category 1    0.614          307.000
+      Category 2    0.386          193.000
+    U13
+      Category 1    0.596          298.000
+      Category 2    0.404          202.000
+    U14
+      Category 1    0.562          281.000
+      Category 2    0.438          219.000
+    U15
+      Category 1    0.562          281.000
+      Category 2    0.438          219.000
+    U16
+      Category 1    0.584          292.000
+      Category 2    0.416          208.000
+    U17
+      Category 1    0.618          309.000
+      Category 2    0.382          191.000
+    U18
+      Category 1    0.592          296.000
+      Category 2    0.408          204.000
+    U19
+      Category 1    0.642          321.000
+      Category 2    0.358          179.000
+    U20
+      Category 1    0.596          298.000
+      Category 2    0.404          202.000
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+     THE CHI-SQUARE TEST CANNOT BE COMPUTED BECAUSE THE FREQUENCY TABLE FOR THE
+     CATEGORICAL VARIABLES IS TOO LARGE.
+
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       40
+
+Loglikelihood
+
+          H0 Value                       -6265.315
+          H0 Scaling Correction Factor      1.0029
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                   12610.630
+          Bayesian (BIC)                 12779.214
+          Sample-Size Adjusted BIC       12652.252
+            (n* = (n + 2) / 24)
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F        BY
+    U1                 1.026      0.152      6.755      0.000
+    U2                 1.062      0.157      6.780      0.000
+    U3                 0.916      0.141      6.482      0.000
+    U4                 1.155      0.161      7.190      0.000
+    U5                 0.980      0.151      6.471      0.000
+    U6                 0.519      0.121      4.298      0.000
+    U7                 1.128      0.159      7.085      0.000
+    U8                 1.043      0.148      7.050      0.000
+    U9                 1.021      0.150      6.827      0.000
+    U10                0.969      0.141      6.852      0.000
+    U11                1.235      0.165      7.484      0.000
+    U12                0.982      0.148      6.651      0.000
+    U13                1.007      0.146      6.900      0.000
+    U14                0.760      0.127      5.990      0.000
+    U15                0.791      0.128      6.203      0.000
+    U16                0.950      0.141      6.739      0.000
+    U17                1.144      0.161      7.119      0.000
+    U18                1.125      0.154      7.323      0.000
+    U19                0.781      0.131      5.942      0.000
+    U20                1.094      0.151      7.223      0.000
+
+ Thresholds
+    U1$1              -0.368      0.111     -3.321      0.001
+    U2$1              -0.443      0.114     -3.901      0.000
+    U3$1              -0.327      0.107     -3.051      0.002
+    U4$1              -0.333      0.115     -2.885      0.004
+    U5$1              -0.441      0.111     -3.976      0.000
+    U6$1              -0.432      0.098     -4.426      0.000
+    U7$1              -0.453      0.115     -3.922      0.000
+    U8$1              -0.420      0.112     -3.767      0.000
+    U9$1              -0.437      0.112     -3.909      0.000
+    U10$1             -0.450      0.110     -4.082      0.000
+    U11$1              0.593      0.122      4.868      0.000
+    U12$1              0.552      0.112      4.923      0.000
+    U13$1              0.465      0.111      4.173      0.000
+    U14$1              0.278      0.102      2.728      0.006
+    U15$1              0.280      0.103      2.726      0.006
+    U16$1              0.399      0.109      3.668      0.000
+    U17$1              0.599      0.119      5.051      0.000
+    U18$1              0.460      0.116      3.969      0.000
+    U19$1              0.658      0.108      6.120      0.000
+    U20$1              0.476      0.115      4.150      0.000
+
+ Variances
+    F                  1.000      0.000    999.000    999.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.125E+00
+       (ratio of smallest to largest eigenvalue)
+
+
+RESULTS IN PROBABILITY SCALE
+
+                    Estimate
+
+ U1
+    Category 1         0.425
+    Category 2         0.575
+ U2
+    Category 1         0.411
+    Category 2         0.589
+ U3
+    Category 1         0.431
+    Category 2         0.569
+ U4
+    Category 1         0.435
+    Category 2         0.565
+ U5
+    Category 1         0.409
+    Category 2         0.591
+ U6
+    Category 1         0.400
+    Category 2         0.600
+ U7
+    Category 1         0.411
+    Category 2         0.589
+ U8
+    Category 1         0.415
+    Category 2         0.585
+ U9
+    Category 1         0.411
+    Category 2         0.589
+ U10
+    Category 1         0.407
+    Category 2         0.593
+ U11
+    Category 1         0.612
+    Category 2         0.388
+ U12
+    Category 1         0.613
+    Category 2         0.387
+ U13
+    Category 1         0.595
+    Category 2         0.405
+ U14
+    Category 1         0.561
+    Category 2         0.439
+ U15
+    Category 1         0.561
+    Category 2         0.439
+ U16
+    Category 1         0.583
+    Category 2         0.417
+ U17
+    Category 1         0.617
+    Category 2         0.383
+ U18
+    Category 1         0.591
+    Category 2         0.409
+ U19
+    Category 1         0.641
+    Category 2         0.359
+ U20
+    Category 1         0.595
+    Category 2         0.405
+
+
+IRT PARAMETERIZATION
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ Item Discriminations
+
+ F        BY
+    U1                 1.026      0.152      6.755      0.000
+    U2                 1.062      0.157      6.780      0.000
+    U3                 0.916      0.141      6.482      0.000
+    U4                 1.155      0.161      7.190      0.000
+    U5                 0.980      0.151      6.471      0.000
+    U6                 0.519      0.121      4.298      0.000
+    U7                 1.128      0.159      7.085      0.000
+    U8                 1.043      0.148      7.050      0.000
+    U9                 1.021      0.150      6.827      0.000
+    U10                0.969      0.141      6.852      0.000
+    U11                1.235      0.165      7.484      0.000
+    U12                0.982      0.148      6.651      0.000
+    U13                1.007      0.146      6.900      0.000
+    U14                0.760      0.127      5.990      0.000
+    U15                0.791      0.128      6.203      0.000
+    U16                0.950      0.141      6.739      0.000
+    U17                1.144      0.161      7.119      0.000
+    U18                1.125      0.154      7.323      0.000
+    U19                0.781      0.131      5.942      0.000
+    U20                1.094      0.151      7.223      0.000
+
+ Item Difficulties
+    U1                -0.359      0.113     -3.176      0.001
+    U2                -0.417      0.112     -3.721      0.000
+    U3                -0.357      0.122     -2.913      0.004
+    U4                -0.288      0.101     -2.841      0.004
+    U5                -0.451      0.120     -3.748      0.000
+    U6                -0.833      0.253     -3.296      0.001
+    U7                -0.402      0.107     -3.747      0.000
+    U8                -0.403      0.114     -3.540      0.000
+    U9                -0.428      0.116     -3.698      0.000
+    U10               -0.464      0.122     -3.816      0.000
+    U11                0.480      0.105      4.555      0.000
+    U12                0.562      0.129      4.374      0.000
+    U13                0.462      0.120      3.833      0.000
+    U14                0.366      0.143      2.560      0.010
+    U15                0.354      0.138      2.566      0.010
+    U16                0.420      0.123      3.403      0.001
+    U17                0.524      0.113      4.626      0.000
+    U18                0.409      0.109      3.766      0.000
+    U19                0.843      0.176      4.778      0.000
+    U20                0.435      0.112      3.882      0.000
+
+ Variances
+    F                  1.000      0.000      0.000      1.000
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           TAU
+              U1$1          U2$1          U3$1          U4$1          U5$1
+              ________      ________      ________      ________      ________
+                   21            22            23            24            25
+
+
+           TAU
+              U6$1          U7$1          U8$1          U9$1          U10$1
+              ________      ________      ________      ________      ________
+                   26            27            28            29            30
+
+
+           TAU
+              U11$1         U12$1         U13$1         U14$1         U15$1
+              ________      ________      ________      ________      ________
+                   31            32            33            34            35
+
+
+           TAU
+              U16$1         U17$1         U18$1         U19$1         U20$1
+              ________      ________      ________      ________      ________
+                   36            37            38            39            40
+
+
+           NU
+              U1            U2            U3            U4            U5
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              U6            U7            U8            U9            U10
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              U11           U12           U13           U14           U15
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           NU
+              U16           U17           U18           U19           U20
+              ________      ________      ________      ________      ________
+                    0             0             0             0             0
+
+
+           LAMBDA
+              F
+              ________
+ U1                 1
+ U2                 2
+ U3                 3
+ U4                 4
+ U5                 5
+ U6                 6
+ U7                 7
+ U8                 8
+ U9                 9
+ U10               10
+ U11               11
+ U12               12
+ U13               13
+ U14               14
+ U15               15
+ U16               16
+ U17               17
+ U18               18
+ U19               19
+ U20               20
+
+
+           THETA
+              U1            U2            U3            U4            U5
+              ________      ________      ________      ________      ________
+ U1                 0
+ U2                 0             0
+ U3                 0             0             0
+ U4                 0             0             0             0
+ U5                 0             0             0             0             0
+ U6                 0             0             0             0             0
+ U7                 0             0             0             0             0
+ U8                 0             0             0             0             0
+ U9                 0             0             0             0             0
+ U10                0             0             0             0             0
+ U11                0             0             0             0             0
+ U12                0             0             0             0             0
+ U13                0             0             0             0             0
+ U14                0             0             0             0             0
+ U15                0             0             0             0             0
+ U16                0             0             0             0             0
+ U17                0             0             0             0             0
+ U18                0             0             0             0             0
+ U19                0             0             0             0             0
+ U20                0             0             0             0             0
+
+
+           THETA
+              U6            U7            U8            U9            U10
+              ________      ________      ________      ________      ________
+ U6                 0
+ U7                 0             0
+ U8                 0             0             0
+ U9                 0             0             0             0
+ U10                0             0             0             0             0
+ U11                0             0             0             0             0
+ U12                0             0             0             0             0
+ U13                0             0             0             0             0
+ U14                0             0             0             0             0
+ U15                0             0             0             0             0
+ U16                0             0             0             0             0
+ U17                0             0             0             0             0
+ U18                0             0             0             0             0
+ U19                0             0             0             0             0
+ U20                0             0             0             0             0
+
+
+           THETA
+              U11           U12           U13           U14           U15
+              ________      ________      ________      ________      ________
+ U11                0
+ U12                0             0
+ U13                0             0             0
+ U14                0             0             0             0
+ U15                0             0             0             0             0
+ U16                0             0             0             0             0
+ U17                0             0             0             0             0
+ U18                0             0             0             0             0
+ U19                0             0             0             0             0
+ U20                0             0             0             0             0
+
+
+           THETA
+              U16           U17           U18           U19           U20
+              ________      ________      ________      ________      ________
+ U16                0
+ U17                0             0
+ U18                0             0             0
+ U19                0             0             0             0
+ U20                0             0             0             0             0
+
+
+           ALPHA
+              F
+              ________
+                    0
+
+
+           BETA
+              F
+              ________
+ F                  0
+
+
+           PSI
+              F
+              ________
+ F                  0
+
+
+     STARTING VALUES
+
+
+           TAU
+              U1$1          U2$1          U3$1          U4$1          U5$1
+              ________      ________      ________      ________      ________
+               -0.298        -0.356        -0.274        -0.257        -0.364
+
+
+           TAU
+              U6$1          U7$1          U8$1          U9$1          U10$1
+              ________      ________      ________      ________      ________
+               -0.405        -0.356        -0.339        -0.356        -0.372
+
+
+           TAU
+              U11$1         U12$1         U13$1         U14$1         U15$1
+              ________      ________      ________      ________      ________
+                0.464         0.464         0.389         0.249         0.249
+
+
+           TAU
+              U16$1         U17$1         U18$1         U19$1         U20$1
+              ________      ________      ________      ________      ________
+                0.339         0.481         0.372         0.584         0.389
+
+
+           NU
+              U1            U2            U3            U4            U5
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           NU
+              U6            U7            U8            U9            U10
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           NU
+              U11           U12           U13           U14           U15
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           NU
+              U16           U17           U18           U19           U20
+              ________      ________      ________      ________      ________
+                0.000         0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              F
+              ________
+ U1             1.000
+ U2             1.000
+ U3             1.000
+ U4             1.000
+ U5             1.000
+ U6             1.000
+ U7             1.000
+ U8             1.000
+ U9             1.000
+ U10            1.000
+ U11            1.000
+ U12            1.000
+ U13            1.000
+ U14            1.000
+ U15            1.000
+ U16            1.000
+ U17            1.000
+ U18            1.000
+ U19            1.000
+ U20            1.000
+
+
+           THETA
+              U1            U2            U3            U4            U5
+              ________      ________      ________      ________      ________
+ U1             1.000
+ U2             0.000         1.000
+ U3             0.000         0.000         1.000
+ U4             0.000         0.000         0.000         1.000
+ U5             0.000         0.000         0.000         0.000         1.000
+ U6             0.000         0.000         0.000         0.000         0.000
+ U7             0.000         0.000         0.000         0.000         0.000
+ U8             0.000         0.000         0.000         0.000         0.000
+ U9             0.000         0.000         0.000         0.000         0.000
+ U10            0.000         0.000         0.000         0.000         0.000
+ U11            0.000         0.000         0.000         0.000         0.000
+ U12            0.000         0.000         0.000         0.000         0.000
+ U13            0.000         0.000         0.000         0.000         0.000
+ U14            0.000         0.000         0.000         0.000         0.000
+ U15            0.000         0.000         0.000         0.000         0.000
+ U16            0.000         0.000         0.000         0.000         0.000
+ U17            0.000         0.000         0.000         0.000         0.000
+ U18            0.000         0.000         0.000         0.000         0.000
+ U19            0.000         0.000         0.000         0.000         0.000
+ U20            0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              U6            U7            U8            U9            U10
+              ________      ________      ________      ________      ________
+ U6             1.000
+ U7             0.000         1.000
+ U8             0.000         0.000         1.000
+ U9             0.000         0.000         0.000         1.000
+ U10            0.000         0.000         0.000         0.000         1.000
+ U11            0.000         0.000         0.000         0.000         0.000
+ U12            0.000         0.000         0.000         0.000         0.000
+ U13            0.000         0.000         0.000         0.000         0.000
+ U14            0.000         0.000         0.000         0.000         0.000
+ U15            0.000         0.000         0.000         0.000         0.000
+ U16            0.000         0.000         0.000         0.000         0.000
+ U17            0.000         0.000         0.000         0.000         0.000
+ U18            0.000         0.000         0.000         0.000         0.000
+ U19            0.000         0.000         0.000         0.000         0.000
+ U20            0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              U11           U12           U13           U14           U15
+              ________      ________      ________      ________      ________
+ U11            1.000
+ U12            0.000         1.000
+ U13            0.000         0.000         1.000
+ U14            0.000         0.000         0.000         1.000
+ U15            0.000         0.000         0.000         0.000         1.000
+ U16            0.000         0.000         0.000         0.000         0.000
+ U17            0.000         0.000         0.000         0.000         0.000
+ U18            0.000         0.000         0.000         0.000         0.000
+ U19            0.000         0.000         0.000         0.000         0.000
+ U20            0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              U16           U17           U18           U19           U20
+              ________      ________      ________      ________      ________
+ U16            1.000
+ U17            0.000         1.000
+ U18            0.000         0.000         1.000
+ U19            0.000         0.000         0.000         1.000
+ U20            0.000         0.000         0.000         0.000         1.000
+
+
+           ALPHA
+              F
+              ________
+                0.000
+
+
+           BETA
+              F
+              ________
+ F              0.000
+
+
+           PSI
+              F
+              ________
+ F              1.000
+
+
+TECHNICAL 8 OUTPUT
+
+
+   E STEP  ITER  LOGLIKELIHOOD    ABS CHANGE   REL CHANGE  ALGORITHM
+              1 -0.62863564D+04    0.0000000    0.0000000  EM
+              2 -0.62661906D+04   20.1657817    0.0032079  EM
+              3 -0.62653912D+04    0.7994457    0.0001276  EM
+              4 -0.62653242D+04    0.0670496    0.0000107  EM
+              5 -0.62653166D+04    0.0075983    0.0000012  EM
+              6 -0.62653152D+04    0.0013361    0.0000002  EM
+              7 -0.62653149D+04    0.0003687    0.0000001  EM
+
+
+SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES
+
+
+     SAMPLE STATISTICS
+
+
+           Means
+              F             F_SE
+              ________      ________
+                0.000         0.455
+
+
+           Covariances
+              F             F_SE
+              ________      ________
+ F              0.791
+ F_SE           0.001         0.001
+
+
+           Correlations
+              F             F_SE
+              ________      ________
+ F              1.000
+ F_SE           0.033         1.000
+
+
+PLOT INFORMATION
+
+The following plots are available:
+
+  Histograms (sample values, estimated factor scores, estimated values, residuals)
+  Scatterplots (sample values, estimated factor scores, estimated values, residuals)
+  Sample proportions and estimated probabilities
+  Item characteristic curves
+  Information curves
+  Latent variable distribution plots
+
+     Beginning Time:  09:53:56
+        Ending Time:  09:53:56
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

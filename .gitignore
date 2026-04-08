@@ -26,11 +26,10 @@ products
 *.out
 *.log
 *.dgm
+*.gh5
 !inst/extdata/*.out
 !inst/extdata/*.csv
 !tests/testthat/*.csv
 !tests/testthat/*.out
-!tests/testthat/*.out
-!tests/testthat/*.csv
 !tests/testthat/mplus_ug
 docs

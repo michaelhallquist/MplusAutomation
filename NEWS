@@ -1,4 +1,8 @@
 Version 1.3
+ - feature:     readModels now parses input MODEL sections into $model_table, a syntax-oriented data.frame with parameter headers, labels, modifiers, values, fixed/free status, and source sections
+ - feature:     readModels now extracts TECH4 standard errors, Est./S.E. values, and p-values for latent means, covariances, and correlations alongside the estimate matrices
+ - bugfix:      expand TECH4 parsing to preserve estimate matrices when Mplus repeats "ESTIMATES DERIVED FROM THE MODEL" subsections for estimates versus S.E./test-statistic blocks
+ - bugfix:      improve grouped TECH4 and SVALUES handling, including regression coverage for grouped User's Guide examples such as ex5.16
  - feature:     TECH10 section is now parsed into $tech10 by readModels
  - feature:     mplusModel now supports update() semantics like mplusObject and base R objects
  - bugfix:      support extraction of TECH11 and other sections when they are interrupted by warnings or errors

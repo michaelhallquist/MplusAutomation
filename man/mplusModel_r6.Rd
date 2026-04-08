@@ -31,6 +31,8 @@ Wrapped by \code{mplusModel}
 
 \item{\code{input}}{Read-only accessor for the \code{input} section returned by \code{readModels()}.}
 
+\item{\code{model_table}}{Read-only accessor for the \code{model_table} section returned by \code{readModels()}.}
+
 \item{\code{warnings}}{Read-only accessor for the \code{warnings} section returned by \code{readModels()}.}
 
 \item{\code{errors}}{Read-only accessor for the \code{errors} section returned by \code{readModels()}.}

@@ -3,6 +3,7 @@
 \name{get_results}
 \alias{get_results}
 \alias{get_input}
+\alias{get_model_table}
 \alias{get_warn_err}
 \alias{get_data_summary}
 \alias{get_sampstat}
@@ -33,6 +34,8 @@
 get_results(x, element, simplify = FALSE, ...)
 
 get_input(x, simplify = FALSE, ...)
+
+get_model_table(x, simplify = FALSE, ...)
 
 get_warn_err(x, simplify = FALSE, ...)
 
@@ -117,6 +120,7 @@ by name from different types of objects returned by \code{MplusAutomation}.
  unlink("model1.out")
 }
 out <- get_input(res)
+out <- get_model_table(res)
 out <- get_warn_err(res)
 out <- get_data_summary(res)
 out <- get_sampstat(res)

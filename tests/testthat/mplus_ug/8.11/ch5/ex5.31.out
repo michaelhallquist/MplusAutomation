@@ -1,0 +1,252 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a Bayesian bi-factor CFA with two items
+          loading on only the general factor and cross-loadings with
+          zero-mean and small-variance priors
+  DATA:	FILE = ex5.31.dat;
+  VARIABLE:	NAMES = y1-y10;
+  ANALYSIS:	ESTIMATOR = BAYES;
+  	PROCESSORS = 2;
+  MODEL:	fg BY y1-y10*;
+  	fg@1;
+  	f1 BY y1-y4
+  	y5-y10 (f1xlam5-f1xlam10);
+  	f2 BY y5-y8
+  	y1-y4 y9-y10(f2xlam1-f2xlam6);
+  	fg WITH f1-f2@0;
+  MODEL PRIORS:
+  	f1xlam5-f2xlam6~N(0,0.01);
+  PLOT:	TYPE = PLOT2;
+
+
+
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a Bayesian bi-factor CFA with two items
+loading on only the general factor and cross-loadings with
+zero-mean and small-variance priors
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                   10
+Number of independent variables                                  0
+Number of continuous latent variables                            3
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2          Y3          Y4          Y5          Y6
+   Y7          Y8          Y9          Y10
+
+Continuous latent variables
+   FG          F1          F2
+
+
+Estimator                                                    BAYES
+Specifications for Bayesian Estimation
+  Point estimate                                            MEDIAN
+  Number of Markov chain Monte Carlo (MCMC) chains               2
+  Random seed for the first chain                                0
+  Starting value information                           UNPERTURBED
+  Algorithm used for Markov chain Monte Carlo           GIBBS(PX1)
+  Convergence criterion                                  0.500D-01
+  Maximum number of iterations                               50000
+  K-th iteration used for thinning                               1
+
+Input data file(s)
+  ex5.31.dat
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                   -0.073       0.041      -2.518    0.20%      -0.928     -0.356     -0.050
+             500.000       0.990      -0.354       2.797    0.20%       0.175      0.743
+     Y2                    0.049       0.117      -2.908    0.20%      -0.805     -0.269      0.003
+             500.000       1.033      -0.089       3.240    0.20%       0.295      0.885
+     Y3                    0.012      -0.075      -2.473    0.20%      -0.922     -0.230      0.034
+             500.000       0.967      -0.424       2.645    0.20%       0.312      0.844
+     Y4                   -0.042      -0.033      -3.179    0.20%      -0.901     -0.303     -0.041
+             500.000       1.059      -0.092       2.923    0.20%       0.218      0.845
+     Y5                    0.021      -0.037      -2.795    0.20%      -0.863     -0.249      0.043
+             500.000       1.047      -0.191       2.902    0.20%       0.298      0.919
+     Y6                   -0.025       0.105      -2.537    0.20%      -0.856     -0.270     -0.061
+             500.000       0.976      -0.072       2.874    0.20%       0.189      0.752
+     Y7                    0.022       0.029      -3.404    0.20%      -0.809     -0.257     -0.029
+             500.000       1.028      -0.049       2.933    0.20%       0.214      0.888
+     Y8                    0.059       0.017      -3.018    0.20%      -0.850     -0.193      0.066
+             500.000       1.142      -0.044       3.332    0.20%       0.313      0.935
+     Y9                   -0.018       0.064      -3.308    0.20%      -0.828     -0.287     -0.053
+             500.000       0.989       0.026       3.174    0.20%       0.169      0.820
+     Y10                  -0.003       0.048      -2.327    0.20%      -0.860     -0.310     -0.003
+             500.000       0.959      -0.321       3.071    0.20%       0.279      0.846
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+     USE THE FBITERATIONS OPTION TO INCREASE THE NUMBER OF ITERATIONS BY A FACTOR
+     OF AT LEAST TWO TO CHECK CONVERGENCE AND THAT THE PSR VALUE DOES NOT INCREASE.
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                              51
+
+Bayesian Posterior Predictive Checking using Chi-Square
+
+          95% Confidence Interval for the Difference Between
+          the Observed and the Replicated Chi-Square Values
+
+                                -31.351            35.584
+
+          Posterior Predictive P-Value              0.387
+
+          Prior Posterior Predictive P-Value        0.361
+
+Information Criteria
+
+          Deviance (DIC)                        11569.991
+          Estimated Number of Parameters (pD)      40.498
+          Bayesian (BIC)                        11804.965
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.020
+          90 Percent C.I.                    0.000  0.045
+          Probability RMSEA <= .05           0.993
+
+CFI/TLI
+
+          CFI                                0.998
+          90 Percent C.I.                    0.991  1.000
+
+          TLI                                0.997
+          90 Percent C.I.                    0.983  1.000
+
+
+
+MODEL RESULTS
+
+                                Posterior  One-Tailed         95% C.I.
+                    Estimate       S.D.      P-Value   Lower 2.5%  Upper 2.5%  Significance
+
+ FG       BY
+    Y1                 0.683       0.045      0.000       0.597       0.774      *
+    Y2                 0.728       0.048      0.000       0.636       0.817      *
+    Y3                 0.744       0.045      0.000       0.661       0.834      *
+    Y4                 0.742       0.048      0.000       0.652       0.841      *
+    Y5                 0.753       0.045      0.000       0.664       0.840      *
+    Y6                 0.705       0.045      0.000       0.619       0.795      *
+    Y7                 0.671       0.049      0.000       0.571       0.769      *
+    Y8                 0.719       0.050      0.000       0.620       0.816      *
+    Y9                 0.708       0.044      0.000       0.627       0.794      *
+    Y10                0.628       0.047      0.000       0.541       0.725      *
+
+ F1       BY
+    Y1                 1.000       0.000      0.000       1.000       1.000
+    Y2                 0.965       0.157      0.000       0.689       1.325      *
+    Y3                 0.765       0.132      0.000       0.513       1.015      *
+    Y4                 0.847       0.155      0.000       0.525       1.161      *
+    Y5                -0.012       0.080      0.434      -0.169       0.152
+    Y6                -0.071       0.078      0.166      -0.226       0.082
+    Y7                 0.088       0.083      0.141      -0.076       0.254
+    Y8                -0.014       0.081      0.427      -0.174       0.146
+    Y9                -0.003       0.091      0.487      -0.190       0.175
+    Y10                0.034       0.090      0.346      -0.159       0.206
+
+ F2       BY
+    Y5                 1.000       0.000      0.000       1.000       1.000
+    Y6                 0.957       0.299      0.000       0.558       1.714      *
+    Y7                 1.106       0.574      0.000       0.597       2.858      *
+    Y8                 1.162       0.372      0.000       0.715       2.134      *
+    Y1                 0.017       0.088      0.426      -0.153       0.187
+    Y2                 0.017       0.089      0.430      -0.154       0.197
+    Y3                -0.070       0.088      0.208      -0.251       0.089
+    Y4                 0.024       0.083      0.389      -0.154       0.179
+    Y9                 0.028       0.095      0.393      -0.162       0.218
+    Y10               -0.023       0.089      0.385      -0.197       0.150
+
+ FG       WITH
+    F1                 0.000       0.000      1.000       0.000       0.000
+    F2                 0.000       0.000      1.000       0.000       0.000
+
+ F2       WITH
+    F1                 0.024       0.037      0.180      -0.044       0.108
+
+ Intercepts
+    Y1                -0.075       0.049      0.054      -0.175       0.016
+    Y2                 0.045       0.049      0.179      -0.050       0.139
+    Y3                 0.010       0.048      0.409      -0.084       0.100
+    Y4                -0.044       0.050      0.173      -0.140       0.055
+    Y5                 0.022       0.049      0.341      -0.077       0.110
+    Y6                -0.025       0.048      0.298      -0.121       0.063
+    Y7                 0.022       0.049      0.326      -0.076       0.113
+    Y8                 0.060       0.051      0.116      -0.047       0.165
+    Y9                -0.019       0.047      0.359      -0.113       0.070
+    Y10               -0.001       0.047      0.487      -0.097       0.089
+
+ Variances
+    FG                 1.000       0.000      0.000       1.000       1.000
+    F1                 0.211       0.054      0.000       0.114       0.322      *
+    F2                 0.109       0.055      0.000       0.028       0.227      *
+
+ Residual Variances
+    Y1                 0.328       0.032      0.000       0.260       0.389      *
+    Y2                 0.320       0.030      0.000       0.260       0.378      *
+    Y3                 0.303       0.026      0.000       0.258       0.358      *
+    Y4                 0.370       0.029      0.000       0.317       0.430      *
+    Y5                 0.387       0.033      0.000       0.324       0.455      *
+    Y6                 0.397       0.034      0.000       0.336       0.465      *
+    Y7                 0.440       0.048      0.000       0.334       0.525      *
+    Y8                 0.494       0.042      0.000       0.418       0.583      *
+    Y9                 0.506       0.044      0.000       0.416       0.591      *
+    Y10                0.576       0.045      0.000       0.492       0.670      *
+
+
+PLOT INFORMATION
+
+The following plots are available:
+
+  Bayesian posterior parameter distributions
+  Bayesian posterior parameter trace plots
+  Bayesian autocorrelation plots
+  Bayesian prior parameter distributions
+  Bayesian posterior predictive checking scatterplots
+  Bayesian posterior predictive checking distribution plots
+
+     Beginning Time:  09:53:46
+        Ending Time:  09:53:47
+       Elapsed Time:  00:00:01
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

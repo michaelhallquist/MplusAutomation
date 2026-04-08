@@ -1,0 +1,343 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a bi-factor EFA
+  DATA:	FILE = ex5.29.dat;
+  VARIABLE:	NAMES = y1-y10;
+  ANALYSIS:	ROTATION = BI-GEOMIN;
+  MODEL:	fg f1 f2 BY y1-y10 (*1);
+  OUTPUT:	STDY;
+
+
+
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a bi-factor EFA
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        5000
+
+Number of dependent variables                                   10
+Number of independent variables                                  0
+Number of continuous latent variables                            3
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2          Y3          Y4          Y5          Y6
+   Y7          Y8          Y9          Y10
+
+Continuous latent variables
+
+  EFA factors
+  *1:   FG          F1          F2
+
+
+Estimator                                                       ML
+Rotation                                                 BI-GEOMIN
+Row standardization                                    CORRELATION
+Type of rotation                                           OBLIQUE
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Optimization Specifications for the Exploratory Factor Analysis
+Rotation Algorithm
+  Number of random starts                                       30
+  Maximum number of iterations                               10000
+  Derivative convergence criterion                       0.100D-04
+
+Input data file(s)
+  ex5.29.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                   -0.069      -0.021      -8.072    0.02%      -1.718     -0.593     -0.064
+            5000.000       3.951      -0.050       6.765    0.02%       0.462      1.615
+     Y2                   -0.033      -0.006      -6.509    0.02%      -1.453     -0.460     -0.037
+            5000.000       2.984       0.094       5.992    0.02%       0.387      1.390
+     Y3                   -0.055       0.025      -6.330    0.02%      -1.584     -0.497     -0.048
+            5000.000       3.306      -0.003       7.279    0.02%       0.380      1.484
+     Y4                   -0.058       0.027      -9.738    0.02%      -2.313     -0.792     -0.069
+            5000.000       7.133      -0.044      10.394    0.02%       0.631      2.219
+     Y5                   -0.040      -0.037      -7.276    0.02%      -1.509     -0.483     -0.022
+            5000.000       3.001      -0.047       5.370    0.02%       0.382      1.433
+     Y6                   -0.018      -0.040      -6.045    0.02%      -1.526     -0.459     -0.024
+            5000.000       3.279      -0.094       5.984    0.02%       0.438      1.524
+     Y7                   -0.005       0.053      -6.998    0.02%      -1.642     -0.510     -0.054
+            5000.000       3.754      -0.061       8.425    0.02%       0.435      1.667
+     Y8                    0.004      -0.043      -7.447    0.02%      -1.703     -0.485      0.013
+            5000.000       4.190       0.108       7.341    0.02%       0.528      1.702
+     Y9                    0.015       0.006      -7.174    0.02%      -1.687     -0.505      0.007
+            5000.000       4.002      -0.018       6.831    0.02%       0.536      1.702
+     Y10                   0.016      -0.018      -7.589    0.02%      -1.796     -0.510      0.035
+            5000.000       4.599      -0.098       8.354    0.02%       0.581      1.825
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       47
+
+Loglikelihood
+
+          H0 Value                     -100433.997
+          H1 Value                     -100421.815
+
+Information Criteria
+
+          Akaike (AIC)                  200961.994
+          Bayesian (BIC)                201268.302
+          Sample-Size Adjusted BIC      201118.952
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                             24.364
+          Degrees of Freedom                    18
+          P-Value                           0.1435
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.008
+          90 Percent C.I.                    0.000  0.016
+          Probability RMSEA <= .05           1.000
+
+CFI/TLI
+
+          CFI                                0.999
+          TLI                                0.998
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           8960.687
+          Degrees of Freedom                    45
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.006
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ FG       BY
+    Y1                 0.931      0.311      2.993      0.003
+    Y2                 0.771      0.094      8.227      0.000
+    Y3                 0.837      0.207      4.036      0.000
+    Y4                 1.037      0.808      1.284      0.199
+    Y5                 0.664      0.093      7.100      0.000
+    Y6                 0.550      0.063      8.728      0.000
+    Y7                 0.577      0.079      7.329      0.000
+    Y8                 0.651      0.075      8.726      0.000
+    Y9                 0.601      0.106      5.673      0.000
+    Y10                0.589      0.083      7.089      0.000
+
+ F1       BY
+    Y1                 0.726      0.430      1.690      0.091
+    Y2                 0.215      0.296      0.724      0.469
+    Y3                 0.472      0.358      1.319      0.187
+    Y4                 2.252      0.302      7.449      0.000
+    Y5                -0.073      0.146     -0.497      0.619
+    Y6                -0.005      0.037     -0.136      0.892
+    Y7                 0.019      0.027      0.732      0.464
+    Y8                 0.009      0.024      0.374      0.708
+    Y9                -0.063      0.037     -1.696      0.090
+    Y10                0.030      0.038      0.784      0.433
+
+ F2       BY
+    Y1                -0.045      0.037     -1.214      0.225
+    Y2                 0.008      0.044      0.172      0.864
+    Y3                -0.010      0.024     -0.420      0.675
+    Y4                 0.011      0.009      1.155      0.248
+    Y5                 0.376      0.072      5.221      0.000
+    Y6                 0.781      0.047     16.711      0.000
+    Y7                 0.984      0.054     18.116      0.000
+    Y8                 1.177      0.049     24.086      0.000
+    Y9                 1.120      0.058     19.253      0.000
+    Y10                1.308      0.048     27.085      0.000
+
+ F1       WITH
+    FG                 0.000      0.000     -7.217      0.000
+
+ F2       WITH
+    FG                 0.000      0.000     -7.931      0.000
+    F1                -0.029      0.182     -0.161      0.872
+
+ Intercepts
+    Y1                -0.069      0.028     -2.463      0.014
+    Y2                -0.033      0.024     -1.341      0.180
+    Y3                -0.055      0.026     -2.126      0.034
+    Y4                -0.058      0.038     -1.548      0.122
+    Y5                -0.040      0.024     -1.634      0.102
+    Y6                -0.018      0.026     -0.690      0.490
+    Y7                -0.005      0.027     -0.170      0.865
+    Y8                 0.004      0.029      0.130      0.897
+    Y9                 0.015      0.028      0.542      0.588
+    Y10                0.016      0.030      0.544      0.586
+
+ Variances
+    FG                 1.000      0.000    999.000    999.000
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    Y1                 2.553      0.090     28.506      0.000
+    Y2                 2.343      0.071     33.196      0.000
+    Y3                 2.383      0.067     35.645      0.000
+    Y4                 0.986      1.289      0.765      0.444
+    Y5                 2.412      0.073     33.266      0.000
+    Y6                 2.366      0.053     44.330      0.000
+    Y7                 2.453      0.059     41.808      0.000
+    Y8                 2.382      0.063     37.813      0.000
+    Y9                 2.378      0.061     39.089      0.000
+    Y10                2.542      0.073     34.856      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.124E-03
+       (ratio of smallest to largest eigenvalue)
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDY Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ FG       BY
+    Y1                 0.468      0.156      2.997      0.003
+    Y2                 0.446      0.054      8.304      0.000
+    Y3                 0.460      0.114      4.046      0.000
+    Y4                 0.388      0.302      1.284      0.199
+    Y5                 0.383      0.054      7.152      0.000
+    Y6                 0.304      0.034      8.824      0.000
+    Y7                 0.298      0.040      7.386      0.000
+    Y8                 0.318      0.036      8.822      0.000
+    Y9                 0.300      0.053      5.699      0.000
+    Y10                0.274      0.038      7.141      0.000
+
+ F1       BY
+    Y1                 0.365      0.216      1.691      0.091
+    Y2                 0.124      0.172      0.724      0.469
+    Y3                 0.260      0.197      1.319      0.187
+    Y4                 0.843      0.113      7.466      0.000
+    Y5                -0.042      0.084     -0.497      0.619
+    Y6                -0.003      0.021     -0.136      0.892
+    Y7                 0.010      0.014      0.732      0.464
+    Y8                 0.004      0.012      0.374      0.708
+    Y9                -0.031      0.019     -1.697      0.090
+    Y10                0.014      0.018      0.784      0.433
+
+ F2       BY
+    Y1                -0.023      0.019     -1.214      0.225
+    Y2                 0.004      0.026      0.172      0.864
+    Y3                -0.006      0.013     -0.420      0.675
+    Y4                 0.004      0.003      1.156      0.248
+    Y5                 0.217      0.041      5.237      0.000
+    Y6                 0.431      0.025     17.261      0.000
+    Y7                 0.508      0.027     18.781      0.000
+    Y8                 0.575      0.022     25.556      0.000
+    Y9                 0.560      0.028     20.009      0.000
+    Y10                0.610      0.021     29.258      0.000
+
+ F1       WITH
+    FG                 0.000      0.000     -7.217      0.000
+
+ F2       WITH
+    FG                 0.000      0.000     -7.931      0.000
+    F1                -0.029      0.182     -0.161      0.872
+
+ Intercepts
+    Y1                -0.035      0.014     -2.462      0.014
+    Y2                -0.019      0.014     -1.341      0.180
+    Y3                -0.030      0.014     -2.125      0.034
+    Y4                -0.022      0.014     -1.547      0.122
+    Y5                -0.023      0.014     -1.633      0.102
+    Y6                -0.010      0.014     -0.690      0.490
+    Y7                -0.002      0.014     -0.170      0.865
+    Y8                 0.002      0.014      0.130      0.897
+    Y9                 0.008      0.014      0.542      0.588
+    Y10                0.008      0.014      0.544      0.586
+
+ Variances
+    FG                 1.000      0.000    999.000    999.000
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    Y1                 0.646      0.022     29.962      0.000
+    Y2                 0.785      0.020     38.370      0.000
+    Y3                 0.721      0.018     40.477      0.000
+    Y4                 0.138      0.181      0.765      0.444
+    Y5                 0.804      0.021     38.907      0.000
+    Y6                 0.722      0.013     54.911      0.000
+    Y7                 0.654      0.014     47.178      0.000
+    Y8                 0.569      0.014     39.388      0.000
+    Y9                 0.594      0.014     41.556      0.000
+    Y10                0.553      0.015     35.786      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    Y1                 0.354      0.022     16.410      0.000
+    Y2                 0.215      0.020     10.490      0.000
+    Y3                 0.279      0.018     15.675      0.000
+    Y4                 0.862      0.181      4.769      0.000
+    Y5                 0.196      0.021      9.499      0.000
+    Y6                 0.278      0.013     21.195      0.000
+    Y7                 0.346      0.014     25.014      0.000
+    Y8                 0.431      0.014     29.894      0.000
+    Y9                 0.406      0.014     28.378      0.000
+    Y10                0.447      0.015     28.963      0.000
+
+
+     Beginning Time:  09:53:46
+        Ending Time:  09:53:46
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

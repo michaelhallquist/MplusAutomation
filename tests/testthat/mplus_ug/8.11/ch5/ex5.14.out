@@ -1,0 +1,275 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a multiple group CFA
+  	with covariates (MIMIC) with continuous
+  	factor indicators
+  DATA:	FILE IS ex5.14.dat;
+  VARIABLE:	NAMES ARE y1-y6 x1-x3 g;
+  	GROUPING IS g (1=male 2=female);
+  ANALYSIS:	MODEL = NOMEANSTRUCTURE;
+  	INFORMATION = EXPECTED;
+  MODEL:	f1 BY y1-y3;
+  	f2 BY y4-y6;
+  	f1 f2 ON x1-x3;
+  MODEL female:
+  	f1 BY y3;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a multiple group CFA
+with covariates (MIMIC) with continuous
+factor indicators
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 2
+Number of observations
+   Group MALE                                                  500
+   Group FEMALE                                                600
+   Total sample size                                          1100
+
+Number of dependent variables                                    6
+Number of independent variables                                  3
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2          Y3          Y4          Y5          Y6
+
+Observed independent variables
+   X1          X2          X3
+
+Continuous latent variables
+   F1          F2
+
+Variables with special functions
+
+  Grouping variable     G
+
+Estimator                                                       ML
+Information matrix                                        EXPECTED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex5.14.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS FOR MALE
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                    2.066      -0.174      -2.827    0.20%       0.516      1.668      2.111
+             500.000       3.227      -0.300       6.876    0.20%       2.616      3.685
+     Y2                    2.088       0.021      -2.785    0.20%       0.544      1.611      2.178
+             500.000       3.388      -0.114       7.456    0.20%       2.561      3.658
+     Y3                    2.088       0.036      -2.223    0.20%       0.534      1.685      2.046
+             500.000       3.295      -0.323       6.987    0.20%       2.510      3.553
+     Y4                    1.663      -0.017      -3.780    0.20%       0.067      1.162      1.694
+             500.000       3.595      -0.233       7.734    0.20%       2.122      3.307
+     Y5                    1.623      -0.138      -3.931    0.20%       0.039      1.236      1.649
+             500.000       3.290      -0.253       5.979    0.20%       2.060      3.303
+     Y6                    1.596      -0.104      -3.491    0.20%       0.040      1.122      1.588
+             500.000       3.434      -0.338       6.396    0.20%       2.087      3.243
+     X1                   -0.061      -0.070      -5.568    0.20%      -1.405     -0.513     -0.093
+             500.000       2.921       0.161       4.844    0.20%       0.268      1.410
+     X2                    1.033      -0.175      -4.642    0.20%      -0.089      0.776      1.082
+             500.000       2.082       0.136       4.880    0.20%       1.424      2.167
+     X3                    2.090       0.036      -0.597    0.20%       1.176      1.777      2.115
+             500.000       1.042      -0.377       4.840    0.20%       2.374      3.002
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS FOR FEMALE
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                    1.918       0.039      -3.060    0.17%       0.314      1.434      1.828
+             600.000       3.190      -0.391       6.553    0.17%       2.304      3.541
+     Y2                    1.913       0.053      -3.112    0.17%       0.343      1.399      1.869
+             600.000       3.209      -0.166       7.310    0.17%       2.327      3.433
+     Y3                    0.963       0.168      -2.101    0.17%       0.053      0.637      0.959
+             600.000       1.080      -0.097       4.398    0.17%       1.222      1.802
+     Y4                    1.519       0.076      -3.636    0.17%      -0.178      1.014      1.513
+             600.000       3.961      -0.152       7.391    0.17%       2.030      3.204
+     Y5                    1.526      -0.021      -4.207    0.17%      -0.130      1.073      1.505
+             600.000       4.010      -0.138       7.570    0.17%       2.093      3.237
+     Y6                    1.533       0.077      -4.125    0.17%      -0.222      0.966      1.563
+             600.000       4.038      -0.134       7.690    0.17%       1.959      3.239
+     X1                   -0.033      -0.039      -5.000    0.17%      -1.447     -0.446     -0.053
+             600.000       2.989      -0.184       4.920    0.17%       0.379      1.390
+     X2                    0.981       0.011      -3.292    0.17%      -0.206      0.610      0.974
+             600.000       2.144       0.091       6.391    0.17%       1.263      2.213
+     X3                    1.965      -0.112      -1.400    0.17%       1.099      1.678      1.973
+             600.000       1.123      -0.002       4.983    0.17%       2.270      2.880
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       35
+
+Loglikelihood
+
+          H0 Value                       -8811.413
+          H1 Value                       -8790.546
+
+Information Criteria
+
+          Akaike (AIC)                   17692.826
+          Bayesian (BIC)                 17867.933
+          Sample-Size Adjusted BIC       17756.765
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                             41.735
+          Degrees of Freedom                    43
+          P-Value                           0.5262
+
+Chi-Square Contribution From Each Group
+
+          MALE                              21.980
+          FEMALE                            19.755
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.028
+          Probability RMSEA <= .05           1.000
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           8731.537
+          Degrees of Freedom                    66
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.013
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Group MALE
+
+ F1       BY
+    Y1                 1.000      0.000    999.000    999.000
+    Y2                 1.014      0.020     50.252      0.000
+    Y3                 1.013      0.027     38.019      0.000
+
+ F2       BY
+    Y4                 1.000      0.000    999.000    999.000
+    Y5                 1.001      0.018     55.628      0.000
+    Y6                 1.008      0.018     54.847      0.000
+
+ F1       ON
+    X1                 0.501      0.026     19.379      0.000
+    X2                 0.571      0.031     18.703      0.000
+    X3                 0.697      0.043     16.250      0.000
+
+ F2       ON
+    X1                 0.664      0.024     27.232      0.000
+    X2                 0.589      0.028     20.839      0.000
+    X3                 0.423      0.039     10.803      0.000
+
+ F2       WITH
+    F1                 0.224      0.039      5.779      0.000
+
+ Residual Variances
+    Y1                 0.525      0.046     11.474      0.000
+    Y2                 0.518      0.046     11.274      0.000
+    Y3                 0.477      0.044     10.802      0.000
+    Y4                 0.554      0.046     12.042      0.000
+    Y5                 0.396      0.038     10.495      0.000
+    Y6                 0.516      0.044     11.688      0.000
+    F1                 0.733      0.061     12.115      0.000
+    F2                 0.616      0.051     11.977      0.000
+
+Group FEMALE
+
+ F1       BY
+    Y1                 1.000      0.000    999.000    999.000
+    Y2                 1.014      0.020     50.252      0.000
+    Y3                 0.480      0.019     24.642      0.000
+
+ F2       BY
+    Y4                 1.000      0.000    999.000    999.000
+    Y5                 1.001      0.018     55.628      0.000
+    Y6                 1.008      0.018     54.847      0.000
+
+ F1       ON
+    X1                 0.440      0.024     18.525      0.000
+    X2                 0.598      0.028     21.173      0.000
+    X3                 0.643      0.038     16.690      0.000
+
+ F2       ON
+    X1                 0.681      0.024     28.447      0.000
+    X2                 0.638      0.028     23.011      0.000
+    X3                 0.505      0.037     13.534      0.000
+
+ F2       WITH
+    F1                 0.279      0.040      6.936      0.000
+
+ Residual Variances
+    Y1                 0.492      0.046     10.765      0.000
+    Y2                 0.504      0.047     10.743      0.000
+    Y3                 0.466      0.030     15.786      0.000
+    Y4                 0.616      0.047     13.129      0.000
+    Y5                 0.512      0.042     12.243      0.000
+    Y6                 0.485      0.041     11.872      0.000
+    F1                 0.747      0.059     12.616      0.000
+    F2                 0.739      0.056     13.225      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.299E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  09:53:44
+        Ending Time:  09:53:44
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

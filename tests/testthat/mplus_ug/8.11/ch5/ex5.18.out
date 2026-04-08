@@ -1,0 +1,297 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a two-group twin
+  	model for continuous outcomes where
+  	factors represent the ACE components
+  DATA:	FILE = ex5.18.dat;
+  VARIABLE:	NAMES = y1 y2 g;
+  	GROUPING = g (1 = mz 2 = dz);
+  ANALYSIS:MODEL = NOCOVARIANCES;
+  MODEL:	[y1-y2]   (1);
+  	y1-y2@0;
+  	a1 BY y1* (2);
+  	a2 BY y2* (2);
+  	c1 BY y1* (3);
+  	c2 BY y2* (3);
+  	e1 BY y1* (4);
+  	e2 BY y2* (4);
+  	a1-e2@1;
+  	[a1-e2@0];
+  	a1 WITH a2@1;
+  	c1 WITH c2@1;
+  MODEL dz:	a1 WITH a2@.5;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a two-group twin
+model for continuous outcomes where
+factors represent the ACE components
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 2
+Number of observations
+   Group MZ                                                   1000
+   Group DZ                                                   1000
+   Total sample size                                          2000
+
+Number of dependent variables                                    2
+Number of independent variables                                  0
+Number of continuous latent variables                            6
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2
+
+Continuous latent variables
+   A1          A2          C1          C2          E1          E2
+
+Variables with special functions
+
+  Grouping variable     G
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex5.18.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS FOR MZ
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                    0.013      -0.062      -3.543    0.10%      -0.800     -0.277     -0.009
+            1000.000       0.992      -0.153       3.058    0.10%       0.264      0.871
+     Y2                    0.035      -0.019      -3.045    0.10%      -0.850     -0.204      0.013
+            1000.000       1.056      -0.174       3.125    0.10%       0.313      0.929
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS FOR DZ
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                   -0.017       0.052      -2.676    0.10%      -0.844     -0.251     -0.026
+            1000.000       0.985      -0.088       3.447    0.10%       0.202      0.823
+     Y2                    0.006       0.091      -2.754    0.10%      -0.846     -0.252     -0.026
+            1000.000       1.042      -0.059       2.969    0.10%       0.244      0.845
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+     WARNING:  THE LATENT VARIABLE COVARIANCE MATRIX (PSI) IN GROUP MZ
+     IS NOT POSITIVE DEFINITE.  THIS COULD INDICATE A NEGATIVE VARIANCE/
+     RESIDUAL VARIANCE FOR A LATENT VARIABLE, A CORRELATION GREATER OR EQUAL
+     TO ONE BETWEEN TWO LATENT VARIABLES, OR A LINEAR DEPENDENCY AMONG MORE
+     THAN TWO LATENT VARIABLES.  CHECK THE TECH4 OUTPUT FOR MORE INFORMATION.
+     PROBLEM INVOLVING VARIABLE A2.
+
+
+     WARNING:  THE LATENT VARIABLE COVARIANCE MATRIX (PSI) IN GROUP DZ
+     IS NOT POSITIVE DEFINITE.  THIS COULD INDICATE A NEGATIVE VARIANCE/
+     RESIDUAL VARIANCE FOR A LATENT VARIABLE, A CORRELATION GREATER OR EQUAL
+     TO ONE BETWEEN TWO LATENT VARIABLES, OR A LINEAR DEPENDENCY AMONG MORE
+     THAN TWO LATENT VARIABLES.  CHECK THE TECH4 OUTPUT FOR MORE INFORMATION.
+     PROBLEM INVOLVING VARIABLE C2.
+
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        4
+
+Loglikelihood
+
+          H0 Value                       -5217.340
+          H1 Value                       -5214.760
+
+Information Criteria
+
+          Akaike (AIC)                   10442.679
+          Bayesian (BIC)                 10465.083
+          Sample-Size Adjusted BIC       10452.375
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              5.160
+          Degrees of Freedom                     6
+          P-Value                           0.5235
+
+Chi-Square Contribution From Each Group
+
+          MZ                                 3.443
+          DZ                                 1.718
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.038
+          Probability RMSEA <= .05           0.993
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            994.489
+          Degrees of Freedom                     2
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.022
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Group MZ
+
+ A1       BY
+    Y1                 0.801      0.035     23.136      0.000
+
+ A2       BY
+    Y2                 0.801      0.035     23.136      0.000
+
+ C1       BY
+    Y1                 0.333      0.078      4.293      0.000
+
+ C2       BY
+    Y2                 0.333      0.078      4.293      0.000
+
+ E1       BY
+    Y1                 0.515      0.011     45.047      0.000
+
+ E2       BY
+    Y2                 0.515      0.011     45.047      0.000
+
+ A1       WITH
+    A2                 1.000      0.000    999.000    999.000
+
+ C1       WITH
+    C2                 1.000      0.000    999.000    999.000
+
+ Means
+    A1                 0.000      0.000    999.000    999.000
+    A2                 0.000      0.000    999.000    999.000
+    C1                 0.000      0.000    999.000    999.000
+    C2                 0.000      0.000    999.000    999.000
+    E1                 0.000      0.000    999.000    999.000
+    E2                 0.000      0.000    999.000    999.000
+
+ Intercepts
+    Y1                 0.008      0.020      0.395      0.693
+    Y2                 0.008      0.020      0.395      0.693
+
+ Variances
+    A1                 1.000      0.000    999.000    999.000
+    A2                 1.000      0.000    999.000    999.000
+    C1                 1.000      0.000    999.000    999.000
+    C2                 1.000      0.000    999.000    999.000
+    E1                 1.000      0.000    999.000    999.000
+    E2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    Y1                 0.000      0.000    999.000    999.000
+    Y2                 0.000      0.000    999.000    999.000
+
+Group DZ
+
+ A1       BY
+    Y1                 0.801      0.035     23.136      0.000
+
+ A2       BY
+    Y2                 0.801      0.035     23.136      0.000
+
+ C1       BY
+    Y1                 0.333      0.078      4.293      0.000
+
+ C2       BY
+    Y2                 0.333      0.078      4.293      0.000
+
+ E1       BY
+    Y1                 0.515      0.011     45.047      0.000
+
+ E2       BY
+    Y2                 0.515      0.011     45.047      0.000
+
+ A1       WITH
+    A2                 0.500      0.000    999.000    999.000
+
+ C1       WITH
+    C2                 1.000      0.000    999.000    999.000
+
+ Means
+    A1                 0.000      0.000    999.000    999.000
+    A2                 0.000      0.000    999.000    999.000
+    C1                 0.000      0.000    999.000    999.000
+    C2                 0.000      0.000    999.000    999.000
+    E1                 0.000      0.000    999.000    999.000
+    E2                 0.000      0.000    999.000    999.000
+
+ Intercepts
+    Y1                 0.008      0.020      0.395      0.693
+    Y2                 0.008      0.020      0.395      0.693
+
+ Variances
+    A1                 1.000      0.000    999.000    999.000
+    A2                 1.000      0.000    999.000    999.000
+    C1                 1.000      0.000    999.000    999.000
+    C2                 1.000      0.000    999.000    999.000
+    E1                 1.000      0.000    999.000    999.000
+    E2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    Y1                 0.000      0.000    999.000    999.000
+    Y2                 0.000      0.000    999.000    999.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.137E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  09:53:44
+        Ending Time:  09:53:45
+       Elapsed Time:  00:00:01
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

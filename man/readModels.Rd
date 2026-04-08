@@ -55,6 +55,7 @@ a single mplus.model object, not a list of files. Specific elements are:
 \item \code{random_starts}: Parsed random starts results, including final-stage loglikelihoods and random start specifications
 \item \code{parameters}: Model parameters from \code{extractModelParameters}, having structure as specified by that function
 \item \code{svalues}: Raw text from the SVALUES section, if present
+\item \code{model_table}: Parsed model syntax from the input \code{MODEL} sections as a data.frame
 \item \code{class_counts}: Latent class counts and proportions for models that include a categorical latent variable
 \item \code{indirect}: Output of MODEL INDIRECT if available in output. Contains \code{$overall} and \code{$specific} data.frames for each indirect effect section
 \item \code{mod_indices}: Model modification indices from \code{extractModIndices}, having structure as specified by that function
@@ -64,7 +65,7 @@ a single mplus.model object, not a list of files. Specific elements are:
 \item \code{bparameters}: an \code{mcmc.list} object containing the draws from the MCMC chains for a Bayesian model that uses the SAVEDATA: BPARAMETERS command
 \item \code{tech1}: a list containing parameter specification and starting values from OUTPUT: TECH1
 \item \code{tech3}: a list containing parameter covariance and correlation matrices from OUTPUT: TECH3
-\item \code{tech4}: a list containing means, covariances, and correlations for latent variables from OUTPUT: TECH4
+\item \code{tech4}: a list containing estimates, standard errors, Est./S.E. values, and p-values for latent variable means, covariances, and correlations from OUTPUT: TECH4
 \item \code{tech7}: a list containing sample statistics for each latent class from OUTPUT: TECH7
 \item \code{tech8}: a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8
 \item \code{tech9}: a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9
@@ -89,7 +90,7 @@ reduced set of output sections (especially to speed up the function when reading
 as a character vector from the following options:
 
 c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
-"random_starts", "parameters", "svalues", "class_counts", "indirect", "mod_indices", "residuals",
+"random_starts", "parameters", "svalues", "model_table", "class_counts", "indirect", "mod_indices", "residuals",
 "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
 "output")

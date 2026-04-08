@@ -7,6 +7,7 @@
 createMixtures(
   classes = 1L,
   filename_stem = NULL,
+  outputDirectory = getwd(),
   model_overall = NULL,
   model_class_specific = NULL,
   rdata = NULL,
@@ -24,6 +25,9 @@ generate. Defaults to 1L. E.g., \code{classes = 1:6},
 
 \item{filename_stem}{Character. A stem for the automatically generated filenames of
 the syntax and data files.}
+
+\item{outputDirectory}{Character. Directory where generated input, output,
+and data files should be written. Defaults to the current working directory.}
 
 \item{model_overall}{Character. Mplus syntax for the overall model (across
 classes).}

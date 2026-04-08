@@ -1,0 +1,191 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a threshold
+  	structure CFA for categorical factor indicators
+  DATA:	FILE IS ex5.10.dat;
+  VARIABLE:	NAMES ARE  u1a-u1c u2a-u2c;
+  	CATEGORICAL ARE u1a-u1c u2a-u2c;
+  MODEL:	f1 BY u1a u1b@1 u1c@1;
+  	f2 BY u2a u2b@1 u2c@1;
+  	[u1a$1 u1b$1 u1c$1] (1);	
+  	[u2a$1 u2b$1 u2c$1] (2);
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a threshold
+structure CFA for categorical factor indicators
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Binary and ordered categorical (ordinal)
+   U1A         U1B         U1C         U2A         U2B         U2C
+
+Continuous latent variables
+   F1          F2
+
+
+Estimator                                                    WLSMV
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Parameterization                                             DELTA
+Link                                                        PROBIT
+
+Input data file(s)
+  ex5.10.dat
+
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    U1A
+      Category 1    0.316          158.000
+      Category 2    0.684          342.000
+    U1B
+      Category 1    0.282          141.000
+      Category 2    0.718          359.000
+    U1C
+      Category 1    0.312          156.000
+      Category 2    0.688          344.000
+    U2A
+      Category 1    0.718          359.000
+      Category 2    0.282          141.000
+    U2B
+      Category 1    0.704          352.000
+      Category 2    0.296          148.000
+    U2C
+      Category 1    0.694          347.000
+      Category 2    0.306          153.000
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        5
+
+Chi-Square Test of Model Fit
+
+          Value                             15.119*
+          Degrees of Freedom                    16
+          P-Value                           0.5159
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.039
+          Probability RMSEA <= .05           0.992
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            406.672
+          Degrees of Freedom                    15
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.044
+
+Optimum Function Value for Weighted Least-Squares Estimator
+
+          Value                     0.11568994D-01
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    U1A                1.000      0.000    999.000    999.000
+    U1B                1.000      0.000    999.000    999.000
+    U1C                1.000      0.000    999.000    999.000
+
+ F2       BY
+    U2A                1.000      0.000    999.000    999.000
+    U2B                1.000      0.000    999.000    999.000
+    U2C                1.000      0.000    999.000    999.000
+
+ F2       WITH
+    F1                 0.176      0.040      4.400      0.000
+
+ Thresholds
+    U1A$1             -0.515      0.043    -11.874      0.000
+    U1B$1             -0.515      0.043    -11.874      0.000
+    U1C$1             -0.515      0.043    -11.874      0.000
+    U2A$1              0.540      0.044     12.247      0.000
+    U2B$1              0.540      0.044     12.247      0.000
+    U2C$1              0.540      0.044     12.247      0.000
+
+ Variances
+    F1                 0.494      0.043     11.453      0.000
+    F2                 0.526      0.044     12.078      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.504E+00
+       (ratio of smallest to largest eigenvalue)
+
+
+R-SQUARE
+
+    Observed                   Residual
+    Variable        Estimate   Variance
+
+    U1A                0.494      0.506
+    U1B                0.494      0.506
+    U1C                0.494      0.506
+    U2A                0.526      0.474
+    U2B                0.526      0.474
+    U2C                0.526      0.474
+
+
+     Beginning Time:  09:53:39
+        Ending Time:  09:53:39
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

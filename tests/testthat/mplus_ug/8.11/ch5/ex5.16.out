@@ -1,0 +1,632 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a multiple group CFA
+  	with covariates (MIMIC) with categorical
+  	factor indicators and a threshold
+  	structure
+  DATA:	FILE IS ex5.16.dat;
+  VARIABLE:	NAMES ARE u1-u6 x1-x3 g;
+  	CATEGORICAL ARE u1-u6;
+  	GROUPING IS g (1=male 2=female);
+  MODEL:	f1 BY u1-u3;
+  	f2 BY u4-u6;
+  	f1 f2 ON x1-x3;
+  MODEL female:
+  	f1 BY u3;
+  	[u3$1];
+  	{u3@1};
+  OUTPUT: TECH4 SVALUES;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a multiple group CFA
+with covariates (MIMIC) with categorical
+factor indicators and a threshold
+structure
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 2
+Number of observations
+   Group MALE                                                 1000
+   Group FEMALE                                               1200
+   Total sample size                                          2200
+
+Number of dependent variables                                    6
+Number of independent variables                                  3
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Binary and ordered categorical (ordinal)
+   U1          U2          U3          U4          U5          U6
+
+Observed independent variables
+   X1          X2          X3
+
+Continuous latent variables
+   F1          F2
+
+Variables with special functions
+
+  Grouping variable     G
+
+Estimator                                                    WLSMV
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Parameterization                                             DELTA
+Link                                                        PROBIT
+
+Input data file(s)
+  ex5.16.dat
+
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+  Group MALE
+    U1
+      Category 1    0.260          260.000
+      Category 2    0.740          740.000
+    U2
+      Category 1    0.354          354.000
+      Category 2    0.646          646.000
+    U3
+      Category 1    0.432          432.000
+      Category 2    0.568          568.000
+    U4
+      Category 1    0.495          495.000
+      Category 2    0.505          505.000
+    U5
+      Category 1    0.547          547.000
+      Category 2    0.453          453.000
+    U6
+      Category 1    0.631          631.000
+      Category 2    0.369          369.000
+
+  Group FEMALE
+    U1
+      Category 1    0.271          325.000
+      Category 2    0.729          875.000
+    U2
+      Category 1    0.382          458.000
+      Category 2    0.618          742.000
+    U3
+      Category 1    0.693          831.000
+      Category 2    0.307          369.000
+    U4
+      Category 1    0.512          614.000
+      Category 2    0.488          586.000
+    U5
+      Category 1    0.571          685.000
+      Category 2    0.429          515.000
+    U6
+      Category 1    0.638          766.000
+      Category 2    0.362          434.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS FOR MALE
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     X1                   -0.022      -0.059      -3.215    0.10%      -0.816     -0.282     -0.047
+            1000.000       0.979      -0.046       2.840    0.10%       0.185      0.828
+     X2                    0.024      -0.081      -3.990    0.10%      -0.801     -0.190      0.026
+            1000.000       1.047       0.136       3.812    0.10%       0.275      0.847
+     X3                    0.029      -0.028      -3.223    0.10%      -0.871     -0.281      0.049
+            1000.000       1.091      -0.180       2.983    0.10%       0.309      0.929
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS FOR FEMALE
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     X1                    0.011       0.082      -3.147    0.08%      -0.884     -0.252      0.017
+            1200.000       1.069       0.045       4.267    0.08%       0.280      0.859
+     X2                   -0.033      -0.026      -3.406    0.08%      -0.847     -0.294     -0.042
+            1200.000       1.002       0.002       2.888    0.08%       0.203      0.820
+     X3                   -0.057      -0.051      -3.400    0.08%      -0.884     -0.305     -0.058
+            1200.000       1.042       0.032       2.964    0.08%       0.194      0.800
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       37
+
+Chi-Square Test of Model Fit
+
+          Value                             33.718*
+          Degrees of Freedom                    41
+          P-Value                           0.7830
+
+Chi-Square Contribution From Each Group
+
+          MALE                              16.002
+          FEMALE                            17.717
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.014
+          Probability RMSEA <= .05           1.000
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           6573.773
+          Degrees of Freedom                    66
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.016
+
+Optimum Function Value for Weighted Least-Squares Estimator
+
+          Value                     0.48564199D-02
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Group MALE
+
+ F1       BY
+    U1                 1.000      0.000    999.000    999.000
+    U2                 0.957      0.049     19.609      0.000
+    U3                 0.978      0.049     20.074      0.000
+
+ F2       BY
+    U4                 1.000      0.000    999.000    999.000
+    U5                 1.002      0.044     22.888      0.000
+    U6                 0.992      0.045     22.037      0.000
+
+ F1       ON
+    X1                 0.499      0.044     11.288      0.000
+    X2                 0.550      0.045     12.308      0.000
+    X3                 0.671      0.046     14.497      0.000
+
+ F2       ON
+    X1                 0.644      0.045     14.262      0.000
+    X2                 0.619      0.043     14.241      0.000
+    X3                 0.450      0.041     10.904      0.000
+
+ F2       WITH
+    F1                 0.005      0.043      0.117      0.907
+
+ Intercepts
+    F1                 0.000      0.000    999.000    999.000
+    F2                 0.000      0.000    999.000    999.000
+
+ Thresholds
+    U1$1              -0.905      0.057    -15.937      0.000
+    U2$1              -0.536      0.052    -10.361      0.000
+    U3$1              -0.230      0.047     -4.920      0.000
+    U4$1              -0.013      0.045     -0.297      0.767
+    U5$1               0.198      0.042      4.668      0.000
+    U6$1               0.499      0.049     10.287      0.000
+
+ Residual Variances
+    F1                 0.741      0.051     14.570      0.000
+    F2                 0.691      0.044     15.554      0.000
+
+ Scales
+    U1                 1.000      0.000    999.000    999.000
+    U2                 1.000      0.000    999.000    999.000
+    U3                 1.000      0.000    999.000    999.000
+    U4                 1.000      0.000    999.000    999.000
+    U5                 1.000      0.000    999.000    999.000
+    U6                 1.000      0.000    999.000    999.000
+
+Group FEMALE
+
+ F1       BY
+    U1                 1.000      0.000    999.000    999.000
+    U2                 0.957      0.049     19.609      0.000
+    U3                 0.777      0.166      4.678      0.000
+
+ F2       BY
+    U4                 1.000      0.000    999.000    999.000
+    U5                 1.002      0.044     22.888      0.000
+    U6                 0.992      0.045     22.037      0.000
+
+ F1       ON
+    X1                 0.397      0.086      4.613      0.000
+    X2                 0.471      0.100      4.700      0.000
+    X3                 0.521      0.110      4.720      0.000
+
+ F2       ON
+    X1                 0.780      0.121      6.446      0.000
+    X2                 0.648      0.103      6.273      0.000
+    X3                 0.530      0.087      6.063      0.000
+
+ F2       WITH
+    F1                -0.039      0.036     -1.077      0.281
+
+ Intercepts
+    F1                -0.171      0.128     -1.341      0.180
+    F2                -0.035      0.064     -0.547      0.585
+
+ Thresholds
+    U1$1              -0.905      0.057    -15.937      0.000
+    U2$1              -0.536      0.052    -10.361      0.000
+    U3$1               0.430      0.129      3.327      0.001
+    U4$1              -0.013      0.045     -0.297      0.767
+    U5$1               0.198      0.042      4.668      0.000
+    U6$1               0.499      0.049     10.287      0.000
+
+ Residual Variances
+    F1                 0.410      0.172      2.384      0.017
+    F2                 0.830      0.251      3.306      0.001
+
+ Scales
+    U1                 1.349      0.275      4.899      0.000
+    U2                 1.356      0.302      4.483      0.000
+    U3                 1.000      0.000    999.000    999.000
+    U4                 0.939      0.141      6.636      0.000
+    U5                 0.931      0.142      6.579      0.000
+    U6                 0.917      0.133      6.874      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.256E-03
+       (ratio of smallest to largest eigenvalue)
+
+
+R-SQUARE
+
+Group MALE
+
+    Observed                   Residual
+    Variable        Estimate   Variance
+
+    U1                 0.877      0.259
+    U2                 0.840      0.321
+    U3                 0.858      0.292
+    U4                 0.852      0.309
+    U5                 0.854      0.307
+    U6                 0.845      0.321
+
+     Latent
+    Variable        Estimate
+
+    F1                 0.598
+    F2                 0.612
+
+Group FEMALE
+
+    Observed                   Residual
+    Variable        Estimate   Variance
+
+    U1                 0.889      0.140
+    U2                 0.859      0.169
+    U3                 0.474      0.753
+    U4                 0.882      0.304
+    U5                 0.877      0.321
+    U6                 0.857      0.374
+
+     Latent
+    Variable        Estimate
+
+    F1                 0.636
+    F2                 0.636
+
+
+MODEL COMMAND WITH FINAL ESTIMATES USED AS STARTING VALUES
+
+     f1 BY u1;
+     f1 BY u2;
+     f1 BY u3;
+     f2 BY u4;
+     f2 BY u5;
+     f2 BY u6;
+
+     f1 ON x1;
+     f1 ON x2;
+     f1 ON x3;
+     f2 ON x1;
+     f2 ON x2;
+     f2 ON x3;
+
+  MODEL MALE:
+
+     f1 BY u1@1;
+     f1 BY u2*0.95730 (7);
+     f1 BY u3*0.97782;
+     f2 BY u4@1;
+     f2 BY u5*1.00168 (9);
+     f2 BY u6*0.99152 (10);
+
+     f1 ON x1*0.49946;
+     f1 ON x2*0.55047;
+     f1 ON x3*0.67082;
+     f2 ON x1*0.64382;
+     f2 ON x2*0.61878;
+     f2 ON x3*0.45016;
+
+     f2 WITH f1*0.00502;
+
+     [ f1@0 ];
+     [ f2@0 ];
+
+     [ u1$1*-0.90507 ] (1);
+     [ u2$1*-0.53590 ] (2);
+     [ u3$1*-0.22972 ];
+     [ u4$1*-0.01340 ] (4);
+     [ u5$1*0.19816 ] (5);
+     [ u6$1*0.49896 ] (6);
+
+     f1*0.74065;
+     f2*0.69111;
+
+     { u1@1 };
+     { u2@1 };
+     { u3@1 };
+     { u4@1 };
+     { u5@1 };
+     { u6@1 };
+
+  MODEL FEMALE:
+
+     f1 BY u1@1;
+     f1 BY u2*0.95730 (7);
+     f1 BY u3*0.77675;
+     f2 BY u4@1;
+     f2 BY u5*1.00168 (9);
+     f2 BY u6*0.99152 (10);
+
+     f1 ON x1*0.39714;
+     f1 ON x2*0.47106;
+     f1 ON x3*0.52140;
+     f2 ON x1*0.78014;
+     f2 ON x2*0.64773;
+     f2 ON x3*0.53030;
+
+     f2 WITH f1*-0.03918;
+
+     [ f1*-0.17144 ];
+     [ f2*-0.03480 ];
+
+     [ u1$1*-0.90507 ] (1);
+     [ u2$1*-0.53590 ] (2);
+     [ u3$1*0.43003 ];
+     [ u4$1*-0.01340 ] (4);
+     [ u5$1*0.19816 ] (5);
+     [ u6$1*0.49896 ] (6);
+
+     f1*0.40954;
+     f2*0.82993;
+
+     { u1*1.34885 };
+     { u2@1.35580 };
+     { u3@1 };
+     { u4@0.93888 };
+     { u5@0.93114 };
+     { u6@0.91674 };
+
+
+
+TECHNICAL 4 OUTPUT
+
+
+     ESTIMATES DERIVED FROM THE MODEL FOR MALE
+
+
+           ESTIMATED MEANS FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+                0.021         0.013
+
+
+           ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             1.843
+ F2             1.061         1.783
+
+
+           ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             1.000
+ F2             0.585         1.000
+
+
+     ESTIMATES DERIVED FROM THE MODEL FOR FEMALE
+
+
+           ESTIMATED MEANS FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+               -0.212        -0.078
+
+
+           ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             1.125
+ F2             0.946         2.281
+
+
+           ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             1.000
+ F2             0.591         1.000
+
+
+     ESTIMATES DERIVED FROM THE MODEL FOR MALE
+
+
+           S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+                0.033         0.033
+
+
+           EST./S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+                0.634         0.397
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+                0.526         0.691
+
+
+           S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             0.155
+ F2             0.103         0.143
+
+
+           EST./S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1            11.897
+ F2            10.300        12.459
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             0.000
+ F2             0.000         0.000
+
+
+           S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             0.000
+ F2             0.032         0.000
+
+
+           EST./S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1           999.000
+ F2            18.415       999.000
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             0.000
+ F2             0.000         0.000
+
+
+     ESTIMATES DERIVED FROM THE MODEL FOR FEMALE
+
+
+           S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+                0.123         0.076
+
+
+           EST./S.E. FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+               -1.728        -1.022
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED MEANS FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+                0.084         0.307
+
+
+           S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             0.467
+ F2             0.251         0.685
+
+
+           EST./S.E. FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             2.411
+ F2             3.768         3.330
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED COVARIANCE MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             0.016
+ F2             0.000         0.001
+
+
+           S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             0.000
+ F2             0.031         0.000
+
+
+           EST./S.E. FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1           999.000
+ F2            19.132       999.000
+
+
+           TWO-TAILED P-VALUE FOR ESTIMATED CORRELATION MATRIX FOR THE LATENT VARIABLES
+              F1            F2
+              ________      ________
+ F1             0.000
+ F2             0.000         0.000
+
+
+     Beginning Time:  09:53:44
+        Ending Time:  09:53:44
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

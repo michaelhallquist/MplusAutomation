@@ -1,0 +1,287 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a two-group
+  twin model for categorical outcomes where
+  factors represent the ACE components
+  DATA:	FILE = ex5.19.dat;	
+  VARIABLE:	NAMES = u1 u2 g;
+  	CATEGORICAL = u1-u2;
+  	GROUPING = g (1 = mz 2 = dz);
+  ANALYSIS:MODEL=NOCOVARIANCES;
+  MODEL:	[u1$1-u2$1] (1);
+  	a1 BY u1*   (2);
+  	a2 BY u2*   (2);
+  	c1 BY u1*   (3);
+  	c2 BY u2*   (3);
+  	a1-c2@1;
+  	[a1-c2@0];
+  	a1 WITH a2@1;
+  	c1 WITH c2@1;
+  MODEL dz:	a1 WITH a2@.5;
+  	{u1-u2@1};
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a two-group
+twin model for categorical outcomes where
+factors represent the ACE components
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 2
+Number of observations
+   Group MZ                                                   1000
+   Group DZ                                                   1000
+   Total sample size                                          2000
+
+Number of dependent variables                                    2
+Number of independent variables                                  0
+Number of continuous latent variables                            4
+
+Observed dependent variables
+
+  Binary and ordered categorical (ordinal)
+   U1          U2
+
+Continuous latent variables
+   A1          A2          C1          C2
+
+Variables with special functions
+
+  Grouping variable     G
+
+Estimator                                                    WLSMV
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Parameterization                                             DELTA
+Link                                                        PROBIT
+
+Input data file(s)
+  ex5.19.dat
+
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+  Group MZ
+    U1
+      Category 1    0.502          502.000
+      Category 2    0.498          498.000
+    U2
+      Category 1    0.494          494.000
+      Category 2    0.506          506.000
+
+  Group DZ
+    U1
+      Category 1    0.504          504.000
+      Category 2    0.496          496.000
+    U2
+      Category 1    0.511          511.000
+      Category 2    0.489          489.000
+
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+     WARNING:  THE LATENT VARIABLE COVARIANCE MATRIX (PSI) IN GROUP MZ
+     IS NOT POSITIVE DEFINITE.  THIS COULD INDICATE A NEGATIVE VARIANCE/
+     RESIDUAL VARIANCE FOR A LATENT VARIABLE, A CORRELATION GREATER OR EQUAL
+     TO ONE BETWEEN TWO LATENT VARIABLES, OR A LINEAR DEPENDENCY AMONG MORE
+     THAN TWO LATENT VARIABLES.  CHECK THE TECH4 OUTPUT FOR MORE INFORMATION.
+     PROBLEM INVOLVING VARIABLE A2.
+
+
+     WARNING:  THE LATENT VARIABLE COVARIANCE MATRIX (PSI) IN GROUP DZ
+     IS NOT POSITIVE DEFINITE.  THIS COULD INDICATE A NEGATIVE VARIANCE/
+     RESIDUAL VARIANCE FOR A LATENT VARIABLE, A CORRELATION GREATER OR EQUAL
+     TO ONE BETWEEN TWO LATENT VARIABLES, OR A LINEAR DEPENDENCY AMONG MORE
+     THAN TWO LATENT VARIABLES.  CHECK THE TECH4 OUTPUT FOR MORE INFORMATION.
+     PROBLEM INVOLVING VARIABLE C2.
+
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        3
+
+Chi-Square Test of Model Fit
+
+          Value                              0.905*
+          Degrees of Freedom                     3
+          P-Value                           0.8242
+
+Chi-Square Contribution From Each Group
+
+          MZ                                 0.476
+          DZ                                 0.429
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.032
+          Probability RMSEA <= .05           0.992
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                            952.816
+          Degrees of Freedom                     2
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.005
+
+Optimum Function Value for Weighted Least-Squares Estimator
+
+          Value                     0.14675290D-03
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+Group MZ
+
+ A1       BY
+    U1                 0.848      0.060     14.119      0.000
+
+ A2       BY
+    U2                 0.848      0.060     14.119      0.000
+
+ C1       BY
+    U1                 0.229      0.199      1.149      0.250
+
+ C2       BY
+    U2                 0.229      0.199      1.149      0.250
+
+ A1       WITH
+    A2                 1.000      0.000    999.000    999.000
+
+ C1       WITH
+    C2                 1.000      0.000    999.000    999.000
+
+ Means
+    A1                 0.000      0.000    999.000    999.000
+    A2                 0.000      0.000    999.000    999.000
+    C1                 0.000      0.000    999.000    999.000
+    C2                 0.000      0.000    999.000    999.000
+
+ Thresholds
+    U1$1               0.007      0.024      0.292      0.770
+    U2$1               0.007      0.024      0.292      0.770
+
+ Variances
+    A1                 1.000      0.000    999.000    999.000
+    A2                 1.000      0.000    999.000    999.000
+    C1                 1.000      0.000    999.000    999.000
+    C2                 1.000      0.000    999.000    999.000
+
+ Scales
+    U1                 1.000      0.000    999.000    999.000
+    U2                 1.000      0.000    999.000    999.000
+
+Group DZ
+
+ A1       BY
+    U1                 0.848      0.060     14.119      0.000
+
+ A2       BY
+    U2                 0.848      0.060     14.119      0.000
+
+ C1       BY
+    U1                 0.229      0.199      1.149      0.250
+
+ C2       BY
+    U2                 0.229      0.199      1.149      0.250
+
+ A1       WITH
+    A2                 0.500      0.000    999.000    999.000
+
+ C1       WITH
+    C2                 1.000      0.000    999.000    999.000
+
+ Means
+    A1                 0.000      0.000    999.000    999.000
+    A2                 0.000      0.000    999.000    999.000
+    C1                 0.000      0.000    999.000    999.000
+    C2                 0.000      0.000    999.000    999.000
+
+ Thresholds
+    U1$1               0.007      0.024      0.292      0.770
+    U2$1               0.007      0.024      0.292      0.770
+
+ Variances
+    A1                 1.000      0.000    999.000    999.000
+    A2                 1.000      0.000    999.000    999.000
+    C1                 1.000      0.000    999.000    999.000
+    C2                 1.000      0.000    999.000    999.000
+
+ Scales
+    U1                 1.000      0.000    999.000    999.000
+    U2                 1.000      0.000    999.000    999.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.470E-02
+       (ratio of smallest to largest eigenvalue)
+
+
+R-SQUARE
+
+Group MZ
+
+    Observed                   Residual
+    Variable        Estimate   Variance
+
+    U1                 0.771      0.229
+    U2                 0.771      0.229
+
+Group DZ
+
+    Observed                   Residual
+    Variable        Estimate   Variance
+
+    U1                 0.771      0.229
+    U2                 0.771      0.229
+
+
+     Beginning Time:  09:53:45
+        Ending Time:  09:53:45
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

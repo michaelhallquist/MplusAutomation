@@ -1,0 +1,208 @@
+Mplus VERSION 8.11 (Mac)
+MUTHEN & MUTHEN
+04/08/2026   9:53 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a CFA with
+  	continuous and categorical factor
+  	indicators
+  DATA:	FILE IS ex5.3.dat;
+  VARIABLE:	NAMES ARE u1-u3 y4-y6;
+  	CATEGORICAL ARE u1 u2 u3;
+  MODEL:	f1 BY u1-u3;
+  	f2 BY y4-y6;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a CFA with
+continuous and categorical factor
+indicators
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   Y4          Y5          Y6
+
+  Binary and ordered categorical (ordinal)
+   U1          U2          U3
+
+Continuous latent variables
+   F1          F2
+
+
+Estimator                                                    WLSMV
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+Parameterization                                             DELTA
+Link                                                        PROBIT
+
+Input data file(s)
+  ex5.3.dat
+
+Input data format  FREE
+
+
+UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES
+
+    U1
+      Category 1    0.504          252.000
+      Category 2    0.496          248.000
+    U2
+      Category 1    0.506          253.000
+      Category 2    0.494          247.000
+    U3
+      Category 1    0.496          248.000
+      Category 2    0.504          252.000
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y4                   -0.016      -0.016      -3.215    0.20%      -0.786     -0.287     -0.048
+             500.000       1.025       0.246       3.033    0.20%       0.212      0.795
+     Y5                   -0.016      -0.103      -3.132    0.20%      -0.955     -0.257     -0.033
+             500.000       1.026      -0.236       3.199    0.20%       0.257      0.903
+     Y6                    0.014       0.036      -3.294    0.20%      -0.859     -0.292     -0.042
+             500.000       0.988      -0.336       2.803    0.20%       0.285      0.921
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       16
+
+Chi-Square Test of Model Fit
+
+          Value                              3.935*
+          Degrees of Freedom                     8
+          P-Value                           0.8629
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.028
+          Probability RMSEA <= .05           0.995
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           1699.445
+          Degrees of Freedom                    15
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.010
+
+Optimum Function Value for Weighted Least-Squares Estimator
+
+          Value                     0.94739409D-03
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    U1                 1.000      0.000    999.000    999.000
+    U2                 1.066      0.043     24.666      0.000
+    U3                 1.000      0.039     25.935      0.000
+
+ F2       BY
+    Y4                 1.000      0.000    999.000    999.000
+    Y5                 1.051      0.039     26.737      0.000
+    Y6                 0.997      0.041     24.331      0.000
+
+ F2       WITH
+    F1                -0.004      0.044     -0.094      0.925
+
+ Intercepts
+    Y4                -0.016      0.045     -0.350      0.726
+    Y5                -0.016      0.045     -0.358      0.720
+    Y6                 0.014      0.044      0.312      0.755
+
+ Thresholds
+    U1$1               0.010      0.056      0.179      0.858
+    U2$1               0.015      0.056      0.268      0.788
+    U3$1              -0.010      0.056     -0.179      0.858
+
+ Variances
+    F1                 0.801      0.046     17.468      0.000
+    F2                 0.774      0.062     12.504      0.000
+
+ Residual Variances
+    Y4                 0.251      0.025     10.219      0.000
+    Y5                 0.170      0.021      7.950      0.000
+    Y6                 0.218      0.021     10.507      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.393E-02
+       (ratio of smallest to largest eigenvalue)
+
+
+R-SQUARE
+
+    Observed                   Residual
+    Variable        Estimate   Variance
+
+    U1                 0.801      0.199
+    U2                 0.911      0.089
+    U3                 0.802      0.198
+    Y4                 0.755
+    Y5                 0.834
+    Y6                 0.779
+
+
+     Beginning Time:  09:53:46
+        Ending Time:  09:53:46
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

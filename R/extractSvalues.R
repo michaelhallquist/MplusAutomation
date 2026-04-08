@@ -23,13 +23,21 @@ extractSvalues <- function(outfiletext, filename, input = NULL) {
   list(text = as.character(svalues_text), parameters = parsed)
 }
 
-svalues_default_state <- function() {
+extractModelTable <- function(input, filename) {
+  if (is.null(input) || length(input) == 0L) return(NULL)
+  
+  parsed <- svalues_split_model_sections(input)
+  parseMplusSyntaxTable(parsed, filename = filename, input = input, mode = "model")
+}
+
+svalues_default_state <- function(source_section = NULL) {
   list(
     raw_block = NULL,
     is_overall = FALSE,
     latent_class = NULL,
     between_within = NULL,
-    group = NULL
+    group = NULL,
+    source_section = source_section
   )
 }
 
@@ -82,10 +90,10 @@ svalues_parse_model_header <- function(line, state) {
   new_state
 }
 
-svalues_split_statements <- function(section_lines) {
+svalues_split_statements <- function(section_lines, initial_state = svalues_default_state()) {
   section_lines <- sanitize_mplus_text(section_lines)
   
-  state <- svalues_default_state()
+  state <- initial_state
   statements <- list()
   idx <- 1L
   buffer <- ""
@@ -141,6 +149,60 @@ svalues_split_statements <- function(section_lines) {
   list(statements = statements, class_labels = discovered_classes)
 }
 
+svalues_model_section_names <- function(input) {
+  nms <- names(input)
+  if (length(nms) == 0L) return(character(0))
+  
+  reserved <- c(
+    "model.population", "model.missing", "model.indirect",
+    "model.constraint", "model.test", "model.priors"
+  )
+  
+  nms[(nms == "model" | grepl("^model\\.", nms, perl = TRUE)) & !nms %in% reserved]
+}
+
+svalues_reconstruct_model_header <- function(section_name) {
+  if (identical(section_name, "model")) return(NULL)
+  
+  suffix <- sub("^model\\.", "", section_name, perl = TRUE)
+  header <- if (grepl("^c\\.(\\d+)$", suffix, perl = TRUE)) {
+    sub("^c\\.(\\d+)$", "C#\\1", suffix, perl = TRUE)
+  } else if (grepl("^class\\.(\\d+)$", suffix, perl = TRUE)) {
+    sub("^class\\.(\\d+)$", "CLASS \\1", suffix, perl = TRUE)
+  } else {
+    toupper(gsub("\\.", " ", suffix, perl = TRUE))
+  }
+  
+  paste0("MODEL ", header, ":")
+}
+
+svalues_split_model_sections <- function(input) {
+  section_names <- svalues_model_section_names(input)
+  if (length(section_names) == 0L) {
+    return(list(statements = list(), class_labels = character(0)))
+  }
+  
+  parsed_sections <- lapply(section_names, function(section_name) {
+    section_lines <- input[[section_name]]
+    if (length(section_lines) == 0L) {
+      return(list(statements = list(), class_labels = character(0)))
+    }
+    
+    header <- svalues_reconstruct_model_header(section_name)
+    if (!is.null(header)) section_lines <- c(header, section_lines)
+    
+    svalues_split_statements(
+      section_lines,
+      initial_state = svalues_default_state(source_section = section_name)
+    )
+  })
+  
+  list(
+    statements = unlist(lapply(parsed_sections, `[[`, "statements"), recursive = FALSE),
+    class_labels = unique(unlist(lapply(parsed_sections, `[[`, "class_labels"), use.names = FALSE))
+  )
+}
+
 svalues_prepare_statement <- function(statement) {
   stmt <- trimws(statement)
   labels <- character(0)
@@ -162,6 +224,25 @@ svalues_split_tokens <- function(text) {
   unlist(strsplit(text, "\\s+", perl = TRUE), use.names = FALSE)
 }
 
+svalues_parse_tokens_with_labels <- function(text) {
+  tokens <- svalues_split_tokens(text)
+  if (length(tokens) == 0L) return(list())
+  
+  out <- list()
+  for (tok in tokens) {
+    if (grepl("^\\([^()]+\\)$", tok, perl = TRUE)) {
+      if (length(out) > 0L) out[[length(out)]]$label <- sub("^\\(([^()]*)\\)$", "\\1", tok, perl = TRUE)
+      next
+    }
+    
+    parsed <- svalues_parse_token(tok)
+    parsed$label <- NA_character_
+    out[[length(out) + 1L]] <- parsed
+  }
+  
+  out
+}
+
 svalues_parse_token <- function(token) {
   token <- trimws(token)
   if (!nzchar(token)) {
@@ -181,16 +262,18 @@ svalues_parse_token <- function(token) {
   list(var = var, modifier = modifier, value = value)
 }
 
-svalues_make_row <- function(paramHeader, param, est, fixed, state, overall = FALSE) {
+svalues_make_row <- function(paramHeader, param, value, fixed, state, overall = FALSE, modifier = "", label = NA_character_) {
   data.frame(
     paramHeader = paramHeader,
     param = toupper(param),
-    est = est,
+    modifier = if (nzchar(modifier)) modifier else NA_character_,
+    value = value,
     fixed = fixed,
-    label = NA_character_,
+    label = label,
     LatentClass = if (is.null(state$latent_class)) NA_character_ else state$latent_class,
     BetweenWithin = if (is.null(state$between_within)) NA_character_ else state$between_within,
     Group = if (is.null(state$group)) NA_character_ else state$group,
+    source_section = if (is.null(state$source_section)) NA_character_ else state$source_section,
     .svalues_overall = overall,
     stringsAsFactors = FALSE
   )
@@ -199,19 +282,21 @@ svalues_make_row <- function(paramHeader, param, est, fixed, state, overall = FA
 svalues_apply_labels <- function(df, labels) {
   if (is.null(df) || nrow(df) == 0L) return(df)
   if (length(labels) == 0L) return(df)
+  fillable <- which(is.na(df$label))
+  if (length(fillable) == 0L) return(df)
   
   if (length(labels) == 1L) {
-    df$label[] <- labels[1L]
+    df$label[fillable] <- labels[1L]
     return(df)
   }
   
-  n <- nrow(df)
+  n <- length(fillable)
   k <- length(labels)
   if (k <= n) {
-    idx <- seq.int(from = n - k + 1L, to = n)
+    idx <- fillable[seq.int(from = n - k + 1L, to = n)]
     df$label[idx] <- labels
   } else {
-    df$label[] <- labels[seq_len(n)]
+    df$label[fillable] <- labels[seq_len(n)]
   }
   
   df
@@ -256,29 +341,33 @@ svalues_detect_latent_and_endogenous <- function(statements, growth_factors = ch
   list(latent_vars = latent_vars, endogenous_vars = endogenous_vars)
 }
 
-svalues_parse_growth <- function(statement, state) {
+svalues_parse_growth <- function(statement, state, mode = c("svalues", "model")) {
+  mode <- match.arg(mode)
+  keep_missing <- identical(mode, "model")
   match <- regexec("^(.*?)\\s*\\|\\s*(.*)$", statement, perl = TRUE)
   parts <- regmatches(statement, match)[[1L]]
   if (length(parts) != 3L) return(NULL)
   
   lhs_tokens <- svalues_split_tokens(expandCmd(parts[2L], expand_numeric = FALSE))
   rhs_tokens <- svalues_split_tokens(expandCmd(parts[3L], expand_numeric = FALSE))
-  rhs_parsed <- lapply(rhs_tokens, svalues_parse_token)
+  rhs_parsed <- svalues_parse_tokens_with_labels(expandCmd(parts[3L], expand_numeric = FALSE))
   rhs_parsed <- rhs_parsed[vapply(rhs_parsed, function(x) nzchar(x$var), logical(1))]
   if (length(lhs_tokens) == 0L || length(rhs_parsed) == 0L) return(NULL)
   
   rows <- lapply(seq_along(lhs_tokens), function(i) {
     factor_name <- toupper(lhs_tokens[i])
     do.call(rbind, lapply(rhs_parsed, function(rhs) {
-      est <- if (i == 1L) 1 else if (!is.na(rhs$value)) rhs$value^(i - 1L) else NA_real_
-      if (is.na(est)) return(NULL)
+      value <- if (i == 1L) 1 else if (!is.na(rhs$value)) rhs$value^(i - 1L) else NA_real_
+      if (is.na(value) && !keep_missing) return(NULL)
       svalues_make_row(
         paramHeader = paste0(factor_name, ".|"),
         param = rhs$var,
-        est = est,
+        value = value,
         fixed = if (i == 1L) TRUE else identical(rhs$modifier, "@"),
         state = state,
-        overall = isTRUE(state$is_overall)
+        overall = isTRUE(state$is_overall),
+        modifier = rhs$modifier,
+        label = rhs$label
       )
     }))
   })
@@ -288,15 +377,16 @@ svalues_parse_growth <- function(statement, state) {
   do.call(rbind, rows)
 }
 
-svalues_parse_bracket <- function(statement, state, context = list()) {
+svalues_parse_bracket <- function(statement, state, context = list(), mode = c("svalues", "model")) {
+  mode <- match.arg(mode)
+  keep_missing <- identical(mode, "model")
   inner <- sub("^\\[(.*)\\]$", "\\1", statement, perl = TRUE)
-  tokens <- svalues_split_tokens(expandCmd(inner, expand_numeric = FALSE))
-  parsed <- lapply(tokens, svalues_parse_token)
+  parsed <- svalues_parse_tokens_with_labels(expandCmd(inner, expand_numeric = FALSE))
   latent_vars <- toupper(if (is.null(context$latent_vars)) character(0) else context$latent_vars)
   endogenous_vars <- toupper(if (is.null(context$endogenous_vars)) character(0) else context$endogenous_vars)
   
   rows <- lapply(parsed, function(tok) {
-    if (!nzchar(tok$var) || is.na(tok$value)) return(NULL)
+    if (!nzchar(tok$var) || (is.na(tok$value) && !keep_missing)) return(NULL)
     var_uc <- toupper(tok$var)
     header <- if (grepl("$", tok$var, fixed = TRUE)) {
       "Thresholds"
@@ -308,10 +398,12 @@ svalues_parse_bracket <- function(statement, state, context = list()) {
     svalues_make_row(
       paramHeader = header,
       param = tok$var,
-      est = tok$value,
+      value = tok$value,
       fixed = identical(tok$modifier, "@"),
       state = state,
-      overall = isTRUE(state$is_overall)
+      overall = isTRUE(state$is_overall),
+      modifier = tok$modifier,
+      label = tok$label
     )
   })
   
@@ -320,20 +412,23 @@ svalues_parse_bracket <- function(statement, state, context = list()) {
   do.call(rbind, rows)
 }
 
-svalues_parse_brace <- function(statement, state) {
+svalues_parse_brace <- function(statement, state, mode = c("svalues", "model")) {
+  mode <- match.arg(mode)
+  keep_missing <- identical(mode, "model")
   inner <- sub("^\\{(.*)\\}$", "\\1", statement, perl = TRUE)
-  tokens <- svalues_split_tokens(expandCmd(inner, expand_numeric = FALSE))
-  parsed <- lapply(tokens, svalues_parse_token)
+  parsed <- svalues_parse_tokens_with_labels(expandCmd(inner, expand_numeric = FALSE))
   
   rows <- lapply(parsed, function(tok) {
-    if (!nzchar(tok$var) || is.na(tok$value)) return(NULL)
+    if (!nzchar(tok$var) || (is.na(tok$value) && !keep_missing)) return(NULL)
     svalues_make_row(
       paramHeader = "Scales",
       param = tok$var,
-      est = tok$value,
+      value = tok$value,
       fixed = identical(tok$modifier, "@"),
       state = state,
-      overall = isTRUE(state$is_overall)
+      overall = isTRUE(state$is_overall),
+      modifier = tok$modifier,
+      label = tok$label
     )
   })
   
@@ -342,16 +437,17 @@ svalues_parse_brace <- function(statement, state) {
   do.call(rbind, rows)
 }
 
-svalues_parse_relation <- function(statement, state) {
+svalues_parse_relation <- function(statement, state, mode = c("svalues", "model")) {
+  mode <- match.arg(mode)
+  keep_missing <- identical(mode, "model")
   match <- regexec("^(.*?)\\s+(ON|WITH|BY)\\s+(.*)$", statement, perl = TRUE, ignore.case = TRUE)
   parts <- regmatches(statement, match)[[1L]]
   if (length(parts) != 4L) return(NULL)
   
   lhs_tokens <- svalues_split_tokens(expandCmd(parts[2L], expand_numeric = FALSE))
   operator <- toupper(parts[3L])
-  rhs_tokens <- svalues_split_tokens(expandCmd(parts[4L], expand_numeric = FALSE))
-  rhs_parsed <- lapply(rhs_tokens, svalues_parse_token)
-  rhs_parsed <- rhs_parsed[vapply(rhs_parsed, function(x) nzchar(x$var) && !is.na(x$value), logical(1))]
+  rhs_parsed <- svalues_parse_tokens_with_labels(expandCmd(parts[4L], expand_numeric = FALSE))
+  rhs_parsed <- rhs_parsed[vapply(rhs_parsed, function(x) nzchar(x$var) && (keep_missing || !is.na(x$value)), logical(1))]
   if (length(lhs_tokens) == 0L || length(rhs_parsed) == 0L) return(NULL)
   
   rows <- lapply(lhs_tokens, function(lhs) {
@@ -359,10 +455,12 @@ svalues_parse_relation <- function(statement, state) {
       svalues_make_row(
         paramHeader = paste0(toupper(lhs), ".", operator),
         param = rhs$var,
-        est = rhs$value,
+        value = rhs$value,
         fixed = identical(rhs$modifier, "@"),
         state = state,
-        overall = isTRUE(state$is_overall)
+        overall = isTRUE(state$is_overall),
+        modifier = rhs$modifier,
+        label = rhs$label
       )
     }))
   })
@@ -372,22 +470,25 @@ svalues_parse_relation <- function(statement, state) {
   do.call(rbind, rows)
 }
 
-svalues_parse_variance <- function(statement, state, context = list()) {
-  tokens <- svalues_split_tokens(expandCmd(statement, expand_numeric = FALSE))
-  parsed <- lapply(tokens, svalues_parse_token)
+svalues_parse_variance <- function(statement, state, context = list(), mode = c("svalues", "model")) {
+  mode <- match.arg(mode)
+  keep_missing <- identical(mode, "model")
+  parsed <- svalues_parse_tokens_with_labels(expandCmd(statement, expand_numeric = FALSE))
   latent_vars <- toupper(if (is.null(context$latent_vars)) character(0) else context$latent_vars)
   endogenous_vars <- toupper(if (is.null(context$endogenous_vars)) character(0) else context$endogenous_vars)
   
   rows <- lapply(parsed, function(tok) {
-    if (!nzchar(tok$var) || is.na(tok$value)) return(NULL)
+    if (!nzchar(tok$var) || (is.na(tok$value) && !keep_missing)) return(NULL)
     var_uc <- toupper(tok$var)
     svalues_make_row(
       paramHeader = if (var_uc %in% latent_vars && !var_uc %in% endogenous_vars) "Variances" else "Residual.Variances",
       param = tok$var,
-      est = tok$value,
+      value = tok$value,
       fixed = identical(tok$modifier, "@"),
       state = state,
-      overall = isTRUE(state$is_overall)
+      overall = isTRUE(state$is_overall),
+      modifier = tok$modifier,
+      label = tok$label
     )
   })
   
@@ -434,23 +535,40 @@ svalues_expand_overall_rows <- function(df, class_labels) {
   df
 }
 
-svalues_finalize <- function(df, filename) {
+svalues_finalize <- function(df, filename, mode = c("svalues", "model")) {
+  mode <- match.arg(mode)
   if (is.null(df) || nrow(df) == 0L) return(NULL)
   
-  optional <- c("LatentClass", "BetweenWithin", "Group", "ReferenceClass")
+  if (identical(mode, "svalues")) {
+    df$modifier <- NULL
+    df$source_section <- NULL
+    names(df)[names(df) == "value"] <- "est"
+  } else {
+    ord <- c("paramHeader", "param", "modifier", "value", "fixed", "label",
+      "LatentClass", "BetweenWithin", "Group", "ReferenceClass", "source_section")
+    keep <- ord[ord %in% names(df)]
+    df <- df[, keep, drop = FALSE]
+  }
+  
+  optional <- c("LatentClass", "BetweenWithin", "Group", "ReferenceClass", "source_section")
   keep_optional <- optional[optional %in% names(df)]
   if (length(keep_optional) > 0L) {
     drop_cols <- keep_optional[vapply(df[keep_optional], function(x) all(is.na(x)), logical(1))]
     if (length(drop_cols) > 0L) df[drop_cols] <- NULL
   }
   
-  class(df) <- c("mplus.params", "data.frame")
+  class(df) <- if (identical(mode, "svalues")) c("mplus.params", "data.frame") else c("mplus.model.syntax", "data.frame")
   attr(df, "filename") <- filename
   df
 }
 
 parseSvaluesSyntax <- function(section_lines, filename, input = NULL) {
   parsed <- svalues_split_statements(section_lines)
+  parseMplusSyntaxTable(parsed, filename = filename, input = input, mode = "svalues")
+}
+
+parseMplusSyntaxTable <- function(parsed, filename, input = NULL, mode = c("svalues", "model")) {
+  mode <- match.arg(mode)
   statements <- parsed$statements
   class_labels <- parsed$class_labels
   growth_factors <- svalues_detect_growth_factors(statements)
@@ -466,26 +584,26 @@ parseSvaluesSyntax <- function(section_lines, filename, input = NULL) {
     if (!nzchar(stmt)) return(NULL)
     
     if (grepl("|", stmt, fixed = TRUE)) {
-      res <- svalues_parse_growth(stmt, x$state)
+      res <- svalues_parse_growth(stmt, x$state, mode = mode)
       if (!is.null(res)) return(svalues_apply_labels(res, labels))
     }
     
     if (grepl("^\\[.*\\]$", stmt, perl = TRUE)) {
-      res <- svalues_parse_bracket(stmt, x$state, context = context)
+      res <- svalues_parse_bracket(stmt, x$state, context = context, mode = mode)
       if (!is.null(res)) return(svalues_apply_labels(res, labels))
     }
     
     if (grepl("^\\{.*\\}$", stmt, perl = TRUE)) {
-      res <- svalues_parse_brace(stmt, x$state)
+      res <- svalues_parse_brace(stmt, x$state, mode = mode)
       if (!is.null(res)) return(svalues_apply_labels(res, labels))
     }
     
     if (grepl("\\s+(ON|WITH|BY)\\s+", stmt, perl = TRUE, ignore.case = TRUE)) {
-      res <- svalues_parse_relation(stmt, x$state)
+      res <- svalues_parse_relation(stmt, x$state, mode = mode)
       if (!is.null(res)) return(svalues_apply_labels(res, labels))
     }
     
-    svalues_apply_labels(svalues_parse_variance(stmt, x$state, context = context), labels)
+    svalues_apply_labels(svalues_parse_variance(stmt, x$state, context = context, mode = mode), labels)
   })
   
   rows <- Filter(Negate(is.null), rows)
@@ -493,5 +611,5 @@ parseSvaluesSyntax <- function(section_lines, filename, input = NULL) {
   
   df <- do.call(rbind, rows)
   df <- svalues_expand_overall_rows(df, class_labels)
-  svalues_finalize(df, filename)
+  svalues_finalize(df, filename, mode = mode)
 }
