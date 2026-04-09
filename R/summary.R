@@ -64,6 +64,144 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy = NULL) {
   return(MplusData)
 }
 
+summary_field_decimals <- function() {
+  decimals <- c(
+    Title = FALSE,
+    Mplus.version = FALSE,
+    AnalysisType = FALSE,
+    DataType = FALSE,
+    Filename = FALSE,
+    Estimator = FALSE,
+    Warnings = FALSE,
+    Observations = FALSE,
+    Parameters = FALSE,
+    ParametersWithAux = FALSE,
+    NGroups = FALSE,
+    NDependentVars = FALSE,
+    NIndependentVars = FALSE,
+    NContinuousLatentVars = FALSE,
+    NCategoricalLatentVars = FALSE,
+    NumFactors = FALSE,
+    ChiSqM_DF = FALSE,
+    ChiSqBaseline_DF = FALSE,
+    ChiSqCategoricalPearson_DF = FALSE,
+    ChiSqCategoricalLRT_DF = FALSE,
+    ChiSqMCARUnrestrictedPearson_DF = FALSE,
+    ChiSqMCARUnrestrictedLRT_DF = FALSE,
+    ChiSqDiffTest_DF = FALSE,
+    ChiSqM_NumComputations = FALSE,
+    LL_NumComputations = FALSE,
+    UnrestrictedLL_NumComputations = FALSE,
+    CFI_NumComputations = FALSE,
+    TLI_NumComputations = FALSE,
+    PostPred_PValue_NumComputations = FALSE,
+    PriorPostPred_PValue_NumComputations = FALSE,
+    AIC_NumComputations = FALSE,
+    BIC_NumComputations = FALSE,
+    aBIC_NumComputations = FALSE,
+    RMSEA_NumComputations = FALSE,
+    WRMR_NumComputations = FALSE,
+    DIC_NumComputations = FALSE,
+    pD_NumComputations = FALSE,
+    SRMR_NumComputations = FALSE,
+    SRMR.Within_NumComputations = FALSE,
+    SRMR.Between_NumComputations = FALSE,
+    T11_VLMR_ParamDiff = FALSE,
+    BLRT_ParamDiff = FALSE,
+    BLRT_SuccessfulDraws = FALSE,
+    Classes = FALSE,
+    min_N = FALSE,
+    max_N = FALSE,
+    min_prob = TRUE,
+    max_prob = TRUE
+  )
+
+  return(decimals)
+}
+
+is_decimal_summary_field <- function(name, values = NULL) {
+  decimals <- summary_field_decimals()
+
+  if (name %in% names(decimals)) {
+    return(unname(decimals[[name]]))
+  }
+
+  if (grepl("(_DF|_NumComputations|_SuccessfulDraws|_ParamDiff|_Starts|_Final)$", name)) {
+    return(FALSE)
+  }
+
+  if (grepl("^N[A-Z]", name)) {
+    return(FALSE)
+  }
+
+  if (!is.null(values) && is.integer(values)) {
+    return(FALSE)
+  }
+
+  if (!is.null(values) && is.numeric(values)) {
+    return(TRUE)
+  }
+
+  return(FALSE)
+}
+
+format_summary_display <- function(data, digits) {
+  if (is.null(digits)) {
+    return(data)
+  }
+
+  if (!is.numeric(digits) || length(digits) != 1L || is.na(digits) || digits < 0) {
+    stop("digits must be a single non-negative number.")
+  }
+
+  digits <- as.integer(digits)
+  formatted <- data
+
+  for (nm in names(formatted)) {
+    values <- formatted[[nm]]
+
+    if (!is.numeric(values) || !is_decimal_summary_field(nm, values)) {
+      next
+    }
+
+    formatted[[nm]] <- ifelse(
+      is.na(values),
+      NA_character_,
+      formatC(values, digits = digits, format = "f")
+    )
+  }
+
+  formatted
+}
+
+xtable_digits <- function(data, digits) {
+  if (is.null(digits)) {
+    return(NULL)
+  }
+
+  xtable_digits <- rep(0L, ncol(data) + 1L)
+  digits <- as.integer(digits)
+
+  for (i in seq_along(data)) {
+    if (is.numeric(data[[i]]) && is_decimal_summary_field(names(data)[i], data[[i]])) {
+      xtable_digits[i + 1L] <- digits
+    }
+  }
+
+  xtable_digits
+}
+
+summary_xtable <- function(data, caption = NULL, label = NULL, digits = NULL) {
+  if (is.null(digits)) {
+    return(xtable(data, caption = caption, label = label))
+  }
+
+  xtable(data,
+         caption = caption,
+         label = label,
+         digits = xtable_digits(data, digits))
+}
+
 
 #' Create a summary table of Mplus model statistics
 #'
@@ -96,6 +234,10 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy = NULL) {
 #'   applies to types \dQuote{html}, \dQuote{latex}, and \dQuote{markdown}.
 #' @param display optional logical (defaults to \code{FALSE}). This parameter specifies whether to display the
 #'   table upon creation (\code{TRUE} or \code{FALSE}).
+#' @param digits optional. Number of digits to display for decimal-valued summary
+#'   fields. This affects rendered output for screen, popup, markdown, html,
+#'   and latex formats, but \code{type = "none"} always returns the raw numeric
+#'   values.
 #' @param \ldots additional arguments passed on to specific formatting types.
 #' @param include.rownames optional logical whether to include rownames or not.
 #' @return Invisibly returns the summary table, which can be used if the printing options avaiable are not sufficient.
@@ -132,13 +274,15 @@ subsetModelList <- function(modelList, keepCols, dropCols, sortBy = NULL) {
 #' }
 SummaryTable <- function(modelList, type = c("none", "screen", "popup", "html", "latex", "markdown"),
                          filename = "", keepCols, dropCols, sortBy = NULL, caption = "",
-                         display = FALSE, ..., include.rownames = FALSE) {
+                         display = FALSE, digits = NULL, ..., include.rownames = FALSE) {
   type <- match.arg(type)
   
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
+  displayData <- format_summary_display(MplusData, digits)
   
   if (!include.rownames) {
     rownames(MplusData) <- NULL
+    rownames(displayData) <- NULL
   }
   
   if (nzchar(filename)) {
@@ -150,29 +294,29 @@ SummaryTable <- function(modelList, type = c("none", "screen", "popup", "html", 
   
   switch(type,
          none = return(MplusData),
-         screen = print(MplusData),
+         screen = print(displayData),
          popup = {
            if (!suppressWarnings(requireNamespace("relimp"))) {
              stop("The relimp package is absent. Interactive folder selection cannot function.")
            }
-           relimp::showData(MplusData,
+           relimp::showData(displayData,
                             placement = "+30+30",
                             maxwidth = 150,
                             maxheight = 50,
                             rownumbers = include.rownames,
                             title = "Mplus Summary Table", ...)
-         },
-         html = print(xtable(MplusData, caption = caption),
+         }, 
+         html = print(summary_xtable(MplusData, caption = caption, digits = digits),
                       type = "html",
                       file = filename,
                       include.rownames = include.rownames,
                       NA.string = ".", ...),
-         latex = print(xtable(MplusData, caption = caption),
+         latex = print(summary_xtable(MplusData, caption = caption, digits = digits),
                        type = "latex",
                        file = filename,
                        include.rownames = include.rownames,
                        NA.string = ".", ...),
-         markdown = pander(MplusData,
+         markdown = pander(displayData,
                            caption = caption,
                            ...)
   )
@@ -245,6 +389,8 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, font=
 #'   Defaults to \code{NULL}, which does not sort the table.
 #' @param display optional. This parameter specifies whether to display the table in a web
 #'   browser upon creation (\code{TRUE} or \code{FALSE}).
+#' @param digits optional. Number of digits to display for decimal-valued summary
+#'   fields in the rendered HTML table.
 #' @return No value is returned by this function. It is solely used to create an HTML file containing summary statistics.
 #' @author Michael Hallquist
 #' @note You must choose between \code{keepCols} and \code{dropCols} because it is not sensible to use these
@@ -255,7 +401,7 @@ showSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, font=
 #' @keywords interface
 #' @examples
 #' # make me!!!
-HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy = NULL, display=FALSE) {
+HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Comparison.html"), keepCols, dropCols, sortBy = NULL, display=FALSE, digits = NULL) {
   #create HTML table and write to file.
   
   #ensure that the filename has a .html or .htm at the end
@@ -270,7 +416,7 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
   
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
   
-  print(x=xtable(MplusData),
+  print(x=summary_xtable(MplusData, digits = digits),
         type="html",
         file=filename,
         include.rownames = FALSE,
@@ -305,6 +451,8 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #' @param label optional. A character string specifying the label for the LaTex table, which can be
 #'   used for referencing the table.
 #' @param caption optional. A character string specifying the caption for the LaTex table.
+#' @param digits optional. Number of digits to display for decimal-valued summary
+#'   fields in the rendered LaTeX table.
 #' @return A LaTex-formatted table summarizing the \code{modelList} is returned (created by \code{xtable}).
 #' @author Michael Hallquist
 #' @note You must choose between \code{keepCols} and \code{dropCols} because it is not sensible to use these together
@@ -315,11 +463,10 @@ HTMLSummaryTable <- function(modelList, filename=file.path(getwd(), "Model Compa
 #' @keywords interface
 #' @examples
 #' # make me!!!
-LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, label=NULL, caption=NULL) {
+LatexSummaryTable <- function(modelList, keepCols, dropCols, sortBy = NULL, label=NULL, caption=NULL, digits = NULL) {
   #return latex table to caller
   
   MplusData <- subsetModelList(modelList, keepCols, dropCols, sortBy)
   
-  return(xtable(MplusData, label=label, caption=caption))
+  return(summary_xtable(MplusData, label=label, caption=caption, digits = digits))
 }
-

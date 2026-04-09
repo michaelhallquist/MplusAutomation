@@ -13,6 +13,7 @@ SummaryTable(
   sortBy = NULL,
   caption = "",
   display = FALSE,
+  digits = NULL,
   ...,
   include.rownames = FALSE
 )
@@ -48,6 +49,11 @@ applies to types \dQuote{html}, \dQuote{latex}, and \dQuote{markdown}.}
 
 \item{display}{optional logical (defaults to \code{FALSE}). This parameter specifies whether to display the
 table upon creation (\code{TRUE} or \code{FALSE}).}
+
+\item{digits}{optional. Number of digits to display for decimal-valued summary
+fields. This affects rendered output for screen, popup, markdown, html,
+and latex formats, but \code{type = "none"} always returns the raw numeric
+values.}
 
 \item{include.rownames}{optional logical whether to include rownames or not.}
 

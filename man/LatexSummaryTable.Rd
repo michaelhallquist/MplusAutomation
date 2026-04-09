@@ -10,7 +10,8 @@ LatexSummaryTable(
   dropCols,
   sortBy = NULL,
   label = NULL,
-  caption = NULL
+  caption = NULL,
+  digits = NULL
 )
 }
 \arguments{
@@ -33,6 +34,9 @@ Defaults to \code{NULL}, which does not sort the table.}
 used for referencing the table.}
 
 \item{caption}{optional. A character string specifying the caption for the LaTex table.}
+
+\item{digits}{optional. Number of digits to display for decimal-valued summary
+fields in the rendered LaTeX table.}
 }
 \value{
 A LaTex-formatted table summarizing the \code{modelList} is returned (created by \code{xtable}).

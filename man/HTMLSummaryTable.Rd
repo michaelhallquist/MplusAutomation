@@ -10,7 +10,8 @@ HTMLSummaryTable(
   keepCols,
   dropCols,
   sortBy = NULL,
-  display = FALSE
+  display = FALSE,
+  digits = NULL
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ Defaults to \code{NULL}, which does not sort the table.}
 
 \item{display}{optional. This parameter specifies whether to display the table in a web
 browser upon creation (\code{TRUE} or \code{FALSE}).}
+
+\item{digits}{optional. Number of digits to display for decimal-valued summary
+fields in the rendered HTML table.}
 }
 \value{
 No value is returned by this function. It is solely used to create an HTML file containing summary statistics.

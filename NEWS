@@ -10,6 +10,8 @@ Version 1.3
  - feature:     readModels parses final estimates as starting values section (produced by OUTPUT: SVALUES) into $svalues and $parameters$svalues. Closes #214
  - feature:     readModels extracts information about random starts, including final stage log-likelihoods into $random_starts. Closes #214
  - bugfix:      error in mplusModeler() when user provides NAMES statement and also uses rdata (which generates NAMES). Closes #164
+ - feature:	mplusModel now supports clearer entry points, including from an existing out_file
+ - feature:     expose a digits argument for SummaryTable to allow user to control rounding/precision for numeric fields. Closes #216
  
 Version 1.2
  - notice:      MplusAutomation examples vignette updated to refer to readModels, not outmoded extract* functions
