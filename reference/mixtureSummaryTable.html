@@ -77,8 +77,10 @@ line with published guidelines (see Jung &amp; Wickrama, 2008; Nylund et al.,
 
 
 <dl><dt id="arg-modellist">modelList<a class="anchor" aria-label="anchor" href="#arg-modellist"></a></dt>
-<dd><p>A list of models returned from the
-<code>extractModelSummaries</code> function.</p></dd>
+<dd><p>A list of mixture models, such as the <code>mplus.model.list</code>
+returned by <code><a href="readModels.html">readModels()</a></code>. If using <code><a href="readModels.html">readModels()</a></code>, pass the
+returned model object directly rather than <code>$summaries</code>, because
+<code>mixtureSummaryTable()</code> also uses class counts and warnings.</p></dd>
 
 
 <dt id="arg-keepcols">keepCols<a class="anchor" aria-label="anchor" href="#arg-keepcols"></a></dt>

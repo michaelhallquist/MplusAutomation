@@ -26,7 +26,12 @@ mixtureSummaryTable(
 
 - modelList:
 
-  A list of models returned from the `extractModelSummaries` function.
+  A list of mixture models, such as the `mplus.model.list` returned by
+  [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md).
+  If using
+  [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md),
+  pass the returned model object directly rather than `$summaries`,
+  because `mixtureSummaryTable()` also uses class counts and warnings.
 
 - keepCols:
 
