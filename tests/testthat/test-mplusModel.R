@@ -17,6 +17,102 @@ MODEL:  y1 ON x1 x3;
   expect_true(inherits(m, "mplusModel_r6"))
   expect_equal(m$model_dir, tmp)
   expect_equal(m$inp_file, file.path(tmp, "ex3.1.inp"))
+  expect_equal(m$out_file, file.path(tmp, "ex3.1.out"))
+  expect_equal(m$gh5_file, file.path(tmp, "ex3.1.gh5"))
+})
+
+test_that("mplusModel supports syntax-first construction via dir and file_stem", {
+  syn <- "
+TITLE: syntax first;
+DATA: FILE IS syntax_first.dat;
+VARIABLE: NAMES ARE y x;
+MODEL: y ON x;
+"
+  dat <- data.frame(y = 1:3, x = 4:6)
+  tmp_dir <- tempfile()
+  dir.create(tmp_dir)
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  m <- mplusModel(
+    syntax = syn,
+    data = dat,
+    dir = tmp_dir,
+    file_stem = "syntax_first",
+    read = FALSE,
+    Mplus_command = mplus_fake
+  )
+
+  expect_equal(m$dir, normalizePath(tmp_dir))
+  expect_equal(m$file_stem, "syntax_first")
+  expect_equal(m$inp_file, file.path(normalizePath(tmp_dir), "syntax_first.inp"))
+  expect_equal(m$out_file, file.path(normalizePath(tmp_dir), "syntax_first.out"))
+  expect_equal(m$dat_file, file.path(normalizePath(tmp_dir), "syntax_first.dat"))
+})
+
+test_that("mplusModel requires a complete canonical identity", {
+  expect_error(
+    mplusModel(syntax = "MODEL: y ON x;", read = FALSE),
+    "Either inp_file/out_file or dir/file_stem must be provided"
+  )
+  expect_error(
+    mplusModel(syntax = "MODEL: y ON x;", dir = tempdir(), read = FALSE),
+    "dir and file_stem must be provided together"
+  )
+})
+
+test_that("mplusModel rejects mismatched inp and out paths", {
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  expect_error(
+    mplusModel(
+      syntax = "MODEL: y ON x;",
+      inp_file = file.path(tempdir(), "one.inp"),
+      out_file = file.path(tempdir(), "two.out"),
+      read = FALSE,
+      Mplus_command = mplus_fake
+    ),
+    "must refer to the same model stem"
+  )
+})
+
+test_that("mplusModel allows consistent mixed path-style and stem-style identity", {
+  tmp_dir <- tempfile()
+  dir.create(tmp_dir)
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  m <- mplusModel(
+    syntax = "MODEL: y ON x;",
+    inp_file = file.path(tmp_dir, "mixed.inp"),
+    dir = tmp_dir,
+    file_stem = "mixed",
+    read = FALSE,
+    Mplus_command = mplus_fake
+  )
+
+  expect_equal(m$dir, normalizePath(tmp_dir))
+  expect_equal(m$file_stem, "mixed")
+})
+
+test_that("mplusModel rejects inconsistent mixed path-style and stem-style identity", {
+  tmp_dir <- tempfile()
+  dir.create(tmp_dir)
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  expect_error(
+    mplusModel(
+      syntax = "MODEL: y ON x;",
+      inp_file = file.path(tmp_dir, "mixed.inp"),
+      dir = tmp_dir,
+      file_stem = "other",
+      read = FALSE,
+      Mplus_command = mplus_fake
+    ),
+    "same canonical model identity"
+  )
 })
 
 test_that("mplusModel writes input and data files", {
@@ -41,7 +137,7 @@ MODEL:  y1 ON x1 x3;
   expect_true(file.exists(m$inp_file))
 })
 
-test_that("write_inp honors explicit inp_file argument", {
+test_that("dir and file_stem setters move canonical model files", {
   syn <- "
 DATA:   FILE IS ex3.1.dat;
 VARIABLE:       NAMES ARE y1 x1 x3;
@@ -56,7 +152,6 @@ MODEL:  y1 ON x1 x3;
   tmp_dir <- tempfile()
   dir.create(tmp_dir)
   default_inp <- file.path(tmp_dir, "default.inp")
-  alternate_inp <- file.path(tmp_dir, "alternate.inp")
   mplus_fake <- tempfile()
   file.create(mplus_fake)
 
@@ -67,12 +162,18 @@ MODEL:  y1 ON x1 x3;
     Mplus_command = mplus_fake
   )
 
-  m$write_dat(quiet = TRUE)
-  m$write_inp(inp_file = alternate_inp, overwrite = TRUE, quiet = TRUE)
+  expect_message(m$dir <- "nested", "Model directory changed")
+  expect_equal(m$dir, file.path(normalizePath(tmp_dir), "nested"))
+  expect_equal(m$model_dir, m$dir)
+  expect_equal(m$inp_file, file.path(m$dir, "default.inp"))
+  expect_equal(m$dat_file, file.path(m$dir, "default.dat"))
 
-  expect_true(file.exists(alternate_inp))
-  expect_false(file.exists(default_inp))
-  expect_equal(readLines(alternate_inp), m$syntax)
+  expect_message(m$file_stem <- "renamed", "Model file stem changed")
+  expect_equal(m$file_stem, "renamed")
+  expect_equal(m$inp_file, file.path(m$dir, "renamed.inp"))
+  expect_equal(m$out_file, file.path(m$dir, "renamed.out"))
+  expect_equal(m$gh5_file, file.path(m$dir, "renamed.gh5"))
+  expect_equal(m$dat_file, file.path(m$dir, "renamed.dat"))
 })
 
 test_that("write_inp uses filename when data is in the model directory", {
@@ -104,10 +205,10 @@ MODEL:  y1 ON x1 x3;
   m$write_inp(overwrite = TRUE, quiet = TRUE)
 
   file_line <- m$syntax[grep("^FILE", m$syntax)]
-  expect_equal(file_line, 'FILE = "ex3.1.dat";')
+  expect_equal(file_line, 'FILE = "model.dat";')
 })
 
-test_that("write_inp preserves absolute data paths outside the model directory", {
+test_that("write_dat canonicalizes absolute data paths into model_dir", {
   syn <- "
 DATA:   FILE IS ex3.1.dat;
 VARIABLE:       NAMES ARE y1 x1 x3;
@@ -148,14 +249,13 @@ MODEL:  y1 ON x1 x3;
   end_idx <- file_idx - 1 + which(grepl('";$', following))[1]
   data_lines <- m$syntax[file_idx:end_idx]
   data_block <- paste(data_lines, collapse = "")
-  expected_spec <- gsub("//+", "/", gsub("\\\\", "/", external_path))
-  expected_path <- normalizePath(external_path, winslash = "/", mustWork = FALSE)
+  expected_path <- normalizePath(file.path(model_dir, "model.dat"), winslash = "/", mustWork = FALSE)
 
-  expect_true(grepl(expected_spec, data_block, fixed = TRUE))
+  expect_true(grepl('FILE = "model.dat";', data_block, fixed = TRUE))
   expect_equal(normalizePath(m$dat_file, winslash = "/", mustWork = FALSE), expected_path)
 })
 
-test_that("write_inp preserves relative data paths outside the model directory", {
+test_that("write_dat canonicalizes relative data paths into model_dir", {
   syn <- "
 DATA:   FILE IS ex3.1.dat;
 VARIABLE:       NAMES ARE y1 x1 x3;
@@ -197,69 +297,35 @@ MODEL:  y1 ON x1 x3;
   data_lines <- m$syntax[file_idx:end_idx]
   data_block <- paste(data_lines, collapse = "")
 
-  expected_spec <- gsub("\\\\", "/", rel_path)
-  expect_true(grepl(expected_spec, data_block, fixed = TRUE))
-
-  expected_path <- normalizePath(file.path(model_dir, rel_path), winslash = "/", mustWork = FALSE)
+  expect_true(grepl('FILE = "model.dat";', data_block, fixed = TRUE))
+  expected_path <- normalizePath(file.path(model_dir, "model.dat"), winslash = "/", mustWork = FALSE)
   expect_equal(normalizePath(m$dat_file, winslash = "/", mustWork = FALSE), expected_path)
 })
 
-test_that("write_inp round-trips long wrapped data paths", {
+test_that("changing file identity unloads output and updates canonical paths", {
   syn <- "
 DATA:   FILE IS ex3.1.dat;
 VARIABLE:       NAMES ARE y1 x1 x3;
 MODEL:  y1 ON x1 x3;
 "
 
-  dat <- as.data.frame(data.table::fread(
-    testthat::test_path("submitModels", "ex3.1.dat"),
-    data.table = FALSE
-  ))
+  dat <- as.data.frame(data.table::fread(testthat::test_path("submitModels", "ex3.1.dat"), data.table = FALSE))
   names(dat) <- c("y1", "x1", "x3")
-
-  base_dir <- tempfile()
-  dir.create(base_dir)
-  model_dir <- file.path(base_dir, "model")
-  dir.create(model_dir)
-  external_dir <- file.path(
-    base_dir,
-    "segment_aaaaaaaaaaaaaaaaaaaa",
-    "segment_bbbbbbbbbbbbbbbbbbbb",
-    "segment_cccccccccccccccccccc",
-    "segment_dddddddddddddddddddd"
-  )
-  dir.create(external_dir, recursive = TRUE)
-
-  inp_path <- file.path(model_dir, "model.inp")
-  external_path <- file.path(external_dir, "external_long_filename.dat")
-  expect_gt(nchar(external_path), 90)
+  tmp <- tempdir()
+  tmp <- normalizePath(tmp)
+  file.copy(testthat::test_path("submitModels", "ex3.1.inp"), tmp, overwrite = TRUE)
+  file.copy(testthat::test_path("submitModels", "ex3.1.dat"), tmp, overwrite = TRUE)
+  file.copy(testthat::test_path("ex3.1.out"), tmp, overwrite = TRUE)
   mplus_fake <- tempfile()
   file.create(mplus_fake)
 
-  m <- mplusModel(
-    syntax = syn,
-    data = dat,
-    inp_file = inp_path,
-    Mplus_command = mplus_fake
-  )
+  m <- mplusModel(inp_file = file.path(tmp, "ex3.1.inp"), read = TRUE, Mplus_command = mplus_fake)
+  expect_equal(m$summaries$AIC, 1396.667, tolerance = 1e-3)
 
-  m$.__enclos_env__$private$set_dat_file(external_path)
-  m$write_dat(quiet = TRUE)
-  m$write_inp(overwrite = TRUE, quiet = TRUE)
-
-  inp_lines <- readLines(inp_path)
-  file_idx <- grep("^\\s*FILE\\s*=", inp_lines)
-  following <- inp_lines[file_idx:length(inp_lines)]
-  end_idx <- file_idx - 1 + which(grepl(";\\s*$", following))[1]
-  data_file_lines <- inp_lines[file_idx:end_idx]
-  expect_lte(max(nchar(data_file_lines)), 90)
-
-  m2 <- mplusModel(inp_file = inp_path, read = FALSE, Mplus_command = mplus_fake)
-  expect_equal(
-    normalizePath(m2$dat_file, winslash = "/", mustWork = FALSE),
-    normalizePath(external_path, winslash = "/", mustWork = FALSE)
-  )
-  expect_true(file.exists(m2$dat_file))
+  expect_message(m$file_stem <- "relocated", "Unloading model results")
+  expect_null(m$summaries)
+  expect_equal(m$inp_file, file.path(tmp, "relocated.inp"))
+  expect_equal(m$dat_file, file.path(tmp, "relocated.dat"))
 })
 
 test_that("mplusModel reads existing output", {
@@ -272,6 +338,204 @@ test_that("mplusModel reads existing output", {
   m <- mplusModel(inp_file = file.path(tmp, "ex3.1.inp"), read = TRUE, Mplus_command = mplus_fake)
   expect_equal(m$summaries$AIC, 1396.667, tolerance = 1e-3)
   expect_equal(nrow(m$data), 500)
+})
+
+test_that("inp_file entry skips automatic output loading when inp is newer than out", {
+  tmp <- tempfile()
+  dir.create(tmp)
+  inp_path <- file.path(tmp, "ex3.1.inp")
+  out_path <- file.path(tmp, "ex3.1.out")
+  dat_path <- file.path(tmp, "ex3.1.dat")
+  file.copy(testthat::test_path("submitModels", "ex3.1.inp"), inp_path)
+  file.copy(testthat::test_path("submitModels", "ex3.1.dat"), dat_path)
+  file.copy(testthat::test_path("ex3.1.out"), out_path)
+  Sys.sleep(1.1)
+  writeLines(readLines(inp_path), inp_path)
+
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  expect_warning(
+    m <- mplusModel(
+      inp_file = inp_path,
+      read = TRUE,
+      Mplus_command = mplus_fake
+    ),
+    "skipping automatic output loading"
+  )
+
+  expect_null(m$summaries)
+  expect_true(any(grepl("^TITLE:", m$syntax)))
+})
+
+test_that("out_file entry warns on newer inp but still loads output", {
+  tmp <- tempfile()
+  dir.create(tmp)
+  inp_path <- file.path(tmp, "ex3.1.inp")
+  out_path <- file.path(tmp, "ex3.1.out")
+  dat_path <- file.path(tmp, "ex3.1.dat")
+  file.copy(testthat::test_path("submitModels", "ex3.1.inp"), inp_path)
+  file.copy(testthat::test_path("submitModels", "ex3.1.dat"), dat_path)
+  file.copy(testthat::test_path("ex3.1.out"), out_path)
+  Sys.sleep(1.1)
+  writeLines(readLines(inp_path), inp_path)
+
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  expect_warning(
+    m <- mplusModel(
+      out_file = out_path,
+      read = TRUE,
+      Mplus_command = mplus_fake
+    ),
+    "loading the \\.out because `out_file` was supplied explicitly"
+  )
+
+  expect_equal(m$summaries$AIC, 1396.667, tolerance = 1e-3)
+  expect_equal(nrow(m$data), 500)
+})
+
+test_that("out_file entry prefers syntax echoed in output over sibling inp file", {
+  tmp <- tempfile()
+  dir.create(tmp)
+  out_path <- file.path(tmp, "ex3.1.out")
+  inp_path <- file.path(tmp, "ex3.1.inp")
+  dat_path <- file.path(tmp, "ex3.1.dat")
+  file.copy(testthat::test_path("ex3.1.out"), out_path)
+  file.copy(testthat::test_path("submitModels", "ex3.1.dat"), dat_path)
+  writeLines(
+    c(
+      "TITLE: STALE INPUT;",
+      "DATA: FILE IS ex3.1.dat;",
+      "VARIABLE: NAMES ARE y1 x1 x3;",
+      "MODEL: y1 ON x1;"
+    ),
+    inp_path
+  )
+
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  m <- mplusModel(
+    out_file = out_path,
+    read = FALSE,
+    Mplus_command = mplus_fake
+  )
+
+  expect_false(any(grepl("STALE INPUT", m$syntax, fixed = TRUE)))
+  expect_true(any(grepl("x3", m$syntax, fixed = TRUE)))
+})
+
+test_that("explicit syntax suppresses automatic output loading", {
+  tmp <- tempfile()
+  dir.create(tmp)
+  file.copy(testthat::test_path("ex3.1.out"), file.path(tmp, "model.out"))
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  expect_message(
+    m <- mplusModel(
+      syntax = c(
+        "TITLE: CUSTOM;",
+        "DATA: FILE IS model.dat;",
+        "VARIABLE: NAMES ARE y1 x1 x3;",
+        "MODEL: y1 ON x1;"
+      ),
+      dir = tmp,
+      file_stem = "model",
+      read = TRUE,
+      Mplus_command = mplus_fake
+    ),
+    "Use `\\$read\\(\\)` to load the \\.out file explicitly"
+  )
+
+  expect_true(any(grepl("CUSTOM", m$syntax, fixed = TRUE)))
+  expect_null(m$summaries)
+
+  m$read()
+  expect_equal(m$summaries$AIC, 1396.667, tolerance = 1e-3)
+})
+
+test_that("inp_file entry with read FALSE does not inspect a sibling out file", {
+  tmp <- tempfile()
+  dir.create(tmp)
+  inp_path <- file.path(tmp, "x.inp")
+  out_path <- file.path(tmp, "x.out")
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  writeLines(
+    c(
+      "TITLE: FROM INPUT;",
+      "DATA: FILE IS x.dat;",
+      "VARIABLE: NAMES ARE y x;",
+      "MODEL: y ON x;"
+    ),
+    inp_path
+  )
+  writeLines("not valid Mplus output", out_path)
+
+  expect_silent({
+    m <- mplusModel(
+      inp_file = inp_path,
+      read = FALSE,
+      Mplus_command = mplus_fake
+    )
+  })
+
+  expect_true(any(grepl("FROM INPUT", m$syntax, fixed = TRUE)))
+  expect_null(m$summaries)
+})
+
+test_that("mplusModel can initialize from an out file only", {
+  tmp <- tempfile()
+  dir.create(tmp)
+  tmp <- normalizePath(tmp)
+  file.copy(testthat::test_path("submitModels", "ex3.1.dat"), tmp)
+  file.copy(testthat::test_path("ex3.1.out"), tmp)
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  m <- mplusModel(
+    out_file = file.path(tmp, "ex3.1.out"),
+    read = TRUE,
+    Mplus_command = mplus_fake
+  )
+
+  expect_equal(
+    normalizePath(m$inp_file, winslash = "/", mustWork = FALSE),
+    normalizePath(file.path(tmp, "ex3.1.inp"), winslash = "/", mustWork = FALSE)
+  )
+  expect_equal(
+    normalizePath(m$out_file, winslash = "/", mustWork = FALSE),
+    normalizePath(file.path(tmp, "ex3.1.out"), winslash = "/", mustWork = FALSE)
+  )
+  expect_equal(
+    normalizePath(m$gh5_file, winslash = "/", mustWork = FALSE),
+    normalizePath(file.path(tmp, "ex3.1.gh5"), winslash = "/", mustWork = FALSE)
+  )
+  expect_true(any(grepl("^TITLE:", m$syntax)))
+  expect_equal(m$summaries$AIC, 1396.667, tolerance = 1e-3)
+  expect_equal(nrow(m$data), 500)
+})
+
+test_that("mplusModel can bootstrap syntax from out file without loading results", {
+  tmp <- tempfile()
+  dir.create(tmp)
+  tmp <- normalizePath(tmp)
+  file.copy(testthat::test_path("ex3.1.out"), tmp)
+  mplus_fake <- tempfile()
+  file.create(mplus_fake)
+
+  m <- mplusModel(
+    out_file = file.path(tmp, "ex3.1.out"),
+    read = FALSE,
+    Mplus_command = mplus_fake
+  )
+
+  expect_true(any(grepl("^TITLE:", m$syntax)))
+  expect_null(m$summaries)
 })
 
 test_that("mplusModel falls back to basename for missing data file", {

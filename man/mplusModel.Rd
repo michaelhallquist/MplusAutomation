@@ -8,6 +8,9 @@ mplusModel(
   syntax = NULL,
   data = NULL,
   inp_file = NULL,
+  out_file = NULL,
+  dir = NULL,
+  file_stem = NULL,
   read = TRUE,
   Mplus_command = NULL
 )
@@ -18,6 +21,12 @@ mplusModel(
 \item{data}{a data.frame to be used for estimating the model}
 
 \item{inp_file}{the location of .inp file for this model}
+
+\item{out_file}{the location of .out file for this model}
+
+\item{dir}{the directory for this model's files}
+
+\item{file_stem}{the shared filename stem for this model's \code{.inp}, \code{.out}, \code{.gh5}, and \code{.dat} files}
 
 \item{read}{If TRUE and the .out file already exists, read the contents of the .out file using \code{readModels}}
 

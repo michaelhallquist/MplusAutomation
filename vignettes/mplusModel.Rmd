@@ -38,7 +38,17 @@ It stores:
 Compared with the traditional `mplusObject`, `mplusModel` is designed around a single model lifecycle:
 create, update, write files, run/submit, and inspect results.
 
-# Create an `mplusModel`
+# Three Ways to Start
+
+There are three common entry points:
+
+1. Start from syntax and data when you want to define a model in R and choose its file location with `dir` and `file_stem`.
+2. Start from an existing `.inp` file when the input syntax already exists on disk.
+3. Start from an existing `.out` file when you want to recover a model object from Mplus output, even if the `.inp` file is missing.
+
+In all three cases, the object tracks a canonical file identity through `dir` and `file_stem`, and derives the `.inp`, `.out`, `.gh5`, and `.dat` paths from that state.
+
+# Start from Syntax and Data
 
 ```{r}
 model_syntax <- "
@@ -60,17 +70,37 @@ model_data <- mtcars[, c("mpg", "wt", "hp", "cyl", "qsec")]
 m <- mplusModel(
   syntax = model_syntax,
   data = model_data,
-  inp_file = file.path(tmp_dir, "mtcars_demo.inp"),
+  dir = tmp_dir,
+  file_stem = "mtcars_demo",
   Mplus_command = fake_mplus
 )
 
+m$dir
+m$file_stem
 m$model_dir
 m$inp_file
 m$dat_file
 m$variables
 ```
 
-The object uses active bindings, so values like `m$inp_file` and `m$dat_file` are always synchronized with the current object state.
+The object uses active bindings, so values like `m$dir`, `m$file_stem`, `m$inp_file`, and `m$dat_file` are always synchronized with the current object state. To relocate the model files, update `m$dir` and/or `m$file_stem`; `write_dat()` and `write_inp()` always write to those canonical locations.
+
+# Start from an Existing `.inp` File
+
+If you already have an Mplus input file, initialize the object from `inp_file`.
+
+```{r}
+m$write_dat()
+m$write_inp()
+
+m_from_inp <- mplusModel(
+  inp_file = m$inp_file,
+  read = FALSE,
+  Mplus_command = fake_mplus
+)
+
+head(m_from_inp$syntax, n = 8)
+```
 
 # Write Mplus Files
 
@@ -82,18 +112,6 @@ m$write_inp()
 
 file.exists(m$dat_file)
 file.exists(m$inp_file)
-```
-
-You can re-create an object from an existing `.inp` file:
-
-```{r}
-m_from_inp <- mplusModel(
-  inp_file = m$inp_file,
-  read = FALSE,
-  Mplus_command = fake_mplus
-)
-
-head(m_from_inp$syntax, n = 8)
 ```
 
 # Update Syntax and Variables
@@ -136,31 +154,23 @@ m$variables <- NULL
 m$variables
 ```
 
-# Read Existing Output into `mplusModel`
+# Start from an Existing `.out` File
 
-This example uses an output file shipped with the package (`inst/extdata/ex3.1.out`).
+This example uses an output file shipped with the package (`inst/extdata/ex3.1.out`). The constructor rebuilds syntax from the echoed input stored in the output file and, when `read = TRUE`, also loads the parsed results.
 
 ```{r}
 out_file <- system.file("extdata", "ex3.1.out", package = "MplusAutomation")
 file.copy(out_file, file.path(tmp_dir, "ex3.1.out"), overwrite = TRUE)
 
-writeLines(
-  c(
-    "TITLE: User's Guide Example 3.1;",
-    "DATA: FILE IS ex3.1.dat;",
-    "VARIABLE: NAMES ARE y1 x1 x3;",
-    "MODEL: y1 ON x1 x3;"
-  ),
-  con = file.path(tmp_dir, "ex3.1.inp")
-)
-
 m_out <- mplusModel(
-  inp_file = file.path(tmp_dir, "ex3.1.inp"),
+  out_file = file.path(tmp_dir, "ex3.1.out"),
   data = data.frame(y1 = 0, x1 = 0, x3 = 0),
   read = TRUE,
   Mplus_command = fake_mplus
 )
 
+m_out$inp_file
+m_out$syntax[1:4]
 m_out$summaries[c("AIC", "BIC", "CFI", "RMSEA_Estimate")]
 head(m_out$parameters$unstandardized[, c("paramHeader", "param", "est", "se", "pval")])
 ```
@@ -190,11 +200,10 @@ m$submit(
 
 Use `mplusModel` when you want an object-oriented workflow for a single model:
 
-1. define syntax and data
-2. write `.inp` / `.dat`
-3. update syntax programmatically
-4. run or submit
-5. read and inspect results
+1. Start from `syntax` + `dir` + `file_stem`, an existing `inp_file`, or an existing `out_file`.
+2. Work with canonical file paths through `dir`, `file_stem`, `inp_file`, `out_file`, and `dat_file`.
+3. Write `.inp` / `.dat`, update syntax programmatically, and run or submit the model.
+4. Read and inspect parsed output sections from the corresponding `.out` file.
 
 ```{r cleanup, include=FALSE}
 unlink(tmp_dir, recursive = TRUE, force = TRUE)

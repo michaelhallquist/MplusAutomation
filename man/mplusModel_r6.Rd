@@ -13,11 +13,17 @@ Wrapped by \code{mplusModel}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{model_dir}}{the directory for Mplus files corresponding to this model}
+\item{\code{dir}}{the directory for Mplus files corresponding to this model}
+
+\item{\code{file_stem}}{the shared filename stem for the model's .inp, .out, .gh5, and .dat files}
+
+\item{\code{model_dir}}{alias for \code{dir}, retained for compatibility}
 
 \item{\code{inp_file}}{the location of the Mplus .inp file for this model}
 
 \item{\code{out_file}}{the location of the Mplus .out file for this model}
+
+\item{\code{gh5_file}}{the location of the Mplus .gh5 file for this model}
 
 \item{\code{dat_file}}{the location of the Mplus .dat (data) file for this model}
 
@@ -122,6 +128,9 @@ generate an mplusModel_r6 object
   syntax = NULL,
   data = NULL,
   inp_file = NULL,
+  out_file = NULL,
+  dir = NULL,
+  file_stem = NULL,
   read = TRUE,
   Mplus_command = NULL
 )}\if{html}{\out{</div>}}
@@ -135,6 +144,12 @@ generate an mplusModel_r6 object
 \item{\code{data}}{a data.frame to be used for estimating the model}
 
 \item{\code{inp_file}}{the location of .inp file for this model}
+
+\item{\code{out_file}}{the location of .out file for this model}
+
+\item{\code{dir}}{the directory for this model's files}
+
+\item{\code{file_stem}}{the shared filename stem for this model's \code{.inp}, \code{.out}, \code{.gh5}, and \code{.dat} files}
 
 \item{\code{read}}{If TRUE and the .out file already exists, read the contents of the .out file using \code{readModels}}
 
@@ -189,15 +204,13 @@ write the .inp and .dat files for this model to the intended location
 \subsection{Method \code{write_inp()}}{
 write the .inp and .dat files for this model to the intended location
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$write_inp(overwrite = TRUE, inp_file = NULL, quiet = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{mplusModel_r6$write_inp(overwrite = TRUE, quiet = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{overwrite}}{if \code{TRUE}, overwrite existing data. Default: \code{TRUE}.}
-
-\item{\code{inp_file}}{The location of the input file to write. If NULL (default), use the \verb{$inp_file} of this object.}
 
 \item{\code{quiet}}{if \code{TRUE}, do not produce messages about the outcome of this command (e.g., a message about overwriting existing data)}
 }

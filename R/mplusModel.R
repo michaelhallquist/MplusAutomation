@@ -44,13 +44,16 @@ normalizeMplusUpdateName <- function(name) {
 #' @param syntax a character vector of Mplus input syntax for this model
 #' @param data a data.frame to be used for estimating the model
 #' @param inp_file the location of .inp file for this model
+#' @param out_file the location of .out file for this model
+#' @param dir the directory for this model's files
+#' @param file_stem the shared filename stem for this model's `.inp`, `.out`, `.gh5`, and `.dat` files
 #' @param read If TRUE and the .out file already exists, read the contents of the .out file using `readModels`
 #' @param Mplus_command The location of the Mplus executable to run. If NULL, use `detectMplus()`
 #' @return a `mplusModel_r6` object containing information about the model
 #' @export
-mplusModel <- function(syntax=NULL, data=NULL, inp_file=NULL, read=TRUE, Mplus_command = NULL) {
+mplusModel <- function(syntax=NULL, data=NULL, inp_file=NULL, out_file=NULL, dir=NULL, file_stem=NULL, read=TRUE, Mplus_command = NULL) {
   # simple wrapper around class constructor
-  mobj <- mplusModel_r6$new(syntax, data, inp_file, read, Mplus_command)
+  mobj <- mplusModel_r6$new(syntax, data, inp_file, out_file, dir, file_stem, read, Mplus_command)
   
   return(mobj)
 }
@@ -69,8 +72,7 @@ mplusModel_r6 <- R6::R6Class(
       pvt_output_loaded = FALSE,
       pvt_syntax = NULL,           # syntax for this model, parsed into a list
       pvt_data = NULL,             # data.frame containing data for model estimation
-      pvt_inp_file = NULL,         # name of .inp file
-      pvt_out_file = NULL,         # name of .out file
+      pvt_model_stem = NULL,       # stem shared by .inp/.out/.gh5 files
       pvt_dat_file = NULL,         # name of .dat file
       pvt_model_dir = NULL,        # location of model files
       pvt_Mplus_command = NULL,    # location of Mplus binary
@@ -78,6 +80,161 @@ mplusModel_r6 <- R6::R6Class(
       pvt_variables_manual = FALSE,# whether variables are manually set (not auto-detected)
       pvt_is_montecarlo = FALSE,   # whether this is a monte carlo model (in which case the data section is irrelevant)
       
+      model_path = function(ext) {
+        if (is.null(private$pvt_model_dir) || is.null(private$pvt_model_stem)) return(NULL)
+        file.path(private$pvt_model_dir, paste0(private$pvt_model_stem, ext))
+      },
+
+      canonical_dat_spec = function() {
+        if (is.null(private$pvt_model_stem)) return(NULL)
+        paste0(private$pvt_model_stem, ".dat")
+      },
+
+      parse_model_path = function(path, type = c("inp", "out")) {
+        type <- match.arg(type)
+        checkmate::assert_string(path)
+
+        s <- splitFilePath(path, normalize = TRUE)
+        directory <- ifelse(is.na(s$directory), getwd(), s$directory)
+        filename <- s$filename
+        pattern <- switch(
+          type,
+          inp = "\\.inp?$",
+          out = "\\.out$"
+        )
+
+        if (!grepl(pattern, filename, ignore.case = TRUE, perl = TRUE)) {
+          stop(sprintf("%s must have a .%s extension.", type, type), call. = FALSE)
+        }
+
+        stem <- sub(pattern, "", filename, ignore.case = TRUE, perl = TRUE)
+        if (!nzchar(stem)) {
+          stop(sprintf("Could not determine model stem from %s.", path), call. = FALSE)
+        }
+
+        list(
+          directory = private$normalize_path_safe(directory),
+          stem = stem
+        )
+      },
+
+      establish_model_identity = function(inp_file = NULL, out_file = NULL, dir = NULL, file_stem = NULL) {
+        has_path_identity <- !is.null(inp_file) || !is.null(out_file)
+        has_stem_identity <- !is.null(dir) || !is.null(file_stem)
+
+        if (is.null(dir) != is.null(file_stem)) {
+          stop("dir and file_stem must be provided together.", call. = FALSE)
+        }
+        if (!has_path_identity && !has_stem_identity) {
+          stop("Either inp_file/out_file or dir/file_stem must be provided.", call. = FALSE)
+        }
+
+        inp_info <- if (!is.null(inp_file)) private$parse_model_path(inp_file, type = "inp") else NULL
+        out_info <- if (!is.null(out_file)) private$parse_model_path(out_file, type = "out") else NULL
+        stem_info <- if (has_stem_identity) {
+          list(
+            directory = private$normalize_model_dir_input(dir),
+            stem = private$normalize_file_stem_input(file_stem)
+          )
+        } else NULL
+
+        if (!is.null(inp_info) && !is.null(out_info)) {
+          same_dir <- identical(inp_info$directory, out_info$directory)
+          same_stem <- identical(inp_info$stem, out_info$stem)
+          if (!same_dir || !same_stem) {
+            stop("inp_file and out_file must refer to the same model stem in the same directory.", call. = FALSE)
+          }
+        }
+
+        path_info <- if (!is.null(inp_info)) inp_info else out_info
+        if (!is.null(path_info) && !is.null(stem_info)) {
+          same_dir <- identical(path_info$directory, stem_info$directory)
+          same_stem <- identical(path_info$stem, stem_info$stem)
+          if (!same_dir || !same_stem) {
+            stop("Path-style inputs and dir/file_stem must refer to the same canonical model identity.", call. = FALSE)
+          }
+        }
+
+        info <- if (!is.null(path_info)) path_info else stem_info
+        private$pvt_model_dir <- info$directory
+        private$pvt_model_stem <- info$stem
+      },
+
+      normalize_model_dir_input = function(path) {
+        checkmate::assert_string(path)
+        path <- trimws(path)
+        if (!nzchar(path)) stop("dir must be a non-empty path.", call. = FALSE)
+
+        expanded <- path.expand(path)
+        if (private$is_absolute_path(expanded)) {
+          return(private$normalize_path_safe(expanded))
+        }
+
+        base_dir <- private$pvt_model_dir
+        if (is.null(base_dir)) base_dir <- getwd()
+        private$normalize_path_safe(file.path(base_dir, path))
+      },
+
+      normalize_file_stem_input = function(value) {
+        checkmate::assert_string(value)
+        value <- trimws(value)
+        if (!nzchar(value)) stop("file_stem must be a non-empty string.", call. = FALSE)
+        if (grepl("[/\\\\]", value, perl = TRUE)) {
+          stop("file_stem must not contain path separators.", call. = FALSE)
+        }
+
+        value <- sub("\\.(inp|out|gh5|dat)$", "", value, ignore.case = TRUE, perl = TRUE)
+        if (!nzchar(value)) stop("file_stem must be a non-empty string.", call. = FALSE)
+        value
+      },
+
+      update_location_message = function(kind, old_value, new_value) {
+        if (identical(old_value, new_value)) return(invisible(NULL))
+
+        msg <- switch(
+          kind,
+          dir = sprintf("Model directory changed from %s to %s.", old_value, new_value),
+          file_stem = sprintf("Model file stem changed from %s to %s.", old_value, new_value),
+          stop("Unknown location change kind.", call. = FALSE)
+        )
+
+        if (isTRUE(private$pvt_output_loaded)) {
+          private$clear_output()
+          msg <- paste(msg, "Unloading model results from object.")
+        }
+
+        message(msg)
+      },
+
+      set_model_dir = function(value, announce = TRUE) {
+        new_dir <- private$normalize_model_dir_input(value)
+        old_dir <- private$pvt_model_dir
+        if (identical(old_dir, new_dir)) return(invisible(NULL))
+
+        if (!dir.exists(new_dir)) dir.create(new_dir, recursive = TRUE, showWarnings = FALSE)
+        private$pvt_model_dir <- new_dir
+        if (!isTRUE(private$pvt_is_montecarlo) && !is.null(private$pvt_model_stem)) {
+          private$set_dat_file(private$canonical_dat_spec())
+        }
+        if (isTRUE(announce) && !is.null(old_dir)) {
+          private$update_location_message("dir", old_dir, new_dir)
+        }
+      },
+
+      set_model_stem = function(value, announce = TRUE) {
+        new_stem <- private$normalize_file_stem_input(value)
+        old_stem <- private$pvt_model_stem
+        if (identical(old_stem, new_stem)) return(invisible(NULL))
+
+        private$pvt_model_stem <- new_stem
+        if (!isTRUE(private$pvt_is_montecarlo)) {
+          private$set_dat_file(private$canonical_dat_spec())
+        }
+        if (isTRUE(announce) && !is.null(old_stem)) {
+          private$update_location_message("file_stem", old_stem, new_stem)
+        }
+      },
+
       # private method to populate mplus output fields from readModels result
       populate_output = function(o) {
         private$pvt_output_loaded <- TRUE
@@ -252,25 +409,48 @@ mplusModel_r6 <- R6::R6Class(
   ),
   active = c(
     list(
-      #' @field model_dir the directory for Mplus files corresponding to this model
-      model_dir = function(value) {
+      #' @field dir the directory for Mplus files corresponding to this model
+      dir = function(value) {
         if (missing(value)) {
           private$pvt_model_dir
         } else {
-          if (!dir.exists(value)) dir.create(value, recursive = TRUE)
-          private$pvt_model_dir <- value
+          private$set_model_dir(value, announce = TRUE)
+        }
+      },
+
+      #' @field file_stem the shared filename stem for the model's .inp, .out, .gh5, and .dat files
+      file_stem = function(value) {
+        if (missing(value)) {
+          private$pvt_model_stem
+        } else {
+          private$set_model_stem(value, announce = TRUE)
+        }
+      },
+
+      #' @field model_dir alias for `dir`, retained for compatibility
+      model_dir = function(value) {
+        if (missing(value)) {
+          self$dir
+        } else {
+          self$dir <- value
         }
       },
       
       #' @field inp_file the location of the Mplus .inp file for this model
       inp_file = function(value) {
-        if (missing(value)) file.path(private$pvt_model_dir, private$pvt_inp_file)
+        if (missing(value)) private$model_path(".inp")
         else stop("Cannot set read-only field", call. = FALSE)
       },
       
       #' @field out_file the location of the Mplus .out file for this model
       out_file = function(value) {
-        if (missing(value)) file.path(private$pvt_model_dir, private$pvt_out_file)
+        if (missing(value)) private$model_path(".out")
+        else stop("Cannot set read-only field", call. = FALSE)
+      },
+
+      #' @field gh5_file the location of the Mplus .gh5 file for this model
+      gh5_file = function(value) {
+        if (missing(value)) private$model_path(".gh5")
         else stop("Cannot set read-only field", call. = FALSE)
       },
       
@@ -348,7 +528,7 @@ mplusModel_r6 <- R6::R6Class(
           private$pvt_Mplus_command
         } else {
           if (is.null(value)) {
-            private$pvt_Mplus_command <- MplusAutomation::detectMplus() # default
+            private$pvt_Mplus_command <- detectMplus() # default
           } else if (!checkmate::test_string(value)) {
             warning("Mplus_command must be a character string pointing to the location of Mplus")
           } else {
@@ -448,63 +628,105 @@ mplusModel_r6 <- R6::R6Class(
     #' @param syntax a character vector of Mplus input syntax for this model
     #' @param data a data.frame to be used for estimating the model
     #' @param inp_file the location of .inp file for this model
+    #' @param out_file the location of .out file for this model
+    #' @param dir the directory for this model's files
+    #' @param file_stem the shared filename stem for this model's `.inp`, `.out`, `.gh5`, and `.dat` files
     #' @param read If TRUE and the .out file already exists, read the contents of the .out file using `readModels`
     #' @param Mplus_command N.B.: No need to pass this parameter for most users (has intelligent defaults). Allows the user to 
     #'   specify the name/path of the Mplus executable to be used for running models. This covers situations where Mplus
     #'   is not in the system's path, or where one wants to test different versions of the Mplus program.
-    initialize = function(syntax=NULL, data=NULL, inp_file=NULL, read=TRUE, Mplus_command = NULL) {
+    initialize = function(syntax=NULL, data=NULL, inp_file=NULL, out_file=NULL, dir=NULL, file_stem=NULL, read=TRUE, Mplus_command = NULL) {
       checkmate::assert_flag(read)
-      
-      # look for extant inp file and read the corresponding output if requested
-      if (!is.null(inp_file)) {
-        # if (!file.exists(inp_file)) stop("inp_file does does not exist: ", inp_file)
-        checkmate::assert_string(inp_file)
-        s <- splitFilePath(inp_file, normalize=TRUE)
-        private$pvt_model_dir <- ifelse(is.na(s$directory), getwd(), s$directory)
-        private$pvt_inp_file <- s$filename
-        private$pvt_out_file <- sub("\\.inp?$", ".out", s$filename)
-        
-        if (file.exists(self$out_file) && isTRUE(read)) self$read() # load the .out file if requested
-        
-        # if a syntax string is not passed in, set the syntax string to be the contents of the extant input file
-        if (is.null(syntax) && file.exists(self$inp_file)) {
-          syntax <- readLines(self$inp_file)
-        }
-        
-        # if data is not provided, but the .out file is provided, attempt to read the data
-        if (is.null(data) && private$pvt_output_loaded && !is.null(self$input$data$file)) {
-          dfile <- self$input$data$file
-          private$set_dat_file(self$input$data$file)
 
-          # If the data file cannot be loaded as-is, attempt to locate it in the directory of the input/output files.
-          # This handles cases where the data file was specified with an absolute path on another machine but
-          # the .dat, .inp and .out files all reside in the same folder.
-          if (!file.exists(dfile)) {
-            # first, try using the provided path relative to the model directory
-            rel_dfile <- file.path(private$pvt_model_dir, dfile)
-            if (file.exists(rel_dfile)) {
-              dfile <- rel_dfile
-            } else {
-              # next, try just the basename of the data file in the model directory
-              base_dfile <- file.path(private$pvt_model_dir, basename(dfile))
-              if (file.exists(base_dfile)) {
-                dfile <- base_dfile
-                private$set_dat_file(basename(dfile))
-              }
+      private$establish_model_identity(inp_file = inp_file, out_file = out_file, dir = dir, file_stem = file_stem)
+
+      explicit_syntax_supplied <- !is.null(syntax)
+      entered_via_inp <- !is.null(inp_file)
+      entered_via_out <- !is.null(out_file)
+
+      # For inp_file entry, trust the input file first when the caller did not request output loading.
+      if (is.null(syntax) && isTRUE(entered_via_inp) && file.exists(self$inp_file)) {
+        syntax <- readLines(self$inp_file)
+      }
+
+      parsed_output <- NULL
+      out_exists <- file.exists(self$out_file)
+      inp_exists <- file.exists(self$inp_file)
+      inp_newer_than_out <- FALSE
+      if (isTRUE(out_exists) && isTRUE(inp_exists)) {
+        finfo <- file.info(c(self$inp_file, self$out_file))
+        inp_mtime <- finfo[self$inp_file, "mtime"]
+        out_mtime <- finfo[self$out_file, "mtime"]
+        if (!is.na(inp_mtime) && !is.na(out_mtime) && inp_mtime > out_mtime) {
+          inp_newer_than_out <- TRUE
+        }
+      }
+
+      should_read_output <- FALSE
+
+      if (isTRUE(out_exists) && isTRUE(read) && isTRUE(explicit_syntax_supplied)) {
+        message("Explicit syntax supplied; skipping automatic output loading. Use `$read()` to load the .out file explicitly.")
+      } else if (isTRUE(out_exists) && isTRUE(read) && isTRUE(entered_via_inp) && isTRUE(inp_newer_than_out)) {
+        warning("Input file is newer than output file; skipping automatic output loading because the .out may be stale. Use `$read()` to load it anyway if desired.")
+      } else if (isTRUE(out_exists) && isTRUE(read) && isTRUE(entered_via_out)) {
+        if (isTRUE(inp_newer_than_out)) {
+          warning("Input file is newer than output file; loading the .out because `out_file` was supplied explicitly.")
+        }
+        should_read_output <- TRUE
+      } else if (isTRUE(out_exists) && isTRUE(read)) {
+        should_read_output <- TRUE
+      } else if (isTRUE(out_exists) && isFALSE(read) && is.null(syntax) && !isTRUE(entered_via_inp)) {
+        should_read_output <- TRUE
+      }
+
+      if (isTRUE(should_read_output)) {
+        what <- if (isTRUE(read)) "all" else "input"
+        parsed_output <- readModels(self$out_file, what = what, quiet = TRUE)
+        if (isTRUE(read)) private$populate_output(parsed_output)
+      }
+
+      # Prefer a real input file when present. Otherwise reconstruct syntax from the echoed input in the .out file.
+      if (is.null(syntax) && isTRUE(entered_via_out) && !is.null(parsed_output$input) && length(parsed_output$input) > 0L) {
+        syntax <- mplusInpToString(parsed_output$input)
+      } else if (is.null(syntax) && file.exists(self$inp_file)) {
+        syntax <- readLines(self$inp_file)
+      } else if (is.null(syntax) && !is.null(parsed_output$input) && length(parsed_output$input) > 0L) {
+        syntax <- mplusInpToString(parsed_output$input)
+      }
+
+      # if data is not provided, but the .out file is provided, attempt to read the data
+      if (is.null(data) && private$pvt_output_loaded && !is.null(self$input$data$file)) {
+        dfile <- self$input$data$file
+        private$set_dat_file(self$input$data$file)
+
+        # If the data file cannot be loaded as-is, attempt to locate it in the directory of the input/output files.
+        # This handles cases where the data file was specified with an absolute path on another machine but
+        # the .dat, .inp and .out files all reside in the same folder.
+        if (!file.exists(dfile)) {
+          # first, try using the provided path relative to the model directory
+          rel_dfile <- file.path(private$pvt_model_dir, dfile)
+          if (file.exists(rel_dfile)) {
+            dfile <- rel_dfile
+          } else {
+            # next, try just the basename of the data file in the model directory
+            base_dfile <- file.path(private$pvt_model_dir, basename(dfile))
+            if (file.exists(base_dfile)) {
+              dfile <- base_dfile
+              private$set_dat_file(basename(dfile))
             }
           }
-
-          data <- tryCatch(
-            data.table::fread(dfile, header = FALSE, na.strings = c("*", "."), strip.white = TRUE, data.table = FALSE),
-            error = function(e) {
-              warning("Could not load data file: ", dfile)
-              return(NULL)
-            }
-          )
-
-          # set the names of the data if read succeeds
-          if (!is.null(data)) names(data) <- strsplit(expandCmd(self$input$variable$names), "\\s+")[[1]]
         }
+
+        data <- tryCatch(
+          data.table::fread(dfile, header = FALSE, na.strings = c("*", "."), strip.white = TRUE, data.table = FALSE),
+          error = function(e) {
+            warning("Could not load data file: ", dfile)
+            return(NULL)
+          }
+        )
+
+        # set the names of the data if read succeeds
+        if (!is.null(data)) names(data) <- strsplit(expandCmd(self$input$variable$names), "\\s+")[[1]]
       }
       
       # populate model syntax
@@ -525,8 +747,8 @@ mplusModel_r6 <- R6::R6Class(
       }
       
       # set default data file name
-      if (isFALSE(private$pvt_is_montecarlo) && is.null(private$pvt_dat_file) && !is.null(private$pvt_inp_file)) {
-        private$set_dat_file(sub("\\.inp?$", ".dat", private$pvt_inp_file))
+      if (isFALSE(private$pvt_is_montecarlo) && is.null(private$pvt_dat_file) && !is.null(private$pvt_model_stem)) {
+        private$set_dat_file(paste0(private$pvt_model_stem, ".dat"))
       }
       
       # set Mplus command
@@ -538,7 +760,7 @@ mplusModel_r6 <- R6::R6Class(
     read = function(force=FALSE) {
       checkmate::assert_flag(force)
       if ((force || !private$pvt_output_loaded) && file.exists(self$out_file)) {
-        o <- MplusAutomation::readModels(self$out_file)
+        o <- readModels(self$out_file)
         private$populate_output(o)
       }
     },
@@ -555,6 +777,8 @@ mplusModel_r6 <- R6::R6Class(
       if (private$pvt_is_montecarlo) return(invisible(self))
       
       if (is.null(self$data)) stop("Cannot write data to file because this object has no data.")
+
+      private$set_dat_file(private$canonical_dat_spec())
       
       dat_path <- self$dat_file
       if (is.null(dat_path)) {
@@ -601,15 +825,15 @@ mplusModel_r6 <- R6::R6Class(
     
     #' @description write the .inp and .dat files for this model to the intended location
     #' @param overwrite if `TRUE`, overwrite existing data. Default: `TRUE`.
-    #' @param inp_file The location of the input file to write. If NULL (default), use the `$inp_file` of this object.
     #' @param quiet if `TRUE`, do not produce messages about the outcome of this command (e.g., a message about overwriting existing data)
-    write_inp = function(overwrite = TRUE, inp_file = NULL, quiet = FALSE) {
+    write_inp = function(overwrite = TRUE, quiet = FALSE) {
       checkmate::assert_flag(overwrite)
-      checkmate::assert_string(inp_file, null.ok = TRUE)
       checkmate::assert_flag(quiet)
       write <- TRUE
-      
-      if (is.null(inp_file)) inp_file <- self$inp_file
+
+      private$set_dat_file(private$canonical_dat_spec())
+      inp_file <- self$inp_file
+      if (!dir.exists(dirname(inp_file))) dir.create(dirname(inp_file), recursive = TRUE, showWarnings = FALSE)
       
       # always ensure that the data file in the syntax matches the internal object location
       # and apply wrapping at 75 characters to avoid > 90 errors

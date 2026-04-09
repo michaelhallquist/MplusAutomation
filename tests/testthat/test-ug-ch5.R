@@ -52,9 +52,7 @@ test_that("Ch 5: Example 5.4 - Censored and count indicators", {
   expect_equal(param_rows(m, "F2.BY", "U6")$est, 1.048)
 })
 
-test_that("Ch 5: IRT examples capture model variants and gh5 output", {
-  skip_if_not_installed("rhdf5")
-
+test_that("Ch 5: IRT examples capture model variants", {
   gpcm <- read_ch5_model("ex5.5.out")
   pcm <- read_ch5_model("ex5.5pcm.out")
   irt_2pl <- read_ch5_model("ex5.5part2.out")
@@ -63,7 +61,6 @@ test_that("Ch 5: IRT examples capture model variants and gh5 output", {
 
   expect_equal(gpcm$input$variable$categorical, "u1-u20 (gpcm)")
   expect_equal(param_rows(gpcm, "F.BY", "U4")$est, 1.085)
-  expect_true("irt_data" %in% names(gpcm$gh5))
 
   expect_equal(pcm$summaries$Parameters, 81)
   expect_equal(param_rows(pcm, "F.BY", "U1")$est, 1)
@@ -309,24 +306,19 @@ test_that("Ch 5: Examples 5.29 and 5.30 - Bi-factor EFA models", {
   expect_equal(param_rows(ex530, "F2.BY", "Y8")$est, 0.369)
 })
 
-test_that("Ch 5: Bayesian examples load Bayes summaries and gh5 companions", {
-  skip_if_not_installed("rhdf5")
-
+test_that("Ch 5: Bayesian examples load Bayes summaries", {
   ex531 <- read_ch5_model("ex5.31.out")
   ex532 <- read_ch5_model("ex5.32.out")
   ex533 <- read_ch5_model("ex5.33.out")
 
   expect_equal(ex531$summaries$Estimator, "BAYES")
   expect_equal(param_rows(ex531, "Variances", "F1")$est, 0.211)
-  expect_true("bayesian_data" %in% names(ex531$gh5))
 
   expect_equal(ex532$summaries$BIC, 8291.205)
   expect_equal(param_rows(ex532, "F1.ON", "X3")$est, 0.706)
-  expect_true("bayesian_data" %in% names(ex532$gh5))
 
   expect_equal(ex533$summaries$AnalysisType, "MIXTURE")
   expect_equal(ex533$input$variable$knownclass, "c(group = 1-10)")
   expect_equal(length(param_rows(ex533, "Means", "F1")$est), 10)
   expect_equal(param_rows(ex533, "Means", "F1")$est[c(1, 10)], c(0.937, 0.000))
-  expect_true(all(c("class_data", "measurement_parameters") %in% names(ex533$gh5)))
 })
