@@ -9,6 +9,9 @@ mplusModel(
   syntax = NULL,
   data = NULL,
   inp_file = NULL,
+  out_file = NULL,
+  dir = NULL,
+  file_stem = NULL,
   read = TRUE,
   Mplus_command = NULL
 )
@@ -27,6 +30,19 @@ mplusModel(
 - inp_file:
 
   the location of .inp file for this model
+
+- out_file:
+
+  the location of .out file for this model
+
+- dir:
+
+  the directory for this model's files
+
+- file_stem:
+
+  the shared filename stem for this model's `.inp`, `.out`, `.gh5`, and
+  `.dat` files
 
 - read:
 

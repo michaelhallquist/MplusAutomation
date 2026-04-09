@@ -8,9 +8,18 @@ Wrapped by `mplusModel`
 
 ## Active bindings
 
-- `model_dir`:
+- `dir`:
 
   the directory for Mplus files corresponding to this model
+
+- `file_stem`:
+
+  the shared filename stem for the model's .inp, .out, .gh5, and .dat
+  files
+
+- `model_dir`:
+
+  alias for `dir`, retained for compatibility
 
 - `inp_file`:
 
@@ -19,6 +28,10 @@ Wrapped by `mplusModel`
 - `out_file`:
 
   the location of the Mplus .out file for this model
+
+- `gh5_file`:
+
+  the location of the Mplus .gh5 file for this model
 
 - `dat_file`:
 
@@ -243,6 +256,9 @@ generate an mplusModel_r6 object
       syntax = NULL,
       data = NULL,
       inp_file = NULL,
+      out_file = NULL,
+      dir = NULL,
+      file_stem = NULL,
       read = TRUE,
       Mplus_command = NULL
     )
@@ -260,6 +276,19 @@ generate an mplusModel_r6 object
 - `inp_file`:
 
   the location of .inp file for this model
+
+- `out_file`:
+
+  the location of .out file for this model
+
+- `dir`:
+
+  the directory for this model's files
+
+- `file_stem`:
+
+  the shared filename stem for this model's `.inp`, `.out`, `.gh5`, and
+  `.dat` files
 
 - `read`:
 
@@ -324,18 +353,13 @@ write the .inp and .dat files for this model to the intended location
 
 #### Usage
 
-    mplusModel_r6$write_inp(overwrite = TRUE, inp_file = NULL, quiet = FALSE)
+    mplusModel_r6$write_inp(overwrite = TRUE, quiet = FALSE)
 
 #### Arguments
 
 - `overwrite`:
 
   if `TRUE`, overwrite existing data. Default: `TRUE`.
-
-- `inp_file`:
-
-  The location of the input file to write. If NULL (default), use the
-  `$inp_file` of this object.
 
 - `quiet`:
 

@@ -14,7 +14,22 @@ Compared with the traditional `mplusObject`, `mplusModel` is designed
 around a single model lifecycle: create, update, write files,
 run/submit, and inspect results.
 
-## Create an `mplusModel`
+## Three Ways to Start
+
+There are three common entry points:
+
+1.  Start from syntax and data when you want to define a model in R and
+    choose its file location with `dir` and `file_stem`.
+2.  Start from an existing `.inp` file when the input syntax already
+    exists on disk.
+3.  Start from an existing `.out` file when you want to recover a model
+    object from Mplus output, even if the `.inp` file is missing.
+
+In all three cases, the object tracks a canonical file identity through
+`dir` and `file_stem`, and derives the `.inp`, `.out`, `.gh5`, and
+`.dat` paths from that state.
+
+## Start from Syntax and Data
 
 ``` r
 model_syntax <- "
@@ -36,43 +51,42 @@ model_data <- mtcars[, c("mpg", "wt", "hp", "cyl", "qsec")]
 m <- mplusModel(
   syntax = model_syntax,
   data = model_data,
-  inp_file = file.path(tmp_dir, "mtcars_demo.inp"),
+  dir = tmp_dir,
+  file_stem = "mtcars_demo",
   Mplus_command = fake_mplus
 )
 
+m$dir
+#> [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202"
+m$file_stem
+#> [1] "mtcars_demo"
 m$model_dir
-#> [1] "/tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a"
+#> [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202"
 m$inp_file
-#> [1] "/tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a/mtcars_demo.inp"
+#> [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.inp"
 m$dat_file
-#> [1] "/tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a/mtcars_demo.dat"
+#> [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.dat"
 m$variables
 #> [1] "mpg" "wt"  "hp"
 ```
 
-The object uses active bindings, so values like `m$inp_file` and
-`m$dat_file` are always synchronized with the current object state.
+The object uses active bindings, so values like `m$dir`, `m$file_stem`,
+`m$inp_file`, and `m$dat_file` are always synchronized with the current
+object state. To relocate the model files, update `m$dir` and/or
+`m$file_stem`; `write_dat()` and `write_inp()` always write to those
+canonical locations.
 
-## Write Mplus Files
+## Start from an Existing `.inp` File
 
-`write_dat()` writes the data file, and `write_inp()` writes the Mplus
-input syntax.
+If you already have an Mplus input file, initialize the object from
+`inp_file`.
 
 ``` r
 m$write_dat()
-#> Writing data to file: /tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a/mtcars_demo.dat
+#> Writing data to file: /tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.dat
 m$write_inp()
-#> Writing Mplus syntax to file: /tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a/mtcars_demo.inp
+#> Writing Mplus syntax to file: /tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.inp
 
-file.exists(m$dat_file)
-#> [1] TRUE
-file.exists(m$inp_file)
-#> [1] TRUE
-```
-
-You can re-create an object from an existing `.inp` file:
-
-``` r
 m_from_inp <- mplusModel(
   inp_file = m$inp_file,
   read = FALSE,
@@ -84,6 +98,26 @@ head(m_from_inp$syntax, n = 8)
 #> [3] "DATA:"                            "FILE = mtcars_demo.dat;"         
 #> [5] "VARIABLE:"                        "NAMES = mpg wt hp;"              
 #> [7] "USEVARIABLES = mpg wt hp;"        "MISSING = .;"
+```
+
+## Write Mplus Files
+
+`write_dat()` writes the data file, and `write_inp()` writes the Mplus
+input syntax.
+
+``` r
+m$write_dat()
+#> The file(s)
+#>  'mtcars_demo.dat' 
+#> currently exist(s) and will be overwritten
+#> Writing data to file: /tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.dat
+m$write_inp()
+#> Writing Mplus syntax to file: /tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.inp
+
+file.exists(m$dat_file)
+#> [1] TRUE
+file.exists(m$inp_file)
+#> [1] TRUE
 ```
 
 ## Update Syntax and Variables
@@ -133,33 +167,32 @@ m$variables
 #> [1] "mpg"  "wt"   "hp"   "qsec"
 ```
 
-## Read Existing Output into `mplusModel`
+## Start from an Existing `.out` File
 
 This example uses an output file shipped with the package
-(`inst/extdata/ex3.1.out`).
+(`inst/extdata/ex3.1.out`). The constructor rebuilds syntax from the
+echoed input stored in the output file and, when `read = TRUE`, also
+loads the parsed results.
 
 ``` r
 out_file <- system.file("extdata", "ex3.1.out", package = "MplusAutomation")
 file.copy(out_file, file.path(tmp_dir, "ex3.1.out"), overwrite = TRUE)
 #> [1] TRUE
 
-writeLines(
-  c(
-    "TITLE: User's Guide Example 3.1;",
-    "DATA: FILE IS ex3.1.dat;",
-    "VARIABLE: NAMES ARE y1 x1 x3;",
-    "MODEL: y1 ON x1 x3;"
-  ),
-  con = file.path(tmp_dir, "ex3.1.inp")
-)
-
 m_out <- mplusModel(
-  inp_file = file.path(tmp_dir, "ex3.1.inp"),
+  out_file = file.path(tmp_dir, "ex3.1.out"),
   data = data.frame(y1 = 0, x1 = 0, x3 = 0),
   read = TRUE,
   Mplus_command = fake_mplus
 )
 
+m_out$inp_file
+#> [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/ex3.1.inp"
+m_out$syntax[1:4]
+#> [1] "TITLE:"                                                                              
+#> [2] "this is an example of a simple linear regression for a continuous observed dependent"
+#> [3] "    variable with two covariates"                                                    
+#> [4] "DATA:"
 m_out$summaries[c("AIC", "BIC", "CFI", "RMSEA_Estimate")]
 #>        AIC      BIC CFI RMSEA_Estimate
 #> 1 1396.667 1413.526   1              0
@@ -200,8 +233,11 @@ m$submit(
 Use `mplusModel` when you want an object-oriented workflow for a single
 model:
 
-1.  define syntax and data
-2.  write `.inp` / `.dat`
-3.  update syntax programmatically
-4.  run or submit
-5.  read and inspect results
+1.  Start from `syntax` + `dir` + `file_stem`, an existing `inp_file`,
+    or an existing `out_file`.
+2.  Work with canonical file paths through `dir`, `file_stem`,
+    `inp_file`, `out_file`, and `dat_file`.
+3.  Write `.inp` / `.dat`, update syntax programmatically, and run or
+    submit the model.
+4.  Read and inspect parsed output sections from the corresponding
+    `.out` file.

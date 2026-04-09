@@ -61,7 +61,7 @@
                         <h4 data-toc-skip class="author">Michael
 Hallquist</h4>
             
-            <h4 data-toc-skip class="date">2026-04-08</h4>
+            <h4 data-toc-skip class="date">2026-04-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/michaelhallquist/MplusAutomation/blob/master/vignettes/mplusModel.Rmd" class="external-link"><code>vignettes/mplusModel.Rmd</code></a></small>
       <div class="d-none name"><code>mplusModel.Rmd</code></div>
@@ -87,7 +87,26 @@ paths</li>
 create, update, write files, run/submit, and inspect results.</p>
 </div>
 <div class="section level2">
-<h2 id="create-an-mplusmodel">Create an <code>mplusModel</code><a class="anchor" aria-label="anchor" href="#create-an-mplusmodel"></a>
+<h2 id="three-ways-to-start">Three Ways to Start<a class="anchor" aria-label="anchor" href="#three-ways-to-start"></a>
+</h2>
+<p>There are three common entry points:</p>
+<ol style="list-style-type: decimal">
+<li>Start from syntax and data when you want to define a model in R and
+choose its file location with <code>dir</code> and
+<code>file_stem</code>.</li>
+<li>Start from an existing <code>.inp</code> file when the input syntax
+already exists on disk.</li>
+<li>Start from an existing <code>.out</code> file when you want to
+recover a model object from Mplus output, even if the <code>.inp</code>
+file is missing.</li>
+</ol>
+<p>In all three cases, the object tracks a canonical file identity
+through <code>dir</code> and <code>file_stem</code>, and derives the
+<code>.inp</code>, <code>.out</code>, <code>.gh5</code>, and
+<code>.dat</code> paths from that state.</p>
+</div>
+<div class="section level2">
+<h2 id="start-from-syntax-and-data">Start from Syntax and Data<a class="anchor" aria-label="anchor" href="#start-from-syntax-and-data"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model_syntax</span> <span class="op">&lt;-</span> <span class="st">"</span></span>
@@ -109,41 +128,42 @@ create, update, write files, run/submit, and inspect results.</p>
 <span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mplusModel.html">mplusModel</a></span><span class="op">(</span></span>
 <span>  syntax <span class="op">=</span> <span class="va">model_syntax</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">model_data</span>,</span>
-<span>  inp_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp_dir</span>, <span class="st">"mtcars_demo.inp"</span><span class="op">)</span>,</span>
+<span>  dir <span class="op">=</span> <span class="va">tmp_dir</span>,</span>
+<span>  file_stem <span class="op">=</span> <span class="st">"mtcars_demo"</span>,</span>
 <span>  Mplus_command <span class="op">=</span> <span class="va">fake_mplus</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="va">m</span><span class="op">$</span><span class="va">dir</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202"</span></span>
+<span><span class="va">m</span><span class="op">$</span><span class="va">file_stem</span></span>
+<span><span class="co">#&gt; [1] "mtcars_demo"</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">model_dir</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202"</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">inp_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a/mtcars_demo.inp"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.inp"</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">dat_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a/mtcars_demo.dat"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.dat"</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">variables</span></span>
 <span><span class="co">#&gt; [1] "mpg" "wt"  "hp"</span></span></code></pre></div>
-<p>The object uses active bindings, so values like
-<code>m$inp_file</code> and <code>m$dat_file</code> are always
-synchronized with the current object state.</p>
+<p>The object uses active bindings, so values like <code>m$dir</code>,
+<code>m$file_stem</code>, <code>m$inp_file</code>, and
+<code>m$dat_file</code> are always synchronized with the current object
+state. To relocate the model files, update <code>m$dir</code> and/or
+<code>m$file_stem</code>; <code>write_dat()</code> and
+<code>write_inp()</code> always write to those canonical locations.</p>
 </div>
 <div class="section level2">
-<h2 id="write-mplus-files">Write Mplus Files<a class="anchor" aria-label="anchor" href="#write-mplus-files"></a>
+<h2 id="start-from-an-existing--inp-file">Start from an Existing <code>.inp</code> File<a class="anchor" aria-label="anchor" href="#start-from-an-existing--inp-file"></a>
 </h2>
-<p><code>write_dat()</code> writes the data file, and
-<code>write_inp()</code> writes the Mplus input syntax.</p>
+<p>If you already have an Mplus input file, initialize the object from
+<code>inp_file</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span><span class="op">$</span><span class="fu">write_dat</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Writing data to file: /tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a/mtcars_demo.dat</span></span>
+<span><span class="co">#&gt; Writing data to file: /tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.dat</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="fu">write_inp</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Writing Mplus syntax to file: /tmp/RtmpAqGB0b/mplusModel_vignette_2a9e2059b18a/mtcars_demo.inp</span></span>
+<span><span class="co">#&gt; Writing Mplus syntax to file: /tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.inp</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">dat_file</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">inp_file</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
-<p>You can re-create an object from an existing <code>.inp</code>
-file:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">m_from_inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mplusModel.html">mplusModel</a></span><span class="op">(</span></span>
+<span><span class="va">m_from_inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mplusModel.html">mplusModel</a></span><span class="op">(</span></span>
 <span>  inp_file <span class="op">=</span> <span class="va">m</span><span class="op">$</span><span class="va">inp_file</span>,</span>
 <span>  read <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  Mplus_command <span class="op">=</span> <span class="va">fake_mplus</span></span>
@@ -154,6 +174,25 @@ file:</p>
 <span><span class="co">#&gt; [3] "DATA:"                            "FILE = mtcars_demo.dat;"         </span></span>
 <span><span class="co">#&gt; [5] "VARIABLE:"                        "NAMES = mpg wt hp;"              </span></span>
 <span><span class="co">#&gt; [7] "USEVARIABLES = mpg wt hp;"        "MISSING = .;"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="write-mplus-files">Write Mplus Files<a class="anchor" aria-label="anchor" href="#write-mplus-files"></a>
+</h2>
+<p><code>write_dat()</code> writes the data file, and
+<code>write_inp()</code> writes the Mplus input syntax.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">m</span><span class="op">$</span><span class="fu">write_dat</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The file(s)</span></span>
+<span><span class="co">#&gt;  'mtcars_demo.dat' </span></span>
+<span><span class="co">#&gt; currently exist(s) and will be overwritten</span></span>
+<span><span class="co">#&gt; Writing data to file: /tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.dat</span></span>
+<span><span class="va">m</span><span class="op">$</span><span class="fu">write_inp</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Writing Mplus syntax to file: /tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/mtcars_demo.inp</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">dat_file</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">inp_file</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="update-syntax-and-variables">Update Syntax and Variables<a class="anchor" aria-label="anchor" href="#update-syntax-and-variables"></a>
@@ -202,32 +241,31 @@ to the <code>.dat</code> file:</p>
 <span><span class="co">#&gt; [1] "mpg"  "wt"   "hp"   "qsec"</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="read-existing-output-into-mplusmodel">Read Existing Output into <code>mplusModel</code><a class="anchor" aria-label="anchor" href="#read-existing-output-into-mplusmodel"></a>
+<h2 id="start-from-an-existing--out-file">Start from an Existing <code>.out</code> File<a class="anchor" aria-label="anchor" href="#start-from-an-existing--out-file"></a>
 </h2>
 <p>This example uses an output file shipped with the package
-(<code>inst/extdata/ex3.1.out</code>).</p>
+(<code>inst/extdata/ex3.1.out</code>). The constructor rebuilds syntax
+from the echoed input stored in the output file and, when
+<code>read = TRUE</code>, also loads the parsed results.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"ex3.1.out"</span>, package <span class="op">=</span> <span class="st">"MplusAutomation"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.copy</a></span><span class="op">(</span><span class="va">out_file</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp_dir</span>, <span class="st">"ex3.1.out"</span><span class="op">)</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"TITLE: User's Guide Example 3.1;"</span>,</span>
-<span>    <span class="st">"DATA: FILE IS ex3.1.dat;"</span>,</span>
-<span>    <span class="st">"VARIABLE: NAMES ARE y1 x1 x3;"</span>,</span>
-<span>    <span class="st">"MODEL: y1 ON x1 x3;"</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  con <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp_dir</span>, <span class="st">"ex3.1.inp"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
 <span><span class="va">m_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mplusModel.html">mplusModel</a></span><span class="op">(</span></span>
-<span>  inp_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp_dir</span>, <span class="st">"ex3.1.inp"</span><span class="op">)</span>,</span>
+<span>  out_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tmp_dir</span>, <span class="st">"ex3.1.out"</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>y1 <span class="op">=</span> <span class="fl">0</span>, x1 <span class="op">=</span> <span class="fl">0</span>, x3 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  read <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  Mplus_command <span class="op">=</span> <span class="va">fake_mplus</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="va">m_out</span><span class="op">$</span><span class="va">inp_file</span></span>
+<span><span class="co">#&gt; [1] "/tmp/RtmpTWZEck/mplusModel_vignette_259734fa7202/ex3.1.inp"</span></span>
+<span><span class="va">m_out</span><span class="op">$</span><span class="va">syntax</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
+<span><span class="co">#&gt; [1] "TITLE:"                                                                              </span></span>
+<span><span class="co">#&gt; [2] "this is an example of a simple linear regression for a continuous observed dependent"</span></span>
+<span><span class="co">#&gt; [3] "    variable with two covariates"                                                    </span></span>
+<span><span class="co">#&gt; [4] "DATA:"</span></span>
 <span><span class="va">m_out</span><span class="op">$</span><span class="va">summaries</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AIC"</span>, <span class="st">"BIC"</span>, <span class="st">"CFI"</span>, <span class="st">"RMSEA_Estimate"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt;        AIC      BIC CFI RMSEA_Estimate</span></span>
 <span><span class="co">#&gt; 1 1396.667 1413.526   1              0</span></span>
@@ -266,12 +304,16 @@ submission. These commands require a real Mplus executable.</p>
 <p>Use <code>mplusModel</code> when you want an object-oriented workflow
 for a single model:</p>
 <ol style="list-style-type: decimal">
-<li>define syntax and data</li>
-<li>write <code>.inp</code> / <code>.dat</code>
-</li>
-<li>update syntax programmatically</li>
-<li>run or submit</li>
-<li>read and inspect results</li>
+<li>Start from <code>syntax</code> + <code>dir</code> +
+<code>file_stem</code>, an existing <code>inp_file</code>, or an
+existing <code>out_file</code>.</li>
+<li>Work with canonical file paths through <code>dir</code>,
+<code>file_stem</code>, <code>inp_file</code>, <code>out_file</code>,
+and <code>dat_file</code>.</li>
+<li>Write <code>.inp</code> / <code>.dat</code>, update syntax
+programmatically, and run or submit the model.</li>
+<li>Read and inspect parsed output sections from the corresponding
+<code>.out</code> file.</li>
 </ol>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
