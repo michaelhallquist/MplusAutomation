@@ -1135,7 +1135,11 @@ extractSummaries_1file <- function(outfiletext, filename, input)
 #' }
 extractModelSummaries <- function(target=getwd(), recursive=FALSE, filefilter) {
   #message("This function is deprecated and will be removed from future versions of MplusAutomation. Please use readModels() instead.")
-  message("extractModelSummaries has been deprecated. Please use readModels(\"nameofMplusoutfile.out\", what=\"summaries\")$summaries to replicate the old functionality.")
+  message(paste(
+    "extractModelSummaries has been deprecated.",
+    "Use readModels(\"nameofMplusoutfile.out\", what=\"summaries\")$summaries for the raw summary data.frame,",
+    "or pass readModels(...) directly to SummaryTable() or mixtureSummaryTable() when downstream functions need full model objects."
+  ))
   
   return(invisible(NULL))
 }

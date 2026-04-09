@@ -14,8 +14,10 @@ mixtureSummaryTable(
 )
 }
 \arguments{
-\item{modelList}{A list of models returned from the
-\code{extractModelSummaries} function.}
+\item{modelList}{A list of mixture models, such as the \code{mplus.model.list}
+returned by \code{readModels()}. If using \code{readModels()}, pass the
+returned model object directly rather than \code{$summaries}, because
+\code{mixtureSummaryTable()} also uses class counts and warnings.}
 
 \item{keepCols}{A vector of character strings indicating which
 columns/variables to display in the summary. Only columns included in this

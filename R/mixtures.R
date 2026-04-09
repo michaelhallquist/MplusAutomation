@@ -7,8 +7,10 @@
 #' "Entropy", "T11_VLMR_PValue", "T11_LMR_PValue", "BLRT_PValue", "min_N",
 #' "max_N", "min_prob", "max_prob")}. The table is customizable using the
 #' \code{keepCols} parameter, which is passed through to \link{SummaryTable}.
-#' @param modelList A list of models returned from the
-#' \code{extractModelSummaries} function.
+#' @param modelList A list of mixture models, such as the \code{mplus.model.list}
+#' returned by \code{readModels()}. If using \code{readModels()}, pass the
+#' returned model object directly rather than \code{$summaries}, because
+#' \code{mixtureSummaryTable()} also uses class counts and warnings.
 #' @param keepCols A vector of character strings indicating which
 #' columns/variables to display in the summary. Only columns included in this
 #' list will be displayed (all others excluded). By default, \code{keepCols} is:
@@ -53,14 +55,12 @@ mixtureSummaryTable <- function(modelList,
                                 ),
                                 sortBy = NULL,
                                 ...) {
-  if(all(sapply(modelList, function(x){grepl("mixture", tolower(x$ANALYSIS))}))){
-    if(all(sapply(modelList, function(x){ is.null(x[["results"]])}))){
-      return(cat("These mixture models have not yet been evaluated. Add `run = 1L` to your function call to do so."))
-    }
-  }
   modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
   })
+  if (length(modelList) < 1L || all(vapply(modelList, is.null, logical(1)))) {
+    return(cat("These mixture models have not yet been evaluated. Add `run = 1L` to your function call to do so."))
+  }
   
   # Remove models which are not type "mixture"
   modelList <- check_mixtures(modelList)
