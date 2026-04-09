@@ -134,15 +134,15 @@ through <code>dir</code> and <code>file_stem</code>, and derives the
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">dir</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpyPtJB6/mplusModel_vignette_25662f6db15f"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/Rtmpp3OGDm/mplusModel_vignette_279679f85bf1"</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">file_stem</span></span>
 <span><span class="co">#&gt; [1] "mtcars_demo"</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">model_dir</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpyPtJB6/mplusModel_vignette_25662f6db15f"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/Rtmpp3OGDm/mplusModel_vignette_279679f85bf1"</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">inp_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpyPtJB6/mplusModel_vignette_25662f6db15f/mtcars_demo.inp"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/Rtmpp3OGDm/mplusModel_vignette_279679f85bf1/mtcars_demo.inp"</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">dat_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpyPtJB6/mplusModel_vignette_25662f6db15f/mtcars_demo.dat"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/Rtmpp3OGDm/mplusModel_vignette_279679f85bf1/mtcars_demo.dat"</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="va">variables</span></span>
 <span><span class="co">#&gt; [1] "mpg" "wt"  "hp"</span></span></code></pre></div>
 <p>The object uses active bindings, so values like <code>m$dir</code>,
@@ -159,9 +159,9 @@ state. To relocate the model files, update <code>m$dir</code> and/or
 <code>inp_file</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span><span class="op">$</span><span class="fu">write_dat</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Writing data to file: /tmp/RtmpyPtJB6/mplusModel_vignette_25662f6db15f/mtcars_demo.dat</span></span>
+<span><span class="co">#&gt; Writing data to file: /tmp/Rtmpp3OGDm/mplusModel_vignette_279679f85bf1/mtcars_demo.dat</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="fu">write_inp</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Writing Mplus syntax to file: /tmp/RtmpyPtJB6/mplusModel_vignette_25662f6db15f/mtcars_demo.inp</span></span>
+<span><span class="co">#&gt; Writing Mplus syntax to file: /tmp/Rtmpp3OGDm/mplusModel_vignette_279679f85bf1/mtcars_demo.inp</span></span>
 <span></span>
 <span><span class="va">m_from_inp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mplusModel.html">mplusModel</a></span><span class="op">(</span></span>
 <span>  inp_file <span class="op">=</span> <span class="va">m</span><span class="op">$</span><span class="va">inp_file</span>,</span>
@@ -185,9 +185,9 @@ state. To relocate the model files, update <code>m$dir</code> and/or
 <span><span class="co">#&gt; The file(s)</span></span>
 <span><span class="co">#&gt;  'mtcars_demo.dat' </span></span>
 <span><span class="co">#&gt; currently exist(s) and will be overwritten</span></span>
-<span><span class="co">#&gt; Writing data to file: /tmp/RtmpyPtJB6/mplusModel_vignette_25662f6db15f/mtcars_demo.dat</span></span>
+<span><span class="co">#&gt; Writing data to file: /tmp/Rtmpp3OGDm/mplusModel_vignette_279679f85bf1/mtcars_demo.dat</span></span>
 <span><span class="va">m</span><span class="op">$</span><span class="fu">write_inp</span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Writing Mplus syntax to file: /tmp/RtmpyPtJB6/mplusModel_vignette_25662f6db15f/mtcars_demo.inp</span></span>
+<span><span class="co">#&gt; Writing Mplus syntax to file: /tmp/Rtmpp3OGDm/mplusModel_vignette_279679f85bf1/mtcars_demo.inp</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">dat_file</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
@@ -260,7 +260,7 @@ from the echoed input stored in the output file and, when
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">m_out</span><span class="op">$</span><span class="va">inp_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpyPtJB6/mplusModel_vignette_25662f6db15f/ex3.1.inp"</span></span>
+<span><span class="co">#&gt; [1] "/tmp/Rtmpp3OGDm/mplusModel_vignette_279679f85bf1/ex3.1.inp"</span></span>
 <span><span class="va">m_out</span><span class="op">$</span><span class="va">syntax</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] "TITLE:"                                                                              </span></span>
 <span><span class="co">#&gt; [2] "this is an example of a simple linear regression for a continuous observed dependent"</span></span>
