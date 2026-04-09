@@ -1,3 +1,7 @@
+norm_path <- function(path) {
+  normalizePath(path, winslash = "/", mustWork = FALSE)
+}
+
 test_that("mplusModel R6 object can be initialized with syntax and data", {
   syn <- "
 TITLE:  this is an example of a simple linear
@@ -9,16 +13,16 @@ MODEL:  y1 ON x1 x3;
 "
   dat <- as.data.frame(data.table::fread(testthat::test_path("submitModels","ex3.1.dat"), data.table=FALSE))
   names(dat) <- c("y1","x1","x3")
-  tmp <- normalizePath(tempdir())
+  tmp <- norm_path(tempdir())
   mplus_fake <- tempfile()
   file.create(mplus_fake)
   m <- mplusModel(syntax = syn, data = dat, inp_file = file.path(tmp, "ex3.1.inp"), Mplus_command = mplus_fake)
 
   expect_true(inherits(m, "mplusModel_r6"))
-  expect_equal(m$model_dir, tmp)
-  expect_equal(m$inp_file, file.path(tmp, "ex3.1.inp"))
-  expect_equal(m$out_file, file.path(tmp, "ex3.1.out"))
-  expect_equal(m$gh5_file, file.path(tmp, "ex3.1.gh5"))
+  expect_equal(norm_path(m$model_dir), tmp)
+  expect_equal(norm_path(m$inp_file), norm_path(file.path(tmp, "ex3.1.inp")))
+  expect_equal(norm_path(m$out_file), norm_path(file.path(tmp, "ex3.1.out")))
+  expect_equal(norm_path(m$gh5_file), norm_path(file.path(tmp, "ex3.1.gh5")))
 })
 
 test_that("mplusModel supports syntax-first construction via dir and file_stem", {
@@ -31,6 +35,7 @@ MODEL: y ON x;
   dat <- data.frame(y = 1:3, x = 4:6)
   tmp_dir <- tempfile()
   dir.create(tmp_dir)
+  tmp_dir <- norm_path(tmp_dir)
   mplus_fake <- tempfile()
   file.create(mplus_fake)
 
@@ -43,11 +48,11 @@ MODEL: y ON x;
     Mplus_command = mplus_fake
   )
 
-  expect_equal(m$dir, normalizePath(tmp_dir))
+  expect_equal(norm_path(m$dir), norm_path(tmp_dir))
   expect_equal(m$file_stem, "syntax_first")
-  expect_equal(m$inp_file, file.path(normalizePath(tmp_dir), "syntax_first.inp"))
-  expect_equal(m$out_file, file.path(normalizePath(tmp_dir), "syntax_first.out"))
-  expect_equal(m$dat_file, file.path(normalizePath(tmp_dir), "syntax_first.dat"))
+  expect_equal(norm_path(m$inp_file), norm_path(file.path(tmp_dir, "syntax_first.inp")))
+  expect_equal(norm_path(m$out_file), norm_path(file.path(tmp_dir, "syntax_first.out")))
+  expect_equal(norm_path(m$dat_file), norm_path(file.path(tmp_dir, "syntax_first.dat")))
 })
 
 test_that("mplusModel requires a complete canonical identity", {
@@ -80,6 +85,7 @@ test_that("mplusModel rejects mismatched inp and out paths", {
 test_that("mplusModel allows consistent mixed path-style and stem-style identity", {
   tmp_dir <- tempfile()
   dir.create(tmp_dir)
+  tmp_dir <- norm_path(tmp_dir)
   mplus_fake <- tempfile()
   file.create(mplus_fake)
 
@@ -92,7 +98,7 @@ test_that("mplusModel allows consistent mixed path-style and stem-style identity
     Mplus_command = mplus_fake
   )
 
-  expect_equal(m$dir, normalizePath(tmp_dir))
+  expect_equal(norm_path(m$dir), norm_path(tmp_dir))
   expect_equal(m$file_stem, "mixed")
 })
 
@@ -127,7 +133,7 @@ MODEL:  y1 ON x1 x3;
   
   dat <- as.data.frame(data.table::fread(testthat::test_path("submitModels","ex3.1.dat"), data.table=FALSE))
   names(dat) <- c("y1","x1","x3")
-  tmp <- normalizePath(tempdir())
+  tmp <- norm_path(tempdir())
   mplus_fake <- tempfile()
   file.create(mplus_fake)
   m <- mplusModel(syntax = syn, data = dat, inp_file = file.path(tmp, "ex3.1.inp"), Mplus_command = mplus_fake)
@@ -151,6 +157,7 @@ MODEL:  y1 ON x1 x3;
   names(dat) <- c("y1", "x1", "x3")
   tmp_dir <- tempfile()
   dir.create(tmp_dir)
+  tmp_dir <- norm_path(tmp_dir)
   default_inp <- file.path(tmp_dir, "default.inp")
   mplus_fake <- tempfile()
   file.create(mplus_fake)
@@ -163,17 +170,17 @@ MODEL:  y1 ON x1 x3;
   )
 
   expect_message(m$dir <- "nested", "Model directory changed")
-  expect_equal(m$dir, file.path(normalizePath(tmp_dir), "nested"))
+  expect_equal(norm_path(m$dir), norm_path(file.path(tmp_dir, "nested")))
   expect_equal(m$model_dir, m$dir)
-  expect_equal(m$inp_file, file.path(m$dir, "default.inp"))
-  expect_equal(m$dat_file, file.path(m$dir, "default.dat"))
+  expect_equal(norm_path(m$inp_file), norm_path(file.path(m$dir, "default.inp")))
+  expect_equal(norm_path(m$dat_file), norm_path(file.path(m$dir, "default.dat")))
 
   expect_message(m$file_stem <- "renamed", "Model file stem changed")
   expect_equal(m$file_stem, "renamed")
-  expect_equal(m$inp_file, file.path(m$dir, "renamed.inp"))
-  expect_equal(m$out_file, file.path(m$dir, "renamed.out"))
-  expect_equal(m$gh5_file, file.path(m$dir, "renamed.gh5"))
-  expect_equal(m$dat_file, file.path(m$dir, "renamed.dat"))
+  expect_equal(norm_path(m$inp_file), norm_path(file.path(m$dir, "renamed.inp")))
+  expect_equal(norm_path(m$out_file), norm_path(file.path(m$dir, "renamed.out")))
+  expect_equal(norm_path(m$gh5_file), norm_path(file.path(m$dir, "renamed.gh5")))
+  expect_equal(norm_path(m$dat_file), norm_path(file.path(m$dir, "renamed.dat")))
 })
 
 test_that("write_inp uses filename when data is in the model directory", {
@@ -311,8 +318,7 @@ MODEL:  y1 ON x1 x3;
 
   dat <- as.data.frame(data.table::fread(testthat::test_path("submitModels", "ex3.1.dat"), data.table = FALSE))
   names(dat) <- c("y1", "x1", "x3")
-  tmp <- tempdir()
-  tmp <- normalizePath(tmp)
+  tmp <- norm_path(tempdir())
   file.copy(testthat::test_path("submitModels", "ex3.1.inp"), tmp, overwrite = TRUE)
   file.copy(testthat::test_path("submitModels", "ex3.1.dat"), tmp, overwrite = TRUE)
   file.copy(testthat::test_path("ex3.1.out"), tmp, overwrite = TRUE)
@@ -324,8 +330,8 @@ MODEL:  y1 ON x1 x3;
 
   expect_message(m$file_stem <- "relocated", "Unloading model results")
   expect_null(m$summaries)
-  expect_equal(m$inp_file, file.path(tmp, "relocated.inp"))
-  expect_equal(m$dat_file, file.path(tmp, "relocated.dat"))
+  expect_equal(norm_path(m$inp_file), norm_path(file.path(tmp, "relocated.inp")))
+  expect_equal(norm_path(m$dat_file), norm_path(file.path(tmp, "relocated.dat")))
 })
 
 test_that("mplusModel reads existing output", {
