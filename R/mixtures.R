@@ -55,6 +55,12 @@ mixtureSummaryTable <- function(modelList,
                                 ),
                                 sortBy = NULL,
                                 ...) {
+  if (inherits(modelList, "mplus.summaries")) {
+    stop(
+      "mixtureSummaryTable() requires full model objects, not readModels(...)$summaries.\n",
+      "Call mixtureSummaryTable(readModels(..., what = c(\"summaries\", \"class_counts\", \"warn_err\", \"input\"))) instead."
+    )
+  }
   modelList <- tryCatch(mplus_as_list(modelList), error = function(e){
     stop("mixtureSummaryTable requires a list of mixture models as its first argument.")
   })
