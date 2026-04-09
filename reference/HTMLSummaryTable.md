@@ -15,7 +15,8 @@ HTMLSummaryTable(
   keepCols,
   dropCols,
   sortBy = NULL,
-  display = FALSE
+  display = FALSE,
+  digits = NULL
 )
 ```
 
@@ -59,6 +60,11 @@ HTMLSummaryTable(
 
   optional. This parameter specifies whether to display the table in a
   web browser upon creation (`TRUE` or `FALSE`).
+
+- digits:
+
+  optional. Number of digits to display for decimal-valued summary
+  fields in the rendered HTML table.
 
 ## Value
 

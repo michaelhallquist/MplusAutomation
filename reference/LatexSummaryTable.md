@@ -16,7 +16,8 @@ LatexSummaryTable(
   dropCols,
   sortBy = NULL,
   label = NULL,
-  caption = NULL
+  caption = NULL,
+  digits = NULL
 )
 ```
 
@@ -57,6 +58,11 @@ LatexSummaryTable(
 
   optional. A character string specifying the caption for the LaTex
   table.
+
+- digits:
+
+  optional. Number of digits to display for decimal-valued summary
+  fields in the rendered LaTeX table.
 
 ## Value
 

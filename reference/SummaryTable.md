@@ -18,6 +18,7 @@ SummaryTable(
   sortBy = NULL,
   caption = "",
   display = FALSE,
+  digits = NULL,
   ...,
   include.rownames = FALSE
 )
@@ -76,6 +77,13 @@ SummaryTable(
 
   optional logical (defaults to `FALSE`). This parameter specifies
   whether to display the table upon creation (`TRUE` or `FALSE`).
+
+- digits:
+
+  optional. Number of digits to display for decimal-valued summary
+  fields. This affects rendered output for screen, popup, markdown,
+  html, and latex formats, but `type = "none"` always returns the raw
+  numeric values.
 
 - include.rownames:
 
