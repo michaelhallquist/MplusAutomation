@@ -25,6 +25,7 @@ Joshua F. Wiley <jwiley.psych@gmail.com>
 ## Examples
 
 ``` r
+
 MplusAutomation:::is.windows()
 #> [1] FALSE
 

@@ -49,6 +49,7 @@ Joshua F. Wiley <jwiley.psych@gmail.com>
 ## Examples
 
 ``` r
+
 # sample input
 test <- "
 MODEL:

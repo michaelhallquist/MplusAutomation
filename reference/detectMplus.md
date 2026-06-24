@@ -26,6 +26,7 @@ Joshua F. Wiley <jwiley.psych@gmail.com>
 ## Examples
 
 ``` r
+
 ## if you have Mplus installed, uncomment and run
 ## this will give an error if it cannot find Mplus.
 ## detectMplus()

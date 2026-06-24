@@ -33,6 +33,7 @@ Joshua F. Wiley <jwiley.psych@gmail.com>
 ## Examples
 
 ``` r
+
 MplusAutomation:::htmlout("https://statmodel.com/usersguide/chap3/ex3.1.html")
-#> [1] "/tmp/RtmpiukbmZ/UserGuide1e3c28f0eea.out"
+#> [1] "/tmp/RtmpNU8dsi/UserGuide3c87346d9f75.out"
 ```

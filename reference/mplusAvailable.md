@@ -30,6 +30,7 @@ Joshua Wiley
 ## Examples
 
 ``` r
+
 mplusAvailable(silent = TRUE)
 #> [1] 1
 mplusAvailable(silent = FALSE)

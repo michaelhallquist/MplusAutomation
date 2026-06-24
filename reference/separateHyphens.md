@@ -32,6 +32,7 @@ Michael Hallquist revised by Joshua Wiley
 ## Examples
 
 ``` r
+
 MplusAutomation:::separateHyphens("x1x4")
 #> [1] "x1x4"
 MplusAutomation:::separateHyphens("x1-x4")

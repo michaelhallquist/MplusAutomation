@@ -32,6 +32,7 @@ In all three cases, the object tracks a canonical file identity through
 ## Start from Syntax and Data
 
 ``` r
+
 model_syntax <- "
 TITLE: OLS regression with mtcars data;
 DATA: FILE IS mtcars_demo.dat;
@@ -57,15 +58,15 @@ m <- mplusModel(
 )
 
 m$dir
-#> [1] "/tmp/RtmpoA5Vsy/mplusModel_vignette_25c96fa07b53"
+#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478"
 m$file_stem
 #> [1] "mtcars_demo"
 m$model_dir
-#> [1] "/tmp/RtmpoA5Vsy/mplusModel_vignette_25c96fa07b53"
+#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478"
 m$inp_file
-#> [1] "/tmp/RtmpoA5Vsy/mplusModel_vignette_25c96fa07b53/mtcars_demo.inp"
+#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.inp"
 m$dat_file
-#> [1] "/tmp/RtmpoA5Vsy/mplusModel_vignette_25c96fa07b53/mtcars_demo.dat"
+#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.dat"
 m$variables
 #> [1] "mpg" "wt"  "hp"
 ```
@@ -82,10 +83,11 @@ If you already have an Mplus input file, initialize the object from
 `inp_file`.
 
 ``` r
+
 m$write_dat()
-#> Writing data to file: /tmp/RtmpoA5Vsy/mplusModel_vignette_25c96fa07b53/mtcars_demo.dat
+#> Writing data to file: /tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.dat
 m$write_inp()
-#> Writing Mplus syntax to file: /tmp/RtmpoA5Vsy/mplusModel_vignette_25c96fa07b53/mtcars_demo.inp
+#> Writing Mplus syntax to file: /tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.inp
 
 m_from_inp <- mplusModel(
   inp_file = m$inp_file,
@@ -106,13 +108,14 @@ head(m_from_inp$syntax, n = 8)
 input syntax.
 
 ``` r
+
 m$write_dat()
 #> The file(s)
 #>  'mtcars_demo.dat' 
 #> currently exist(s) and will be overwritten
-#> Writing data to file: /tmp/RtmpoA5Vsy/mplusModel_vignette_25c96fa07b53/mtcars_demo.dat
+#> Writing data to file: /tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.dat
 m$write_inp()
-#> Writing Mplus syntax to file: /tmp/RtmpoA5Vsy/mplusModel_vignette_25c96fa07b53/mtcars_demo.inp
+#> Writing Mplus syntax to file: /tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.inp
 
 file.exists(m$dat_file)
 #> [1] TRUE
@@ -133,6 +136,7 @@ For syntax sections, formulas support replace and append semantics:
 - `~ . + "additional text"` appends
 
 ``` r
+
 m_clone <- update(
   m,
   MODEL = ~ . + "mpg ON cyl;",
@@ -146,6 +150,7 @@ any(grepl("mpg ON cyl;", m_clone$syntax, fixed = TRUE))
 ```
 
 ``` r
+
 m$update(MODEL = ~ . + "mpg ON qsec;")
 any(grepl("mpg ON qsec;", m$syntax, fixed = TRUE))
 #> [1] TRUE
@@ -155,6 +160,7 @@ The `variables` binding controls which columns are written to the `.dat`
 file:
 
 ``` r
+
 m$variables
 #> [1] "mpg"  "wt"   "hp"   "qsec"
 
@@ -175,6 +181,7 @@ echoed input stored in the output file and, when `read = TRUE`, also
 loads the parsed results.
 
 ``` r
+
 out_file <- system.file("extdata", "ex3.1.out", package = "MplusAutomation")
 file.copy(out_file, file.path(tmp_dir, "ex3.1.out"), overwrite = TRUE)
 #> [1] TRUE
@@ -187,7 +194,7 @@ m_out <- mplusModel(
 )
 
 m_out$inp_file
-#> [1] "/tmp/RtmpoA5Vsy/mplusModel_vignette_25c96fa07b53/ex3.1.inp"
+#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/ex3.1.inp"
 m_out$syntax[1:4]
 #> [1] "TITLE:"                                                                              
 #> [2] "this is an example of a simple linear regression for a continuous observed dependent"
@@ -215,6 +222,7 @@ and more.
 commands require a real Mplus executable.
 
 ``` r
+
 # Run locally
 m$run(replaceOutfile = "modifiedDate")
 

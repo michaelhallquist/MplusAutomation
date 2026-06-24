@@ -22,6 +22,7 @@ variables converted to numeric or integer classes
 ## Examples
 
 ``` r
+
 if (FALSE) { # \dontrun{
 df1 <- df2 <- df3 <- df4 <- mtcars
 

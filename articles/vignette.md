@@ -61,6 +61,7 @@ After installing `R` and launching a new session, type the following at
 the command line:
 
 ``` r
+
 install.packages("MplusAutomation")
 ```
 
@@ -71,6 +72,7 @@ To load the `MplusAutomation` package so that its functions are
 available to use, type:
 
 ``` r
+
 library(MplusAutomation)
 ```
 
@@ -95,10 +97,11 @@ type the following code which should provide a listing of all loaded
 packages.
 
 ``` r
+
 sessionInfo()
 ```
 
-    ## R version 4.5.3 (2026-03-11)
+    ## R version 4.6.0 (2026-04-24)
     ## Platform: x86_64-pc-linux-gnu
     ## Running under: Ubuntu 24.04.4 LTS
     ## 
@@ -122,33 +125,30 @@ sessionInfo()
     ## [1] MplusAutomation_1.3
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] gtable_0.3.6        jsonlite_2.0.0      compiler_4.5.3     
-    ##  [4] Rcpp_1.1.1          parallel_4.5.3      jquerylib_0.1.4    
-    ##  [7] systemfonts_1.3.2   scales_1.4.0        textshaping_1.0.5  
-    ## [10] boot_1.3-32         yaml_2.3.12         fastmap_1.2.0      
-    ## [13] lattice_0.22-9      coda_0.19-4.1       ggplot2_4.0.2      
-    ## [16] R6_2.6.1            plyr_1.8.9          knitr_1.51         
-    ## [19] backports_1.5.1     checkmate_2.3.4     pander_0.6.6       
-    ## [22] gsubfn_0.7          proto_1.0.0         desc_1.4.3         
-    ## [25] bslib_0.10.0        RColorBrewer_1.1-3  rlang_1.2.0        
-    ## [28] cachem_1.1.0        xfun_0.57           fs_2.0.1           
-    ## [31] sass_0.4.10         S7_0.2.1            cli_3.6.5          
-    ## [34] pkgdown_2.2.0       fastDummies_1.7.5   digest_0.6.39      
-    ## [37] grid_4.5.3          xtable_1.8-8        texreg_1.39.5      
-    ## [40] lifecycle_1.0.5     vctrs_0.7.2         evaluate_1.0.5     
-    ## [43] glue_1.8.0          data.table_1.18.2.1 farver_2.1.2       
-    ## [46] ragg_1.5.2          rmarkdown_2.31      httr_1.4.8         
-    ## [49] tools_4.5.3         htmltools_0.5.9
+    ##  [1] gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.0     Rcpp_1.1.1-1.1    
+    ##  [5] parallel_4.6.0     jquerylib_0.1.4    systemfonts_1.3.2  scales_1.4.0      
+    ##  [9] textshaping_1.0.5  boot_1.3-32        yaml_2.3.12        fastmap_1.2.0     
+    ## [13] lattice_0.22-9     coda_0.19-4.1      ggplot2_4.0.3      R6_2.6.1          
+    ## [17] plyr_1.8.9         knitr_1.51         backports_1.5.1    checkmate_2.3.4   
+    ## [21] pander_0.6.6       gsubfn_0.7         proto_1.0.0        desc_1.4.3        
+    ## [25] bslib_0.11.0       RColorBrewer_1.1-3 rlang_1.2.0        cachem_1.1.0      
+    ## [29] xfun_0.59          fs_2.1.0           sass_0.4.10        S7_0.2.2          
+    ## [33] otel_0.2.0         cli_3.6.6          pkgdown_2.2.0      fastDummies_1.7.6 
+    ## [37] digest_0.6.39      grid_4.6.0         xtable_1.8-8       texreg_1.39.5     
+    ## [41] lifecycle_1.0.5    vctrs_0.7.3        data.table_1.18.4  evaluate_1.0.5    
+    ## [45] glue_1.8.1         farver_2.1.2       ragg_1.5.2         rmarkdown_2.31    
+    ## [49] httr_1.4.8         tools_4.6.0        htmltools_0.5.9
 
 ### Updating the package to the latest version
 
 As is conventional for `R` packages, the latest version of
 `MplusAutomation` may be obtained from CRAN using the
 [`update.packages()`](https://rdrr.io/r/utils/update.packages.html)
-function in an `R` session. As of 2026-04-09, the current version of the
+function in an `R` session. As of 2026-06-24, the current version of the
 package is 1.3.
 
 ``` r
+
 update.packages(ask=FALSE, checkBuilt=TRUE)
 ```
 
@@ -167,6 +167,7 @@ then be pasted into the head of a new Mplus input file. Here are two
 basic examples of using the command:
 
 ``` r
+
 prepareMplusData(
   my_data,
   filename = "C:/Data_Analysis/Prepare Mplus.dat",
@@ -203,6 +204,7 @@ is up to you to drop one of the dummy codes in the Mplus syntax to
 denote the reference category and avoid multicollinearity.
 
 ``` r
+
 data(mtcars)
 mtcars$gear <- factor(mtcars$gear)
 prepareMplusData(mtcars, "mtcars.dat", dummyCode = c("cyl", "am"))
@@ -240,6 +242,7 @@ input files for these are located in:
 To run this batch, enter this at the command line:
 
 ``` r
+
 runModels("C:/Program Files/Mplus/Mplus Examples/Addendum Examples")
 ```
 
@@ -273,6 +276,7 @@ parent directory, `ComparingLCAvCFA`. To run all models within
 `runModels`.
 
 ``` r
+
 runModels(
   "C:/Data_Analysis/ComparingLCAvCFA",
   recursive=TRUE)
@@ -306,6 +310,7 @@ To specify that no log file should be created, pass `logFile=NULL` to
 [`runModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/runModels.md).
 
 ``` r
+
 runModels(
   "C:/Data_Analysis/ComparingLCAvCFA",
   recursive=TRUE,
@@ -328,6 +333,7 @@ To skip any model that already has an existing output file, pass
 such as in this example:
 
 ``` r
+
 runModels(
   "C:/Data_Analysis/ComparingLCAvCFA",
   recursive=TRUE,
@@ -349,6 +355,7 @@ input file is newer, then the model is run. Otherwise, it is skipped.
 Here is an example:
 
 ``` r
+
 runModels(
   "C:/Data_Analysis/ComparingLCAvCFA",
   recursive=TRUE,
@@ -369,6 +376,7 @@ pass `showOutput=TRUE` to the
 function.
 
 ``` r
+
 runModels(
   "C:/Data_Analysis/ComparingLCAvCFA",
   recursive=TRUE,
@@ -391,6 +399,7 @@ dialog box for specifying which models to run. To start the interface,
 type the following:
 
 ``` r
+
 runModels_Interactive()
 ```
 
@@ -480,6 +489,7 @@ of an `mplus.model` object include:
 Basic example:
 
 ``` r
+
 allOutput <- readModels(
   "C:/Data_Files/CFANesting",
   recursive=TRUE)
@@ -513,6 +523,7 @@ from Mplus output. If only summaries are required, specify
 `$summaries` element of the returned list:
 
 ``` r
+
 mlist <- readModels(
   "C:/Data_Analysis/ComparingLCAvCFA",
   recursive = TRUE,
@@ -538,6 +549,7 @@ digits 1, 2, or 3 (for 1-class, 2-class, or 3-class output files) and
 also contain the text “Threshold”:
 
 ``` r
+
 mlist <- readModels(
   "C:/Data_Analysis/Multiclass Models",
   filefilter = "[123]{1}-class.*Threshold.*",
@@ -655,6 +667,7 @@ Here is a simple example of using
 by specifying which columns to keep in the table:
 
 ``` r
+
 showSummaryTable(
   summaryStats,
   keepCols = c("Title", "LL", "AIC", "BIC", "CFI"),
@@ -665,6 +678,7 @@ And another example specifying that all columns in the model list should
 be displayed *except* those specified:
 
 ``` r
+
 showSummaryTable(
   summaryStats,
   dropCols = c("InputInstructions", "Observations", "Parameters"),
@@ -688,6 +702,7 @@ summary table in the web browser after it is created. Here is a simple
 of using the function:
 
 ``` r
+
 HTMLSummaryTable(
   summaryStats,
   filename = "C:/MyModelSummary.html",
@@ -716,6 +731,7 @@ returns a value, specifically the LaTeX syntax for the summary table.
 Here is a simple example of the function
 
 ``` r
+
 myLatexTable <- LatexSummaryTable(
   summaryStats,
   keepCols = c("Title", "BIC", "Parameters"),
@@ -776,6 +792,7 @@ To obtain the modification indices, use
 and access the `$mod_indices` element:
 
 ``` r
+
 my_model <- readModels("~/Mplus_Test.out")
 my_model$mod_indices
 ```
@@ -798,6 +815,7 @@ parameters are extracted into nested `data.frame` objects.
 ### Example: Extracting parameters from a single file
 
 ``` r
+
 modelResults <- readModels(
   "C:/Data_Analysis/Mplus Output.out",
   what = "parameters")$parameters
@@ -813,6 +831,7 @@ relevant section. Such elements may be accessed using traditional `R`
 list operators, such as:
 
 ``` r
+
 unstandardizedResults <- modelResults$unstandardized
 
 #equivalently
@@ -848,6 +867,7 @@ Then the following code would extract model parameters for all files in
 the directory structure, returning each output as a list element.
 
 ``` r
+
 allModelParameters <- readModels(
   "C:/Data_Analysis/ComparingLCAvCFA",
   recursive = TRUE,
@@ -860,6 +880,7 @@ sign have been replaced by periods to be compatible with `R` naming
 conventions):
 
 ``` r
+
 names(allModelParameters)
 
 ## ComparingLCAvCFA.LCA.1.class.LCA.out
@@ -874,6 +895,7 @@ So, to extract the STDYX standardized results for the 2-factor CFA, one
 would access that `data.frame` as follows:
 
 ``` r
+
 TwoFacCFA.STDYX <- allModelParameters$ComparingLCAvCFA.CFA.2.factor.CFA.out$parameters$stdyx.standardized
 ```
 
@@ -896,6 +918,7 @@ retain only unstandardized results, for example, one could do the
 following (building on the CFA v. LCA example above):
 
 ``` r
+
 unstandardizedOnly <- sapply(allModelParameters, "[", c("parameters"))
 unstandardizedOnly <- sapply(unstandardizedOnly, "[", "unstandardized")
 ```
@@ -908,6 +931,7 @@ manually tweaked using the `names` function. For example, to retain the
 existing filenames without appending .unstandardized, this would work:
 
 ``` r
+
 oldNames <- names(allModelParameters)
 unstandardizedOnly <- sapply(allModelParameters, "[", c("parameters"))
 unstandardizedOnly <- sapply(unstandardizedOnly, "[", "unstandardized")
@@ -922,6 +946,7 @@ combine these results into a single data.frame. The following code would
 accomplish this (assumes the immediately prior code was run):
 
 ``` r
+
 #add the filename as a field in the data.frame (so it's uniquely identified when combined)
 lapply(names(unstandardizedOnly), function(element) {
     unstandardizedOnly[[element]]$filename <<- element
@@ -987,6 +1012,7 @@ mean and unit variance. The intention of this plot is to visualize the
 means and standard error of each indicator across the latent classes.
 
 ``` r
+
   library(MplusAutomation)
   library(ggplot2)
   modelParams <- readModels("output_to_plot.out")$parameters$unstandardized
@@ -1047,6 +1073,7 @@ Here is a brief example of how one might use
 [`compareModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/compareModels.md).
 
 ``` r
+
 parallelModels <- readModels("10_14_Harsh_SelfCon_Impul")
 
 compareModels(parallelModels[["backport.from.grand.model.out"]],

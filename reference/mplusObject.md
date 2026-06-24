@@ -214,6 +214,7 @@ Joshua F. Wiley <jwiley.psych@gmail.com>
 ## Examples
 
 ``` r
+
 example1 <- mplusObject(MODEL = "mpg ON wt;",
   usevariables = c("mpg", "hp"), rdata = mtcars)
 str(example1)

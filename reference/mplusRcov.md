@@ -69,28 +69,28 @@ variance is assumed to be identical for all variables and all
 covariances are assumed to be zero. The structure is represented in this
 table.
 
-|     |                     |                     |                     |     |                     |
-|-----|---------------------|---------------------|---------------------|-----|---------------------|
-|     | t1                  | t2                  | t3                  | ... | tn                  |
-| t1  | \\\sigma^{2}\_{e}\\ |                     |                     | ... |                     |
-| t2  | 0                   | \\\sigma^{2}\_{e}\\ |                     | ... |                     |
-| t3  | 0                   | 0                   | \\\sigma^{2}\_{e}\\ | ... |                     |
-| ... | ...                 | ...                 | ...                 | ... | ...                 |
-| tn  | 0                   | 0                   | 0                   | ... | \\\sigma^{2}\_{e}\\ |
+|  |  |  |  |  |  |
+|----|----|----|----|----|----|
+|  | t1 | t2 | t3 | ... | tn |
+| t1 | \\\sigma^{2}\_{e}\\ |  |  | ... |  |
+| t2 | 0 | \\\sigma^{2}\_{e}\\ |  | ... |  |
+| t3 | 0 | 0 | \\\sigma^{2}\_{e}\\ | ... |  |
+| ... | ... | ... | ... | ... | ... |
+| tn | 0 | 0 | 0 | ... | \\\sigma^{2}\_{e}\\ |
 
 The **heterogenous** residual covariance structure estimates **n**
 parameters, where **n** is the number of variables. A unique residual
 variance is estimated for every variable. All covariances are assumed to
 be zero. The structure is represented in this table.
 
-|     |                      |                      |                      |     |                      |
-|-----|----------------------|----------------------|----------------------|-----|----------------------|
-|     | t1                   | t2                   | t3                   | ... | tn                   |
-| t1  | \\\sigma^{2}\_{e1}\\ |                      |                      | ... |                      |
-| t2  | 0                    | \\\sigma^{2}\_{e2}\\ |                      | ... |                      |
-| t3  | 0                    | 0                    | \\\sigma^{2}\_{e3}\\ | ... |                      |
-| ... | ...                  | ...                  | ...                  | ... | ...                  |
-| tn  | 0                    | 0                    | 0                    | ... | \\\sigma^{2}\_{en}\\ |
+|  |  |  |  |  |  |
+|----|----|----|----|----|----|
+|  | t1 | t2 | t3 | ... | tn |
+| t1 | \\\sigma^{2}\_{e1}\\ |  |  | ... |  |
+| t2 | 0 | \\\sigma^{2}\_{e2}\\ |  | ... |  |
+| t3 | 0 | 0 | \\\sigma^{2}\_{e3}\\ | ... |  |
+| ... | ... | ... | ... | ... | ... |
+| tn | 0 | 0 | 0 | ... | \\\sigma^{2}\_{en}\\ |
 
 The **compound symmetric** residual covariance structure estimates two
 parameters: one for the residual variance , \\\sigma^{2}\_{e}\\, and one
@@ -98,14 +98,14 @@ for the covariance. The residual variance is assumed to be identical for
 all variables and all covariances are assumed to be identical. The
 structure is represented in this table.
 
-|     |                     |                     |                     |     |                     |
-|-----|---------------------|---------------------|---------------------|-----|---------------------|
-|     | t1                  | t2                  | t3                  | ... | tn                  |
-| t1  | \\\sigma^{2}\_{e}\\ |                     |                     | ... |                     |
-| t2  | \\\rho\\            | \\\sigma^{2}\_{e}\\ |                     | ... |                     |
-| t3  | \\\rho\\            | \\\rho\\            | \\\sigma^{2}\_{e}\\ | ... |                     |
-| ... | ...                 | ...                 | ...                 | ... | ...                 |
-| tn  | \\\rho\\            | \\\rho\\            | \\\rho\\            | ... | \\\sigma^{2}\_{e}\\ |
+|  |  |  |  |  |  |
+|----|----|----|----|----|----|
+|  | t1 | t2 | t3 | ... | tn |
+| t1 | \\\sigma^{2}\_{e}\\ |  |  | ... |  |
+| t2 | \\\rho\\ | \\\sigma^{2}\_{e}\\ |  | ... |  |
+| t3 | \\\rho\\ | \\\rho\\ | \\\sigma^{2}\_{e}\\ | ... |  |
+| ... | ... | ... | ... | ... | ... |
+| tn | \\\rho\\ | \\\rho\\ | \\\rho\\ | ... | \\\sigma^{2}\_{e}\\ |
 
 The **toeplitz** residual covariance structure estimates **n**
 parameters, one for every band of the matrix. The residual variance ,
@@ -113,14 +113,14 @@ parameters, one for every band of the matrix. The residual variance ,
 covariances one step removed are all assumed identical. Likewise for all
 further bands. The structure is represented in this table.
 
-|     |                     |                     |                     |     |                     |
-|-----|---------------------|---------------------|---------------------|-----|---------------------|
-|     | t1                  | t2                  | t3                  | ... | tn                  |
-| t1  | \\\sigma^{2}\_{e}\\ |                     |                     | ... |                     |
-| t2  | \\\rho\\            | \\\sigma^{2}\_{e}\\ |                     | ... |                     |
-| t3  | \\\rho\_{2}\\       | \\\rho\\            | \\\sigma^{2}\_{e}\\ | ... |                     |
-| ... | ...                 | ...                 | ...                 | ... | ...                 |
-| tn  | \\\rho\_{n}\\       | \\\rho\_{n - 1}\\   | \\\rho\_{n - 2}\\   | ... | \\\sigma^{2}\_{e}\\ |
+|  |  |  |  |  |  |
+|----|----|----|----|----|----|
+|  | t1 | t2 | t3 | ... | tn |
+| t1 | \\\sigma^{2}\_{e}\\ |  |  | ... |  |
+| t2 | \\\rho\\ | \\\sigma^{2}\_{e}\\ |  | ... |  |
+| t3 | \\\rho\_{2}\\ | \\\rho\\ | \\\sigma^{2}\_{e}\\ | ... |  |
+| ... | ... | ... | ... | ... | ... |
+| tn | \\\rho\_{n}\\ | \\\rho\_{n - 1}\\ | \\\rho\_{n - 2}\\ | ... | \\\sigma^{2}\_{e}\\ |
 
 The **autoregressive** residual covariance structure has two parameters:
 the residual variance, \\\sigma^{2}\_{e}\\ and the correlation between
@@ -131,14 +131,14 @@ and 2 or 2 and 3. More distant relationships are assumed to have smaller
 correlations, decreasing exponentially. Thus between 1 and 3, the
 estimate is \\\rho^2\\. The structure is represented in this table.
 
-|     |                     |                     |                     |     |                     |
-|-----|---------------------|---------------------|---------------------|-----|---------------------|
-|     | t1                  | t2                  | t3                  | ... | tn                  |
-| t1  | \\\sigma^{2}\_{e}\\ |                     |                     | ... |                     |
-| t2  | \\\rho\\            | \\\sigma^{2}\_{e}\\ |                     | ... |                     |
-| t3  | \\\rho^2\\          | \\\rho\\            | \\\sigma^{2}\_{e}\\ | ... |                     |
-| ... | ...                 | ...                 | ...                 | ... | ...                 |
-| tn  | \\\rho^{n-1}\\      | \\\rho^{n-2}\\      | \\\rho^{n-3}\\      | ... | \\\sigma^{2}\_{e}\\ |
+|  |  |  |  |  |  |
+|----|----|----|----|----|----|
+|  | t1 | t2 | t3 | ... | tn |
+| t1 | \\\sigma^{2}\_{e}\\ |  |  | ... |  |
+| t2 | \\\rho\\ | \\\sigma^{2}\_{e}\\ |  | ... |  |
+| t3 | \\\rho^2\\ | \\\rho\\ | \\\sigma^{2}\_{e}\\ | ... |  |
+| ... | ... | ... | ... | ... | ... |
+| tn | \\\rho^{n-1}\\ | \\\rho^{n-2}\\ | \\\rho^{n-3}\\ | ... | \\\sigma^{2}\_{e}\\ |
 
 Because structural equation models generally model covariance
 structures, the autoregressive residual structure must be parameterized
@@ -157,14 +157,14 @@ variance and covariance is freely estimated with no constraints.
 However, in most cases, this results in an overparameterized model and
 is unestimable. The structure is represented in this table.
 
-|     |                      |                      |                      |     |                      |
-|-----|----------------------|----------------------|----------------------|-----|----------------------|
-|     | t1                   | t2                   | t3                   | ... | tn                   |
-| t1  | \\\sigma^{2}\_{e1}\\ |                      |                      | ... |                      |
-| t2  | \\\rho\_{1}\\        | \\\sigma^{2}\_{e2}\\ |                      | ... |                      |
-| t3  | \\\rho\_{2}\\        | \\\rho\_{3}\\        | \\\sigma^{2}\_{e3}\\ | ... |                      |
-| ... | ...                  | ...                  | ...                  | ... | ...                  |
-| tn  | \\\rho\_{5}\\        | \\\rho\_{6}\\        | \\\rho\_{7}\\        | ... | \\\sigma^{2}\_{en}\\ |
+|  |  |  |  |  |  |
+|----|----|----|----|----|----|
+|  | t1 | t2 | t3 | ... | tn |
+| t1 | \\\sigma^{2}\_{e1}\\ |  |  | ... |  |
+| t2 | \\\rho\_{1}\\ | \\\sigma^{2}\_{e2}\\ |  | ... |  |
+| t3 | \\\rho\_{2}\\ | \\\rho\_{3}\\ | \\\sigma^{2}\_{e3}\\ | ... |  |
+| ... | ... | ... | ... | ... | ... |
+| tn | \\\rho\_{5}\\ | \\\rho\_{6}\\ | \\\rho\_{7}\\ | ... | \\\sigma^{2}\_{en}\\ |
 
 ## Author
 

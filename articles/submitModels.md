@@ -16,6 +16,7 @@ locally can finish in hours on a cluster.
 ## Overview: `submitModels()`
 
 ``` r
+
 submitModels(
   target = getwd(),
   recursive = FALSE,
@@ -53,6 +54,7 @@ Submit all `.inp` files in a directory (not its subdirectories) to
 SLURM:
 
 ``` r
+
 track <- submitModels(
   target = "/proj/my_mplus_models",
   scheduler = "slurm",
@@ -67,6 +69,7 @@ track <- submitModels(
 Filter by regex and search subfolders:
 
 ``` r
+
 track <- submitModels(
   target       = "/proj/my_mplus_models",
   recursive    = TRUE,
@@ -82,6 +85,7 @@ track <- submitModels(
 Torque/PBS users:
 
 ``` r
+
 track <- submitModels(
   target = "path/to/models",
   scheduler = "torque",
@@ -131,6 +135,7 @@ time:
 A simple “post” script might parse the output to RDS:
 
 ``` r
+
 # post_example.R
 mplusdir <- Sys.getenv("MPLUSDIR")
 mplusinp <- Sys.getenv("MPLUSINP")
@@ -153,6 +158,7 @@ reduces queue overhead and improves cluster utilization.
 Example strategy:
 
 ``` r
+
 track <- submitModels(
   target = "/proj/mplus_runs",
   scheduler = "slurm",
@@ -172,6 +178,7 @@ Use
 (or `summary(track)`) to query the scheduler for **live status**:
 
 ``` r
+
 checkSubmission(track)
 # Submission status as of: 2024-10-10 08:16:53
 # -------

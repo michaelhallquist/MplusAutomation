@@ -73,9 +73,11 @@ run the model on the dataset, and reads it back into `R`.
 There is even pretty printing now. To see the results:
 
 ``` r
+
 library(texreg)
 screenreg(fit, summaries = c("Observations", "CFI", "SRMR"), single.row=TRUE)
 ```
+
 
     ==================================
                       Model 1
@@ -107,11 +109,13 @@ fit2 <- mplusModeler(pathmodel2, modelout = "model2.inp", run = 1L)
 We can make some pretty output of both models:
 
 ``` r
+
 screenreg(list(
   extract(fit, summaries = c("Observations", "CFI", "SRMR")),
   extract(fit2, summaries = c("Observations", "CFI", "SRMR"))),
   single.row=TRUE)
 ```
+
 
     ====================================================
                       Model 1           Model 2
@@ -138,11 +142,13 @@ which propogates to later models that were updated()ed based on the
 original model):
 
 ``` r
+
 screenreg(list(
   extract(fit, cis=TRUE, summaries = c("Observations", "CFI", "SRMR")),
   extract(fit2, cis=TRUE, summaries = c("Observations", "CFI", "SRMR"))),
   single.row=TRUE)
 ```
+
 
     ================================================================
                       Model 1                 Model 2
