@@ -32,7 +32,7 @@ syntax in `Mplus`. If discardBurnin is `FALSE`, then a superordinate
 list is provided that divides output in terms of burn-in versus valid
 draw halves of the MCMC chains. For documentation of how `Mplus`
 implements chain convergence checks and MCMC draws, see here:
-<http://www.statmodel.com/download/Bayes3.pdf>.
+<https://www.statmodel.com/download/Bayes3.pdf>.
 
 ## Note
 
@@ -43,7 +43,7 @@ loads the dataset accordingly.
 
 ## References
 
-<http://www.statmodel.com/download/Bayes3.pdf>
+<https://www.statmodel.com/download/Bayes3.pdf>
 
 ## See also
 

@@ -3,7 +3,7 @@
 The MplusAutomation package leverages the flexibility of the R language
 to automate latent variable model estimation and interpretation using
 'Mplus', a powerful latent variable modeling program developed by Muthen
-and Muthen (<http://www.statmodel.com>). Specifically, MplusAutomation
+and Muthen (<https://www.statmodel.com>). Specifically, MplusAutomation
 provides routines for creating related groups of models, running batches
 of models, and extracting and tabulating model parameters and fit
 statistics.
@@ -85,7 +85,7 @@ This converts the data.frame to a tab-delimited file and provides an
 
 ## References
 
-Mplus software. Muthen and Muthen. <http://www.statmodel.com>
+Mplus software. Muthen and Muthen. <https://www.statmodel.com>
 
 ## See also
 

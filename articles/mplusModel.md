@@ -58,15 +58,15 @@ m <- mplusModel(
 )
 
 m$dir
-#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478"
+#> [1] "/tmp/RtmptMxuPA/mplusModel_vignette_257f7699969b"
 m$file_stem
 #> [1] "mtcars_demo"
 m$model_dir
-#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478"
+#> [1] "/tmp/RtmptMxuPA/mplusModel_vignette_257f7699969b"
 m$inp_file
-#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.inp"
+#> [1] "/tmp/RtmptMxuPA/mplusModel_vignette_257f7699969b/mtcars_demo.inp"
 m$dat_file
-#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.dat"
+#> [1] "/tmp/RtmptMxuPA/mplusModel_vignette_257f7699969b/mtcars_demo.dat"
 m$variables
 #> [1] "mpg" "wt"  "hp"
 ```
@@ -85,9 +85,9 @@ If you already have an Mplus input file, initialize the object from
 ``` r
 
 m$write_dat()
-#> Writing data to file: /tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.dat
+#> Writing data to file: /tmp/RtmptMxuPA/mplusModel_vignette_257f7699969b/mtcars_demo.dat
 m$write_inp()
-#> Writing Mplus syntax to file: /tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.inp
+#> Writing Mplus syntax to file: /tmp/RtmptMxuPA/mplusModel_vignette_257f7699969b/mtcars_demo.inp
 
 m_from_inp <- mplusModel(
   inp_file = m$inp_file,
@@ -113,9 +113,9 @@ m$write_dat()
 #> The file(s)
 #>  'mtcars_demo.dat' 
 #> currently exist(s) and will be overwritten
-#> Writing data to file: /tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.dat
+#> Writing data to file: /tmp/RtmptMxuPA/mplusModel_vignette_257f7699969b/mtcars_demo.dat
 m$write_inp()
-#> Writing Mplus syntax to file: /tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/mtcars_demo.inp
+#> Writing Mplus syntax to file: /tmp/RtmptMxuPA/mplusModel_vignette_257f7699969b/mtcars_demo.inp
 
 file.exists(m$dat_file)
 #> [1] TRUE
@@ -194,7 +194,7 @@ m_out <- mplusModel(
 )
 
 m_out$inp_file
-#> [1] "/tmp/Rtmp3ZlR7W/mplusModel_vignette_43f718b9c478/ex3.1.inp"
+#> [1] "/tmp/RtmptMxuPA/mplusModel_vignette_257f7699969b/ex3.1.inp"
 m_out$syntax[1:4]
 #> [1] "TITLE:"                                                                              
 #> [2] "this is an example of a simple linear regression for a continuous observed dependent"

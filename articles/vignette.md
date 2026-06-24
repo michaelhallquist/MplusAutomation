@@ -41,7 +41,7 @@ or
 [`mplusModeler()`](https://michaelhallquist.github.io/MplusAutomation/reference/mplusModeler.md)
 functions. If you would like to obtain a copy of `Mplus`, please follow
 the instructions on the [statmodel.com
-website](http://statmodel.com/orderonline/).
+website](https://statmodel.com/orderonline/).
 
 ## Installing and loading the package
 
@@ -235,7 +235,7 @@ nested subdirectories).
 ### Basic use of runModels
 
 As an example, say that we want to run all of the models used in the
-Mplus 5.1 Addendum: <http://statmodel.com/download/examples1.pdf>. The
+Mplus 5.1 Addendum: <https://statmodel.com/download/examples1.pdf>. The
 input files for these are located in:
 `C:\Program Files\Mplus\Mplus Examples\Addendum Examples`.
 
