@@ -403,11 +403,11 @@ getSavedata_Data <- function(outfile) {
 #' SAVEDATA BPARAMETERS command. Each list element corresponds to a single MCMC chain, as specified by
 #' the ANALYSIS: CHAINS syntax in \code{Mplus}. If discardBurnin is \code{FALSE}, then a superordinate list is
 #' provided that divides output in terms of burn-in versus valid draw halves of the MCMC chains. For documentation
-#' of how \code{Mplus} implements chain convergence checks and MCMC draws, see here: \url{http://www.statmodel.com/download/Bayes3.pdf}.
+#' of how \code{Mplus} implements chain convergence checks and MCMC draws, see here: \url{https://www.statmodel.com/download/Bayes3.pdf}.
 #'
 #' @author Michael Hallquist, Florian Boeing-Messing
 #' @seealso \code{\link{getSavedata_Fileinfo}}, \code{\link{getSavedata_Data}}
-#' @references \url{http://www.statmodel.com/download/Bayes3.pdf}
+#' @references \url{https://www.statmodel.com/download/Bayes3.pdf}
 #' @examples
 #' \dontrun{
 #'   fileInfo <- getSavedata_Data("C:/Program Files/Mplus/Test Output.out")

@@ -18,7 +18,7 @@ A \code{list} containing the draws from the MCMC chains for a Bayesian model tha
 SAVEDATA BPARAMETERS command. Each list element corresponds to a single MCMC chain, as specified by
 the ANALYSIS: CHAINS syntax in \code{Mplus}. If discardBurnin is \code{FALSE}, then a superordinate list is
 provided that divides output in terms of burn-in versus valid draw halves of the MCMC chains. For documentation
-of how \code{Mplus} implements chain convergence checks and MCMC draws, see here: \url{http://www.statmodel.com/download/Bayes3.pdf}.
+of how \code{Mplus} implements chain convergence checks and MCMC draws, see here: \url{https://www.statmodel.com/download/Bayes3.pdf}.
 }
 \description{
 This function reads a the BPARAMETERS output file from the Mplus SAVEDATA BPARAMETERS command
@@ -35,7 +35,7 @@ and loads the dataset accordingly.
 }
 }
 \references{
-\url{http://www.statmodel.com/download/Bayes3.pdf}
+\url{https://www.statmodel.com/download/Bayes3.pdf}
 }
 \seealso{
 \code{\link{getSavedata_Fileinfo}}, \code{\link{getSavedata_Data}}

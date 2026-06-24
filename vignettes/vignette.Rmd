@@ -44,7 +44,7 @@ provides convenience functions for interfacing with `Mplus` in `R` and working w
 
 Thus, you must have a working copy of `Mplus` to estimate latent variable models using `MplusAutomation` using the
 `runModels()` or `mplusModeler()` functions. If you would like to obtain a copy of `Mplus`, please follow the 
-instructions on the [statmodel.com website](http://statmodel.com/orderonline/).
+instructions on the [statmodel.com website](https://statmodel.com/orderonline/).
 
 # Installing and loading the package
 
@@ -164,7 +164,7 @@ of related models located within a directory (or nested subdirectories).
 ## Basic use of runModels
 
 As an example, say that we want to run all of the models used in the Mplus 5.1
-Addendum: http://statmodel.com/download/examples1.pdf. The input files for these
+Addendum: https://statmodel.com/download/examples1.pdf. The input files for these
 are located in: 
 `C:\Program Files\Mplus\Mplus Examples\Addendum Examples`.
 

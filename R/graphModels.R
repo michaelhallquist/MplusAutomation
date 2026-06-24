@@ -41,10 +41,12 @@ mplus.traceplot <- function(mplus.model, rows=4, cols=4, parameters_only=TRUE) {
 
   #if(!(suppressWarnings(require(rhdf5)) && suppressWarnings(require(lattice)))) stop("mplus.traceplot requires rhdf5 and lattice packages")
   if(!suppressWarnings(requireNamespace("rhdf5"))) {
-    stop(paste(c("mplus.traceplot requires the rhdf5 package, which is not installed.\n",
-                "To install, in an R session, type:\n",
-                "  source(\"http://bioconductor.org/biocLite.R\")\n",
-                "  biocLite(\"rhdf5\")\n")))
+    stop(paste(c(
+      "mplus.traceplot requires the rhdf5 package, which is not installed.\n",
+      "To install, in an R session, type:\n",
+      "  install.packages(\"BiocManager\")\n",
+      "  BiocManager::install(\"rhdf5\")\n"
+    )))  
   }
 
 	if (length(mplus.model$gh5) <= 0) stop("No data in gh5 element of Mplus model.")

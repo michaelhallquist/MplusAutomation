@@ -5,7 +5,7 @@
 #' @description The MplusAutomation package leverages the flexibility of the
 #'   R language to automate latent variable model estimation and interpretation
 #'   using 'Mplus', a powerful latent variable modeling program developed by Muthen
-#'   and Muthen (\url{http://www.statmodel.com}). Specifically, MplusAutomation provides routines
+#'   and Muthen (\url{https://www.statmodel.com}). Specifically, MplusAutomation provides routines
 #'   for creating related groups of models, running batches of models, and extracting
 #'   and tabulating model parameters and fit statistics.
 #'
@@ -51,8 +51,8 @@
 #' \tabular{ll}{
 #' Package: \tab MplusAutomation\cr
 #' Type: \tab Package\cr
-#' Version: \tab 1.2\cr
-#' Date: \tab 2025-08-25\cr
+#' Version: \tab 1.3\cr
+#' Date: \tab 2026-06-24\cr
 #' License: \tab LGPL-3\cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -66,7 +66,7 @@
 #' @import plyr
 #' @importFrom utils packageDescription
 #' @seealso See \code{\link{runModels}} for an example running a model.
-#' @references Mplus software. Muthen and Muthen. \url{http://www.statmodel.com}
+#' @references Mplus software. Muthen and Muthen. \url{https://www.statmodel.com}
 NULL
 
 
