@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/michaelhallquist/MplusAutomation/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/michaelhallquist/MplusAutomation/blob/1.3/inst/CITATION)
 
 Hallquist, M. N. & Wiley, J. F. (2018). MplusAutomation: An R Package
 for Facilitating Large-Scale Latent Variable Analyses in Mplus

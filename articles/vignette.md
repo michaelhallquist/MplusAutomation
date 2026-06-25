@@ -101,7 +101,7 @@ packages.
 sessionInfo()
 ```
 
-    ## R version 4.6.0 (2026-04-24)
+    ## R version 4.6.1 (2026-06-24)
     ## Platform: x86_64-pc-linux-gnu
     ## Running under: Ubuntu 24.04.4 LTS
     ## 
@@ -125,8 +125,8 @@ sessionInfo()
     ## [1] MplusAutomation_1.3
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.0     Rcpp_1.1.1-1.1    
-    ##  [5] parallel_4.6.0     jquerylib_0.1.4    systemfonts_1.3.2  scales_1.4.0      
+    ##  [1] gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.1     Rcpp_1.1.1-1.1    
+    ##  [5] parallel_4.6.1     jquerylib_0.1.4    systemfonts_1.3.2  scales_1.4.0      
     ##  [9] textshaping_1.0.5  boot_1.3-32        yaml_2.3.12        fastmap_1.2.0     
     ## [13] lattice_0.22-9     coda_0.19-4.1      ggplot2_4.0.3      R6_2.6.1          
     ## [17] plyr_1.8.9         knitr_1.51         backports_1.5.1    checkmate_2.3.4   
@@ -134,17 +134,17 @@ sessionInfo()
     ## [25] bslib_0.11.0       RColorBrewer_1.1-3 rlang_1.2.0        cachem_1.1.0      
     ## [29] xfun_0.59          fs_2.1.0           sass_0.4.10        S7_0.2.2          
     ## [33] otel_0.2.0         cli_3.6.6          pkgdown_2.2.0      fastDummies_1.7.6 
-    ## [37] digest_0.6.39      grid_4.6.0         xtable_1.8-8       texreg_1.39.5     
+    ## [37] digest_0.6.39      grid_4.6.1         xtable_1.8-8       texreg_1.39.5     
     ## [41] lifecycle_1.0.5    vctrs_0.7.3        data.table_1.18.4  evaluate_1.0.5    
     ## [45] glue_1.8.1         farver_2.1.2       ragg_1.5.2         rmarkdown_2.31    
-    ## [49] httr_1.4.8         tools_4.6.0        htmltools_0.5.9
+    ## [49] httr_1.4.8         tools_4.6.1        htmltools_0.5.9
 
 ### Updating the package to the latest version
 
 As is conventional for `R` packages, the latest version of
 `MplusAutomation` may be obtained from CRAN using the
 [`update.packages()`](https://rdrr.io/r/utils/update.packages.html)
-function in an `R` session. As of 2026-06-24, the current version of the
+function in an `R` session. As of 2026-06-25, the current version of the
 package is 1.3.
 
 ``` r
