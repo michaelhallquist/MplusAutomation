@@ -16,6 +16,7 @@ validate_dhms(str)
 
 ## Details
 
-this always converts to an hms format, and if days are present, it
-converts to dhms. Supported date formats match slurm sbatch:
-https://slurm.schedmd.com/sbatch.html
+this normalizes overflow in clock components (for example, 90 seconds
+becomes 1 minute and 30 seconds), converts to an hms format, and retains
+a dhms format when days are present. Supported date formats match slurm
+sbatch: https://slurm.schedmd.com/sbatch.html

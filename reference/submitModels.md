@@ -80,11 +80,13 @@ submitModels(
 - scheduler:
 
   Which scheduler to use for job submission. Options are 'qsub',
-  'torque', 'sbatch', 'slurm', 'local', or 'sh'. The terms `'qsub'` and
-  `'torque'` are aliases (where 'torque' submits via the qsub command).
-  Likewise for 'sbatch' and 'slurm'. If `'local'` or `'sh'` are
-  specified, `submitModels` does not submit to any scheduler at all, but
-  instead executes the command locally via a shell script.
+  'torque', 'sbatch', 'slurm', 'local', or 'sh'. Day-based walltime
+  strings are retained for Slurm and converted to total hours for
+  TORQUE/qsub. The terms `'qsub'` and `'torque'` are aliases (where
+  'torque' submits via the qsub command). Likewise for 'sbatch' and
+  'slurm'. If `'local'` or `'sh'` are specified, `submitModels` does not
+  submit to any scheduler at all, but instead executes the command
+  locally via a shell script.
 
 - sched_args:
 

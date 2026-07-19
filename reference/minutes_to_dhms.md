@@ -13,9 +13,8 @@ minutes_to_dhms(x)
 
 - x:
 
-  string or charcater number of minutes
+  numeric or character number of minutes
 
 ## Value
 
-the dhms string representing this number of minutes in days, hours,
-minutes, and seconds
+the hms string representing this number of minutes

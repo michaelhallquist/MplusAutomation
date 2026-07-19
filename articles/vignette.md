@@ -76,7 +76,7 @@ available to use, type:
 library(MplusAutomation)
 ```
 
-    ## Version:  1.3
+    ## Version:  1.4
     ## We work hard to write this free software. Please help us get credit by citing: 
     ## 
     ## Hallquist, M. N. & Wiley, J. F. (2018). MplusAutomation: An R Package for Facilitating Large-Scale Latent Variable Analyses in Mplus. Structural Equation Modeling, 25, 621-638. doi: 10.1080/10705511.2017.1402334.
@@ -122,18 +122,18 @@ sessionInfo()
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] MplusAutomation_1.3
+    ## [1] MplusAutomation_1.4
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.1     Rcpp_1.1.1-1.1    
+    ##  [1] gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.1     Rcpp_1.1.2        
     ##  [5] parallel_4.6.1     jquerylib_0.1.4    systemfonts_1.3.2  scales_1.4.0      
     ##  [9] textshaping_1.0.5  boot_1.3-32        yaml_2.3.12        fastmap_1.2.0     
     ## [13] lattice_0.22-9     coda_0.19-4.1      ggplot2_4.0.3      R6_2.6.1          
     ## [17] plyr_1.8.9         knitr_1.51         backports_1.5.1    checkmate_2.3.4   
     ## [21] pander_0.6.6       gsubfn_0.7         proto_1.0.0        desc_1.4.3        
-    ## [25] bslib_0.11.0       RColorBrewer_1.1-3 rlang_1.2.0        cachem_1.1.0      
-    ## [29] xfun_0.59          fs_2.1.0           sass_0.4.10        S7_0.2.2          
-    ## [33] otel_0.2.0         cli_3.6.6          pkgdown_2.2.0      fastDummies_1.7.6 
+    ## [25] bslib_0.11.0       RColorBrewer_1.1-3 rlang_1.3.0        cachem_1.1.0      
+    ## [29] xfun_0.60          fs_2.1.0           sass_0.4.10        S7_0.2.2          
+    ## [33] otel_0.2.0         cli_3.6.6          pkgdown_2.2.1      fastDummies_1.7.6 
     ## [37] digest_0.6.39      grid_4.6.1         xtable_1.8-8       texreg_1.39.5     
     ## [41] lifecycle_1.0.5    vctrs_0.7.3        data.table_1.18.4  evaluate_1.0.5    
     ## [45] glue_1.8.1         farver_2.1.2       ragg_1.5.2         rmarkdown_2.31    
@@ -144,8 +144,8 @@ sessionInfo()
 As is conventional for `R` packages, the latest version of
 `MplusAutomation` may be obtained from CRAN using the
 [`update.packages()`](https://rdrr.io/r/utils/update.packages.html)
-function in an `R` session. As of 2026-06-25, the current version of the
-package is 1.3.
+function in an `R` session. As of 2026-07-19, the current version of the
+package is 1.4.
 
 ``` r
 

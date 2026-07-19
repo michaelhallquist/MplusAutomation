@@ -9,7 +9,7 @@ single directory or nested within subdirectories."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">MplusAutomation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@ single directory or nested within subdirectories."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Submit Mplus models to a high-performance cluster scheduler</h1>
-      <small class="dont-index">Source: <a href="https://github.com/michaelhallquist/MplusAutomation/blob/1.3/R/submitModels.R" class="external-link"><code>R/submitModels.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/michaelhallquist/MplusAutomation/blob/master/R/submitModels.R" class="external-link"><code>R/submitModels.R</code></a></small>
       <div class="d-none name"><code>submitModels.Rd</code></div>
     </div>
 
@@ -117,6 +117,7 @@ or where one wants to test different versions of the Mplus program.</p></dd>
 
 <dt id="arg-scheduler">scheduler<a class="anchor" aria-label="anchor" href="#arg-scheduler"></a></dt>
 <dd><p>Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', 'local', or 'sh'.
+Day-based walltime strings are retained for Slurm and converted to total hours for TORQUE/qsub.
 The terms <code>'qsub'</code> and <code>'torque'</code> are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
 and 'slurm'. If <code>'local'</code> or  <code>'sh'</code> are specified, <code>submitModels</code> does not submit to any scheduler at all,
 but instead executes the command locally via a shell script.</p></dd>
@@ -229,7 +230,7 @@ submitting further models.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
