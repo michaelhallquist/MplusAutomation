@@ -1,3 +1,6 @@
+Version 1.4
+ - bugfix:      submitModels now correctly batches fractional walltimes, normalizes overflow in duration fields, and renders day-based durations as total hours for TORQUE/qsub.
+
 Version 1.3
  - feature:     readModels now parses input MODEL sections into $model_table, a syntax-oriented data.frame with parameter headers, labels, modifiers, values, fixed/free status, and source sections
  - feature:     readModels now extracts TECH4 standard errors, Est./S.E. values, and p-values for latent means, covariances, and correlations alongside the estimate matrices

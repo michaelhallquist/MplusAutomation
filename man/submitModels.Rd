@@ -57,6 +57,7 @@ or where one wants to test different versions of the Mplus program.}
 \item{quiet}{optional. If \code{FALSE}, show status messages in the console.}
 
 \item{scheduler}{Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', 'local', or 'sh'.
+Day-based walltime strings are retained for Slurm and converted to total hours for TORQUE/qsub.
 The terms \code{'qsub'} and \code{'torque'} are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
 and 'slurm'. If \code{'local'} or  \code{'sh'} are specified, \code{submitModels} does not submit to any scheduler at all,
 but instead executes the command locally via a shell script.}

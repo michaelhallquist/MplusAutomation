@@ -2,25 +2,67 @@
 #'
 #' @param str string containing a duration that may include a days specification
 #' @importFrom checkmate assert_string
-#' @details this always converts to an hms format, and if days are present, it
-#'   converts to dhms. Supported date formats match slurm sbatch:
+#' @details this normalizes overflow in clock components (for example, 90
+#'   seconds becomes 1 minute and 30 seconds), converts to an hms format, and
+#'   retains a dhms format when days are present. Supported date formats match slurm sbatch:
 #'   https://slurm.schedmd.com/sbatch.html
 #' @keywords internal
 validate_dhms <- function(str) {
   checkmate::assert_string(str)
-  if (grepl("^\\d+:\\d+?$", str, perl = T)) { # m:s input
-    return(paste0("00:", str)) # add 0 hours prefix
-  } else if (grepl("^(\\d+-)?\\d+:\\d+:\\d+?$", str, perl = T)) { # h:m:s or d-h:m:s input
-    return(str)
-  } else if (grepl("^(\\d+-)?\\d+:\\d+?$", str, perl = T)) { # d-h:m input
-    return(paste0(str, ":00")) # add 0 seconds
-  } else if (grepl("^\\d+-\\d+$", str, perl = T)) { # days-hours input
-    return(paste0(str, ":00:00")) # add 0 minutes, 0 seconds
-  } else if (grepl("^\\d+$", str, perl = T)) {
-    return(paste0("00:", str, ":00")) # minutes only -> hours:minutes:seconds
+  has_days <- grepl("^\\d+-", str, perl = TRUE)
+  if (grepl("^\\d+$", str, perl = TRUE)) { # minutes only
+    days <- 0
+    hours <- 0
+    minutes <- as.numeric(str)
+    seconds <- 0
+  } else if (grepl("^\\d+:\\d+$", str, perl = TRUE)) { # m:s input
+    parts <- as.numeric(strsplit(str, ":", fixed = TRUE)[[1L]])
+    days <- 0
+    hours <- 0
+    minutes <- parts[1L]
+    seconds <- parts[2L]
+  } else if (grepl("^\\d+:\\d+:\\d+$", str, perl = TRUE)) { # h:m:s input
+    parts <- as.numeric(strsplit(str, ":", fixed = TRUE)[[1L]])
+    days <- 0
+    hours <- parts[1L]
+    minutes <- parts[2L]
+    seconds <- parts[3L]
+  } else if (grepl("^\\d+-\\d+$", str, perl = TRUE)) { # days-hours input
+    parts <- as.numeric(strsplit(str, "-", fixed = TRUE)[[1L]])
+    days <- parts[1L]
+    hours <- parts[2L]
+    minutes <- 0
+    seconds <- 0
+  } else if (grepl("^\\d+-\\d+:\\d+$", str, perl = TRUE)) { # days-hours:minutes input
+    parts <- as.numeric(unlist(strsplit(str, "[-:]", perl = TRUE)))
+    days <- parts[1L]
+    hours <- parts[2L]
+    minutes <- parts[3L]
+    seconds <- 0
+  } else if (grepl("^\\d+-\\d+:\\d+:\\d+$", str, perl = TRUE)) { # days-hours:minutes:seconds input
+    parts <- as.numeric(unlist(strsplit(str, "[-:]", perl = TRUE)))
+    days <- parts[1L]
+    hours <- parts[2L]
+    minutes <- parts[3L]
+    seconds <- parts[4L]
   } else {
     stop("Invalid duration string: ", str)
   }
+
+  total_seconds <- days * 86400 + hours * 3600 + minutes * 60 + seconds
+  if (has_days) {
+    days <- total_seconds %/% 86400
+    remainder <- total_seconds %% 86400
+    hours <- remainder %/% 3600
+    minutes <- (remainder %% 3600) %/% 60
+    seconds <- remainder %% 60
+    return(sprintf("%d-%02d:%02d:%02d", days, hours, minutes, seconds))
+  }
+
+  hours <- total_seconds %/% 3600
+  minutes <- (total_seconds %% 3600) %/% 60
+  seconds <- total_seconds %% 60
+  sprintf("%d:%02d:%02d", hours, minutes, seconds)
 }
 
 #' helper function to convert a dhms string to the number of hours for combining similar job times
@@ -50,26 +92,28 @@ dhms_to_hours <- function(str) {
   return(hours)
 }
 
+#' helper function to convert a number of seconds into an hms-formatted string
+#' @param x numeric number of seconds
+#' @return an hms string suitable for scheduler submission
+#' @keywords internal
+seconds_to_dhms <- function(x) {
+  checkmate::assert_number(x, lower = 0)
+  x <- round(x)
+  hours <- x %/% 3600
+  minutes <- (x %% 3600) %/% 60
+  seconds <- x %% 60
+
+  validate_dhms(sprintf("%d:%02d:%02d", hours, minutes, seconds))
+}
+
 #' helper function to convert a number of minutes into a dhms-formatted string for submission
-#' @param x string or charcater number of minutes
-#' @return the dhms string representing this number of minutes in days, hours, minutes, and seconds
+#' @param x numeric or character number of minutes
+#' @return the hms string representing this number of minutes
 #' @keywords internal
 minutes_to_dhms <- function(x) {
-  # for now, don't even support seconds
   if (is.character(x)) x <- as.numeric(x)
-  d <- 0
-  h <- 0
-  if (x > 1440) {
-    d <- floor(x / (24 * 60))
-    r <- x %% (24 * 60)
-    h <- floor(r / 60)
-    m <- r %% 60
-  } else if (x > 60) {
-    h <- floor(x / 60)
-    m <- x %% 60
-  }
-
-  validate_dhms(paste0(d, "-", h, ":", m))
+  checkmate::assert_number(x, lower = 0)
+  seconds_to_dhms(x * 60)
 }
 
 #' helper function to crawl over the target location, determine if it is a file or folder,
@@ -201,6 +245,7 @@ filter_inp_filelist <- function(inp_files, replaceOutfile = "always", quiet=TRUE
 #'   or where one wants to test different versions of the Mplus program.
 #' @param quiet optional. If \code{FALSE}, show status messages in the console.
 #' @param scheduler Which scheduler to use for job submission. Options are 'qsub', 'torque', 'sbatch', 'slurm', 'local', or 'sh'.
+#'   Day-based walltime strings are retained for Slurm and converted to total hours for TORQUE/qsub.
 #'      The terms `'qsub'` and `'torque'` are aliases (where 'torque' submits via the qsub command). Likewise for 'sbatch'
 #'      and 'slurm'. If `'local'` or  `'sh'` are specified, `submitModels` does not submit to any scheduler at all, 
 #'      but instead executes the command locally via a shell script.
@@ -392,7 +437,7 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
     pre_lines <- grep("^\\s*\\!\\s*pre\\s+", ff, ignore.case = TRUE, perl = TRUE, value = TRUE)
     post_lines <- grep("^\\s*\\!\\s*post\\s+", ff, ignore.case = TRUE, perl = TRUE, value = TRUE)
 
-    if (length(par_lines) > 1L) {
+    if (length(par_lines) > 0L) {
       for (pp in par_lines) {
         if (grepl("^\\s*\\!\\s*time\\s+", pp, perl = TRUE, ignore.case = TRUE)) {
           run_df$wall_time[rr] <- validate_dhms(sub("^\\s*\\!\\s*time\\s+", "", pp, perl = TRUE, ignore.case = TRUE))
@@ -484,15 +529,17 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
         } else {
           this_chunk <- rr[elig_chunk,]
           this_chunk <- this_chunk[order(this_chunk$wall_hr),] # sort in ascending order by wall time
+          this_chunk$wall_sec <- round(this_chunk$wall_hr * 3600)
+          time_max_sec <- round(time_max_hr * 3600)
           
           while (nrow(this_chunk) > 0L) {
-            elig_times <- cumsum(this_chunk$wall_hr)
+            elig_times <- cumsum(this_chunk$wall_sec)
             
             # initialize chunked job with maximal memory and core demand
             this_job <- data.frame(jobid=NA_character_, cores=max_cores, memgb=max_mem,
                                wall_time=NA_character_, sched_script=NA_character_)
             
-            included <- elig_times < time_max_hr
+            included <- elig_times <= time_max_sec
             # if all remaining jobs are more than the allowed max job time, revert to single jobs scheduled for their individually requested times
             if (all(included == FALSE)) included <- c(TRUE, rep(FALSE, nrow(this_chunk) - 1))
             
@@ -501,8 +548,9 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
             this_job$file <- list(unlist(this_chunk$file[included]))
             this_job$pre <- list(this_chunk$pre[included])
             this_job$post <- list(this_chunk$post[included])
-            this_job$wall_hr <- max(elig_times[included])
-            this_job$wall_time <- validate_dhms(paste0(this_job$wall_hr, ":00:00"))
+            wall_sec <- max(elig_times[included])
+            this_job$wall_hr <- wall_sec / 3600
+            this_job$wall_time <- seconds_to_dhms(wall_sec)
             this_job$sched <- this_chunk$sched[1L] # by definition of splits, sched arguments apply to all models in this chunk
             
             out_list <- c(out_list, list(this_job))
@@ -562,11 +610,12 @@ submitModels <- function(target=getwd(), recursive=FALSE, filefilter = NULL,
       )
     } else if (scheduler == "qsub") {
       file_suffix <- ".pbs"
+      torque_wall_time <- seconds_to_dhms(round(dhms_to_hours(run_df$wall_time[rr]) * 3600))
       job_str <- c(
         "#!/bin/bash",
         "",
         paste0("#PBS -l nodes=1:ppn=", run_df$cores[rr]),
-        paste0("#PBS -l walltime=", run_df$wall_time[rr]),
+        paste0("#PBS -l walltime=", torque_wall_time),
         paste0("#PBS -l mem=", run_df$memgb[rr], "gb"),
         if (!is.null(sched_args)) paste("#PBS", sched_args), # common and model-specific scheduler arguments
         ""

@@ -13,8 +13,9 @@ validate_dhms(str)
 helper function to validate format of walltime inputs for HPC submission
 }
 \details{
-this always converts to an hms format, and if days are present, it
-converts to dhms. Supported date formats match slurm sbatch:
+this normalizes overflow in clock components (for example, 90
+seconds becomes 1 minute and 30 seconds), converts to an hms format, and
+retains a dhms format when days are present. Supported date formats match slurm sbatch:
 https://slurm.schedmd.com/sbatch.html
 }
 \keyword{internal}

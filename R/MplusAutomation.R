@@ -51,8 +51,8 @@
 #' \tabular{ll}{
 #' Package: \tab MplusAutomation\cr
 #' Type: \tab Package\cr
-#' Version: \tab 1.3\cr
-#' Date: \tab 2026-06-24\cr
+#' Version: \tab 1.4\cr
+#' Date: \tab 2026-07-19\cr
 #' License: \tab LGPL-3\cr
 #' LazyLoad: \tab yes\cr
 #' }

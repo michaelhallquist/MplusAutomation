@@ -7,10 +7,10 @@
 minutes_to_dhms(x)
 }
 \arguments{
-\item{x}{string or charcater number of minutes}
+\item{x}{numeric or character number of minutes}
 }
 \value{
-the dhms string representing this number of minutes in days, hours, minutes, and seconds
+the hms string representing this number of minutes
 }
 \description{
 helper function to convert a number of minutes into a dhms-formatted string for submission
