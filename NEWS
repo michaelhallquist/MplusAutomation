@@ -1,5 +1,6 @@
 Version 1.4
- - bugfix:      submitModels now correctly batches fractional walltimes, normalizes overflow in duration fields, and renders day-based durations as total hours for TORQUE/qsub.
+- feature:     readModels now parses VIF section in SAMPSTAT section of v9.1 outputs
+- bugfix:      submitModels now correctly batches fractional walltimes, normalizes overflow in duration fields, and renders day-based durations as total hours for TORQUE/qsub.
 
 Version 1.3
  - feature:     readModels now parses input MODEL sections into $model_table, a syntax-oriented data.frame with parameter headers, labels, modifiers, values, fixed/free status, and source sections
