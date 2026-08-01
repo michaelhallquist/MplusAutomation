@@ -1180,8 +1180,11 @@ extractResiduals_1section <- function(residSection, filename) {
     targetList[["covarianceResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
     targetList[["covarianceResid.std"]] <- matrixExtract(residSubsections[[g]], "Standardized Residuals \\(z-scores\\) for Covariances(/Correlations/Residual Corr)*", filename)
     targetList[["covarianceResid.norm"]] <- matrixExtract(residSubsections[[g]], "Normalized Residuals for Covariances(/Correlations/Residual Correlations)*", filename)
-    targetList[["correlationEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Correlations", filename)
-    targetList[["correlationResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Correlations", filename)
+    # Mplus 9.1 appends "/Residual Correlations" for categorical outcomes.
+    targetList[["correlationEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Correlations.*", filename)
+    targetList[["correlationResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Correlations.*", filename)
+    targetList[["partialCorrelationEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Partial Correlations.*", filename)
+    targetList[["partialCorrelationResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Partial Correlations.*", filename)
     targetList[["slopeEst"]] <- matrixExtract(residSubsections[[g]], "Model Estimated Slopes", filename)
     targetList[["slopeResid"]] <- matrixExtract(residSubsections[[g]], "Residuals for Slopes", filename)
     
