@@ -1520,7 +1520,16 @@ extractSampstat <- function(outfiletext, filename) {
     
     for (g in 1:length(univariateSubsections)) {
       thisSub <- univariateSubsections[[g]]
-      stats <- lapply(thisSub[grepl("\\d$", thisSub)], function(x) { strsplit(trimws(x), split = "\\s+")[[1]] })
+
+      # Mplus 9.1 appends a VIF table to this section. It is not a pair of
+      # descriptive-statistics lines, so exclude it before collecting those
+      # lines. Otherwise the VIF rows are recycled by cbind() below, producing
+      # warnings and corrupting the univariate statistics.
+      vif_header <- "^\\s*VIF \\(VARIANCE INFLATION FACTOR\\) FOR EXPLORING MULTICOLLINEARITY OF INDEPENDENT VARIABLES\\s*$"
+      vif_start <- grep(vif_header, thisSub, perl=TRUE)
+      statsSub <- if (length(vif_start) > 0L) thisSub[seq_len(vif_start[1L] - 1L)] else thisSub
+
+      stats <- lapply(statsSub[grepl("\\d$", statsSub)], function(x) { strsplit(trimws(x), split = "\\s+")[[1]] })
       if(length(stats) %% 2 == 0) {
         out <- cbind(do.call(rbind, stats[seq(1, length(stats), by = 2)]),
                      do.call(rbind, stats[seq(2, length(stats), by = 2)]))
@@ -1546,6 +1555,40 @@ extractSampstat <- function(outfiletext, filename) {
           sampstatList[[groupNames[g]]][["univariate.sample.statistics"]] <- out
         } else {
           sampstatList[["univariate.sample.statistics"]] <- out
+        }
+      }
+
+      # Mplus prints up to three variable/VIF pairs per row, rather than a
+      # conventional matrix, so extract and stack each valid pairwise row.
+      if (length(vif_start) > 0L) {
+        vif_lines <- if (vif_start[1L] < length(thisSub)) {
+          thisSub[seq.int(vif_start[1L] + 1L, length(thisSub))]
+        } else {
+          character()
+        }
+        vif_rows <- lapply(vif_lines, function(x) {
+          fields <- strsplit(trimws(x), split="\\s+", perl=TRUE)[[1L]]
+          if (length(fields) == 0L || length(fields) %% 2L != 0L ||
+              identical(fields[1L], "Variable")) return(NULL)
+
+          values <- suppressWarnings(mplus_as.numeric(fields[seq(2L, length(fields), by=2L)]))
+          if (anyNA(values)) return(NULL)
+
+          data.frame(
+            variable=fields[seq(1L, length(fields), by=2L)],
+            vif=values,
+            stringsAsFactors=FALSE
+          )
+        })
+        vif_rows <- Filter(Negate(is.null), vif_rows)
+        if (length(vif_rows) > 0L) {
+          vif <- do.call(rbind, vif_rows)
+          rownames(vif) <- NULL
+          if (length(univariateSubsections) > 1) {
+            sampstatList[[groupNames[g]]][["vif"]] <- vif
+          } else {
+            sampstatList[["vif"]] <- vif
+          }
         }
       }
     }
