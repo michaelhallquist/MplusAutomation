@@ -144,7 +144,7 @@ sessionInfo()
 As is conventional for `R` packages, the latest version of
 `MplusAutomation` may be obtained from CRAN using the
 [`update.packages()`](https://rdrr.io/r/utils/update.packages.html)
-function in an `R` session. As of 2026-07-24, the current version of the
+function in an `R` session. As of 2026-08-01, the current version of the
 package is 1.4.
 
 ``` r
