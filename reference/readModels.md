@@ -14,7 +14,8 @@ readModels(
   filefilter,
   pathfilter,
   what = "all",
-  quiet = TRUE
+  quiet = TRUE,
+  preferH5File = TRUE
 )
 ```
 
@@ -55,6 +56,14 @@ readModels(
   whether to suppress printing to the screen the file currently being
   processed. Defaults to TRUE.
 
+- preferH5File:
+
+  whether to use the H5RESULTS SAVEDATA file, when available, as the
+  authoritative source for supported MODEL RESULTS and parameter tables
+  (including standardized, interval, odds-ratio, IRT, and
+  probability-scale results). Defaults to TRUE. Unsupported H5 layouts
+  fall back to text parsing.
+
 ## Value
 
 A list with one mplus.model per file. Each mplus.model object is
@@ -67,6 +76,10 @@ a single mplus.model object, not a list of files. Specific elements are:
 - `warnings`: Syntax and estimation warnings as a list
 
 - `errors`: Syntax and estimation errors as a list
+
+- `converged`: Explicit Mplus termination status: `FALSE` for a reported
+  non-convergence, `TRUE` for normal termination, and `NA` when neither
+  message was found. A non-convergence message is retained in `errors`.
 
 - `data_summary`: Output of SUMMARY OF DATA section, including cluster
   sizes and ICCs
@@ -163,7 +176,7 @@ output. If you would like to extract a reduced set of output sections
 (especially to speed up the function when reading many files), specify
 the sections as a character vector from the following options:
 
-c("input", "warn_err", "data_summary", "sampstat",
+c("input", "warn_err", "converged", "data_summary", "sampstat",
 "covariance_coverage", "summaries", "random_starts", "parameters",
 "svalues", "model_table", "class_counts", "indirect", "mod_indices",
 "residuals", "savedata", "bparameters", "tech1", "tech3", "tech4",

@@ -56,7 +56,8 @@ these into a list object, with one element per output file identified.</p>
 <span>  <span class="va">filefilter</span>,</span>
 <span>  <span class="va">pathfilter</span>,</span>
 <span>  what <span class="op">=</span> <span class="st">"all"</span>,</span>
-<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  preferH5File <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -100,6 +101,14 @@ See details for additional information.</p></dd>
 <dd><p>whether to suppress printing to the screen the file currently
 being processed. Defaults to TRUE.</p></dd>
 
+
+<dt id="arg-preferh-file">preferH5File<a class="anchor" aria-label="anchor" href="#arg-preferh-file"></a></dt>
+<dd><p>whether to use the H5RESULTS SAVEDATA file, when
+available, as the authoritative source for supported MODEL RESULTS and
+parameter tables (including standardized, interval, odds-ratio, IRT, and
+probability-scale results). Defaults to TRUE. Unsupported H5 layouts fall
+back to text parsing.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -109,6 +118,9 @@ elements containing major output sections, as detailed below. If
 a single mplus.model object, not a list of files. Specific elements are:</p><ul><li><p><code>input</code>: Mplus input syntax parsed into a list by major section</p></li>
 <li><p><code>warnings</code>: Syntax and estimation warnings as a list</p></li>
 <li><p><code>errors</code>: Syntax and estimation errors as a list</p></li>
+<li><p><code>converged</code>: Explicit Mplus termination status: <code>FALSE</code> for a reported
+non-convergence, <code>TRUE</code> for normal termination, and <code>NA</code> when neither
+message was found. A non-convergence message is retained in <code>errors</code>.</p></li>
 <li><p><code>data_summary</code>: Output of SUMMARY OF DATA section, including cluster sizes and ICCs</p></li>
 <li><p><code>sampstat</code>: Sample statistics provided by OUTPUT: SAMPSTAT, if specified</p></li>
 <li><p><code>covariance_coverage</code>: Covariance coverage matrix for checking missingness patterns</p></li>
@@ -144,7 +156,7 @@ a single mplus.model object, not a list of files. Specific elements are:</p><ul>
     <p>The <code>what</code> parameter defaults to "all", which extracts all supported output. If you would like to extract a
 reduced set of output sections (especially to speed up the function when reading many files), specify the sections
 as a character vector from the following options:</p>
-<p>c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
+<p>c("input", "warn_err", "converged", "data_summary", "sampstat", "covariance_coverage", "summaries",
 "random_starts", "parameters", "svalues", "model_table", "class_counts", "indirect", "mod_indices", "residuals",
 "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",

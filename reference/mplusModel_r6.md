@@ -74,6 +74,11 @@ Wrapped by `mplusModel`
   Read-only accessor for the `errors` section returned by
   [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md).
 
+- `converged`:
+
+  Read-only accessor for the `converged` field returned by
+  [`readModels()`](https://michaelhallquist.github.io/MplusAutomation/reference/readModels.md).
+
 - `data_summary`:
 
   Read-only accessor for the `data_summary` section returned by
