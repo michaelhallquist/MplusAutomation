@@ -81,7 +81,10 @@ test_that("Ch 3: Example 3.5 - Logistic Regression", {
 # modified version of multinomial regression ex3.6 that includes odds ratios and confidence intervals
 # only currently run on 8.11
 test_that("Ch 3: Example 3.6 - Multinomial Regression", {
-  m <- readModels(target = get_mplus_file("ch3/ex3.6.out", mplus_version="8.11"))
+  m <- readModels(
+    target = get_mplus_file("ch3/ex3.6.out", mplus_version="8.11"),
+    preferH5File = FALSE
+  )
   b <- coef(m, params = "regression")
   expect_equal(trimws(b$Label[2]), "U1#1<-X3")
   expect_equal(b$est[2], 2.259)

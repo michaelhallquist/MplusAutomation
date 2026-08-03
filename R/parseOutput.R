@@ -514,6 +514,49 @@ divideIntoFields <- function(section.text, required) {
   return(section.divide)
 }
 
+#' Extract model convergence status from one Mplus output file
+#'
+#' Mplus communicates non-convergence differently for conventional and
+#' Bayesian estimation. This parser records only explicit termination messages;
+#' warnings about identification, standard errors, or MCMC mixing do not by
+#' themselves change a model's convergence status.
+#'
+#' @param outfiletext The text of the output file.
+#' @return A `mplus.convergence` object.
+#' @keywords internal
+#' @noRd
+extractConvergence_1file <- function(outfiletext) {
+  nonconvergence_patterns <- c(
+    max_iterations_exceeded = "NO\\s+CONVERGENCE\\.\\s*NUMBER\\s+OF\\s+ITERATIONS\\s+EXCEEDED\\.",
+    bayes_criterion_not_satisfied = "THE\\s+CONVERGENCE\\s+CRITERION\\s+IS\\s+NOT\\s+(?:SATISFIED|MET)\\.",
+    abnormal_termination = "THE\\s+MODEL\\s+ESTIMATION\\s+DID\\s+NOT\\s+TERMINATE\\s+NORMALLY",
+    likelihood_decreased = "THE\\s+LOGLIKELIHOOD\\s+DECREASED"
+  )
+
+  matched <- vapply(
+    nonconvergence_patterns,
+    function(pattern) any(grepl(pattern, outfiletext, ignore.case = TRUE, perl = TRUE)),
+    logical(1L)
+  )
+  if (any(matched)) {
+    reason <- names(nonconvergence_patterns)[which(matched)[1L]]
+    message <- trimws(outfiletext[grepl(
+      nonconvergence_patterns[[reason]], outfiletext, ignore.case = TRUE, perl = TRUE
+    )])
+    return(new_mplus_convergence(FALSE, reason = reason, message = message))
+  }
+
+  normal_termination <- "THE\\s+MODEL\\s+ESTIMATION\\s+TERMINATED\\s+NORMALLY"
+  message <- trimws(outfiletext[grepl(
+    normal_termination, outfiletext, ignore.case = TRUE, perl = TRUE
+  )])
+  if (length(message) > 0L) {
+    return(new_mplus_convergence(TRUE, reason = "normal_termination", message = message))
+  }
+
+  new_mplus_convergence()
+}
+
 #' Extract warnings and errors from 1 mplus file
 #'
 #' Helper function
@@ -611,6 +654,7 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
   #  1) THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY
   #  2) THE LOGLIKELIHOOD DECREASED
   #  3) NO CONVERGENCE
+  #  4) THE CONVERGENCE CRITERION IS NOT SATISFIED (Bayes)
   #
   # Warnings that can potentially be ignored are prefixed by "WARNING: "
   # whereas more serious estimation problems (errors) typically have no prefix.
@@ -621,7 +665,7 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
   endEstWarnErr <- grep("^\\s*(MODEL FIT INFORMATION|FINAL CLASS COUNTS|MODEL RESULTS|TESTS OF MODEL FIT)\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
   
   if (length(endEstWarnErr) == 0L) { return(warnerr) } #unable to find section properly
-  startEstWarnErr <- grep("^\\s*(WARNING:.*|THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY.*|THE LOGLIKELIHOOD DECREASED.*|THE MODEL ESTIMATION TERMINATED NORMALLY|NO CONVERGENCE\\.\\s+NUMBER OF ITERATIONS EXCEEDED\\..*)\\s*$",
+  startEstWarnErr <- grep("^\\s*(WARNING:.*|THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY.*|THE LOGLIKELIHOOD DECREASED.*|THE MODEL ESTIMATION TERMINATED NORMALLY|NO CONVERGENCE\\.\\s+NUMBER OF ITERATIONS EXCEEDED\\..*|THE CONVERGENCE CRITERION IS NOT (?:SATISFIED|MET)\\..*)\\s*$",
     outfiletext[1:endEstWarnErr[1L]], ignore.case=TRUE, perl=TRUE)
   
   if (length(startEstWarnErr) > 0L && length(endEstWarnErr) > 0L) {

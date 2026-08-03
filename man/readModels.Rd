@@ -10,7 +10,8 @@ readModels(
   filefilter,
   pathfilter,
   what = "all",
-  quiet = TRUE
+  quiet = TRUE,
+  preferH5File = TRUE
 )
 }
 \arguments{
@@ -38,6 +39,12 @@ See details for additional information.}
 
 \item{quiet}{whether to suppress printing to the screen the file currently
 being processed. Defaults to TRUE.}
+
+\item{preferH5File}{whether to use the H5RESULTS SAVEDATA file, when
+available, as the authoritative source for supported MODEL RESULTS and
+parameter tables (including standardized, interval, odds-ratio, IRT, and
+probability-scale results). Defaults to TRUE. Unsupported H5 layouts fall
+back to text parsing.}
 }
 \value{
 A list with one mplus.model per file. Each mplus.model object is composed of
@@ -48,6 +55,9 @@ a single mplus.model object, not a list of files. Specific elements are:
 \item \code{input}: Mplus input syntax parsed into a list by major section
 \item \code{warnings}: Syntax and estimation warnings as a list
 \item \code{errors}: Syntax and estimation errors as a list
+\item \code{converged}: Explicit Mplus termination status: \code{FALSE} for a reported
+non-convergence, \code{TRUE} for normal termination, and \code{NA} when neither
+message was found. A non-convergence message is retained in \code{errors}.
 \item \code{data_summary}: Output of SUMMARY OF DATA section, including cluster sizes and ICCs
 \item \code{sampstat}: Sample statistics provided by OUTPUT: SAMPSTAT, if specified
 \item \code{covariance_coverage}: Covariance coverage matrix for checking missingness patterns
@@ -89,7 +99,7 @@ The \code{what} parameter defaults to "all", which extracts all supported output
 reduced set of output sections (especially to speed up the function when reading many files), specify the sections
 as a character vector from the following options:
 
-c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
+c("input", "warn_err", "converged", "data_summary", "sampstat", "covariance_coverage", "summaries",
 "random_starts", "parameters", "svalues", "model_table", "class_counts", "indirect", "mod_indices", "residuals",
 "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",

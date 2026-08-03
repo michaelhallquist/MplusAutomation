@@ -1,5 +1,7 @@
 Version 1.4
 - feature:     readModels now parses VIF section in SAMPSTAT section of v9.1 outputs
+- feature:     readModels now reports explicit Mplus termination status in $converged (TRUE, FALSE, or NA); ML and Bayesian non-convergence messages are retained in $errors.
+- feature:     readModels now prefers full-precision MODEL RESULTS, standardized-results, odds-ratio, confidence-interval, Bayesian credibility-interval, IRT-parameterization, and probability-scale tables from SAVEDATA: H5RESULTS when available; set preferH5File = FALSE to use text parsing.
 - bugfix:      submitModels now correctly batches fractional walltimes, normalizes overflow in duration fields, and renders day-based durations as total hours for TORQUE/qsub.
 
 Version 1.3

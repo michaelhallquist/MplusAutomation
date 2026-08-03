@@ -23,6 +23,11 @@
 #'    See details for additional information.
 #' @param quiet whether to suppress printing to the screen the file currently
 #' being processed. Defaults to TRUE.
+#' @param preferH5File whether to use the H5RESULTS SAVEDATA file, when
+#'   available, as the authoritative source for supported MODEL RESULTS and
+#'   parameter tables (including standardized, interval, odds-ratio, IRT, and
+#'   probability-scale results). Defaults to TRUE. Unsupported H5 layouts fall
+#'   back to text parsing.
 #'
 #' @details
 #'
@@ -30,7 +35,7 @@
 #' reduced set of output sections (especially to speed up the function when reading many files), specify the sections
 #' as a character vector from the following options:
 #'
-#' c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
+#' c("input", "warn_err", "converged", "data_summary", "sampstat", "covariance_coverage", "summaries",
 #'      "random_starts", "parameters", "svalues", "model_table", "class_counts", "indirect", "mod_indices", "residuals",
 #'      "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
 #'      "tech9", "tech10", "tech12", "fac_score_stats", "lcCondMeans", "gh5",
@@ -44,6 +49,9 @@
 #' * `input`: Mplus input syntax parsed into a list by major section
 #' * `warnings`: Syntax and estimation warnings as a list
 #' * `errors`: Syntax and estimation errors as a list
+#' * `converged`: Explicit Mplus termination status: `FALSE` for a reported
+#'   non-convergence, `TRUE` for normal termination, and `NA` when neither
+#'   message was found. A non-convergence message is retained in `errors`.
 #' * `data_summary`: Output of SUMMARY OF DATA section, including cluster sizes and ICCs
 #' * `sampstat`: Sample statistics provided by OUTPUT: SAMPSTAT, if specified
 #' * `covariance_coverage`: Covariance coverage matrix for checking missingness patterns
@@ -81,12 +89,13 @@
 #'   allOutput <- readModels(
 #'     "C:/Program Files/Mplus/Mplus Examples/User's Guide Examples", recursive=TRUE)
 #' }
-readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, what="all", quiet=TRUE) {
+readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, what="all", quiet=TRUE, preferH5File=TRUE) {
   #large wrapper function to read summaries, parameters, and savedata from one or more output files.
 
   ## enforce quiet being logical and length 1 as used in if else statements
   stopifnot(identical(length(quiet), 1L) && is.logical(quiet))
-  allsections <- c("input", "warn_err", "data_summary", "sampstat", "covariance_coverage", "summaries",
+  stopifnot(identical(length(preferH5File), 1L) && is.logical(preferH5File))
+  allsections <- c("input", "warn_err", "converged", "data_summary", "sampstat", "covariance_coverage", "summaries",
       "random_starts", "invariance_testing", "parameters", "svalues", "model_table", "class_counts", "indirect", "mod_indices", "residuals",
       "savedata", "bparameters", "tech1", "tech3", "tech4", "tech7", "tech8",
       "tech9", "tech10", "tech12", "tech15", "fac_score_stats", "lcCondMeans", "r3step", 
@@ -159,6 +168,14 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
       "Error extracting SAVEDATA file information in output file: ",
       curfile
     )
+
+    h5resultsfile <- h5results_file_path(savedata_info, curfile)
+    h5results <- NULL
+    if (!is.na(h5resultsfile) && file.exists(h5resultsfile) &&
+        (isTRUE("h5results" %in% what) ||
+         (isTRUE("parameters" %in% what) && isTRUE(preferH5File)))) {
+      h5results <- read_h5(h5resultsfile)
+    }
     
     if (isTRUE("warn_err" %in% what)) {
       #Parse warnings and errors in output file
@@ -169,6 +186,10 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
 
       allFiles[[listID]]$warnings <- warn_err$warnings
       allFiles[[listID]]$errors <- warn_err$errors
+    }
+
+    if (isTRUE("converged" %in% what)) {
+      allFiles[[listID]]$converged <- extractConvergence_1file(rawtext)$converged
     }
 
     if (isTRUE("data_summary" %in% what)) {
@@ -245,9 +266,13 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     ))
     
     if (isTRUE("parameters" %in% what)) {
-      #Model parameters (MODEL RESULTS section)
+      # Model parameters: the helper selects a complete H5RESULTS parse when
+      # supported, otherwise it delegates to the established text parser.
       allFiles[[listID]]$parameters <- parse_or_empty(
-        extractParameters_1file(outfiletext, curfile, efa = is_efa),
+        extractParameters_1file_with_h5(
+          outfiletext, curfile, h5results, h5resultsfile,
+          prefer_h5 = preferH5File, efa = is_efa
+        ),
         list(),
         "Error extracting MODEL RESULTS in output file: ",
         curfile
@@ -470,18 +495,7 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     allFiles[[listID]]$gh5 <- gh5
     
     ### H5 results
-    h5results <- list() # default empty field
-    if (isTRUE("h5results" %in% what) && isFALSE(is.null(savedata_info)) && !is.na(savedata_info$h5resultsFile[1L])) {
-      #check for h5results file, and load if possible
-      h5resultsfname <- savedata_info$h5resultsFile[1L]
-      
-      if (is.na(splitFilePath(h5resultsfname)$directory)) { # if just a local file, add curfile directory
-        h5resultsfname <- file.path(dirname(curfile), h5resultsfname)
-      }
-      
-      h5results <- read_h5(h5resultsfname)
-    }
-    allFiles[[listID]]$h5results <- h5results
+    allFiles[[listID]]$h5results <- if (isTRUE("h5results" %in% what) && !is.null(h5results)) h5results else list()
     
     ### Text of .out file
     if (isTRUE("output" %in% what)) {

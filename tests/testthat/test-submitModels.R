@@ -16,8 +16,11 @@ test_that("submitModels job ID check", {
   # checks on parsing of scheduling arguments and script setup
   mplus_fake <- tempfile()
   file.create(mplus_fake)
+  batch_outdir <- tempfile("mplus-batch-files-")
+  on.exit(unlink(batch_outdir, recursive = TRUE, force = TRUE), add = TRUE)
   track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE, replaceOutfile = "always",
-                        max_time_per_job = "4:10:00", combine_jobs = FALSE, Mplus_command = mplus_fake)
+                        max_time_per_job = "4:10:00", combine_jobs = FALSE,
+                        batch_outdir = batch_outdir, Mplus_command = mplus_fake)
   
   expect_equal(track$jobid[1], "dummy_1")
   
@@ -55,8 +58,10 @@ p <- test_path("submitModels/job_combine")
 test_that("submitModels combines jobs as expected", {
   mplus_fake <- tempfile()
   file.create(mplus_fake)
+  batch_outdir <- tempfile("mplus-batch-files-")
+  on.exit(unlink(batch_outdir, recursive = TRUE, force = TRUE), add = TRUE)
   track <- submitModels(p, sched_args=c("--mail=user", "--export=v"), debug=TRUE, max_time_per_job = "48:10:00",
-                        batch_outdir = file.path(p, "batchfiles"), Mplus_command = mplus_fake)
+                        batch_outdir = batch_outdir, Mplus_command = mplus_fake)
   expect_equal(track$file[[5]], c("job_19.inp", "job_20.inp"))
   expect_equal(track$wall_hr[5], 39)
 })

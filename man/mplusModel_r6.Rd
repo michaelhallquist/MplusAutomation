@@ -43,6 +43,8 @@ Wrapped by \code{mplusModel}
 
 \item{\code{errors}}{Read-only accessor for the \code{errors} section returned by \code{readModels()}.}
 
+\item{\code{converged}}{Read-only accessor for the \code{converged} field returned by \code{readModels()}.}
+
 \item{\code{data_summary}}{Read-only accessor for the \code{data_summary} section returned by \code{readModels()}.}
 
 \item{\code{sampstat}}{Read-only accessor for the \code{sampstat} section returned by \code{readModels()}.}

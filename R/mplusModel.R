@@ -1,6 +1,6 @@
 # sections returned by readModels (used for dynamic active bindings)
 .mplus_sections <- c(
-  "input", "model_table", "warnings", "errors", "data_summary", "sampstat",
+  "input", "model_table", "warnings", "errors", "converged", "data_summary", "sampstat",
   "covariance_coverage", "summaries", "random_starts", "invariance_testing",
   "parameters", "svalues", "class_counts", "indirect", "mod_indices",
   "residuals", "savedata", "savedata_info", "bparameters",
@@ -577,6 +577,7 @@ mplusModel_r6 <- R6::R6Class(
     #' @field model_table Read-only accessor for the `model_table` section returned by `readModels()`.
     #' @field warnings Read-only accessor for the `warnings` section returned by `readModels()`.
     #' @field errors Read-only accessor for the `errors` section returned by `readModels()`.
+    #' @field converged Read-only accessor for the `converged` field returned by `readModels()`.
     #' @field data_summary Read-only accessor for the `data_summary` section returned by `readModels()`.
     #' @field sampstat Read-only accessor for the `sampstat` section returned by `readModels()`.
     #' @field covariance_coverage Read-only accessor for the `covariance_coverage` section returned by `readModels()`.

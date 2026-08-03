@@ -340,6 +340,25 @@ new_mplus_tech8 <- function(psr = new_mplus_psr(), psr_pppp = NULL) {
   out
 }
 
+new_mplus_convergence <- function(converged = NA, reason = NA_character_, message = character()) {
+  converged <- as.logical(converged)[1L]
+  status <- if (isTRUE(converged)) {
+    "converged"
+  } else if (identical(converged, FALSE)) {
+    "not_converged"
+  } else {
+    "unknown"
+  }
+  out <- list(
+    converged = converged,
+    status = status,
+    reason = as.character(reason)[1L],
+    message = as.character(message)
+  )
+  class(out) <- c("mplus.convergence", "list")
+  out
+}
+
 new_mplus_indirect <- function(overall = data.frame(), specific = data.frame()) {
   out <- list(overall = overall, specific = specific)
   class(out) <- c("mplus.indirect", "list")
