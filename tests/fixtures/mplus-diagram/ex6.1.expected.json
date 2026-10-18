@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "fixture": "ex6.1",
+  "review_method": "Literal transcription from output tables plus input echo; independent of Lin and MplusAutomation",
+  "reviewer": "Codex fixture agent; human visual approval pending",
+  "observed": [
+    "Y11",
+    "Y12",
+    "Y13",
+    "Y14"
+  ],
+  "latent_roles": {
+    "I": "growth_intercept",
+    "S": "growth_slope"
+  },
+  "relationships": [
+    {
+      "lhs": "I",
+      "operator": "|",
+      "rhs": "Y11",
+      "unstandardized": 1,
+      "stdyx": null,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 126,
+          "row": "Y11                1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": null,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "I",
+      "operator": "|",
+      "rhs": "Y12",
+      "unstandardized": 1,
+      "stdyx": null,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 127,
+          "row": "Y12                1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": null,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "I",
+      "operator": "|",
+      "rhs": "Y13",
+      "unstandardized": 1,
+      "stdyx": null,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 128,
+          "row": "Y13                1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": null,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "I",
+      "operator": "|",
+      "rhs": "Y14",
+      "unstandardized": 1,
+      "stdyx": null,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 129,
+          "row": "Y14                1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": null,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "S",
+      "operator": "|",
+      "rhs": "Y11",
+      "unstandardized": 0,
+      "stdyx": null,
+      "fixed": true,
+      "fixed_value": 0,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 132,
+          "row": "Y11                0.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": null,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "S",
+      "operator": "|",
+      "rhs": "Y12",
+      "unstandardized": 1,
+      "stdyx": null,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 133,
+          "row": "Y12                1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": null,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "S",
+      "operator": "|",
+      "rhs": "Y13",
+      "unstandardized": 2,
+      "stdyx": null,
+      "fixed": true,
+      "fixed_value": 2,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 134,
+          "row": "Y13                2.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": null,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "S",
+      "operator": "|",
+      "rhs": "Y14",
+      "unstandardized": 3,
+      "stdyx": null,
+      "fixed": true,
+      "fixed_value": 3,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 135,
+          "row": "Y14                3.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": null,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "S",
+      "operator": "WITH",
+      "rhs": "I",
+      "unstandardized": 0.133,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": "default",
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 138,
+          "row": "I                  0.133      0.032      4.100      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    }
+  ],
+  "stdyx_available": false,
+  "time_scores": {
+    "Y11": 0,
+    "Y12": 1,
+    "Y13": 2,
+    "Y14": 3
+  },
+  "pvalue_review_method": "P-Value column transcribed directly from the fixed output text; source section, 1-based line and literal row retained; independent of Lin and MplusAutomation.",
+  "pvalue_source_output": "inst/extdata/mplus-diagram/ex6.1.out"
+}

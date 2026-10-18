@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "fixture": "ex5.20",
+  "review_method": "Literal transcription from output tables plus input echo; independent of Lin and MplusAutomation",
+  "reviewer": "Codex fixture agent; human visual approval pending",
+  "observed": [
+    "Y1",
+    "Y2",
+    "Y3",
+    "Y4",
+    "Y5",
+    "Y6"
+  ],
+  "latent_roles": {
+    "F1": "factor",
+    "F2": "factor"
+  },
+  "relationships": [
+    {
+      "lhs": "F1",
+      "operator": "BY",
+      "rhs": "Y1",
+      "unstandardized": 1,
+      "stdyx": 0.8,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 148,
+          "row": "Y1                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 202,
+          "row": "Y1                 0.800      0.022     36.300      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "F1",
+      "operator": "BY",
+      "rhs": "Y2",
+      "unstandardized": 1.06,
+      "stdyx": 0.85,
+      "fixed": false,
+      "fixed_value": null,
+      "label": "LAM2",
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 149,
+          "row": "Y2                 1.060      0.052     20.334      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 203,
+          "row": "Y2                 0.850      0.014     60.183      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "F1",
+      "operator": "BY",
+      "rhs": "Y3",
+      "unstandardized": 0.998,
+      "stdyx": 0.805,
+      "fixed": false,
+      "fixed_value": null,
+      "label": "LAM3",
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 150,
+          "row": "Y3                 0.998      0.051     19.670      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 204,
+          "row": "Y3                 0.805      0.015     52.744      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "F2",
+      "operator": "BY",
+      "rhs": "Y4",
+      "unstandardized": 1,
+      "stdyx": 0.83,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 153,
+          "row": "Y4                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 207,
+          "row": "Y4                 0.830      0.020     40.981      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "F2",
+      "operator": "BY",
+      "rhs": "Y5",
+      "unstandardized": 0.876,
+      "stdyx": 0.85,
+      "fixed": false,
+      "fixed_value": null,
+      "label": "LAM5",
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 154,
+          "row": "Y5                 0.876      0.041     21.322      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 208,
+          "row": "Y5                 0.850      0.014     60.183      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "F2",
+      "operator": "BY",
+      "rhs": "Y6",
+      "unstandardized": 0.813,
+      "stdyx": 0.805,
+      "fixed": false,
+      "fixed_value": null,
+      "label": "LAM6",
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 155,
+          "row": "Y6                 0.813      0.040     20.574      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 209,
+          "row": "Y6                 0.805      0.015     52.744      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "F2",
+      "operator": "WITH",
+      "rhs": "F1",
+      "unstandardized": -0.024,
+      "stdyx": -0.026,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": "default",
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 158,
+          "row": "F1                -0.024      0.049     -0.495      0.621",
+          "p_literal": "0.621",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 212,
+          "row": "F1                -0.026      0.052     -0.495      0.620",
+          "p_literal": "0.620",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.621,
+      "stdyx_p": 0.62
+    }
+  ],
+  "derived_parameters": [
+    "REL2",
+    "REL5",
+    "STAN3",
+    "STAN6"
+  ],
+  "pvalue_review_method": "P-Value column transcribed directly from the fixed output text; source section, 1-based line and literal row retained; independent of Lin and MplusAutomation.",
+  "pvalue_source_output": "inst/extdata/mplus-diagram/ex5.20.out"
+}

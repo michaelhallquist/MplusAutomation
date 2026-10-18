@@ -1,0 +1,12 @@
+TITLE: Lin fixture sem, public Mplus ex5.11 data;
+DATA: FILE = ex5.11.dat;
+VARIABLE: NAMES = y1-y12;
+ANALYSIS: ESTIMATOR = ML;
+ITERATIONS = 1;
+MODEL: f1 BY y1-y3;
+f2 BY y4-y6;
+f3 BY y7-y9;
+f4 BY y10-y12;
+f4 ON f3;
+f3 ON f1 f2;
+OUTPUT: STDYX TECH1;

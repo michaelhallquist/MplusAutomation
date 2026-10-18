@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "scripts": {"test": "node mplus-diagram.test.cjs && node residual-orbit.test.cjs && node covariance-side.test.cjs && node line-types.test.cjs"},
+  "devDependencies": {"playwright": "1.58.2"}
+}

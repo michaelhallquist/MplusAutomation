@@ -10,7 +10,9 @@ Authors@R: c(person("Michael", "Hallquist", role = c("aut", "cre"),
     person(given = "Caspar", family ="van Lissa", role = "ctb",
     email = "c.j.vanlissa@uu.nl"),
     person("Daniel", "Morillo", role = "ctb",
-    email = "danivorillo@gmail.com")
+    email = "danivorillo@gmail.com"),
+    person("Chaopai", "Lin", role = "ctb",
+    email = "Linchaopai@gmail.com")
     )
 Maintainer: Michael Hallquist <michael.hallquist@gmail.com>
 Description: Leverages the R language to automate latent variable model estimation
@@ -42,6 +44,12 @@ Imports:
     fastDummies,
     checkmate
 Suggests:
+    htmltools (>= 0.5.8),
+    htmlwidgets (>= 1.6.4),
+    jsonlite (>= 1.8.8),
+    shiny (>= 1.8.1),
+    later (>= 1.3.2),
+    withr,
     rhdf5,
     tcltk,
     relimp,

@@ -1,0 +1,341 @@
+Mplus VERSION 8.11
+MUTHEN & MUTHEN
+05/02/2024   8:01 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a CFA with parameter
+  	constraints
+  DATA:	FILE = ex5.20.dat;
+  VARIABLE: 	NAMES = y1-y6;
+  MODEL:	f1 BY y1
+  	y2-y3(lam2-lam3);
+  	f2 BY y4
+  	y5-y6(lam5-lam6);
+  	f1 (vf1);
+  	f2 (vf2);
+  	y1-y3 (ve1-ve3);
+  	y4-y6 (ve4-ve6);
+  MODEL CONSTRAINT:
+  	NEW(rel2 rel5 stan3 stan6);
+  	rel2 = lam2**2*vf1/(lam2**2*vf1 + ve2);
+  	rel5 = lam5**2*vf2/(lam5**2*vf2 + ve5);
+  	rel5 = rel2;
+  	stan3 = lam3*SQRT(vf1)/SQRT(lam3**2*vf1 + ve3);
+  	stan6 = lam6*SQRT(vf2)/SQRT(lam6**2*vf2 + ve6);
+  	0 = stan6 - stan3;
+  	ve2 > ve5;
+  	ve4 > 0;
+  OUTPUT:	STANDARDIZED;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a CFA with parameter
+constraints
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2          Y3          Y4          Y5          Y6
+
+Continuous latent variables
+   F1          F2
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex5.20.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                   -0.019      -0.050      -3.428    0.20%      -1.070     -0.342     -0.034
+             500.000       1.478      -0.363       3.107    0.20%       0.284      1.074
+     Y2                    0.015      -0.092      -3.996    0.20%      -1.001     -0.307      0.017
+             500.000       1.477      -0.086       3.371    0.20%       0.364      1.043
+     Y3                    0.022       0.187      -3.367    0.20%      -1.093     -0.341     -0.033
+             500.000       1.458      -0.137       3.550    0.20%       0.333      1.080
+     Y4                   -0.018      -0.016      -3.693    0.20%      -0.903     -0.329     -0.055
+             500.000       1.353       0.246       3.484    0.20%       0.244      0.914
+     Y5                   -0.015      -0.087      -2.991    0.20%      -0.938     -0.269     -0.047
+             500.000       0.988      -0.241       3.220    0.20%       0.272      0.908
+     Y6                    0.022       0.108      -3.093    0.20%      -0.855     -0.298     -0.044
+             500.000       0.949      -0.230       2.987    0.20%       0.235      0.858
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       17
+
+Loglikelihood
+
+          H0 Value                       -3898.949
+          H1 Value                       -3896.904
+
+Information Criteria
+
+          Akaike (AIC)                    7831.898
+          Bayesian (BIC)                  7903.547
+          Sample-Size Adjusted BIC        7849.588
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              4.090
+          Degrees of Freedom                    10
+          P-Value                           0.9432
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.009
+          Probability RMSEA <= .05           0.999
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           1418.024
+          Degrees of Freedom                    15
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.012
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1                 1.000      0.000    999.000    999.000
+    Y2                 1.060      0.052     20.334      0.000
+    Y3                 0.998      0.051     19.670      0.000
+
+ F2       BY
+    Y4                 1.000      0.000    999.000    999.000
+    Y5                 0.876      0.041     21.322      0.000
+    Y6                 0.813      0.040     20.574      0.000
+
+ F2       WITH
+    F1                -0.024      0.049     -0.495      0.621
+
+ Intercepts
+    Y1                -0.019      0.054     -0.355      0.723
+    Y2                 0.015      0.054      0.268      0.789
+    Y3                 0.022      0.054      0.416      0.677
+    Y4                -0.018      0.052     -0.349      0.727
+    Y5                -0.015      0.045     -0.340      0.734
+    Y6                 0.022      0.044      0.497      0.619
+
+ Variances
+    F1                 0.942      0.092     10.230      0.000
+    F2                 0.937      0.087     10.755      0.000
+
+ Residual Variances
+    Y1                 0.529      0.048     10.957      0.000
+    Y2                 0.408      0.037     11.088      0.000
+    Y3                 0.509      0.039     13.069      0.000
+    Y4                 0.424      0.042     10.138      0.000
+    Y5                 0.277      0.025     11.170      0.000
+    Y6                 0.336      0.026     13.172      0.000
+
+New/Additional Parameters
+    REL2               0.722      0.024     30.091      0.000
+    REL5               0.722      0.024     30.091      0.000
+    STAN3              0.805      0.015     52.744      0.000
+    STAN6              0.805      0.015     52.744      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.602E-04
+       (ratio of smallest to largest eigenvalue)
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1                 0.800      0.022     36.300      0.000
+    Y2                 0.850      0.014     60.183      0.000
+    Y3                 0.805      0.015     52.744      0.000
+
+ F2       BY
+    Y4                 0.830      0.020     40.981      0.000
+    Y5                 0.850      0.014     60.183      0.000
+    Y6                 0.805      0.015     52.744      0.000
+
+ F2       WITH
+    F1                -0.026      0.052     -0.495      0.620
+
+ Intercepts
+    Y1                -0.016      0.045     -0.355      0.723
+    Y2                 0.012      0.045      0.268      0.789
+    Y3                 0.019      0.045      0.416      0.677
+    Y4                -0.016      0.045     -0.349      0.727
+    Y5                -0.015      0.045     -0.340      0.734
+    Y6                 0.022      0.045      0.497      0.619
+
+ Variances
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    Y1                 0.359      0.035     10.186      0.000
+    Y2                 0.278      0.024     11.589      0.000
+    Y3                 0.352      0.025     14.305      0.000
+    Y4                 0.311      0.034      9.265      0.000
+    Y5                 0.278      0.024     11.589      0.000
+    Y6                 0.352      0.025     14.305      0.000
+
+
+STDY Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1                 0.800      0.022     36.300      0.000
+    Y2                 0.850      0.014     60.183      0.000
+    Y3                 0.805      0.015     52.744      0.000
+
+ F2       BY
+    Y4                 0.830      0.020     40.981      0.000
+    Y5                 0.850      0.014     60.183      0.000
+    Y6                 0.805      0.015     52.744      0.000
+
+ F2       WITH
+    F1                -0.026      0.052     -0.495      0.620
+
+ Intercepts
+    Y1                -0.016      0.045     -0.355      0.723
+    Y2                 0.012      0.045      0.268      0.789
+    Y3                 0.019      0.045      0.416      0.677
+    Y4                -0.016      0.045     -0.349      0.727
+    Y5                -0.015      0.045     -0.340      0.734
+    Y6                 0.022      0.045      0.497      0.619
+
+ Variances
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    Y1                 0.359      0.035     10.186      0.000
+    Y2                 0.278      0.024     11.589      0.000
+    Y3                 0.352      0.025     14.305      0.000
+    Y4                 0.311      0.034      9.265      0.000
+    Y5                 0.278      0.024     11.589      0.000
+    Y6                 0.352      0.025     14.305      0.000
+
+
+STD Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1                 0.971      0.047     20.460      0.000
+    Y2                 1.029      0.039     26.530      0.000
+    Y3                 0.969      0.038     25.182      0.000
+
+ F2       BY
+    Y4                 0.968      0.045     21.511      0.000
+    Y5                 0.848      0.032     26.290      0.000
+    Y6                 0.787      0.032     24.963      0.000
+
+ F2       WITH
+    F1                -0.026      0.052     -0.495      0.620
+
+ Intercepts
+    Y1                -0.019      0.054     -0.355      0.723
+    Y2                 0.015      0.054      0.268      0.789
+    Y3                 0.022      0.054      0.416      0.677
+    Y4                -0.018      0.052     -0.349      0.727
+    Y5                -0.015      0.045     -0.340      0.734
+    Y6                 0.022      0.044      0.497      0.619
+
+ Variances
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    Y1                 0.529      0.048     10.957      0.000
+    Y2                 0.408      0.037     11.088      0.000
+    Y3                 0.509      0.039     13.069      0.000
+    Y4                 0.424      0.042     10.138      0.000
+    Y5                 0.277      0.025     11.170      0.000
+    Y6                 0.336      0.026     13.172      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    Y1                 0.641      0.035     18.150      0.000
+    Y2                 0.722      0.024     30.091      0.000
+    Y3                 0.648      0.025     26.372      0.000
+    Y4                 0.689      0.034     20.491      0.000
+    Y5                 0.722      0.024     30.091      0.000
+    Y6                 0.648      0.025     26.372      0.000
+
+
+     Beginning Time:  20:01:31
+        Ending Time:  20:01:31
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2024 Muthen & Muthen

@@ -169,6 +169,29 @@ SRMR               0.14                    0.00
 </code></pre>
 
 
+
+Interactive path diagrams
+-------------------------
+
+`mplus_diagram()` displays existing Mplus results in an editable HTML widget.
+Install the optional rendering packages once, then try the bundled CFA output;
+Mplus itself is not needed to view these fixed results.
+
+```r
+install.packages(c("htmlwidgets", "jsonlite"))
+library(MplusAutomation)
+out <- system.file("extdata", "mplus-diagram", "cfa-ml.out",
+                   package = "MplusAutomation")
+mplus_diagram(out)
+```
+
+![Interactive CFA diagram from the bundled Mplus output](vignettes/figures/mplus-diagram-cfa.png)
+
+Click **Edit diagram** to drag nodes and labels, adjust paths, and change display
+names. Download SVG/PNG figures or save a JSON layout for reuse with updated
+results. The [diagram vignette](vignettes/mplus-diagram.Rmd) covers longitudinal
+layouts, offline reports, supported models, and optional Shiny editing.
+
 How to Help
 -----------
 

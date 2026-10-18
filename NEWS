@@ -1,4 +1,5 @@
 Version 1.4
+- feature:     mplus_diagram displays existing continuous, single-group, single-level ML/MLR results as an interactive HTML widget, with editable layouts, reusable presentation settings, and SVG/PNG export. Rendering does not run Mplus; Shiny is optional for saving edits directly from an interactive R session.
 - feature:     readModels now parses VIF section in SAMPSTAT section of v9.1 outputs
 - feature:     readModels now reports explicit Mplus termination status in $converged (TRUE, FALSE, or NA); ML and Bayesian non-convergence messages are retained in $errors.
 - feature:     readModels now prefers full-precision MODEL RESULTS, standardized-results, odds-ratio, confidence-interval, Bayesian credibility-interval, IRT-parameterization, and probability-scale tables from SAVEDATA: H5RESULTS when available; set preferH5File = FALSE to use text parsing.

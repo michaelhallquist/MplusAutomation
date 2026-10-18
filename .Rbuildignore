@@ -22,3 +22,6 @@ vignettes/precompile.R
 ^vignettes/.*\.dat$
 .vscode
 ^\.github$
+
+^tests/browser$
+^\.gitattributes$

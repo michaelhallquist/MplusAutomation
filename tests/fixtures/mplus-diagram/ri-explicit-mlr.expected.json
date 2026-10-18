@@ -1,0 +1,742 @@
+{
+  "schema_version": 1,
+  "fixture": "ri-explicit-mlr",
+  "review_method": "Literal transcription from output tables plus input echo; independent of Lin and MplusAutomation",
+  "reviewer": "Codex fixture agent; human visual approval pending",
+  "observed": [
+    "X1",
+    "X2",
+    "X3",
+    "Y1",
+    "Y2",
+    "Y3"
+  ],
+  "latent_roles": {
+    "RIX": "random_intercept",
+    "RIY": "random_intercept",
+    "WX1": "within",
+    "WX2": "within",
+    "WX3": "within",
+    "WY1": "within",
+    "WY2": "within",
+    "WY3": "within"
+  },
+  "relationships": [
+    {
+      "lhs": "RIX",
+      "operator": "BY",
+      "rhs": "X1",
+      "unstandardized": 1,
+      "stdyx": 0.701,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 159,
+          "row": "X1                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 256,
+          "row": "X1                 0.701      0.040     17.627      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "RIX",
+      "operator": "BY",
+      "rhs": "X2",
+      "unstandardized": 1,
+      "stdyx": 0.715,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 160,
+          "row": "X2                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 257,
+          "row": "X2                 0.715      0.044     16.361      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "RIX",
+      "operator": "BY",
+      "rhs": "X3",
+      "unstandardized": 1,
+      "stdyx": 0.732,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 161,
+          "row": "X3                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 258,
+          "row": "X3                 0.732      0.042     17.594      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "RIY",
+      "operator": "BY",
+      "rhs": "Y1",
+      "unstandardized": 1,
+      "stdyx": 0.683,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 164,
+          "row": "Y1                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 261,
+          "row": "Y1                 0.683      0.043     16.035      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "RIY",
+      "operator": "BY",
+      "rhs": "Y2",
+      "unstandardized": 1,
+      "stdyx": 0.717,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 165,
+          "row": "Y2                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 262,
+          "row": "Y2                 0.717      0.049     14.631      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "RIY",
+      "operator": "BY",
+      "rhs": "Y3",
+      "unstandardized": 1,
+      "stdyx": 0.716,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 166,
+          "row": "Y3                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 263,
+          "row": "Y3                 0.716      0.045     15.810      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WX1",
+      "operator": "BY",
+      "rhs": "X1",
+      "unstandardized": 1,
+      "stdyx": 0.713,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 169,
+          "row": "X1                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 266,
+          "row": "X1                 0.713      0.039     18.237      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WX2",
+      "operator": "BY",
+      "rhs": "X2",
+      "unstandardized": 1,
+      "stdyx": 0.699,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 172,
+          "row": "X2                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 269,
+          "row": "X2                 0.699      0.045     15.647      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WX3",
+      "operator": "BY",
+      "rhs": "X3",
+      "unstandardized": 1,
+      "stdyx": 0.681,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 175,
+          "row": "X3                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 272,
+          "row": "X3                 0.681      0.045     15.225      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WY1",
+      "operator": "BY",
+      "rhs": "Y1",
+      "unstandardized": 1,
+      "stdyx": 0.731,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 178,
+          "row": "Y1                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 275,
+          "row": "Y1                 0.731      0.040     18.375      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WY2",
+      "operator": "BY",
+      "rhs": "Y2",
+      "unstandardized": 1,
+      "stdyx": 0.697,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 181,
+          "row": "Y2                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 278,
+          "row": "Y2                 0.697      0.050     13.831      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WY3",
+      "operator": "BY",
+      "rhs": "Y3",
+      "unstandardized": 1,
+      "stdyx": 0.699,
+      "fixed": true,
+      "fixed_value": 1,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 184,
+          "row": "Y3                 1.000      0.000    999.000    999.000",
+          "p_literal": "999.000",
+          "unavailable_reason": "Mplus P-Value column placeholder 999; not an estimate-column sentinel"
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 281,
+          "row": "Y3                 0.699      0.046     15.063      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": null,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WX2",
+      "operator": "ON",
+      "rhs": "WX1",
+      "unstandardized": 0.526,
+      "stdyx": 0.547,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 187,
+          "row": "WX1                0.526      0.065      8.104      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 284,
+          "row": "WX1                0.547      0.058      9.399      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WX2",
+      "operator": "ON",
+      "rhs": "WY1",
+      "unstandardized": 0.064,
+      "stdyx": 0.065,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 188,
+          "row": "WY1                0.064      0.054      1.181      0.237",
+          "p_literal": "0.237",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 285,
+          "row": "WY1                0.065      0.054      1.195      0.232",
+          "p_literal": "0.232",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.237,
+      "stdyx_p": 0.232
+    },
+    {
+      "lhs": "WY2",
+      "operator": "ON",
+      "rhs": "WX1",
+      "unstandardized": -0.161,
+      "stdyx": -0.182,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 191,
+          "row": "WX1               -0.161      0.056     -2.849      0.004",
+          "p_literal": "0.004",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 288,
+          "row": "WX1               -0.182      0.065     -2.778      0.005",
+          "p_literal": "0.005",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.004,
+      "stdyx_p": 0.005
+    },
+    {
+      "lhs": "WY2",
+      "operator": "ON",
+      "rhs": "WY1",
+      "unstandardized": 0.451,
+      "stdyx": 0.497,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 192,
+          "row": "WY1                0.451      0.069      6.563      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 289,
+          "row": "WY1                0.497      0.063      7.843      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WX3",
+      "operator": "ON",
+      "rhs": "WX2",
+      "unstandardized": 0.52,
+      "stdyx": 0.546,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 195,
+          "row": "WX2                0.520      0.062      8.351      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 292,
+          "row": "WX2                0.546      0.063      8.651      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "WX3",
+      "operator": "ON",
+      "rhs": "WY2",
+      "unstandardized": 0.068,
+      "stdyx": 0.065,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 196,
+          "row": "WY2                0.068      0.062      1.086      0.278",
+          "p_literal": "0.278",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 293,
+          "row": "WY2                0.065      0.060      1.092      0.275",
+          "p_literal": "0.275",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.278,
+      "stdyx_p": 0.275
+    },
+    {
+      "lhs": "WY3",
+      "operator": "ON",
+      "rhs": "WX2",
+      "unstandardized": -0.111,
+      "stdyx": -0.12,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 199,
+          "row": "WX2               -0.111      0.055     -2.020      0.043",
+          "p_literal": "0.043",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 296,
+          "row": "WX2               -0.120      0.058     -2.056      0.040",
+          "p_literal": "0.040",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.043,
+      "stdyx_p": 0.04
+    },
+    {
+      "lhs": "WY3",
+      "operator": "ON",
+      "rhs": "WY2",
+      "unstandardized": 0.475,
+      "stdyx": 0.473,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 200,
+          "row": "WY2                0.475      0.073      6.462      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 297,
+          "row": "WY2                0.473      0.076      6.230      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "RIX",
+      "operator": "WITH",
+      "rhs": "RIY",
+      "unstandardized": 0.142,
+      "stdyx": 0.148,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": "explicit",
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 203,
+          "row": "RIY                0.142      0.095      1.495      0.135",
+          "p_literal": "0.135",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 300,
+          "row": "RIY                0.148      0.103      1.437      0.151",
+          "p_literal": "0.151",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.135,
+      "stdyx_p": 0.151
+    },
+    {
+      "lhs": "WX1",
+      "operator": "WITH",
+      "rhs": "WY1",
+      "unstandardized": -0.076,
+      "stdyx": -0.073,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": "explicit",
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 206,
+          "row": "WY1               -0.076      0.087     -0.878      0.380",
+          "p_literal": "0.380",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 303,
+          "row": "WY1               -0.073      0.081     -0.896      0.370",
+          "p_literal": "0.370",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.38,
+      "stdyx_p": 0.37
+    },
+    {
+      "lhs": "WX2",
+      "operator": "WITH",
+      "rhs": "WY2",
+      "unstandardized": -0.007,
+      "stdyx": -0.011,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": "explicit",
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 209,
+          "row": "WY2               -0.007      0.039     -0.187      0.852",
+          "p_literal": "0.852",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 306,
+          "row": "WY2               -0.011      0.060     -0.186      0.852",
+          "p_literal": "0.852",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.852,
+      "stdyx_p": 0.852
+    },
+    {
+      "lhs": "WX3",
+      "operator": "WITH",
+      "rhs": "WY3",
+      "unstandardized": -0.032,
+      "stdyx": -0.05,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": "explicit",
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 212,
+          "row": "WY3               -0.032      0.030     -1.079      0.281",
+          "p_literal": "0.281",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 309,
+          "row": "WY3               -0.050      0.047     -1.081      0.280",
+          "p_literal": "0.280",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.281,
+      "stdyx_p": 0.28
+    }
+  ],
+  "zero_observed_residuals": [
+    "X1",
+    "X2",
+    "X3",
+    "Y1",
+    "Y2",
+    "Y3"
+  ],
+  "equivalence_map": {
+    "WX1": "X1^",
+    "WX2": "X2^",
+    "WX3": "X3^",
+    "WY1": "Y1^",
+    "WY2": "Y2^",
+    "WY3": "Y3^"
+  },
+  "equivalence_tolerance": 0.0011,
+  "stdyx_note": "Independently checked per representation; equality is not assumed from mapped endpoint names",
+  "pvalue_review_method": "P-Value column transcribed directly from the fixed output text; source section, 1-based line and literal row retained; independent of Lin and MplusAutomation.",
+  "pvalue_source_output": "inst/extdata/mplus-diagram/ri-explicit-mlr.out"
+}

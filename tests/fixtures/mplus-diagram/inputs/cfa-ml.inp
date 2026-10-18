@@ -1,0 +1,10 @@
+TITLE: Lin fixture cfa, public Mplus ex5.20 data;
+DATA: FILE = ex5.20.dat;
+VARIABLE: NAMES = y1-y6;
+ANALYSIS: ESTIMATOR = ML;
+MODEL: f1 BY y1
+y2-y3(lam2-lam3);
+f2 BY y4
+y5-y6(lam5-lam6);
+f1 WITH f2;
+OUTPUT: STDYX TECH1;

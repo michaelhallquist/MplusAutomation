@@ -1,0 +1,354 @@
+{
+  "schema_version": 1,
+  "fixture": "clpm-ml",
+  "review_method": "Literal transcription from output tables plus input echo; independent of Lin and MplusAutomation",
+  "reviewer": "Codex fixture agent; human visual approval pending",
+  "observed": [
+    "X1",
+    "X2",
+    "X3",
+    "Y1",
+    "Y2",
+    "Y3"
+  ],
+  "latent_roles": {},
+  "relationships": [
+    {
+      "lhs": "X2",
+      "operator": "ON",
+      "rhs": "X1",
+      "unstandardized": 0.755,
+      "stdyx": 0.77,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 136,
+          "row": "X1                 0.755      0.020     38.401      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 196,
+          "row": "X1                 0.770      0.013     59.730      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "X2",
+      "operator": "ON",
+      "rhs": "Y1",
+      "unstandardized": 0.061,
+      "stdyx": 0.059,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 137,
+          "row": "Y1                 0.061      0.021      2.925      0.003",
+          "p_literal": "0.003",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 197,
+          "row": "Y1                 0.059      0.020      2.922      0.003",
+          "p_literal": "0.003",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.003,
+      "stdyx_p": 0.003
+    },
+    {
+      "lhs": "Y2",
+      "operator": "ON",
+      "rhs": "X1",
+      "unstandardized": -0.052,
+      "stdyx": -0.057,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 140,
+          "row": "X1                -0.052      0.019     -2.743      0.006",
+          "p_literal": "0.006",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 200,
+          "row": "X1                -0.057      0.021     -2.741      0.006",
+          "p_literal": "0.006",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.006,
+      "stdyx_p": 0.006
+    },
+    {
+      "lhs": "Y2",
+      "operator": "ON",
+      "rhs": "Y1",
+      "unstandardized": 0.715,
+      "stdyx": 0.751,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 141,
+          "row": "Y1                 0.715      0.020     35.956      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 201,
+          "row": "Y1                 0.751      0.014     54.144      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "X3",
+      "operator": "ON",
+      "rhs": "X2",
+      "unstandardized": 0.76,
+      "stdyx": 0.779,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 144,
+          "row": "X2                 0.760      0.019     39.580      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 204,
+          "row": "X2                 0.779      0.012     62.624      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "X3",
+      "operator": "ON",
+      "rhs": "Y2",
+      "unstandardized": 0.063,
+      "stdyx": 0.06,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 145,
+          "row": "Y2                 0.063      0.021      3.042      0.002",
+          "p_literal": "0.002",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 205,
+          "row": "Y2                 0.060      0.020      3.039      0.002",
+          "p_literal": "0.002",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.002,
+      "stdyx_p": 0.002
+    },
+    {
+      "lhs": "Y3",
+      "operator": "ON",
+      "rhs": "X2",
+      "unstandardized": -0.024,
+      "stdyx": -0.026,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 148,
+          "row": "X2                -0.024      0.019     -1.244      0.214",
+          "p_literal": "0.214",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 208,
+          "row": "X2                -0.026      0.021     -1.244      0.214",
+          "p_literal": "0.214",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.214,
+      "stdyx_p": 0.214
+    },
+    {
+      "lhs": "Y3",
+      "operator": "ON",
+      "rhs": "Y2",
+      "unstandardized": 0.751,
+      "stdyx": 0.75,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 149,
+          "row": "Y2                 0.751      0.021     35.780      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 209,
+          "row": "Y2                 0.750      0.014     53.976      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "X1",
+      "operator": "WITH",
+      "rhs": "Y1",
+      "unstandardized": 0.065,
+      "stdyx": 0.032,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": "explicit",
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 152,
+          "row": "Y1                 0.065      0.064      1.022      0.307",
+          "p_literal": "0.307",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 212,
+          "row": "Y1                 0.032      0.032      1.024      0.306",
+          "p_literal": "0.306",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.307,
+      "stdyx_p": 0.306
+    },
+    {
+      "lhs": "X2",
+      "operator": "WITH",
+      "rhs": "Y2",
+      "unstandardized": 0.022,
+      "stdyx": 0.027,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": "explicit",
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 155,
+          "row": "Y2                 0.022      0.025      0.865      0.387",
+          "p_literal": "0.387",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 215,
+          "row": "Y2                 0.027      0.032      0.866      0.387",
+          "p_literal": "0.387",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.387,
+      "stdyx_p": 0.387
+    },
+    {
+      "lhs": "X3",
+      "operator": "WITH",
+      "rhs": "Y3",
+      "unstandardized": -0.018,
+      "stdyx": -0.024,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": "explicit",
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 158,
+          "row": "Y3                -0.018      0.024     -0.744      0.457",
+          "p_literal": "0.457",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 218,
+          "row": "Y3                -0.024      0.032     -0.744      0.457",
+          "p_literal": "0.457",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.457,
+      "stdyx_p": 0.457
+    }
+  ],
+  "waves": {
+    "X1": 1,
+    "X2": 2,
+    "X3": 3,
+    "Y1": 1,
+    "Y2": 2,
+    "Y3": 3
+  },
+  "constructs": {
+    "X1": "X",
+    "X2": "X",
+    "X3": "X",
+    "Y1": "Y",
+    "Y2": "Y",
+    "Y3": "Y"
+  },
+  "pvalue_review_method": "P-Value column transcribed directly from the fixed output text; source section, 1-based line and literal row retained; independent of Lin and MplusAutomation.",
+  "pvalue_source_output": "inst/extdata/mplus-diagram/clpm-ml.out"
+}

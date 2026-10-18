@@ -1,0 +1,3 @@
+# Preserve the audited fixture hashes across platform line-ending settings.
+inst/extdata/mplus-diagram/*.out -text
+tests/fixtures/mplus-diagram/inputs/*.inp -text

@@ -1,0 +1,372 @@
+Mplus VERSION 9 (Mac)
+MUTHEN & MUTHEN
+10/14/2026   2:33 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Lin fixture cfa, public Mplus ex5.20 data;
+  DATA: FILE = ex5.20.dat;
+  VARIABLE: NAMES = y1-y6;
+  ANALYSIS: ESTIMATOR = ML;
+  MODEL: f1 BY y1
+  y2-y3(lam2-lam3);
+  f2 BY y4
+  y5-y6(lam5-lam6);
+  f1 WITH f2;
+  OUTPUT: STDYX TECH1;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+Lin fixture cfa, public Mplus ex5.20 data;
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    6
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   Y1          Y2          Y3          Y4          Y5          Y6
+
+Continuous latent variables
+   F1          F2
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex5.20.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y1                   -0.019      -0.050      -3.428    0.20%      -1.070     -0.342     -0.034
+             500.000       1.478      -0.363       3.107    0.20%       0.284      1.074
+     Y2                    0.015      -0.092      -3.996    0.20%      -1.001     -0.307      0.017
+             500.000       1.477      -0.086       3.371    0.20%       0.364      1.043
+     Y3                    0.022       0.187      -3.367    0.20%      -1.093     -0.341     -0.033
+             500.000       1.458      -0.137       3.550    0.20%       0.333      1.080
+     Y4                   -0.018      -0.016      -3.693    0.20%      -0.903     -0.329     -0.055
+             500.000       1.353       0.246       3.484    0.20%       0.244      0.914
+     Y5                   -0.015      -0.087      -2.991    0.20%      -0.938     -0.269     -0.047
+             500.000       0.988      -0.241       3.220    0.20%       0.272      0.908
+     Y6                    0.022       0.108      -3.093    0.20%      -0.855     -0.298     -0.044
+             500.000       0.949      -0.230       2.987    0.20%       0.235      0.858
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                       19
+
+Loglikelihood
+
+          H0 Value                       -3898.899
+          H1 Value                       -3896.904
+
+Information Criteria
+
+          Akaike (AIC)                    7835.797
+          Bayesian (BIC)                  7915.875
+          Sample-Size Adjusted BIC        7855.568
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              3.988
+          Degrees of Freedom                     8
+          P-Value                           0.8582
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.028
+          Probability RMSEA <= .05           0.995
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           1418.024
+          Degrees of Freedom                    15
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.011
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1                 1.000      0.000    999.000    999.000
+    Y2                 1.065      0.057     18.680      0.000
+    Y3                 1.003      0.055     18.256      0.000
+
+ F2       BY
+    Y4                 1.000      0.000    999.000    999.000
+    Y5                 0.871      0.045     19.472      0.000
+    Y6                 0.809      0.043     18.873      0.000
+
+ F1       WITH
+    F2                -0.024      0.049     -0.497      0.620
+
+ Intercepts
+    Y1                -0.019      0.054     -0.354      0.723
+    Y2                 0.015      0.054      0.267      0.789
+    Y3                 0.022      0.054      0.415      0.678
+    Y4                -0.018      0.052     -0.350      0.726
+    Y5                -0.015      0.044     -0.341      0.733
+    Y6                 0.022      0.044      0.499      0.618
+
+ Variances
+    F1                 0.947      0.094     10.049      0.000
+    F2                 0.932      0.088     10.593      0.000
+
+ Residual Variances
+    Y1                 0.531      0.049     10.853      0.000
+    Y2                 0.402      0.048      8.419      0.000
+    Y3                 0.506      0.048     10.533      0.000
+    Y4                 0.421      0.043      9.822      0.000
+    Y5                 0.280      0.031      9.022      0.000
+    Y6                 0.339      0.031     11.028      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.447E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ F1       BY
+    Y1                 0.800      0.022     36.349      0.000
+    Y2                 0.853      0.020     42.345      0.000
+    Y3                 0.808      0.022     37.218      0.000
+
+ F2       BY
+    Y4                 0.830      0.020     40.637      0.000
+    Y5                 0.846      0.020     42.648      0.000
+    Y6                 0.802      0.022     37.271      0.000
+
+ F1       WITH
+    F2                -0.026      0.052     -0.497      0.619
+
+ Intercepts
+    Y1                -0.016      0.045     -0.354      0.723
+    Y2                 0.012      0.045      0.267      0.789
+    Y3                 0.019      0.045      0.415      0.678
+    Y4                -0.016      0.045     -0.350      0.726
+    Y5                -0.015      0.045     -0.341      0.733
+    Y6                 0.022      0.045      0.499      0.618
+
+ Variances
+    F1                 1.000      0.000    999.000    999.000
+    F2                 1.000      0.000    999.000    999.000
+
+ Residual Variances
+    Y1                 0.359      0.035     10.198      0.000
+    Y2                 0.272      0.034      7.923      0.000
+    Y3                 0.347      0.035      9.883      0.000
+    Y4                 0.311      0.034      9.176      0.000
+    Y5                 0.284      0.034      8.447      0.000
+    Y6                 0.357      0.035     10.331      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    Y1                 0.641      0.035     18.174      0.000
+    Y2                 0.728      0.034     21.172      0.000
+    Y3                 0.653      0.035     18.609      0.000
+    Y4                 0.689      0.034     20.318      0.000
+    Y5                 0.716      0.034     21.324      0.000
+    Y6                 0.643      0.035     18.635      0.000
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              Y1            Y2            Y3            Y4            Y5
+              ________      ________      ________      ________      ________
+                  1             2             3             4             5
+
+
+           NU
+              Y6
+              ________
+                  6
+
+
+           LAMBDA
+              F1            F2
+              ________      ________
+ Y1                 0             0
+ Y2                 7             0
+ Y3                 8             0
+ Y4                 0             0
+ Y5                 0             9
+ Y6                 0            10
+
+
+           THETA
+              Y1            Y2            Y3            Y4            Y5
+              ________      ________      ________      ________      ________
+ Y1                11
+ Y2                 0            12
+ Y3                 0             0            13
+ Y4                 0             0             0            14
+ Y5                 0             0             0             0            15
+ Y6                 0             0             0             0             0
+
+
+           THETA
+              Y6
+              ________
+ Y6                16
+
+
+           ALPHA
+              F1            F2
+              ________      ________
+                  0             0
+
+
+           BETA
+              F1            F2
+              ________      ________
+ F1                 0             0
+ F2                 0             0
+
+
+           PSI
+              F1            F2
+              ________      ________
+ F1                17
+ F2                18            19
+
+
+     STARTING VALUES
+
+
+           NU
+              Y1            Y2            Y3            Y4            Y5
+              ________      ________      ________      ________      ________
+               -0.019         0.015         0.022        -0.018        -0.015
+
+
+           NU
+              Y6
+              ________
+                0.022
+
+
+           LAMBDA
+              F1            F2
+              ________      ________
+ Y1             1.000         0.000
+ Y2             1.065         0.000
+ Y3             1.003         0.000
+ Y4             0.000         1.000
+ Y5             0.000         0.871
+ Y6             0.000         0.810
+
+
+           THETA
+              Y1            Y2            Y3            Y4            Y5
+              ________      ________      ________      ________      ________
+ Y1             0.739
+ Y2             0.000         0.739
+ Y3             0.000         0.000         0.729
+ Y4             0.000         0.000         0.000         0.677
+ Y5             0.000         0.000         0.000         0.000         0.494
+ Y6             0.000         0.000         0.000         0.000         0.000
+
+
+           THETA
+              Y6
+              ________
+ Y6             0.475
+
+
+           ALPHA
+              F1            F2
+              ________      ________
+                0.000         0.000
+
+
+           BETA
+              F1            F2
+              ________      ________
+ F1             0.000         0.000
+ F2             0.000         0.000
+
+
+           PSI
+              F1            F2
+              ________      ________
+ F1             0.050
+ F2             0.000         0.050
+
+
+     Beginning Time:  02:33:34
+        Ending Time:  02:33:34
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2025 Muthen & Muthen

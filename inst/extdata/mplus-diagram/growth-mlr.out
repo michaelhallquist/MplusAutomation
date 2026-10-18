@@ -1,0 +1,345 @@
+Mplus VERSION 9 (Mac)
+MUTHEN & MUTHEN
+10/14/2026   2:33 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Lin fixture growth, public Mplus ex6.1 data;
+  DATA: FILE = ex6.1.dat;
+  VARIABLE: NAMES = y11-y14;
+  ANALYSIS: ESTIMATOR = MLR;
+  MODEL: i s | y11@0 y12@1 y13@2 y14@3;
+  OUTPUT: STDYX TECH1;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+Lin fixture growth, public Mplus ex6.1 data;
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    4
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   Y11         Y12         Y13         Y14
+
+Continuous latent variables
+   I           S
+
+
+Estimator                                                      MLR
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex6.1.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y11                   0.514      -0.170      -2.693    0.20%      -0.493      0.237      0.558
+             500.000       1.449      -0.354       3.598    0.20%       0.813      1.610
+     Y12                   1.566      -0.077      -3.062    0.20%       0.443      1.283      1.560
+             500.000       1.974       0.003       5.964    0.20%       1.869      2.761
+     Y13                   2.568      -0.031      -2.745    0.20%       1.013      2.106      2.520
+             500.000       2.931      -0.252       8.428    0.20%       3.051      4.144
+     Y14                   3.601      -0.091      -2.360    0.20%       1.832      3.056      3.612
+             500.000       4.298      -0.121       9.182    0.20%       4.164      5.335
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        9
+
+Loglikelihood
+
+          H0 Value                       -3016.386
+          H0 Scaling Correction Factor      1.0315
+            for MLR
+          H1 Value                       -3014.089
+          H1 Scaling Correction Factor      1.0153
+            for MLR
+
+Information Criteria
+
+          Akaike (AIC)                    6050.772
+          Bayesian (BIC)                  6088.703
+          Sample-Size Adjusted BIC        6060.137
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              4.658*
+          Degrees of Freedom                     5
+          P-Value                           0.4590
+          Scaling Correction Factor         0.9860
+            for MLR
+
+*   The chi-square value for MLM, MLMV, MLR, ULSMV, WLSM and WLSMV cannot be used
+    for chi-square difference testing in the regular way.  MLM, MLR and WLSM
+    chi-square difference testing is described on the Mplus website.  MLMV, WLSMV,
+    and ULSMV difference testing is done using the DIFFTEST option.
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.060
+          Probability RMSEA <= .05           0.890
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           1313.776
+          Degrees of Freedom                     6
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.010
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ I        |
+    Y11                1.000      0.000    999.000    999.000
+    Y12                1.000      0.000    999.000    999.000
+    Y13                1.000      0.000    999.000    999.000
+    Y14                1.000      0.000    999.000    999.000
+
+ S        |
+    Y11                0.000      0.000    999.000    999.000
+    Y12                1.000      0.000    999.000    999.000
+    Y13                2.000      0.000    999.000    999.000
+    Y14                3.000      0.000    999.000    999.000
+
+ S        WITH
+    I                  0.133      0.034      3.949      0.000
+
+ Means
+    I                  0.523      0.051     10.157      0.000
+    S                  1.026      0.025     40.252      0.000
+
+ Intercepts
+    Y11                0.000      0.000    999.000    999.000
+    Y12                0.000      0.000    999.000    999.000
+    Y13                0.000      0.000    999.000    999.000
+    Y14                0.000      0.000    999.000    999.000
+
+ Variances
+    I                  0.989      0.085     11.653      0.000
+    S                  0.224      0.021     10.572      0.000
+
+ Residual Variances
+    Y11                0.475      0.059      8.069      0.000
+    Y12                0.482      0.043     11.105      0.000
+    Y13                0.473      0.051      9.332      0.000
+    Y14                0.545      0.084      6.490      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.462E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ I        |
+    Y11                0.822      0.023     35.305      0.000
+    Y12                0.710      0.023     30.410      0.000
+    Y13                0.585      0.024     24.263      0.000
+    Y14                0.477      0.023     21.171      0.000
+
+ S        |
+    Y11                0.000      0.000    999.000    999.000
+    Y12                0.338      0.017     20.132      0.000
+    Y13                0.557      0.024     23.261      0.000
+    Y14                0.681      0.028     24.228      0.000
+
+ S        WITH
+    I                  0.283      0.080      3.516      0.000
+
+ Means
+    I                  0.526      0.058      8.985      0.000
+    S                  2.170      0.118     18.376      0.000
+
+ Intercepts
+    Y11                0.000      0.000    999.000    999.000
+    Y12                0.000      0.000    999.000    999.000
+    Y13                0.000      0.000    999.000    999.000
+    Y14                0.000      0.000    999.000    999.000
+
+ Variances
+    I                  1.000      0.000    999.000    999.000
+    S                  1.000      0.000    999.000    999.000
+
+ Residual Variances
+    Y11                0.324      0.038      8.474      0.000
+    Y12                0.246      0.020     12.098      0.000
+    Y13                0.164      0.017      9.555      0.000
+    Y14                0.125      0.019      6.730      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    Y11                0.676      0.038     17.653      0.000
+    Y12                0.754      0.020     37.098      0.000
+    Y13                0.836      0.017     48.776      0.000
+    Y14                0.875      0.019     46.957      0.000
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              Y11           Y12           Y13           Y14
+              ________      ________      ________      ________
+                  0             0             0             0
+
+
+           LAMBDA
+              I             S
+              ________      ________
+ Y11                0             0
+ Y12                0             0
+ Y13                0             0
+ Y14                0             0
+
+
+           THETA
+              Y11           Y12           Y13           Y14
+              ________      ________      ________      ________
+ Y11                1
+ Y12                0             2
+ Y13                0             0             3
+ Y14                0             0             0             4
+
+
+           ALPHA
+              I             S
+              ________      ________
+                  5             6
+
+
+           BETA
+              I             S
+              ________      ________
+ I                  0             0
+ S                  0             0
+
+
+           PSI
+              I             S
+              ________      ________
+ I                  7
+ S                  8             9
+
+
+     STARTING VALUES
+
+
+           NU
+              Y11           Y12           Y13           Y14
+              ________      ________      ________      ________
+                0.000         0.000         0.000         0.000
+
+
+           LAMBDA
+              I             S
+              ________      ________
+ Y11            1.000         0.000
+ Y12            1.000         1.000
+ Y13            1.000         2.000
+ Y14            1.000         3.000
+
+
+           THETA
+              Y11           Y12           Y13           Y14
+              ________      ________      ________      ________
+ Y11            0.724
+ Y12            0.000         0.987
+ Y13            0.000         0.000         1.465
+ Y14            0.000         0.000         0.000         2.149
+
+
+           ALPHA
+              I             S
+              ________      ________
+                0.523         1.026
+
+
+           BETA
+              I             S
+              ________      ________
+ I              0.000         0.000
+ S              0.000         0.000
+
+
+           PSI
+              I             S
+              ________      ________
+ I              1.325
+ S              0.000         0.324
+
+
+     Beginning Time:  02:33:20
+        Ending Time:  02:33:20
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2025 Muthen & Muthen

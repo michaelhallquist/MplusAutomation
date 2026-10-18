@@ -1,0 +1,249 @@
+---
+title: "Diagrams of existing Mplus results"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Diagrams of existing Mplus results}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(MplusAutomation)
+knitr::opts_chunk$set(eval = requireNamespace("htmlwidgets", quietly = TRUE) &&
+  requireNamespace("jsonlite", quietly = TRUE))
+```
+
+`mplus_diagram()` displays an existing Mplus analysis as an interactive HTML
+widget. It reads a complete `.out` file or a single model returned by
+`MplusAutomation::readModels()`. No Mplus installation is required to display
+fixed results, and the function does not estimate a model.
+
+Install the optional rendering packages once with
+`install.packages(c("htmlwidgets", "jsonlite"))`. Install `shiny` as well to save
+configuration directly from an interactive editor. Ordinary HTML output can be
+viewed and edited offline.
+
+## Read and display a model
+
+```{r initial}
+out <- system.file("extdata", "mplus-diagram", "cfa-ml.out", package = "MplusAutomation")
+diagram <- mplus_diagram(out)
+diagram
+```
+
+The graph retains original variable identities, fixed parameters and reported
+estimates. Labels edited in the browser are display names. The default view
+keeps the full model structure, uses STDYX when present, hides residual
+variance decorations and known default covariances, and prints two decimals.
+Explicit and unknown-origin covariances remain visible. Paths are not removed
+because their p-values are large.
+
+```{r model-object, eval=FALSE}
+model <- MplusAutomation::readModels(out, quiet = TRUE)
+mplus_diagram(model, options = list(
+  scale = "unstandardized", digits = 3,
+  parameter_labels = TRUE, default_covariances = TRUE
+))
+
+# A directory or model list always requires an explicit selection.
+mplus_diagram("results", select = "my-analysis.out")
+mplus_diagram(list(primary = model), select = "primary")
+```
+
+Only estimates actually printed in the selected results table are displayed.
+If STDYX is absent, a visible diagnostic explains the switch to unstandardized
+estimates. If only one STDYX parameter is absent, that coefficient remains
+unavailable at the standardized scale; its raw value does not replace it.
+Fixed structural values and standardized coefficients are separate. A loading
+fixed to 1 in the original model can have a standardized value other than 1.
+
+By default, coefficient labels use two decimal places, a mathematical minus
+sign (U+2212), and no leading zero for standardized values below one in magnitude.
+Raw coefficients retain their leading zero. Relationship labels sit on the path with a small white clearance around the
+whole text box, protecting decimal points from crossing lines. Diagram text uses
+Times New Roman with Times/Liberation Serif/serif fallbacks. Significance stars use the selected scale's reported p-value: `*` for
+p < .05, `**` for p < .01, and `***` for p < .001. Paths with a valid p-value
+at least .05 use dotted lines without coefficient labels by default, except original-scale fixed constraints. Missing or invalid p-values are not treated as
+nonsignificance. On the original scale, fixed parameters remain solid without stars. A loading
+fixed to 1 on the original scale may have a valid STDYX p-value: standardized
+stars and dots follow that actual p-value, as requested. The original constraint
+is available in the tooltip and Constraints panel, without a printed `[fixed]`
+suffix. Set `stars = FALSE` or `nonsignificant_dotted = FALSE` in
+`options` to disable either display feature. No path is removed by significance.
+The **Dotted nonsignificant** checkbox cycles through checked (dotted without
+labels, the default), mixed (dotted with labels), and unchecked (solid with
+labels). Set `nonsignificant_hide_values = FALSE` with
+`nonsignificant_dotted = TRUE` in `options` for the mixed state. The global
+Values and Parameter labels settings still apply when path labels are enabled.
+
+Factor covariances in CFA and vertically aligned exogenous-variable
+covariances in SEM connect on the left. Ordinary variable correlations now use
+the same cubic bow as CFA/residual correlations: the base proportion is 15% of
+the endpoint distance. SEM automatic layouts enlarge a bend when measurement
+indicators obstruct that side; the simplified view accounts for its own visible
+nodes. This initial routing does not replace a deliberately saved bend.
+
+Use **Path** in edit mode to select a relationship even when it is covered by
+another path or node. **Line type** offers **Straight**, **Curve**, and
+**Polyline** for relationships other than variance arrows. Ordinary single-headed
+paths default to straight; existing saved bends and default covariance curves
+remain curves. Drag the curve handle to change its bend. A polyline has two
+right-angle corners: drag its handle or, after selection, its middle segment to
+move the routing lane above/below or left/right of the endpoints. Its coefficient
+starts at the middle of that segment and can be dragged separately. Changing line
+type recenters the coefficient; moving nodes preserves the stored bend/routing
+offset. Routing is manual and does not automatically avoid every other node.
+Line types and offsets are saved separately for full and simplified views and
+support undo/redo and SVG/PNG export. Variance arrows keep their rotation controls.
+
+Select a correlation and drag its existing curve handle to adjust the bend.
+For curved correlations, drag an arrowhead to switch both connections together, preserving the bend:
+left/right for vertical pairs, top/bottom for horizontal pairs. There are no
+additional visible endpoint handles. If arrowheads overlap, select the intended
+line first. The connection side is saved separately from curvature, supports
+undo/redo and is independent in each view. When residual arrows are visible,
+switching their correlation side rotates the corresponding residual arrows and
+values together; the correlation remains attached to their tails.
+
+Turning on **Residuals** shows short arrows instead of loops, with values just beyond their outer tails;
+residual covariances connect to the corresponding residual-arrow tails. Turning
+Residuals off reconnects those covariances directly to the variables. Exogenous
+factor covariances still connect to the factors, and RI within-person components
+retain their statistical identities. Missing significance display options are automatically
+filled in when an older version-1 configuration is loaded.
+
+## Longitudinal structure
+
+The supported continuous, single-group, single-level ML/MLR corpus includes
+CFA, observed path models, SEM, mediation, CLPM, RI-CLPM with explicit within
+factors or supported `^` residual syntax, and linear growth. Growth time scores
+include fixed zero loadings. RI within components remain model nodes even when
+residual decorations are hidden.
+
+Model syntax establishes structural roles. Variable names alone do not prove
+wave or construct membership. Supply a mapping when the intended longitudinal
+layout is not established by the syntax:
+
+```{r longitudinal}
+panel <- system.file("extdata", "mplus-diagram", "clpm-ml.out", package = "MplusAutomation")
+mplus_diagram(panel, mapping = list(
+  family = "clpm",
+  waves = c(X1 = 1, X2 = 2, X3 = 3, Y1 = 1, Y2 = 2, Y3 = 3),
+  constructs = c(X1 = "X", X2 = "X", X3 = "X",
+                 Y1 = "Y", Y2 = "Y", Y3 = "Y")
+))
+```
+
+Mappings supplement the source model; contradictory roles and unknown
+identifiers are rejected. Unsupported syntax that changes the model cannot be
+silently dropped to produce a partial graph. Multigroup, multilevel, mixture,
+categorical, Bayes, latent interaction and nonlinear/piecewise growth models
+are outside this release's intended scope.
+
+## Edit, save and reuse
+
+In an ordinary widget, click **Edit diagram** to adjust the current display.
+Select one or more nodes (Shift-click for multiple selection), or a path, then
+click **Remove object**. Removing a node also removes its incident paths,
+residual arrows and their labels from both views. **Undo** reverses the change;
+**Restore automatic layout** restores removed objects in both views and resets
+the current view's layout. Removals are saved with the configuration and affect
+SVG/PNG exports without changing the underlying Mplus results.
+Drag nodes, use Shift to select multiple nodes, align selections, select a
+path to adjust its curve, and drag its label to improve spacing. For a residual
+arrow, drag its shaft, control point or value around the variable: the arrow
+rotates through 360 degrees at a fixed length, always aims at the variable center
+with its head on the boundary, and keeps its value
+beyond the outer tail. Visible residual correlations follow that tail. Display names
+can include Chinese text. Undo/redo and restoring the automatic layout affect
+presentation only. The full and simplified views retain their own positions.
+
+Temporary widget edits do not write to the R project. To save directly from
+an interactive R session, use the local editor and an explicit configuration
+target:
+
+```{r editing, eval=FALSE}
+# Requires the optional shiny package and an interactive R session.
+# Choose an existing project directory for the destination.
+saved <- mplus_diagram(out, action = "edit",
+                       config = "my-analysis.diagram.json")
+saved
+```
+
+**Save and return** validates and writes the configuration before ending the
+editor. **Cancel and return** keeps the prior saved configuration. An error
+while saving leaves the editor available for correction. The editor runs on
+loopback; ordinary widgets and report rendering do not start that service.
+RStudio's Viewer is used when available, with a browser alternative.
+
+```{r reuse, eval=FALSE}
+mplus_diagram(out, config = "my-analysis.diagram.json")
+```
+
+With a reliable `.out` source, the default configuration filename is the same
+stem with `.diagram.json`. A model object without a reliable source path needs
+an explicit save target. A relative filename stored inside an R model object
+does not establish its original directory after a working-directory change.
+Pass the `.out` filename directly, read the object with
+`MplusAutomation::readModels(normalizePath(out))`, or supply `config` explicitly.
+Reading a diagram never writes a configuration.
+
+Configuration stores positions, curves, display names, visibility and options.
+It also records the source title, output basename, estimator, Mplus version and
+an SHA256 identifier for the imported output/results snapshot. This content ID
+is not a Mplus run UUID. Older configurations without source metadata still load;
+exports refresh metadata from the current results. Source metadata does not
+choose a save destination or replace results. Re-estimating the same structure keeps compatible
+presentation state while refreshing estimates. A different structure, invalid
+configuration or unknown configuration version produces a diagnostic and an
+automatic layout; the original configuration file remains intact.
+
+Option priority is: explicit `options`, compatible saved state, explicit
+project `defaults`, then package defaults. For example, `options = list(digits
+= 3)` overrides saved precision; `defaults = list(digits = 3)` does not.
+
+## Reports, offline HTML and image export
+
+Place `mplus_diagram()` in an ordinary R Markdown HTML chunk. Rendering reads
+compatible saved configuration or uses a deterministic default. A
+noninteractive call with `action = "edit"` fails immediately with guidance,
+instead of waiting for a person.
+
+```{r html-export, eval=FALSE}
+htmlwidgets::saveWidget(diagram, "model.html", selfcontained = TRUE)
+```
+
+Self-contained output embeds the diagram data, scripts and styles. A reader
+can edit the diagram without R or a network connection. Each diagram in a
+report has separate controls, selection and undo history. Refreshing the HTML
+restores the embedded starting state.
+
+**Export config** downloads presentation state. **Import config** applies a
+compatible file to the current widget. These downloads do not overwrite your
+project or the HTML file. To use a downloaded configuration in the next R
+report, place it at the chosen configuration path and pass it through `config`.
+
+The **SVG** and **PNG** controls export the current graph, including display
+names, paths and labels, without the editing toolbar. PNG provides a scale
+selector. Browser limits can prevent very large bitmap exports; the interface
+reports such failures. SVG remains a vector format. The canvas and image exports omit the model title
+and explanatory legend. PNG multipliers scale both pixel dimensions: 2× has
+twice the width and height, hence four times as many pixels as 1×.
+
+## Diagnostics and verification limits
+
+Mplus warnings remain visible. A normal termination message does not erase an
+improper-solution warning, and a graph is not a substitute for reviewing the
+analysis. Failed estimation and insufficient results are rejected. A supplied
+model object must retain enough source syntax to determine topology and
+constraints reliably.
+
+The repository includes fixed engine outputs and independently transcribed
+relationship expectations. CI consumes them without running the commercial
+engine. A separate developer workflow checks installed package resources and
+renders a two-diagram, self-contained report in a fresh R process while
+verifying that its saved configuration is unchanged. Those checks do not
+constitute human approval of visual quality or certification of every
+RStudio/browser/operating-system combination. The project tracks that
+acceptance separately.

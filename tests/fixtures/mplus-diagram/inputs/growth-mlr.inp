@@ -1,0 +1,6 @@
+TITLE: Lin fixture growth, public Mplus ex6.1 data;
+DATA: FILE = ex6.1.dat;
+VARIABLE: NAMES = y11-y14;
+ANALYSIS: ESTIMATOR = MLR;
+MODEL: i s | y11@0 y12@1 y13@2 y14@3;
+OUTPUT: STDYX TECH1;

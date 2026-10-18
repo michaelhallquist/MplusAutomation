@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "fixture": "estimate-999",
+  "review_method": "Literal transcription from output tables plus input echo; independent of Lin and MplusAutomation",
+  "reviewer": "Codex fixture agent; human visual approval pending",
+  "observed": [
+    "X",
+    "Z",
+    "Y"
+  ],
+  "latent_roles": {},
+  "relationships": [
+    {
+      "lhs": "Y",
+      "operator": "ON",
+      "rhs": "X",
+      "unstandardized": 999,
+      "stdyx": 1,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 141,
+          "row": "X                999.000      0.632   1579.558      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 166,
+          "row": "X                  1.000      0.000  78914.719      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": 0.0
+    },
+    {
+      "lhs": "Y",
+      "operator": "ON",
+      "rhs": "Z",
+      "unstandardized": 0,
+      "stdyx": 0,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 142,
+          "row": "Z                  0.000      0.006      0.000      1.000",
+          "p_literal": "1.000",
+          "unavailable_reason": null
+        },
+        "stdyx": {
+          "section": "STDYX Standardization",
+          "line_number": 167,
+          "row": "Z                  0.000      0.001      0.000      1.000",
+          "p_literal": "1.000",
+          "unavailable_reason": null
+        }
+      },
+      "unstandardized_p": 1.0,
+      "stdyx_p": 1.0
+    }
+  ],
+  "test_columns": {
+    "Y.ON.X": {
+      "se": 0.632,
+      "est_se": 1579.558,
+      "pval": 0
+    },
+    "Y.ON.Z": {
+      "se": 0.006,
+      "est_se": 0,
+      "pval": 1
+    }
+  },
+  "pvalue_review_method": "P-Value column transcribed directly from the fixed output text; source section, 1-based line and literal row retained; independent of Lin and MplusAutomation.",
+  "pvalue_source_output": "inst/extdata/mplus-diagram/estimate-999.out"
+}

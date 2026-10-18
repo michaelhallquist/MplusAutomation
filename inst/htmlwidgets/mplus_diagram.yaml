@@ -1,0 +1,5 @@
+dependencies:
+  - name: mplus-diagram
+    version: 1.0.0
+    src: htmlwidgets/lib/mplus-diagram
+    stylesheet: mplus-diagram.css

@@ -1,0 +1,182 @@
+Mplus VERSION 8.8
+MUTHEN & MUTHEN
+04/20/2022   3:55 PM
+
+INPUT INSTRUCTIONS
+
+  TITLE:	this is an example of a linear growth
+  	model for a continuous outcome
+  DATA:	FILE IS ex6.1.dat;
+  VARIABLE:	NAMES ARE y11-y14;
+  MODEL:	i s | y11@0 y12@1 y13@2 y14@3;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+this is an example of a linear growth
+model for a continuous outcome
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                         500
+
+Number of dependent variables                                    4
+Number of independent variables                                  0
+Number of continuous latent variables                            2
+
+Observed dependent variables
+
+  Continuous
+   Y11         Y12         Y13         Y14
+
+Continuous latent variables
+   I           S
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  ex6.1.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y11                   0.514      -0.170      -2.693    0.20%      -0.493      0.237      0.558
+             500.000       1.449      -0.354       3.598    0.20%       0.813      1.610
+     Y12                   1.566      -0.077      -3.062    0.20%       0.443      1.283      1.560
+             500.000       1.974       0.003       5.964    0.20%       1.869      2.761
+     Y13                   2.568      -0.031      -2.745    0.20%       1.013      2.106      2.520
+             500.000       2.931      -0.252       8.428    0.20%       3.051      4.144
+     Y14                   3.601      -0.091      -2.360    0.20%       1.832      3.056      3.612
+             500.000       4.298      -0.121       9.182    0.20%       4.164      5.335
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        9
+
+Loglikelihood
+
+          H0 Value                       -3016.386
+          H1 Value                       -3014.089
+
+Information Criteria
+
+          Akaike (AIC)                    6050.772
+          Bayesian (BIC)                  6088.703
+          Sample-Size Adjusted BIC        6060.137
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              4.593
+          Degrees of Freedom                     5
+          P-Value                           0.4675
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.060
+          Probability RMSEA <= .05           0.894
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           1439.722
+          Degrees of Freedom                     6
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.010
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ I        |
+    Y11                1.000      0.000    999.000    999.000
+    Y12                1.000      0.000    999.000    999.000
+    Y13                1.000      0.000    999.000    999.000
+    Y14                1.000      0.000    999.000    999.000
+
+ S        |
+    Y11                0.000      0.000    999.000    999.000
+    Y12                1.000      0.000    999.000    999.000
+    Y13                2.000      0.000    999.000    999.000
+    Y14                3.000      0.000    999.000    999.000
+
+ S        WITH
+    I                  0.133      0.032      4.100      0.000
+
+ Means
+    I                  0.523      0.051     10.152      0.000
+    S                  1.026      0.025     40.264      0.000
+
+ Intercepts
+    Y11                0.000      0.000    999.000    999.000
+    Y12                0.000      0.000    999.000    999.000
+    Y13                0.000      0.000    999.000    999.000
+    Y14                0.000      0.000    999.000    999.000
+
+ Variances
+    I                  0.989      0.088     11.178      0.000
+    S                  0.224      0.022     10.068      0.000
+
+ Residual Variances
+    Y11                0.475      0.058      8.122      0.000
+    Y12                0.482      0.040     11.980      0.000
+    Y13                0.473      0.047     10.080      0.000
+    Y14                0.545      0.083      6.593      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.462E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+     Beginning Time:  15:55:25
+        Ending Time:  15:55:25
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2022 Muthen & Muthen

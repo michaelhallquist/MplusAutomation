@@ -1,0 +1,5 @@
+TITLE: Lin numeric boundary, exact orthogonal synthetic design;
+DATA: FILE = special.dat;
+VARIABLE: NAMES = x z y;
+MODEL: y ON x z;
+OUTPUT: STDYX;

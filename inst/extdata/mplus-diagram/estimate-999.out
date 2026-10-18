@@ -1,0 +1,296 @@
+Mplus VERSION 9 (Mac)
+MUTHEN & MUTHEN
+10/14/2026   2:33 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Lin numeric boundary, exact orthogonal synthetic design;
+  DATA: FILE = special.dat;
+  VARIABLE: NAMES = x z y;
+  MODEL: y ON x z;
+  OUTPUT: STDYX;
+
+
+
+INPUT READING TERMINATED NORMALLY
+
+
+
+Lin numeric boundary, exact orthogonal synthetic design;
+
+SUMMARY OF ANALYSIS
+
+Number of groups                                                 1
+Number of observations                                        1000
+
+Number of dependent variables                                    1
+Number of independent variables                                  2
+Number of continuous latent variables                            0
+
+Observed dependent variables
+
+  Continuous
+   Y
+
+Observed independent variables
+   X           Z
+
+
+Estimator                                                       ML
+Information matrix                                        OBSERVED
+Maximum number of iterations                                  1000
+Convergence criterion                                    0.500D-04
+Maximum number of steepest descent iterations                   20
+
+Input data file(s)
+  special.dat
+
+Input data format  FREE
+
+
+
+UNIVARIATE SAMPLE STATISTICS
+
+
+     UNIVARIATE HIGHER-ORDER MOMENT DESCRIPTIVE STATISTICS
+
+         Variable/         Mean/     Skewness/   Minimum/ % with                Percentiles
+        Sample Size      Variance    Kurtosis    Maximum  Min/Max      20%/60%    40%/80%    Median
+
+     Y                     0.000       0.000     -10.190   25.00%     -10.190     -9.790      0.000
+            1000.000      99.840      -1.998      10.190   25.00%       9.790     10.190
+     X                     0.000       0.000      -0.010   50.00%      -0.010     -0.010      0.000
+            1000.000       0.000      -2.000       0.010   50.00%       0.010      0.010
+     Z                     0.000       0.000      -1.000   50.00%      -1.000     -1.000      0.000
+            1000.000       1.000      -2.000       1.000   50.00%       1.000      1.000
+
+
+THE MODEL ESTIMATION TERMINATED NORMALLY
+
+     THE STANDARD ERRORS OF THE MODEL PARAMETER ESTIMATES MAY NOT BE
+     TRUSTWORTHY FOR SOME PARAMETERS DUE TO A NON-POSITIVE DEFINITE
+     FIRST-ORDER DERIVATIVE PRODUCT MATRIX.  THIS MAY BE DUE TO THE STARTING
+     VALUES BUT MAY ALSO BE AN INDICATION OF MODEL NONIDENTIFICATION.  THE
+     CONDITION NUMBER IS       0.392D-15.  PROBLEM INVOLVING THE FOLLOWING PARAMETER:
+     Parameter 4, Y
+
+
+     THE DIFFERENCE IN THE SCALES OF THE VARIABLES IS VERY LARGE.
+     THE PROBLEM MIGHT BE RESOLVED BY RESCALING THE VARIABLES TO
+     APPROXIMATELY STANDARDIZED OR MORE EQUITABLE SCALE.
+     Parameter 4, Y DOES NOT AFFECT THE DATA FIT IN THE RANGE THE PARAMETER IS IN.
+     THE PARAMETER MIGHT HAVE CONVERGED TO A LARGE ABSOLUTE VALUE BEYOND WHICH THE MODEL
+     FIT DOES NOT IMPROVE. THE PROBLEM CAN OCCUR, FOR EXAMPLE, IF THE JOINT DISTRIBUTION
+     OF CATEGORICAL VARIABLES INVOLVED HAS EMPTY CELLS. TO RESOLVE THE PROBLEM, FIX THE
+     PARAMETER TO THE VALUE IT IS ESTIMATED AT.
+
+
+
+
+MODEL FIT INFORMATION
+
+Number of Free Parameters                        4
+
+Loglikelihood
+
+          H0 Value                         190.499
+          H1 Value                         190.499
+
+Information Criteria
+
+          Akaike (AIC)                    -372.999
+          Bayesian (BIC)                  -353.368
+          Sample-Size Adjusted BIC        -366.072
+            (n* = (n + 2) / 24)
+
+Chi-Square Test of Model Fit
+
+          Value                              0.000
+          Degrees of Freedom                     0
+          P-Value                           0.0000
+
+RMSEA (Root Mean Square Error Of Approximation)
+
+          Estimate                           0.000
+          90 Percent C.I.                    0.000  0.000
+          Probability RMSEA <= .05           0.000
+
+CFI/TLI
+
+          CFI                                1.000
+          TLI                                1.000
+
+Chi-Square Test of Model Fit for the Baseline Model
+
+          Value                           7822.446
+          Degrees of Freedom                     2
+          P-Value                           0.0000
+
+SRMR (Standardized Root Mean Square Residual)
+
+          Value                              0.000
+
+
+
+MODEL RESULTS
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ Y        ON
+    X                999.000      0.632   1579.558      0.000
+    Z                  0.000      0.006      0.000      1.000
+
+ Intercepts
+    Y                  0.000      0.006      0.000      1.000
+
+ Residual Variances
+    Y                  0.040      0.002     22.361      0.000
+
+
+QUALITY OF NUMERICAL RESULTS
+
+     Condition Number for the Information Matrix              0.401E-01
+       (ratio of smallest to largest eigenvalue)
+
+
+STANDARDIZED MODEL RESULTS
+
+
+STDYX Standardization
+
+                                                    Two-Tailed
+                    Estimate       S.E.  Est./S.E.    P-Value
+
+ Y        ON
+    X                  1.000      0.000  78914.719      0.000
+    Z                  0.000      0.001      0.000      1.000
+
+ Intercepts
+    Y                  0.000      0.001      0.000      1.000
+
+ Residual Variances
+    Y                  0.000      0.000     15.815      0.000
+
+
+R-SQUARE
+
+    Observed                                        Two-Tailed
+    Variable        Estimate       S.E.  Est./S.E.    P-Value
+
+    Y                  1.000      0.000   ********      0.000
+
+
+TECHNICAL 1 OUTPUT
+
+
+     PARAMETER SPECIFICATION
+
+
+           NU
+              Y             X             Z
+              ________      ________      ________
+                  0             0             0
+
+
+           LAMBDA
+              Y             X             Z
+              ________      ________      ________
+ Y                  0             0             0
+ X                  0             0             0
+ Z                  0             0             0
+
+
+           THETA
+              Y             X             Z
+              ________      ________      ________
+ Y                  0
+ X                  0             0
+ Z                  0             0             0
+
+
+           ALPHA
+              Y             X             Z
+              ________      ________      ________
+                  1             0             0
+
+
+           BETA
+              Y             X             Z
+              ________      ________      ________
+ Y                  0             2             3
+ X                  0             0             0
+ Z                  0             0             0
+
+
+           PSI
+              Y             X             Z
+              ________      ________      ________
+ Y                  4
+ X                  0             0
+ Z                  0             0             0
+
+
+     STARTING VALUES
+
+
+           NU
+              Y             X             Z
+              ________      ________      ________
+                0.000         0.000         0.000
+
+
+           LAMBDA
+              Y             X             Z
+              ________      ________      ________
+ Y              1.000         0.000         0.000
+ X              0.000         1.000         0.000
+ Z              0.000         0.000         1.000
+
+
+           THETA
+              Y             X             Z
+              ________      ________      ________
+ Y              0.000
+ X              0.000         0.000
+ Z              0.000         0.000         0.000
+
+
+           ALPHA
+              Y             X             Z
+              ________      ________      ________
+                0.000         0.000         0.000
+
+
+           BETA
+              Y             X             Z
+              ________      ________      ________
+ Y              0.000         0.000         0.000
+ X              0.000         0.000         0.000
+ Z              0.000         0.000         0.000
+
+
+           PSI
+              Y             X             Z
+              ________      ________      ________
+ Y             49.920
+ X              0.000         0.000
+ Z              0.000         0.000         1.000
+
+
+     Beginning Time:  02:33:54
+        Ending Time:  02:33:54
+       Elapsed Time:  00:00:00
+
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2025 Muthen & Muthen

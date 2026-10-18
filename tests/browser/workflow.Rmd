@@ -1,0 +1,53 @@
+---
+title: "Mplus diagram: fresh-session offline report"
+output:
+  html_document:
+    self_contained: true
+    theme: null
+    mathjax: null
+params:
+  config_file: null
+---
+
+```{r setup, include=FALSE}
+library(MplusAutomation)
+options(viewer = function(...) stop("Viewer must not open during render"),
+        browser = function(...) stop("Browser must not open during render"))
+stopifnot(!interactive())
+cfa_file <- system.file("extdata", "mplus-diagram", "cfa-ml.out", package = "MplusAutomation")
+sem_file <- system.file("extdata", "mplus-diagram", "ex5.11.out", package = "MplusAutomation")
+stopifnot(nzchar(cfa_file), nzchar(sem_file), file.exists(params$config_file))
+config_before <- readBin(params$config_file, "raw", file.info(params$config_file)$size)
+```
+
+The first diagram uses a saved configuration with a Chinese display name and
+saved node position. The second diagram has its own initial state and controls.
+Both read fixed results; rendering does not estimate a model or open an editor.
+
+```{r cfa, echo=FALSE}
+cfa <- mplus_diagram(cfa_file, config = params$config_file)
+stopifnot(cfa$x$state$aliases[["node:F1"]] == "研究构念甲",
+          cfa$x$state$views$full$nodes[["node:F1"]]$x == 631,
+          cfa$x$state$options$digits == 3)
+cfa
+```
+
+The SEM source did not request standardized results. Its displayed scale is
+explicitly unstandardized; there is no invented standardized table.
+
+```{r sem, echo=FALSE}
+sem <- mplus_diagram(sem_file, options = list(scale = "unstandardized"))
+stopifnot(sem$x$state$options$scale == "unstandardized",
+          is.null(sem$x$state$aliases[["node:F1"]]))
+sem
+```
+
+```{r verify, include=FALSE}
+stopifnot(identical(config_before,
+  readBin(params$config_file, "raw", file.info(params$config_file)$size)))
+stopifnot(is.null(cfa$x$editor), is.null(sem$x$editor))
+```
+
+Offline HTML adjustments remain in the current document session. Use the
+configuration download to preserve them, then supply that file to `config`
+in a later R call. Reloading the document restores its embedded initial state.

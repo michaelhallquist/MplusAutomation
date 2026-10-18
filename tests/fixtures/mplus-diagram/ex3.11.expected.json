@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "fixture": "ex3.11",
+  "review_method": "Literal transcription from output tables plus input echo; independent of Lin and MplusAutomation",
+  "reviewer": "Codex fixture agent; human visual approval pending",
+  "observed": [
+    "Y1",
+    "Y2",
+    "Y3",
+    "X1",
+    "X2",
+    "X3"
+  ],
+  "latent_roles": {},
+  "relationships": [
+    {
+      "lhs": "Y1",
+      "operator": "ON",
+      "rhs": "X1",
+      "unstandardized": 0.992,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 131,
+          "row": "X1                 0.992      0.043     22.979      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "Y1",
+      "operator": "ON",
+      "rhs": "X2",
+      "unstandardized": 2.001,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 132,
+          "row": "X2                 2.001      0.045     44.618      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "Y1",
+      "operator": "ON",
+      "rhs": "X3",
+      "unstandardized": 3.052,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 133,
+          "row": "X3                 3.052      0.045     68.274      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "Y2",
+      "operator": "ON",
+      "rhs": "X1",
+      "unstandardized": 2.935,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 136,
+          "row": "X1                 2.935      0.050     59.002      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "Y2",
+      "operator": "ON",
+      "rhs": "X2",
+      "unstandardized": 1.992,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 137,
+          "row": "X2                 1.992      0.052     38.556      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "Y2",
+      "operator": "ON",
+      "rhs": "X3",
+      "unstandardized": 1.023,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 138,
+          "row": "X3                 1.023      0.051     19.869      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "Y3",
+      "operator": "ON",
+      "rhs": "Y1",
+      "unstandardized": 0.507,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 141,
+          "row": "Y1                 0.507      0.020     25.491      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "Y3",
+      "operator": "ON",
+      "rhs": "Y2",
+      "unstandardized": 0.746,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 142,
+          "row": "Y2                 0.746      0.020     37.914      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    },
+    {
+      "lhs": "Y3",
+      "operator": "ON",
+      "rhs": "X2",
+      "unstandardized": 1.046,
+      "stdyx": null,
+      "fixed": false,
+      "fixed_value": null,
+      "label": null,
+      "covariance_source": null,
+      "p_sources": {
+        "unstandardized": {
+          "section": "MODEL RESULTS",
+          "line_number": 143,
+          "row": "X2                 1.046      0.072     14.540      0.000",
+          "p_literal": "0.000",
+          "unavailable_reason": null
+        },
+        "stdyx": null
+      },
+      "unstandardized_p": 0.0,
+      "stdyx_p": null
+    }
+  ],
+  "stdyx_available": false,
+  "pvalue_review_method": "P-Value column transcribed directly from the fixed output text; source section, 1-based line and literal row retained; independent of Lin and MplusAutomation.",
+  "pvalue_source_output": "inst/extdata/mplus-diagram/ex3.11.out"
+}

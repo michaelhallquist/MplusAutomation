@@ -33,3 +33,7 @@ products
 !tests/testthat/*.out
 !tests/testthat/mplus_ug
 docs
+
+# Fixed diagram examples and reproducible test inputs
+!inst/extdata/mplus-diagram/*.out
+!tests/fixtures/mplus-diagram/inputs/*.inp

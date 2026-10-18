@@ -1,0 +1,29 @@
+Mplus VERSION 9 (Mac)
+MUTHEN & MUTHEN
+10/14/2026   2:33 AM
+
+INPUT INSTRUCTIONS
+
+  TITLE: Lin fixture cfa, public Mplus ex5.20 data;
+  DATA: FILE = ex5.20.dat;
+  VARIABLE: NAMES = y1-y6;
+  ANALYSIS: ESTIMATOR = ML;
+  MODEL: f1 BY y1 y2-y3 (lam2-lam3); f2 BY y4 y5-y6 (lam5-lam6); f1 WITH f2;
+  OUTPUT: STDYX TECH1;
+
+*** ERROR in MODEL command
+  The number of equality/parameter labels in the following statement does not
+  match the number of parameters.  Problem found in the statement:
+  f1 BY y1 y2-y3 (lam2-lam3)
+
+
+MUTHEN & MUTHEN
+3463 Stoner Ave.
+Los Angeles, CA  90066
+
+Tel: (310) 391-9971
+Fax: (310) 391-8971
+Web: www.StatModel.com
+Support: Support@StatModel.com
+
+Copyright (c) 1998-2025 Muthen & Muthen
