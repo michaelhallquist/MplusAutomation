@@ -305,8 +305,32 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
       )
       
       #add total number of latent classes to summaries (in case of multiple categorical latent variables, this is just the product)
-      if (isTRUE("summaries" %in% what) && !is.null(allFiles[[listID]]$class_counts$modelEstimated)) {
-        summaries$NLatentClasses <- nrow(allFiles[[listID]]$class_counts$modelEstimated)
+      if (isTRUE("summaries" %in% what)) {
+        cc <- allFiles[[listID]]$class_counts
+        count_tbl <- if (!is.null(summaries) && isTRUE(summaries$NCategoricalLatentVars[1L] > 1)) {
+          if (!is.null(cc$modelEstimated.patterns)) {
+            cc$modelEstimated.patterns
+          } else if (!is.null(cc$posteriorProb.patterns)) {
+            cc$posteriorProb.patterns
+          } else {
+            cc$mostLikely.patterns
+          }
+        } else {
+          if (!is.null(cc$modelEstimated)) {
+            cc$modelEstimated
+          } else if (!is.null(cc$posteriorProb)) {
+            cc$posteriorProb
+          } else if (!is.null(cc$mostLikely)) {
+            cc$mostLikely
+          } else if (length(cc) > 0L && is.list(cc[[1L]])) {
+            cc[[1L]]$modelEstimated
+          } else {
+            NULL
+          }
+        }
+        if (!is.null(count_tbl) && nrow(count_tbl) > 0L) {
+          summaries$NLatentClasses <- nrow(count_tbl)
+        }
       }
     }
 
@@ -339,8 +363,13 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     }
 
     if (isTRUE("savedata" %in% what)) {
-      #missing widths indicative of MI/MC run
-      if (isFALSE(is.null(savedata_info)) && isTRUE(is.na(savedata_info[["fileVarWidths"]]))) {
+      #missing widths or wildcard filename indicative of free-format MI/MC run
+      is_free_savedata <- isFALSE(is.null(savedata_info)) && (
+        length(savedata_info[["fileVarWidths"]]) == 0L ||
+        all(is.na(savedata_info[["fileVarWidths"]])) ||
+        isTRUE(grepl("\\*", savedata_info[["fileName"]], perl = TRUE))
+      )
+      if (is_free_savedata) {
         allFiles[[listID]]$savedata <- tryCatch(getSavedata_readRawFile(curfile, outfiletext, format="free", fileName=savedata_info[["fileName"]], varNames=savedata_info[["fileVarNames"]], input=inp),
             error=function(e) {
               message("Error reading SAVEDATA rawfile: ", savedata_info[["fileName"]] , " in output file: ", curfile); print(e)
@@ -461,8 +490,13 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
     }
 
     if (isTRUE("lcCondMeans" %in% what)) {
-      # aux(e) means and pairwise comparisons
-      allFiles[[listID]]$lcCondMeans <- extractAux(outfiletext, curfile)
+      # aux(e) / BCH / 3-step means and pairwise comparisons
+      allFiles[[listID]]$lcCondMeans <- parse_or_empty(
+        extractAux(outfiletext, curfile),
+        NULL,
+        "Error extracting auxiliary conditional means in output file: ",
+        curfile
+      )
     }
     
     ### R3Step output (3-step procedure)
@@ -530,7 +564,7 @@ read_h5 <- function(file) {
     # Thus, attempt a file extension workaround.
     if (is.null(h5[1L])) {
       tmp_h5 <- tempfile(fileext=".h5")
-      file.copy(h5, to=tmp_h5)
+      file.copy(file, to=tmp_h5)
       h5 <- tryCatch({rhdf5::h5dump(file=tmp_h5, recursive=TRUE, load=TRUE)},
                             error = function(e) list() )
       unlink(tmp_h5) #cleanup temp

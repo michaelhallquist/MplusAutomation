@@ -58,18 +58,22 @@ extractEFAparameters <- function(outfiletext, filename) {
       if (is_wi && is_bw) { stop("EFA section contains both within and between level results. Don't know how to proceed.") }
     }
     
-    loadings_est <- matrixExtract(lines_to_search, "[A-z\\-]+ ROTATED LOADINGS\\s*.*", filename, expect_sig=TRUE)
+    bifactor_est <- matrixExtract(lines_to_search, "BI-FACTOR MODEL", filename, expect_sig=TRUE)
+    bifactor_sig <- attr(bifactor_est, "sig")
+    if (!is.null(bifactor_est)) attr(bifactor_est, "sig") <- NULL
+
+    loadings_est <- matrixExtract(lines_to_search, "(?!(?:S\\.E\\.|Est\\./S\\.E\\.)\\s)(?:[A-Za-z\\-]+\\s+)?ROTATED LOADINGS\\s*.*", filename, expect_sig=TRUE)
     loadings_sig <- attr(loadings_est, "sig")
     attr(loadings_est, "sig") <- NULL
-    corrs_est <- matrixExtract(lines_to_search, "[A-z\\-]+ FACTOR CORRELATIONS\\s*.*", filename, expect_sig=TRUE)
+    corrs_est <- matrixExtract(lines_to_search, "(?!(?:S\\.E\\.|Est\\./S\\.E\\.)\\s)(?:[A-Za-z\\-]+\\s+)?FACTOR CORRELATIONS\\s*.*", filename, expect_sig=TRUE)
     corrs_sig <- attr(corrs_est, "sig")
     attr(corrs_est, "sig") <- NULL
     residuals_est <- matrixExtract(lines_to_search, "ESTIMATED RESIDUAL VARIANCES", filename)
-    loadings_se <- matrixExtract(lines_to_search, "S\\.E\\. [A-z\\-]+ ROTATED LOADINGS", filename)
-    corrs_se <- matrixExtract(lines_to_search, "S\\.E\\. [A-z\\-]+ FACTOR CORRELATIONS\\s*.*", filename)
+    loadings_se <- matrixExtract(lines_to_search, "S\\.E\\.\\s+(?:[A-Za-z\\-]+\\s+)?ROTATED LOADINGS", filename)
+    corrs_se <- matrixExtract(lines_to_search, "S\\.E\\.\\s+(?:[A-Za-z\\-]+\\s+)?FACTOR CORRELATIONS\\s*.*", filename)
     residuals_se <- matrixExtract(lines_to_search, "S\\.E\\. ESTIMATED RESIDUAL VARIANCES", filename)
-    loadings_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\. [A-z\\-]+ ROTATED LOADINGS", filename)
-    corrs_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\. [A-z\\-]+ FACTOR CORRELATIONS\\s*.*", filename)
+    loadings_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\.\\s+(?:[A-Za-z\\-]+\\s+)?ROTATED LOADINGS", filename)
+    corrs_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\.\\s+(?:[A-Za-z\\-]+\\s+)?FACTOR CORRELATIONS\\s*.*", filename)
     residuals_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\. ESTIMATED RESIDUAL VARIANCES", filename)
     loadings_structure <- matrixExtract(lines_to_search, "FACTOR STRUCTURE", filename)
     
@@ -92,6 +96,12 @@ extractEFAparameters <- function(outfiletext, filename) {
         est_se    = residuals_est_se
       )
     )
+    if (!is.null(bifactor_est)) {
+      parameters$bifactor <- list(
+        estimates = bifactor_est,
+        sig = bifactor_sig
+      )
+    }
     
     complete_params <- append(complete_params, list(parameters))
     names(complete_params)[length(complete_params)] <- paste0(n_factors[i], mlefa_suffix)

@@ -79,9 +79,6 @@ extractH5ResultTable <- function(result_section, filename,
     match <- grep(pattern, result_headings, ignore.case = TRUE, perl = TRUE)
     if (length(match) == 1L) result_values[, match] else rep(NA_real_, nrow(result_values))
   }
-  fixed_variance <- section %in% c("Variances", "Residual Variances") &
-    !nzchar(keyword) & !nzchar(rhs) & value_column("^S\\.E\\.$") == 0
-  param[fixed_variance] <- "FALSE"
 
   if ("Posterior S.D." %in% result_headings) {
     params <- data.frame(
@@ -612,10 +609,12 @@ output_interval_type <- function(outfiletext, standardized = FALSE) {
 order_h5_parameters <- function(parameters) {
   section_order <- c(
     "unstandardized", "unstandardized.alt", "r2", "ci.unstandardized",
-    "irt.parameterization", "probability.scale", "odds", "ci.odds",
+    "irt.parameterization", "probability.scale", "class.equality", "transition.odds",
+    "odds", "ci.odds",
     "stdyx.standardized", "ci.stdyx.standardized",
     "stdy.standardized", "ci.stdy.standardized",
-    "std.standardized", "ci.std.standardized", "wilevel.standardized", "efa"
+    "std.standardized", "ci.std.standardized",
+    "wilevel.standardized", "esem.standardized", "efa"
   )
   parameters[intersect(section_order, names(parameters))]
 }
@@ -667,6 +666,23 @@ extractH5Parameters_1file <- function(outfiletext, filename, h5results, h5file,
       return(NULL)
     }
     parameters <- c(parameters, standardized)
+  } else if (has_output_section(outfiletext, "R-SQUARE")) {
+    r2_result_attributes <- read_h5_attributes(h5file, "R-Square/Results")
+    r2_statement_attributes <- read_h5_attributes(h5file, "R-Square/Statements")
+    r2_table <- tryCatch(
+      extractH5ResultTable(
+        h5results[["R-Square"]],
+        filename = filename,
+        result_headings = r2_result_attributes$Headings,
+        statement_headings = r2_statement_attributes$Headings
+      ),
+      error = function(e) NULL
+    )
+    if (is.null(r2_table)) return(NULL)
+    r2 <- r2_table[, c("param", "est", "se", "est_se", "pval"), drop = FALSE]
+    class(r2) <- c("mplus.params", "data.frame")
+    attr(r2, "filename") <- filename
+    parameters$r2 <- r2
   }
 
   interval_type <- output_interval_type(outfiletext)
@@ -721,10 +737,12 @@ extractH5Parameters_1file <- function(outfiletext, filename, h5results, h5file,
   }
 
   has_odds <- has_output_prefix(outfiletext, "LOGISTIC REGRESSION ODDS RATIO RESULTS")
-  has_odds_ci <- has_output_section(
-    outfiletext, "CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS"
-  )
+  odds_section_count <- sum(grepl("^LOGISTIC REGRESSION ODDS RATIO RESULTS", outfiletext, perl = TRUE))
+  has_odds_ci <- any(grepl(
+    "^CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS", outfiletext, perl = TRUE
+  ))
   if (has_odds) {
+    if (odds_section_count > 1L) return(NULL) # fall back to text parser when split across observed + latent-class sections
     odds <- tryCatch(
       extractH5OddsRatioResults_1file(
         h5results, h5file, filename,
@@ -751,6 +769,12 @@ extractParameters_1file_with_h5 <- function(outfiletext, filename, h5results,
   if (is.null(h5_parameters)) {
     extractParameters_1file(outfiletext, filename, efa = efa)
   } else {
-    h5_parameters
+    esem_std <- extractESEMStandardized(outfiletext, filename)
+    if (!is.null(esem_std)) h5_parameters$esem.standardized <- esem_std
+    class_eq <- extractClassEqualityTests(outfiletext, filename)
+    if (!is.null(class_eq)) h5_parameters$class.equality <- class_eq
+    trans_odds <- extractTransitionOdds(outfiletext)
+    if (!is.null(trans_odds)) h5_parameters$transition.odds <- trans_odds
+    order_h5_parameters(h5_parameters)
   }
 }

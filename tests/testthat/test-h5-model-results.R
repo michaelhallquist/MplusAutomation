@@ -204,6 +204,6 @@ test_that("H5 probability-scale and IRT tables preserve parameter fields", {
     result_headings, statement_headings
   )$irt.parameterization
   expect_equal(irt$paramHeader, c("F.BY", "Item.Difficulties", "Variances"))
-  expect_equal(irt$param, c("U1", "U1", "FALSE"))
+  expect_equal(irt$param, c("U1", "U1", "F"))
   expect_equal(irt$est[1L], 0.918273, tolerance = 1e-12)
 })

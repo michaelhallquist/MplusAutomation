@@ -62,7 +62,6 @@ getSavedata_Fileinfo <- function(outfile) {
 #' * `bayesVarNames`: A character vector containing the names of variables in the BPARAMETERS dataset.
 #' * `tech3File`: A character vector of the tech 3 output.
 #' * `tech4File`: A character vector of the tech 4 output.
-#' @importFrom gsubfn strapply
 #' @seealso \code{\link{getSavedata_Data}}
 #' @examples
 #' # make me!
@@ -234,6 +233,17 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
     linesParsed <- c(linesParsed, attr(bparametersSection, "lines"))
   }
 
+  # v8.11+: results in HDF5 format (parse before stripping linesParsed so its
+  # Save file is not mistaken for a primary SAVEDATA raw file)
+  h5resultsSection <- getSection("^\\s*Results in H5 Format\\s*$", savedataSection, sectionStarts)
+  if (!is.null(h5resultsSection)) {
+    h5Start <- grep("^\\s*Save file\\s*$", h5resultsSection, ignore.case=TRUE, perl=TRUE)
+    if (length(h5Start) > 0L) {
+      h5resultsFile <- trimSpace(h5resultsSection[h5Start+1]) # save file is on the next line
+    }
+    linesParsed <- c(linesParsed, attr(h5resultsSection, "lines"))
+  }
+
   #remove all lines already parsed within named sections
   #this should just leave basic savedata output containing save file info, MC replication info, etc.
   if (length(linesParsed) > 0L) savedataSection <- savedataSection[linesParsed*-1]
@@ -246,19 +256,26 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
     saveFile <- trimSpace(savedataSection[(saveFile.text[1L] + 1)])
   }
 
+  # When both DATA IMPUTATION: SAVE and SAVEDATA: FILE appear (e.g., ex11.7.out),
+  # scope variable order/format extraction to the block belonging to saveFile.
+  primarySaveSection <- if (length(saveFile.text) > 1L) {
+    savedataSection[saveFile.text[1L]:(saveFile.text[2L] - 1L)]
+  } else {
+    savedataSection
+  }
 
 #  #file record length
 #  savefile.recordlength <- getSection("^\\s*Save file record length\\s+\\d+\\s*$", savedataSection, sectionStarts)
 #  #Skip for now
 
-  orderFormat.text <- getMultilineSection("Order and format of variables", savedataSection, outfile, allowMultiple=FALSE)
+  orderFormat.text <- getMultilineSection("Order and format of variables", primarySaveSection, outfile, allowMultiple=FALSE)
 
   if (!section_is_missing(orderFormat.text)) {
     variablesToParse <- orderFormat.text[orderFormat.text != ""]
     
     #Mplus v8: remove + sign in front of variables that plausible values from SAVE=FSCORES (XX) in BSEM.
-    if (length(nimp_line <- grep("\\+ variables that have a value for each of the \\d+ imputations", savedataSection)) > 0L) {
-      nimp <- as.numeric(sub(".*\\+ variables that have a value for each of the (\\d+) imputations.*", "\\1", savedataSection[nimp_line]))
+    if (length(nimp_line <- grep("\\+ variables that have a value for each of the \\d+ imputations", primarySaveSection)) > 0L) {
+      nimp <- as.numeric(sub(".*\\+ variables that have a value for each of the (\\d+) imputations.*", "\\1", primarySaveSection[nimp_line]))
       which_imp <- grep("^\\s*\\+.*", variablesToParse)
       variablesToParse <- sub("+", "", variablesToParse, fixed=TRUE)
     } else { which_imp <- integer(0) } #no imputations to unpack
@@ -285,24 +302,29 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
     
     fileVarNames <- sapply(varsSplit, function(x) { paste(x[1:(length(x) - 1)], collapse=".") })
     fileVarFormats <- sapply(varsSplit, function(x) { x[length(x)] }) #last element
-    fileVarWidths <- strapply(fileVarFormats, "[IEFG]+(\\d+)(\\.\\d+)*", as.numeric, perl=TRUE, simplify=TRUE)
+    fileVarWidths <- as.numeric(ifelse(
+      grepl("[IEFG]+\\d+", fileVarFormats, perl = TRUE),
+      sub("^.*?[IEFG]+(\\d+)(?:\\.\\d+)*.*$", "\\1", fileVarFormats, perl = TRUE),
+      NA_character_
+    ))
 
   }
   
   # For some large outputs, records span multiple rows, which is a hard fixed-width parsing demand. Identify the chunks and split out the variables by chunk
   # save file format (sometimes on same line, sometimes on next line)
   # Mplus uses slashes to denote when single records span multiple lines: 512F10.3 / 505F10.3 / 505F10.3 / 540F10.3 I6 I7
-  saveFileFormat.text <- grep("^\\s*Save file format\\s*$", savedataSection, perl=TRUE)
+  saveFileFormat.text <- grep("^\\s*Save file format\\s*$", primarySaveSection, perl=TRUE)
   
   if (length(saveFileFormat.text) > 0L) {
-    saveFileFormat <- trimSpace(savedataSection[saveFileFormat.text[1L] + 1])
+    saveFileFormat <- trimSpace(primarySaveSection[saveFileFormat.text[1L] + 1])
     by_row <- strsplit(saveFileFormat, "\\s*/\\s*", perl=TRUE)[[1]]
     record_chunks <- length(by_row)
     chunkVarWidths <- lapply(by_row, function(cc) {
       # add a 1 in front of records that have no repeat digit(s) in front
       cc <- gsub("(?<![0-9])([IEFG][0-9\\.]+)", "1\\1", cc, perl=TRUE)
-      nreps <- strapply(cc, "(\\d+)[IEFG][0-9\\.]+", as.numeric, perl=TRUE, simplify = TRUE)
-      var_widths <- strapply(cc, "(?:\\d+)[IEFG]+(\\d+)(\\.\\d+)*", as.numeric, perl=TRUE, simplify = TRUE)
+      tokens <- regmatches(cc, gregexpr("\\d+[IEFG]+\\d+(?:\\.\\d+)*", cc, perl = TRUE))[[1L]]
+      nreps <- as.numeric(sub("^(\\d+)[IEFG]+.*$", "\\1", tokens, perl = TRUE))
+      var_widths <- as.numeric(sub("^\\d+[IEFG]+(\\d+).*$", "\\1", tokens, perl = TRUE))
       
       # now repeat the widths the correct number of times to form the line
       var_widths <- rep(var_widths, nreps)
@@ -324,7 +346,7 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
   #
 
   #Monte carlo and multiple imputation output: contains only order of variables, not their format
-  order.text <- getMultilineSection("Order of variables", savedataSection, outfile, allowMultiple=FALSE)
+  order.text <- getMultilineSection("Order of variables", primarySaveSection, outfile, allowMultiple=FALSE)
 
   if (!section_is_missing(order.text)) {
 	  #dump any blank fields because they will cause nulls in the names, formats, widths.
@@ -338,17 +360,6 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
 
   #future: plausible values output from Bayesian runs
   #PLAUSIBLE VALUE MEAN, MEDIAN, SD, AND PERCENTILES FOR EACH OBSERVATION
-
-  # v8.11+: results in HDF5 format
-  h5resultsSection <- getSection("^\\s*Results in H5 Format\\s*$", savedataSection, sectionStarts)
-  
-  if (!is.null(h5resultsSection)) {
-    h5Start <- grep("^\\s*Save file\\s*$", h5resultsSection, ignore.case=TRUE, perl=TRUE)
-    if (length(h5Start) > 0L) {
-      h5resultsFile <- trimSpace(h5resultsSection[h5Start+1]) # save file is on the next line
-    }
-    linesParsed <- c(linesParsed, attr(h5resultsSection, "lines"))
-  }
   
   #return the file information as a list
   #N.B. Would like to shift return to "saveFile", but need to update everywhere and note deprecation in changelog

@@ -5,7 +5,6 @@
 #' @param outfiletext character vector of Mplus output file from which to extract the AUX section
 #' @param filename filename of the Mplus output file being processed
 #' @return A data frame
-#' @importFrom gsubfn strapply
 #' @importFrom stats reshape
 #' @keywords internal
 extractAux <- function(outfiletext, filename) {
@@ -76,51 +75,111 @@ extractAux <- function(outfiletext, filename) {
 
   varnames <- sectionToParse[section_matchlines(variableSections)]
 
+  extract_step_shift <- function(step_lines) {
+    class_prob_idx <- grep(
+      "^\\s*Classification Probabilities for the Step 1 Most Likely",
+      step_lines, perl = TRUE
+    )
+    counts_lines <- if (length(class_prob_idx) > 0L) {
+      step_lines[seq_len(class_prob_idx[1L] - 1L)]
+    } else {
+      step_lines
+    }
+
+    count_matches <- extract_pcre_groups(
+      counts_lines,
+      "^\\s*(\\d+)\\s+([0-9.\\-]+)\\s+([0-9.\\-]+)\\s+([0-9.\\-]+)\\s+([0-9.\\-]+)\\s*$"
+    )
+    count_matches <- Filter(function(x) length(x) == 6L, count_matches)
+    step_counts <- if (length(count_matches) > 0L) {
+      mat <- do.call(rbind, lapply(count_matches, `[`, 2:6))
+      data.frame(
+        class = as.integer(mat[, 1L]),
+        first_step_count = as.numeric(mat[, 2L]),
+        first_step_prop = as.numeric(mat[, 3L]),
+        last_step_count = as.numeric(mat[, 4L]),
+        last_step_prop = as.numeric(mat[, 5L]),
+        stringsAsFactors = FALSE
+      )
+    } else {
+      NULL
+    }
+
+    step_class <- NULL
+    if (length(class_prob_idx) > 0L && (class_prob_idx[1L] + 2L) <= length(step_lines)) {
+      prob_lines <- step_lines[(class_prob_idx[1L] + 2L):length(step_lines)]
+      step_class <- unlabeledMatrixExtract(prob_lines, filename)
+    }
+
+    if (is.null(step_counts) && is.null(step_class)) return(NULL)
+    list(counts = step_counts, classification = step_class)
+  }
+
   vc <- list()
   vcat <- list()
   vomnibus <- list()
   vpairwise <- list()
+  vstepshift <- list()
   for (v in 1:length(variableSections)) {
     thisSection <- variableSections[[v]]
+    var_name <- trimSpace(varnames[v])
+
+    # Mplus 9.0+ appends Step 1 vs. Last Step class count & classification tables
+    # for 3-step auxiliary settings (D3STEP, DU3STEP, D3STEPC, (e)). Slice them off
+    # before parsing equality tests so "First Step vs. Last Step" does not collide.
+    stepCountsLine <- grep(
+      "^\\s*Final Class Counts and Proportions for the Latent Class Patterns\\s*$",
+      thisSection, perl = TRUE
+    )
+    if (length(stepCountsLine) > 0L) {
+      step_shift <- extract_step_shift(thisSection[stepCountsLine[1L]:length(thisSection)])
+      if (!is.null(step_shift)) vstepshift[[var_name]] <- step_shift
+      thisSection <- thisSection[seq_len(stepCountsLine[1L] - 1L)]
+    }
+
     if(any(grepl("Prob\\s*S\\.E\\.\\s*Odds Ratio", thisSection))){
       # This is a categorical auxiliary variable, handle accordingly
       thisSection <- thisSection[!thisSection == ""]
-      # col_headers <- strsplit(trimws(tolower(gsub("(\\d*\\.\\d*)% CI", "ci_\\1", gsub("(?<=[A-Z])\\.", "", grep("Prob\\s*S\\.E\\.\\s*Odds Ratio", thisSection, value = TRUE), perl = TRUE)))), split = "\\s{2,}")[[1]]
-      props <- thisSection[grepl("Class", thisSection, fixed = TRUE) | grepl("Category", thisSection, fixed = TRUE) ]
-      props <- strsplit(props, "\\s+")
+      props <- thisSection[grepl("^\\s*Class\\s+", thisSection, perl = TRUE) | grepl("^\\s*Category\\s+", thisSection, perl = TRUE)]
+      props <- strsplit(trimSpace(props), "\\s+")
       lengths <- sapply(props, length)
-      if(!(all(c(3, 9) %in% lengths))){
+      if(!(all(c(2, 8) %in% lengths))){
         message("Could not extract categorical conditional variables.")
       }
-      labs <- sapply(props[lengths == 3], `[`, 3)
-      props <- data.frame(do.call(rbind, props[lengths == 9]))
-      props$X3 <- as.integer(props$X3)
+      labs <- sapply(props[lengths == 2], `[`, 2)
+      props <- data.frame(do.call(rbind, props[lengths == 8]), stringsAsFactors = FALSE)
+      props$X2 <- as.integer(props$X2)
       which_lab <- 1
       props$X1[1] <- labs[which_lab]
-      for(i in 2:nrow(props)){
-        if(!sign(props$X3[i]-props$X3[i-1] > 0)){
-          which_lab <- which_lab + 1
+      if (nrow(props) >= 2L) {
+        for(i in 2:nrow(props)){
+          if(!sign(props$X2[i]-props$X2[i-1] > 0)){
+            which_lab <- which_lab + 1
+          }
+          props$X1[i] <- labs[which_lab]
         }
-        props$X1[i] <- labs[which_lab]
       }
-      props <- props[, -2]
-      #names(props) <- c("class", "category", col_headers)
       names(props) <- c("class", "category", "prob", "se", "or", "se_or", "ci_lower", "ci_upper")
+      num_cols <- c("prob", "se", "or", "se_or", "ci_lower", "ci_upper")
+      props[num_cols] <- lapply(props[num_cols], function(col) suppressWarnings(mplus_as.numeric(col)))
       
-      tests <- thisSection[grepl("Overall test", thisSection, fixed = TRUE) | grepl(" vs. ", thisSection, fixed = TRUE) ]
-      tests <- strsplit(tests, "\\s+")
+      tests <- thisSection[grepl("^\\s*Overall test\\b", thisSection, perl = TRUE) | grepl("^\\s*Class\\s+\\d+\\s+vs\\.\\s+\\d+", thisSection, perl = TRUE)]
+      tests <- strsplit(trimSpace(tests), "\\s+")
       lengths <- sapply(tests, length)
-      tests[lengths == 6] <- lapply(tests[lengths == 6], function(x){
-        c(x[1], "", x[2], "", x[c(2,4:6)])
+      tests[lengths == 5] <- lapply(tests[lengths == 5], function(x){
+        c("", x[1], "", x[2], x[2:5])
       })
-      tests <- data.frame(do.call(rbind, tests))
-      tests <- tests[, -c(1,2,4)]
+      tests <- data.frame(do.call(rbind, tests), stringsAsFactors = FALSE)
+      tests <- tests[, -c(1, 3, 4), drop = FALSE]
+      names(tests)[1:5] <- c("class", "versus", "chi_square", "p", "df")
+      tests$chi_square <- suppressWarnings(mplus_as.numeric(tests$chi_square))
+      tests$p <- suppressWarnings(mplus_as.numeric(tests$p))
+      tests$df <- as.integer(tests$df)
       if(any(grepl("NUMBER OF OBSERVATIONS USED FOR THE AUXILIARY VARIABLE", thisSection, fixed = TRUE))){
         tests <- cbind(tests, n = as.integer(gsub("^.+?(\\d{1,}).*?$", "\\1", grep("NUMBER OF OBSERVATIONS USED FOR THE AUXILIARY VARIABLE", thisSection, fixed = TRUE, value = TRUE))))
       }
       
-      names(tests)[1:5] <- c("class", "versus", "chi_square", "p", "df")
-      vcat[[varnames[v]]] <- list(parameters = props, tests = tests)
+      vcat[[var_name]] <- list(parameters = props, tests = tests)
     } else {
       # If it is not categorical, extract the conditional means. This is the 'old' code
       #mean s.e. match
@@ -133,7 +192,7 @@ extractAux <- function(outfiletext, filename) {
         if (length(meanSELine) > 0) {
           meanSE_twoColumn <- TRUE #side-by-side output
         } else {
-          print(paste("Couldn't match mean and s.e. for variable", varnames[[v]], "It may not be a continous variable. Support for categorical variables has not yet been implemented."))
+          print(paste("Couldn't match mean and s.e. for variable", var_name, "It may not be a continous variable. Support for categorical variables has not yet been implemented."))
           next
         }
       }
@@ -146,7 +205,7 @@ extractAux <- function(outfiletext, filename) {
         if (length(chiPLine) > 0) {
           chiP_twoColumn <- TRUE #side-by-side output
         } else {
-          message(paste("Couldn't match chi-square and p-value for variable", varnames[[v]], "It may not be a continous variable. Support for categorical variables has not yet been implemented."))
+          message(paste("Couldn't match chi-square and p-value for variable", var_name, "It may not be a continous variable. Support for categorical variables has not yet been implemented."))
           next
         }
       }
@@ -204,54 +263,108 @@ extractAux <- function(outfiletext, filename) {
         chip <- chipReparse
       }
       
-      class.M.SE <- strapply(means, "^\\s*Class\\s+(\\d+)\\s+([\\d\\.-]+)\\s+([\\d\\.-]+)", function(class, m, se) {
-        return(c(class=as.integer(class), m=as.numeric(m), se=as.numeric(se)))
-      }, simplify=FALSE)
-      
-      #drop nulls
-      class.M.SE[sapply(class.M.SE, is.null)] <- NULL
+      mean_matches <- extract_pcre_groups(means, "^\\s*Class\\s+(\\d+)\\s+([0-9.\\-*]+)\\s+([0-9.\\-*]+)")
+      mean_matches <- Filter(function(x) length(x) == 4L, mean_matches)
+      class.M.SE <- lapply(mean_matches, function(x) {
+        c(
+          class = as.integer(x[2L]),
+          m = suppressWarnings(mplus_as.numeric(x[3L])),
+          se = suppressWarnings(mplus_as.numeric(x[4L]))
+        )
+      })
       
       #need to trap overall test versus pairwise comparisons -- this could be much more elegant, but works for now
       overallLine <- grep("^\\s*Overall test\\s+.*$", chip, perl=TRUE)
       if (length(overallLine) > 0L) {
         if (dcon) {
           #DCON output has degrees of freedom inline as a third column
-          class.chi.p.omnibus <- strapply(chip[overallLine], "^\\s*Overall test\\s+([\\d\\.-]+)\\s+([\\d\\.-]+)\\s+([\\d\\.-]+)", function(chisq, p, df) {
-            #return(c(class1="Overall", class2="", chisq=as.numeric(chisq), p=as.numeric(p)))
-            return(c(chisq=as.numeric(chisq), df=as.numeric(df), p=as.numeric(p)))
-          }, simplify=FALSE)[[1L]]
+          om_match <- extract_pcre_groups(
+            chip[overallLine[1L]],
+            "^\\s*Overall test\\s+([0-9.\\-*]+)\\s+([0-9.\\-*]+)\\s+([0-9.\\-*]+)"
+          )[[1L]]
+          class.chi.p.omnibus <- if (length(om_match) == 4L) {
+            data.frame(
+              chisq = suppressWarnings(mplus_as.numeric(om_match[2L])),
+              df = as.numeric(om_match[4L]),
+              p = suppressWarnings(mplus_as.numeric(om_match[3L])),
+              var = var_name,
+              stringsAsFactors = FALSE
+            )
+          } else {
+            NULL
+          }
         } else {
-          class.chi.p.omnibus <- strapply(chip[overallLine], "^\\s*Overall test\\s+([\\d\\.-]+)\\s+([\\d\\.-]+)", function(chisq, p) {
-            #return(c(class1="Overall", class2="", chisq=as.numeric(chisq), p=as.numeric(p)))
-            return(c(chisq=as.numeric(chisq), df=as.numeric(dfOmnibus), p=as.numeric(p)))
-          }, simplify=FALSE)[[1L]]
+          om_match <- extract_pcre_groups(
+            chip[overallLine[1L]],
+            "^\\s*Overall test\\s+([0-9.\\-*]+)\\s+([0-9.\\-*]+)"
+          )[[1L]]
+          class.chi.p.omnibus <- if (length(om_match) == 3L) {
+            data.frame(
+              chisq = suppressWarnings(mplus_as.numeric(om_match[2L])),
+              df = as.numeric(dfOmnibus),
+              p = suppressWarnings(mplus_as.numeric(om_match[3L])),
+              var = var_name,
+              stringsAsFactors = FALSE
+            )
+          } else {
+            NULL
+          }
         }
         chip <- chip[-overallLine] #drop omnibus line from subsequent pairwise parsing
       } else {
-        class.chi.p.omnibus <- list()
+        class.chi.p.omnibus <- NULL
       }
       
       if (dcon) {
         #DCON output has degrees of freedom inline as a third column
-        class.chi.p.pairwise <- strapply(chip, "^\\s*Class\\s+(\\d+)\\s+vs\\.\\s+(\\d+)\\s+([\\d\\.-]+)\\s+([\\d\\.-]+)\\s+([\\d\\.-]+)", function(classA, classB, chisq, p, df) {
-          return(c(classA=as.character(classA), classB=as.character(classB), chisq=as.numeric(chisq), df=as.numeric(df), p=as.numeric(p)))
-        }, simplify=FALSE)
+        pw_matches <- extract_pcre_groups(
+          chip,
+          "^\\s*Class\\s+(\\d+)\\s+vs\\.\\s+(\\d+)\\s+([0-9.\\-*]+)\\s+([0-9.\\-*]+)\\s+([0-9.\\-*]+)"
+        )
+        pw_matches <- Filter(function(x) length(x) == 6L, pw_matches)
+        class.chi.p.pairwise <- lapply(pw_matches, function(x) {
+          data.frame(
+            classA = as.character(x[2L]),
+            classB = as.character(x[3L]),
+            chisq = suppressWarnings(mplus_as.numeric(x[4L])),
+            df = as.integer(x[6L]),
+            p = suppressWarnings(mplus_as.numeric(x[5L])),
+            var = var_name,
+            stringsAsFactors = FALSE
+          )
+        })
       } else {
-        class.chi.p.pairwise <- strapply(chip, "^\\s*Class\\s+(\\d+)\\s+vs\\.\\s+(\\d+)\\s+([\\d\\.-]+)\\s+([\\d\\.-]+)", function(classA, classB, chisq, p) {
-          return(c(classA=as.character(classA), classB=as.character(classB), chisq=as.numeric(chisq), df=as.numeric(dfPairwise), p=as.numeric(p)))
-        }, simplify=FALSE)
+        pw_matches <- extract_pcre_groups(
+          chip,
+          "^\\s*Class\\s+(\\d+)\\s+vs\\.\\s+(\\d+)\\s+([0-9.\\-*]+)\\s+([0-9.\\-*]+)"
+        )
+        pw_matches <- Filter(function(x) length(x) == 5L, pw_matches)
+        class.chi.p.pairwise <- lapply(pw_matches, function(x) {
+          data.frame(
+            classA = as.character(x[2L]),
+            classB = as.character(x[3L]),
+            chisq = suppressWarnings(mplus_as.numeric(x[4L])),
+            df = as.integer(dfPairwise),
+            p = suppressWarnings(mplus_as.numeric(x[5L])),
+            var = var_name,
+            stringsAsFactors = FALSE
+          )
+        })
       }
       
-      class.chi.p.pairwise[sapply(class.chi.p.pairwise, is.null)] <- NULL
-      
-      if (length(class.chi.p.pairwise) > 0L) { class.chi.p.pairwise <- data.frame(do.call("rbind", class.chi.p.pairwise), var=varnames[v]) }
-      if (length(class.chi.p.omnibus) > 0L) { class.chi.p.omnibus <- data.frame(cbind(t(class.chi.p.omnibus), var=varnames[v])) }
+      class.chi.p.pairwise <- if (length(class.chi.p.pairwise) > 0L) {
+        do.call("rbind", class.chi.p.pairwise)
+      } else {
+        list()
+      }
       
       #build data.frame
-      class.M.SE <- data.frame(do.call("rbind", class.M.SE), var=varnames[v])
-      vc[[varnames[v]]] <- class.M.SE
-      vomnibus[[varnames[v]]] <- class.chi.p.omnibus
-      vpairwise[[varnames[v]]] <- class.chi.p.pairwise
+      if (length(class.M.SE) > 0L) {
+        class.M.SE <- data.frame(do.call("rbind", class.M.SE), var=var_name, stringsAsFactors = FALSE)
+        vc[[var_name]] <- class.M.SE
+        vomnibus[[var_name]] <- class.chi.p.omnibus
+        vpairwise[[var_name]] <- class.chi.p.pairwise
+      }
     }
     
   }
@@ -264,10 +377,8 @@ extractAux <- function(outfiletext, filename) {
     allOmnibus <- data.frame(do.call("rbind", vomnibus), row.names=NULL)
     allMeans <- merge(allMeans, allOmnibus, by="var")
     if (! all(sapply(vpairwise, length) == 0L)) {
-      allPairwise <- data.frame(do.call("rbind", vpairwise), row.names=NULL)
-      allPairwise$chisq <- as.numeric(as.character(allPairwise$chisq))
-      allPairwise$df <- as.integer(as.character(allPairwise$df))
-      allPairwise$p <- as.numeric(as.character(allPairwise$p))
+      vpw_nonempty <- Filter(function(x) is.data.frame(x) && nrow(x) > 0L, vpairwise)
+      allPairwise <- data.frame(do.call("rbind", vpw_nonempty), row.names=NULL, stringsAsFactors = FALSE)
       allPairwise <- allPairwise[,c("var", "classA", "classB", "chisq", "df", "p")]
     } else {
       allPairwise <- data.frame(var=factor(character(0)),
@@ -283,6 +394,9 @@ extractAux <- function(outfiletext, filename) {
   if(length(vcat) > 0){
     ret <- c(ret, vcat)
   }
+  if (length(vstepshift) > 0L) {
+    ret$step_shift <- vstepshift
+  }
   class(ret) <- c("mplus.auxE", "list")
 
   return(ret)
@@ -297,19 +411,33 @@ extractAux <- function(outfiletext, filename) {
 extractR3step <- function(outfiletext, filename) {
   allSections <- list() # holds parameters for all identified sections
 
-  parR3stepSection <- getSection("^TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS USING::^THE 3-STEP PROCEDURE", outfiletext)
+  parR3stepSection <- getSection(
+    "^(?:TESTS OF )?CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS USING$::^THE 3-STEP(?: \\([^)]+\\))? PROCEDURE$",
+    outfiletext
+  )
   if (is.null(parR3stepSection)) return(allSections) # nothing
   
   # The highest class value is the default reference, so we need to add 1 to the highest alternative reference class number to infer the first class
-  classNums <- strapply(parR3stepSection, "Parameterization using Reference Class (\\d+)", as.numeric, empty=NA_integer_, simplify=TRUE)
-  firstClass <- max(na.omit(classNums)) + 1
-  firstLine <- paste("Parameterization using Reference Class", firstClass) # Add this on the first line so that we parse the structure correctly
+  refMatches <- extract_pcre_groups(parR3stepSection, "Parameterization using Reference Class (\\d+)")
+  classNums <- vapply(
+    Filter(function(x) length(x) == 2L, refMatches),
+    function(x) as.numeric(x[2L]),
+    numeric(1L)
+  )
+  firstLine <- if (length(classNums) > 0L) {
+    paste("Parameterization using Reference Class", max(classNums) + 1)
+  } else {
+    character(0)
+  }
   
   parR3stepSection <- c(firstLine, parR3stepSection)
   allSections <- appendListElements(allSections, extractParameters_1section(filename, parR3stepSection, "multinomialTests"))
   
   # odds ratios
-  parR3oddsSection <- getSection("^ODDS RATIOS FOR TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS::^USING THE 3-STEP PROCEDURE$", outfiletext)
+  parR3oddsSection <- getSection(
+    "^ODDS RATIOS FOR (?:TESTS OF )?CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS$::^USING THE 3-STEP(?: \\([^)]+\\))? PROCEDURE$",
+    outfiletext
+  )
   
   if (!is.null(parR3oddsSection)) {
     parR3oddsSection <- c(firstLine, parR3oddsSection)
@@ -317,7 +445,10 @@ extractR3step <- function(outfiletext, filename) {
   }
   
   # confidence intervals for 3-step procedure
-  ciR3stepSection <- getSection("^CONFIDENCE INTERVALS FOR TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS$::^USING THE 3-STEP PROCEDURE$", outfiletext)
+  ciR3stepSection <- getSection(
+    "^CONFIDENCE INTERVALS FOR (?:TESTS OF )?CATEGORICAL LATENT VARIABLE MULTINOMIAL LOGISTIC REGRESSIONS$::^USING THE 3-STEP(?: \\([^)]+\\))? PROCEDURE$",
+    outfiletext
+  )
 
   if (!is.null(ciR3stepSection)) {
     ciR3stepSection <- c(firstLine, ciR3stepSection)
@@ -326,9 +457,12 @@ extractR3step <- function(outfiletext, filename) {
   }
   
   # confidence intervals odds ratios for 3-step procedure
-  ciR3stepOddsSection <- getSection("^CONFIDENCE INTERVALS OF ODDS RATIOS FOR TESTS OF CATEGORICAL LATENT VARIABLE MULTINOMIAL$::^LOGISTIC REGRESSIONS USING THE 3-STEP PROCEDURE$", outfiletext)
+  ciR3stepOddsSection <- getSection(
+    "^CONFIDENCE INTERVALS OF ODDS RATIOS FOR (?:TESTS OF )?CATEGORICAL LATENT VARIABLE MULTINOMIAL$::^LOGISTIC REGRESSIONS USING THE 3-STEP(?: \\([^)]+\\))? PROCEDURE$",
+    outfiletext
+  )
   
-  if (!is.null(ciR3stepOddsSection)) {
+  if (!is.null(ciR3stepOddsSection) && !is.null(ciR3stepSection)) {
     # at present, the CI header is not reprinted in the odds ratio section, so we need to copy-paste header line for parsing
     ciR3stepOddsSection <- c(firstLine, ciR3stepSection[attr(hline, "header_lines")], ciR3stepOddsSection)
     allSections <- appendListElements(allSections, extractParameters_1section(filename, ciR3stepOddsSection, "ci.odds"))

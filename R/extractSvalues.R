@@ -257,7 +257,7 @@ svalues_parse_token <- function(token) {
   modifier <- substr(token, mod_pos[1L], mod_pos[1L])
   var <- trimws(substr(token, 1L, mod_pos[1L] - 1L))
   value_text <- trimws(substr(token, mod_pos[1L] + 1L, nchar(token)))
-  value <- if (nzchar(value_text)) mplus_as.numeric(value_text) else NA_real_
+  value <- if (nzchar(value_text)) suppressWarnings(mplus_as.numeric(value_text)) else NA_real_
   
   list(var = var, modifier = modifier, value = value)
 }
