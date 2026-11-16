@@ -100,6 +100,32 @@ test_that("unsupported H5 MODEL RESULTS layouts fall back to text parsing", {
   expect_null(MplusAutomation:::extractH5ModelResults(unsupported, "model.out"))
 })
 
+test_that("H5 R-square retains the columns shown in text output", {
+  filename <- "probit.out"
+  section <- c(
+    "    Observed                   Residual",
+    "    Variable        Estimate   Variance",
+    "    U1                 0.877      1.000",
+    "    U2             Undefined"
+  )
+  h5 <- list("R-Square" = list(
+    Results = rbind(c(0.8773808, 1), c(999, 999)),
+    Statements = rbind(
+      c("Observed Variable", "U1", "", ""),
+      c("Observed Variable", "U2", "", "")
+    )
+  ))
+  r2 <- testthat::with_mocked_bindings(
+    MplusAutomation:::extractH5RSquare_1file(section, h5, "probit.h5", filename),
+    h5_result_headings = function(...) c("Estimate", "Residual Variance"),
+    h5_statement_headings = function(...) c("Section", "Variable", "Keyword", "Right-hand variable")
+  )
+  expect_named(r2, c("param", "est", "resid_var"))
+  expect_equal(r2$param, c("U1", "U2"))
+  expect_equal(r2$est, c(0.8773808, NA_real_))
+  expect_equal(r2$resid_var, c(1, NA_real_))
+})
+
 test_that("H5 odds-ratio results agree with the text-parsed output", {
   skip_if_not_installed("rhdf5")
   outfile <- testthat::test_path("mplus_ug", "8.11", "ch3", "ex3.6.out")

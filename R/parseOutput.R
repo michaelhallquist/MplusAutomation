@@ -699,7 +699,7 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
       if ((line %in% blanks && ! (line-1) %in% blanks) || line == length(warnerrtext)) {
         msg <- trimSpace(warnerrtext[startMsg:ifelse(line %in% blanks, line - 1, line)])
         
-        if (grepl("^\\s*(WARNING:|USE THE FBITERATIONS OPTION|THE EFFECTIVE SAMPLE SIZE FOR THE POSTERIOR DISTRIBUTION)", msg[1L], ignore.case=TRUE, perl=TRUE)) {
+        if (grepl("^\\s*(WARNING:|USE THE FBITERATIONS OPTION|THE EFFECTIVE SAMPLE SIZE FOR THE POSTERIOR DISTRIBUTION|THE FOLLOWING DETERMINISTIC RELATIONSHIP HAS BEEN FOUND)", msg[1L], ignore.case=TRUE, perl=TRUE)) {
           warnerr$warnings[[w]] <- msg
           w <- w+1
         } else {
@@ -1425,22 +1425,19 @@ extractTech1 <- function(outfiletext, filename) {
 
   tech1Section <- getSection("^TECHNICAL 1 OUTPUT$", outfiletext)
   if (is.null(tech1Section)) return(new_mplus_tech1()) #no tech1 output
+  out <- extractTech1_1section(tech1Section, filename)
 
   # Support ESEM outputs containing both UNROTATED and ROTATED SOLUTION blocks
   solIdx <- grep("^\\s*TECHNICAL 1 OUTPUT FOR THE (UNROTATED|ROTATED) SOLUTION\\s*$", tech1Section, perl=TRUE)
   if (length(solIdx) > 1L) {
     solNames <- tolower(sub("^\\s*TECHNICAL 1 OUTPUT FOR THE (UNROTATED|ROTATED) SOLUTION\\s*$", "\\1", tech1Section[solIdx], perl=TRUE))
-    out <- list()
     for (i in seq_along(solIdx)) {
       start_l <- solIdx[i] + 1L
       end_l <- if (i < length(solIdx)) solIdx[i + 1L] - 1L else length(tech1Section)
       out[[solNames[i]]] <- extractTech1_1section(tech1Section[start_l:end_l], filename)
     }
-    class(out) <- c("mplus.tech1", "list")
-    return(out)
   }
-
-  extractTech1_1section(tech1Section, filename)
+  out
 }
 
 #' Helper function to extract the sample statistics from Mplus output
@@ -2035,13 +2032,16 @@ extractTech8 <- function(outfiletext, filename) {
       if (length(blanks) > 0L) {
         ess_lines <- if (blanks[1L] > 1L) ess_lines[seq_len(blanks[1L] - 1L)] else character(0)
       }
-      ess_matches <- extract_pcre_groups(ess_lines, "^\\s*(\\d+)\\s+([0-9.\\-*]+)\\s*$")
-      ess_matches <- Filter(function(x) length(x) == 3L, ess_matches)
+      ess_matches <- extract_pcre_groups(ess_lines, "^\\s*(\\d+)\\s+(<?)([0-9.\\-*]+)\\s*$")
+      ess_matches <- Filter(function(x) length(x) == 4L, ess_matches)
       if (length(ess_matches) > 0L) {
-        mat <- do.call(rbind, lapply(ess_matches, `[`, 2:3))
+        mat <- do.call(rbind, lapply(ess_matches, `[`, 2:4))
+        value <- suppressWarnings(mplus_as.numeric(mat[, 3L]))
+        censored <- mat[, 2L] == "<"
         ess_df <- data.frame(
           parameter = as.integer(mat[, 1L]),
-          ess = suppressWarnings(mplus_as.numeric(mat[, 2L])),
+          ess = replace(value, censored, NA_real_),
+          upper_bound = replace(value, !censored, NA_real_),
           stringsAsFactors = FALSE
         )
         tech8List[["ess"]] <- new_mplus_ess(ess_df)
@@ -2446,13 +2446,16 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
       }
     }
     
+    pattern_header <- "^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT (?:CLASS PATTERNS|CLASSES)$"
+    pattern_section <- function(subheading) {
+      getSection(paste0(pattern_header, "::^", subheading, "$"), outfiletext)
+    }
+    posteriorProb.patterns <- pattern_section("BASED ON ESTIMATED POSTERIOR PROBABILITIES")
     if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
-      posteriorProb.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
       mostLikely.patterns <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
       mostLikelyCounts <- getSection("CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN", outfiletext)
     } else {
-      posteriorProb.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
-      mostLikely.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
+      mostLikely.patterns <- pattern_section("BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN")
       mostLikelyCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE$::^BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
     }
     
@@ -2477,13 +2480,7 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
         c("variable", "class", "count", "proportion"))
     
     # Patterns
-    countlist[["modelEstimated.patterns"]] <-
-      getClassCols_lta(
-        getSection(
-          "^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON THE ESTIMATED MODEL$",
-          outfiletext
-        )
-      )
+    countlist[["modelEstimated.patterns"]] <- getClassCols_lta(pattern_section("BASED ON THE ESTIMATED MODEL"))
     
     countlist[["posteriorProb.patterns"]] <- getClassCols_lta(posteriorProb.patterns)
     countlist[["mostLikely.patterns"]] <- getClassCols_lta(mostLikely.patterns)
@@ -2494,14 +2491,18 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
       first_present <- which(morder != "")[1]
       catvar_names <- strsplit(trimSpace(morder[first_present]), "\\s+")[[1]]
     } else {
-      catvar_names <- unique(countlist[["mostLikely"]]$variable) #fall back approximation
-      #stop("Unable to determine names of categorical latent variables.")
+      catvar_names <- unique(countlist[["modelEstimated"]]$variable)
+      if (!length(catvar_names)) catvar_names <- unique(countlist[["mostLikely"]]$variable)
     }
     
     rename_sections <- which(names(countlist) %in% c("modelEstimated.patterns", "posteriorProb.patterns", "mostLikely.patterns"))
     if (length(rename_sections) > 0L) {
       for (s in rename_sections) {
-        countlist[[s]] <- setNames(countlist[[s]], c(catvar_names, "count", "proportion"))
+        nvars <- ncol(countlist[[s]]) - 2L
+        names(countlist[[s]]) <- c(
+          if (length(catvar_names) == nvars) catvar_names else paste0("class", seq_len(nvars)),
+          "count", "proportion"
+        )
       }
     }
     

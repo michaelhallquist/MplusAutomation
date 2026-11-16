@@ -14,40 +14,15 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
   if (isEmpty(columnNames)) stop("Missing column names for chunk.\n  ", filename)
   if (missing(sectionName)) sectionName <- "" #right now, just use sectionName for R-SQUARE section, where there are no subheaders per se
   
-  #R-SQUARE sections are not divided into the usual subheader sections, and the order of top-level headers is not comparable to typical output.
-  #Create a single match for the whole section
-  #In addition, the column names typically need to be filtered out because of the absence of subheaders
+  # R-SQUARE tables contain observed and latent rows without parameter subheaders.
   if (sectionName == "r2") {
-    splitRows <- strsplit(thisChunk, "\\s+")
-    headerRows <- sapply(splitRows, function(x) {
-          if (identical(x, c("Observed")) ||
-              identical(x, c("Latent")) ||
-              identical(x, c("Observed", "Scale")) ||
-              identical(x, c("Observed", "Two-Tailed", "Scale")) || 
-              identical(x, c("Latent", "Two-Tailed", "Scale")) ||
-              identical(x, c("Observed", "Two-Tailed", "Residual")) || 
-              identical(x, c("Latent", "Two-Tailed", "Residual")) ||
-              identical(x, c("Observed", "Two-Tailed")) ||
-              identical(x, c("Latent", "Two-Tailed")) ||
-              identical(x, c("Observed", "Residual")) ||
-              identical(x, c("Latent", "Residual")) ||
-              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Factors")) ||
-              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Variance")) ||
-              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value")) ||
-              identical(x, c("Variable", "Estimate")) ||
-              identical(x, c("Variable", "Estimate", "Factors")) ||
-              identical(x, c("Variable", "Estimate", "Variance")) ||
-              identical(x, c("Posterior", "One-Tailed", "95%", "C.I.")) ||
-              identical(x, c("Variable", "Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%")) ||
-              identical(x, c("Observed", "Two-Tailed", "Rate", "of")) || #r2 output for MI v8 with rate of missing
-              identical(x, c("Latent", "Two-Tailed", "Rate", "of")) ||
-              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Missing"))
-          ) { TRUE } else { FALSE }
-        })
-
-    thisChunk <- thisChunk[!headerRows]
-      
-    convertMatches <- data.frame(element=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
+    values <- vapply(strsplit(thisChunk, "\\s+"), `[`, character(1L), 2L)
+    is_estimate <- !is.na(suppressWarnings(mplus_as.numeric(values))) |
+      grepl("^(?:Undefined|NA|\\*{2,})$", values, ignore.case = TRUE, perl = TRUE)
+    thisChunk <- thisChunk[is_estimate]
+    if (length(thisChunk) == 0L) return(NULL)
+    convertMatches <- data.frame(element=0L, keyword="R-SQUARE", varname=NA_character_,
+                                 operator=NA_character_, endline=length(thisChunk))
   } else if (sectionName=="probability.scale") {
     #Probability scale output tends to fall in one uniform chunk. If it has header (e.g., Latent Class 1), these are handled upstream before parsing into chunks processed here.
     convertMatches <- data.frame(element=1, keyword="Probability.Scale", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))

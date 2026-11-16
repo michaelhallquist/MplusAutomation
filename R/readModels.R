@@ -67,11 +67,14 @@
 #' * `savedata_info`: File information about SAVEDATA files related to this output
 #' * `savedata`: SAVEDATA file as an R \code{data.frame}, as described in \code{getSavedata_Data}
 #' * `bparameters`: an \code{mcmc.list} object containing the draws from the MCMC chains for a Bayesian model that uses the SAVEDATA: BPARAMETERS command
-#' * `tech1`: a list containing parameter specification and starting values from OUTPUT: TECH1
+#' * `tech1`: parameter specification and starting values from OUTPUT: TECH1.
+#'   ESEM results can also include `unrotated` and `rotated` entries.
 #' * `tech3`: a list containing parameter covariance and correlation matrices from OUTPUT: TECH3
 #' * `tech4`: a list containing estimates, standard errors, Est./S.E. values, and p-values for latent variable means, covariances, and correlations from OUTPUT: TECH4
 #' * `tech7`: a list containing sample statistics for each latent class from OUTPUT: TECH7
-#' * `tech8`: a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8
+#' * `tech8`: Bayesian potential scale reduction and, when reported, the
+#'   effective sample size table (`ess`). For values reported as less than
+#'   a threshold, `ess` is missing and `upper_bound` contains the threshold.
 #' * `tech9`: a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9
 #' * `tech10`: a list containing model fit information from OUTPUT: TECH10
 #' * `tech12`: a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12
@@ -304,32 +307,17 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
         curfile
       )
       
-      #add total number of latent classes to summaries (in case of multiple categorical latent variables, this is just the product)
+      # Prefer counts of joint patterns when the output reports them.
       if (isTRUE("summaries" %in% what)) {
         cc <- allFiles[[listID]]$class_counts
-        count_tbl <- if (!is.null(summaries) && isTRUE(summaries$NCategoricalLatentVars[1L] > 1)) {
-          if (!is.null(cc$modelEstimated.patterns)) {
-            cc$modelEstimated.patterns
-          } else if (!is.null(cc$posteriorProb.patterns)) {
-            cc$posteriorProb.patterns
-          } else {
-            cc$mostLikely.patterns
-          }
-        } else {
-          if (!is.null(cc$modelEstimated)) {
-            cc$modelEstimated
-          } else if (!is.null(cc$posteriorProb)) {
-            cc$posteriorProb
-          } else if (!is.null(cc$mostLikely)) {
-            cc$mostLikely
-          } else if (length(cc) > 0L && is.list(cc[[1L]])) {
-            cc[[1L]]$modelEstimated
-          } else {
-            NULL
-          }
+        count_names <- c("modelEstimated.patterns", "posteriorProb.patterns", "mostLikely.patterns",
+                         "modelEstimated", "posteriorProb", "mostLikely")
+        count_tables <- Filter(function(x) is.data.frame(x) && nrow(x) > 0L, cc[count_names])
+        if (length(count_tables) == 0L && length(cc) > 0L && is.list(cc[[1L]])) {
+          count_tables <- Filter(is.data.frame, cc[[1L]][count_names])
         }
-        if (!is.null(count_tbl) && nrow(count_tbl) > 0L) {
-          summaries$NLatentClasses <- nrow(count_tbl)
+        if (length(count_tables) > 0L) {
+          summaries$NLatentClasses <- nrow(count_tables[[1L]])
         }
       }
     }

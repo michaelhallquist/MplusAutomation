@@ -137,49 +137,43 @@ extractAux <- function(outfiletext, filename) {
       thisSection <- thisSection[seq_len(stepCountsLine[1L] - 1L)]
     }
 
-    if(any(grepl("Prob\\s*S\\.E\\.\\s*Odds Ratio", thisSection))){
-      # This is a categorical auxiliary variable, handle accordingly
-      thisSection <- thisSection[!thisSection == ""]
-      props <- thisSection[grepl("^\\s*Class\\s+", thisSection, perl = TRUE) | grepl("^\\s*Category\\s+", thisSection, perl = TRUE)]
-      props <- strsplit(trimSpace(props), "\\s+")
-      lengths <- sapply(props, length)
-      if(!(all(c(2, 8) %in% lengths))){
-        message("Could not extract categorical conditional variables.")
+    if (any(grepl("Prob\\s+S\\.E\\.\\s+Odds Ratio", thisSection))) {
+      fields <- strsplit(trimws(thisSection), "\\s+")
+      class_lines <- grep("^\\s*Class\\s+\\d+\\s*$", thisSection, perl = TRUE)
+      category_lines <- grep("^\\s*Category\\s+\\d+\\s+", thisSection, perl = TRUE)
+      category_lines <- category_lines[lengths(fields[category_lines]) == 8L]
+      class_index <- findInterval(category_lines, class_lines)
+      category_lines <- category_lines[class_index > 0L]
+      class_ids <- vapply(fields[class_lines[class_index[class_index > 0L]]], `[`, character(1L), 2L)
+
+      parameters <- data.frame(
+        class = class_ids,
+        category = as.integer(vapply(fields[category_lines], `[`, character(1L), 2L)),
+        stringsAsFactors = FALSE
+      )
+      value_columns <- c("prob", "se", "or", "se_or", "ci_lower", "ci_upper")
+      for (i in seq_along(value_columns)) {
+        values <- vapply(fields[category_lines], `[`, character(1L), i + 2L)
+        values[grepl("^\\*{2,}$", values)] <- NA_character_
+        parameters[[value_columns[i]]] <- values
       }
-      labs <- sapply(props[lengths == 2], `[`, 2)
-      props <- data.frame(do.call(rbind, props[lengths == 8]), stringsAsFactors = FALSE)
-      props$X2 <- as.integer(props$X2)
-      which_lab <- 1
-      props$X1[1] <- labs[which_lab]
-      if (nrow(props) >= 2L) {
-        for(i in 2:nrow(props)){
-          if(!sign(props$X2[i]-props$X2[i-1] > 0)){
-            which_lab <- which_lab + 1
-          }
-          props$X1[i] <- labs[which_lab]
-        }
+
+      overall_rows <- fields[grepl("^\\s*Overall test\\b", thisSection)]
+      pairwise_rows <- fields[grepl("^\\s*Class\\s+\\d+\\s+vs\\.\\s+\\d+", thisSection, perl = TRUE)]
+      test_rows <- c(
+        lapply(overall_rows[lengths(overall_rows) == 5L], function(x) c("Overall", "Overall", x[3:5])),
+        lapply(pairwise_rows[lengths(pairwise_rows) == 7L], function(x) x[c(2, 4:7)])
+      )
+      test_values <- matrix(as.character(unlist(test_rows, use.names = FALSE)), ncol = 5L, byrow = TRUE)
+      test_values[grepl("^\\*{2,}$", test_values)] <- NA_character_
+      colnames(test_values) <- c("class", "versus", "chi_square", "p", "df")
+      tests <- as.data.frame(test_values, stringsAsFactors = FALSE)
+      n <- grep("NUMBER OF OBSERVATIONS USED FOR THE AUXILIARY VARIABLE:", thisSection, fixed = TRUE, value = TRUE)
+      if (length(n) > 0L) {
+        tests$n <- rep(as.integer(sub(".*:\\s*", "", n[1L], perl = TRUE)), nrow(tests))
       }
-      names(props) <- c("class", "category", "prob", "se", "or", "se_or", "ci_lower", "ci_upper")
-      num_cols <- c("prob", "se", "or", "se_or", "ci_lower", "ci_upper")
-      props[num_cols] <- lapply(props[num_cols], function(col) suppressWarnings(mplus_as.numeric(col)))
-      
-      tests <- thisSection[grepl("^\\s*Overall test\\b", thisSection, perl = TRUE) | grepl("^\\s*Class\\s+\\d+\\s+vs\\.\\s+\\d+", thisSection, perl = TRUE)]
-      tests <- strsplit(trimSpace(tests), "\\s+")
-      lengths <- sapply(tests, length)
-      tests[lengths == 5] <- lapply(tests[lengths == 5], function(x){
-        c("", x[1], "", x[2], x[2:5])
-      })
-      tests <- data.frame(do.call(rbind, tests), stringsAsFactors = FALSE)
-      tests <- tests[, -c(1, 3, 4), drop = FALSE]
-      names(tests)[1:5] <- c("class", "versus", "chi_square", "p", "df")
-      tests$chi_square <- suppressWarnings(mplus_as.numeric(tests$chi_square))
-      tests$p <- suppressWarnings(mplus_as.numeric(tests$p))
-      tests$df <- as.integer(tests$df)
-      if(any(grepl("NUMBER OF OBSERVATIONS USED FOR THE AUXILIARY VARIABLE", thisSection, fixed = TRUE))){
-        tests <- cbind(tests, n = as.integer(gsub("^.+?(\\d{1,}).*?$", "\\1", grep("NUMBER OF OBSERVATIONS USED FOR THE AUXILIARY VARIABLE", thisSection, fixed = TRUE, value = TRUE))))
-      }
-      
-      vcat[[var_name]] <- list(parameters = props, tests = tests)
+
+      vcat[[var_name]] <- list(parameters = parameters, tests = tests)
     } else {
       # If it is not categorical, extract the conditional means. This is the 'old' code
       #mean s.e. match
@@ -374,8 +368,14 @@ extractAux <- function(outfiletext, filename) {
     allMeans <- allMeans[,c("var", "class", "m", "se")]
     
     allMeans <- reshape(allMeans, idvar="var", timevar="class", direction="wide")
-    allOmnibus <- data.frame(do.call("rbind", vomnibus), row.names=NULL)
-    allMeans <- merge(allMeans, allOmnibus, by="var")
+    allOmnibus <- if (length(vomnibus)) {
+      do.call(rbind, vomnibus)
+    } else {
+      data.frame(var = character(), chisq = numeric(), df = numeric(), p = numeric())
+    }
+    # The auxiliary overall table has historically returned the test fields as strings.
+    allOmnibus[c("chisq", "df", "p")] <- lapply(allOmnibus[c("chisq", "df", "p")], as.character)
+    allMeans <- merge(allMeans, allOmnibus, by = "var", all.x = TRUE)
     if (! all(sapply(vpairwise, length) == 0L)) {
       vpw_nonempty <- Filter(function(x) is.data.frame(x) && nrow(x) > 0L, vpairwise)
       allPairwise <- data.frame(do.call("rbind", vpw_nonempty), row.names=NULL, stringsAsFactors = FALSE)

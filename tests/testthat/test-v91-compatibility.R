@@ -286,10 +286,11 @@ test_that("v9.1 auxiliary D3STEP and D3STEPC step-shift tables do not corrupt eq
   aux <- MplusAutomation:::extractAux(sec, "aux91.out")
 
   expect_s3_class(aux, "mplus.auxE")
-  expect_equal(aux$overall$chisq, 1513.545)
+  expect_equal(aux$overall$chisq, "1513.545")
   expect_equal(nrow(aux$U4$tests), 1L)
-  expect_equal(aux$U4$tests$chi_square, 93.766)
-  expect_equal(aux$U4$tests$df, 1L)
+  expect_equal(aux$U4$tests$versus, "Overall")
+  expect_equal(aux$U4$tests$chi_square, "93.766")
+  expect_equal(aux$U4$tests$df, "1")
   expect_equal(aux$step_shift$X1$counts$last_step_count, c(131.94829, 368.05171))
   expect_equal(aux$step_shift$X1$classification[1, 2], 0.099)
   expect_equal(aux$step_shift$U4$classification[2, 2], 1.000)
@@ -374,6 +375,25 @@ test_that("v9.1 mixture class equality tests, LTA transition odds, Overall Part,
     " C1#1     ON",
     "    F                  0.359      0.054      0.267      0.482",
     "",
+    "CONFIDENCE INTERVALS OF MODEL RESULTS",
+    "",
+    "                  Lower .5%  Lower 2.5%    Lower 5%    Estimate    Upper 5%  Upper 2.5%   Upper .5%",
+    "",
+    " Variances",
+    "    F                 0.578       0.634       0.662       0.812       0.962       0.990       1.046",
+    "",
+    "CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS FOR LATENT CLASS VARIABLES",
+    "",
+    " C1#1     ON",
+    "    F                 0.243       0.267       0.280       0.359       0.460       0.482       0.530",
+    "",
+    "CONFIDENCE INTERVALS FOR THE ALTERNATIVE PARAMETERIZATIONS FOR THE CATEGORICAL LATENT VARIABLE REGRESSION",
+    "",
+    "Parameterization using Reference Class 1",
+    "",
+    " Intercepts",
+    "    C1#2             -0.550      -0.402      -0.327       0.067       0.460       0.536       0.683",
+    "",
     "     Beginning Time:  10:00:00"
   )
 
@@ -406,6 +426,8 @@ test_that("v9.1 mixture class equality tests, LTA transition odds, Overall Part,
   expect_equal(nrow(params$odds), 2L)
   expect_equal(params$odds$param, c("X", "F"))
   expect_equal(params$odds$LatentClass, c("1", "Categorical.Latent.Variables"))
+  expect_equal(params$ci.odds$paramHeader, "C1#1.ON")
+  expect_equal(params$ci.odds$est, 0.359)
 })
 
 test_that("v9.1 Bayes TECH8 ESS, Penalized LL, VIF overflow, standalone R-SQUARE, and invariance (MODEL) syntax work", {
@@ -469,7 +491,6 @@ test_that("v9.1 Bayes TECH8 ESS, Penalized LL, VIF overflow, standalone R-SQUARE
     "",
     "    Observed                                        Two-Tailed",
     "    Variable        Estimate       S.E.  Est./S.E.    P-Value",
-    "",
     "    Y1                 0.312      0.041      7.610      0.000",
     "",
     "TECHNICAL 8 OUTPUT",
@@ -483,6 +504,7 @@ test_that("v9.1 Bayes TECH8 ESS, Penalized LL, VIF overflow, standalone R-SQUARE
     "     MCMC EFFECTIVE SAMPLE SIZE (ESS) IN ASCENDING ORDER",
     "        LOWEST 10 PARAMETERS",
     "        PARAMETER    ESS",
+    "             4       <20",
     "             2        41",
     "             3       195",
     "             1      1200",
@@ -504,8 +526,9 @@ test_that("v9.1 Bayes TECH8 ESS, Penalized LL, VIF overflow, standalone R-SQUARE
   expect_equal(m$sampstat$vif$vif[2L], 1.250)
   expect_equal(m$parameters$r2$est, 0.312)
   expect_s3_class(m$tech8$ess, "mplus.ess.data.frame")
-  expect_equal(m$tech8$ess$parameter, c(2L, 3L, 1L))
-  expect_equal(m$tech8$ess$ess, c(41, 195, 1200))
+  expect_equal(m$tech8$ess$parameter, c(4L, 2L, 3L, 1L))
+  expect_equal(m$tech8$ess$ess, c(NA_real_, 41, 195, 1200))
+  expect_equal(m$tech8$ess$upper_bound, c(20, NA_real_, NA_real_, NA_real_))
   expect_length(m$errors, 0L)
   expect_gte(length(m$warnings), 1L)
 
@@ -592,7 +615,7 @@ test_that("installed Mplus 9.1 example outputs parse cleanly when available", {
   target_files <- c(
     file.path(ug_dir, c(
       "ex3.4.out", "ex3.18.out", "ex4.1part2.out", "ex4.4.out",
-      "ex5.5part3.out", "ex5.26.out", "ex5.27.out",
+      "ex4.5.out", "ex5.5part3.out", "ex5.26.out", "ex5.27.out",
       "ex7.3.out", "ex7.12.out", "ex7.18.out", "ex7.22.out",
       "ex8.7.out", "ex8.8.out", "ex8.14.out",
       "ex9.32.out", "ex9.39b.out",
@@ -617,4 +640,36 @@ test_that("installed Mplus 9.1 example outputs parse cleanly when available", {
     expect_length(grep("^Error (extracting|parsing|reading)", msgs), 0L)
     expect_s3_class(m, "mplus.model")
   }
+})
+
+test_that("installed EFA examples retain the last rotation and each class", {
+  ug_dir <- "/Applications/Mplus/Examples/usersguide/outputs"
+  files <- file.path(ug_dir, c("ex4.4.out", "ex4.5.out", "ex8.15.out"))
+  skip_if_not(all(file.exists(files)), "Mplus 9.1 Examples not installed")
+
+  efa <- readModels(files[1L], what = "parameters")$parameters$efa
+  expect_named(efa, c("f1_CLASS1", "f1_CLASS2", "f2_CLASS1", "f2_CLASS2"))
+  expect_equal(efa$f2_CLASS2$loadings$estimates["Y1", "1"], 0.788)
+
+  efa <- readModels(files[2L], what = "parameters")$parameters$efa
+  expect_equal(efa$wi2_bw0_WITHIN$loadings$estimates["Y1", "1"], 0.798)
+
+  lta <- readModels(files[3L], what = c("summaries", "class_counts"))
+  expect_equal(lta$summaries$NLatentClasses, 54L)
+  expect_equal(nrow(lta$class_counts$modelEstimated.patterns), 54L)
+})
+
+test_that("rotated TECH1 sections preserve the legacy top-level fields", {
+  f <- test_path("mplus_ug", "8.11", "ch5", "ex5.26.out")
+  tech1 <- readModels(f, what = "tech1")$tech1
+  expect_s3_class(tech1$parameterSpecification, "mplus.parameterSpecification")
+  expect_s3_class(tech1$startingValues, "mplus.startingValues")
+  expect_identical(tech1$parameterSpecification$X, tech1$rotated$parameterSpecification)
+  expect_s3_class(tech1$unrotated, "mplus.tech1")
+})
+
+test_that("mixtures without joint pattern tables retain the marginal class count", {
+  f <- test_path("mplus_ug", "8.11", "ch7", "ex7.15.out")
+  m <- readModels(f, what = c("summaries", "class_counts"))
+  expect_equal(m$summaries$NLatentClasses, 6L)
 })

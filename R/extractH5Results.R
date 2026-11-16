@@ -535,22 +535,38 @@ extractH5StandardizedModelResults_1file <- function(h5results, h5file, filename)
     if (!is.null(params)) out[[section_name]] <- params
   }
 
-  r2_result_attributes <- read_h5_attributes(h5file, "R-Square/Results")
-  r2_statement_attributes <- read_h5_attributes(h5file, "R-Square/Statements")
-  r2_table <- extractH5ResultTable(
-    h5results[["R-Square"]],
-    filename = filename,
-    result_headings = r2_result_attributes$Headings,
-    statement_headings = r2_statement_attributes$Headings
-  )
-  if (!is.null(r2_table)) {
-    r2 <- r2_table[, c("param", "est", "se", "est_se", "pval"), drop = FALSE]
-    class(r2) <- c("mplus.params", "data.frame")
-    attr(r2, "filename") <- filename
-    out$r2 <- r2
-  }
-
   if (length(out) == 0L) NULL else out
+}
+
+# Keep the text table's layout and use full-precision values where the H5 rows align.
+extractH5RSquare_1file <- function(section, h5results, h5file, filename) {
+  r2 <- extractParameters_1section(filename, section, "r2")$r2
+  if (is.null(r2)) return(NULL)
+
+  h5_section <- h5results[["R-Square"]]
+  headings <- h5_result_headings(h5file, "R-Square")
+  h5_rows <- extractH5ResultTable(
+    h5_section, filename, headings, h5_statement_headings(h5file, "R-Square")
+  )
+  if (is.null(h5_rows) || !identical(r2$param, h5_rows$param)) return(r2)
+
+  # Undefined text estimates can have numeric sentinels in H5.
+  for (col in intersect(names(r2), c("est", "se", "est_se", "pval", "posterior_sd",
+                                     "lower_2.5ci", "upper_2.5ci"))) {
+    if (is.null(h5_rows[[col]])) next
+    replace <- !is.na(r2[[col]]) & !is.na(h5_rows[[col]])
+    r2[[col]][replace] <- h5_rows[[col]][replace]
+  }
+  extra_columns <- c(resid_var = "Residual Variance", scale_f = "Scale Factors")
+  for (col in intersect(names(r2), names(extra_columns))) {
+    idx <- which(tolower(trimws(headings)) == tolower(extra_columns[[col]]))
+    if (length(idx) == 1L) {
+      values <- h5_section$Results[, idx]
+      replace <- !is.na(r2[[col]]) & !is.na(values)
+      r2[[col]][replace] <- values[replace]
+    }
+  }
+  r2
 }
 
 h5results_file_path <- function(savedata_info, outfile) {
@@ -661,28 +677,14 @@ extractH5Parameters_1file <- function(outfiletext, filename, h5results, h5file,
     )
     expected <- expected_standardized_sections(outfiletext)
     if (is.null(standardized) || length(expected) == 0L ||
-        !all(expected %in% names(standardized)) ||
-        (has_output_section(outfiletext, "R-SQUARE") && !"r2" %in% names(standardized))) {
+        !all(expected %in% names(standardized))) {
       return(NULL)
     }
     parameters <- c(parameters, standardized)
-  } else if (has_output_section(outfiletext, "R-SQUARE")) {
-    r2_result_attributes <- read_h5_attributes(h5file, "R-Square/Results")
-    r2_statement_attributes <- read_h5_attributes(h5file, "R-Square/Statements")
-    r2_table <- tryCatch(
-      extractH5ResultTable(
-        h5results[["R-Square"]],
-        filename = filename,
-        result_headings = r2_result_attributes$Headings,
-        statement_headings = r2_statement_attributes$Headings
-      ),
-      error = function(e) NULL
-    )
-    if (is.null(r2_table)) return(NULL)
-    r2 <- r2_table[, c("param", "est", "se", "est_se", "pval"), drop = FALSE]
-    class(r2) <- c("mplus.params", "data.frame")
-    attr(r2, "filename") <- filename
-    parameters$r2 <- r2
+  }
+  r2_section <- getSection("^R-SQUARE$", outfiletext)
+  if (!is.null(r2_section)) {
+    parameters$r2 <- extractH5RSquare_1file(r2_section, h5results, h5file, filename)
   }
 
   interval_type <- output_interval_type(outfiletext)
@@ -736,13 +738,10 @@ extractH5Parameters_1file <- function(outfiletext, filename, h5results, h5file,
     parameters <- c(parameters, probability_scale)
   }
 
-  has_odds <- has_output_prefix(outfiletext, "LOGISTIC REGRESSION ODDS RATIO RESULTS")
-  odds_section_count <- sum(grepl("^LOGISTIC REGRESSION ODDS RATIO RESULTS", outfiletext, perl = TRUE))
-  has_odds_ci <- any(grepl(
-    "^CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS", outfiletext, perl = TRUE
-  ))
-  if (has_odds) {
-    if (odds_section_count > 1L) return(NULL) # fall back to text parser when split across observed + latent-class sections
+  odds_section_count <- sum(grepl("^\\s*LOGISTIC REGRESSION ODDS RATIO RESULTS", outfiletext, perl = TRUE))
+  has_odds_ci <- has_output_prefix(outfiletext, "CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS")
+  if (odds_section_count > 0L) {
+    if (odds_section_count > 1L) return(NULL) # H5 may omit one of the split tables
     odds <- tryCatch(
       extractH5OddsRatioResults_1file(
         h5results, h5file, filename,

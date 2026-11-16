@@ -338,10 +338,9 @@ new_mplus_ess <- function(x = data.frame()) {
   x
 }
 
-new_mplus_tech8 <- function(psr = new_mplus_psr(), psr_pppp = NULL, ess = NULL) {
+new_mplus_tech8 <- function(psr = new_mplus_psr(), psr_pppp = NULL) {
   out <- list(psr = psr)
   if (!is.null(psr_pppp)) out$psr_pppp <- psr_pppp
-  if (!is.null(ess)) out$ess <- ess
   class(out) <- c("mplus.tech8", "list")
   out
 }
@@ -495,7 +494,7 @@ getSection <- function(sectionHeader, outfiletext, headers="standard") {
   else nextHeader <- h[subsequentHeaders[1]] - 1
   
   section.found <- new_mplus_section(
-    outfiletext[(beginSection+1):nextHeader],
+    outfiletext[seq_len(nextHeader - beginSection) + beginSection],
     lines=beginSection:nextHeader,
     header_line=beginSection,
     header=sectionHeader
@@ -614,6 +613,7 @@ parse_into_sections <- function(outfiletext) {
       "TOTAL, INDIRECT, AND DIRECT EFFECTS BASED ON COUNTERFACTUALS \\(CAUSALLY-DEFINED EFFECTS\\)",
       "STANDARDIZED TOTAL, TOTAL INDIRECT, SPECIFIC INDIRECT, AND DIRECT EFFECTS", "CONFIDENCE INTERVALS OF MODEL RESULTS",
       "CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS.*",
+      "CONFIDENCE INTERVALS FOR THE (?:ODDS RATIOS FOR THE )?ALTERNATIVE PARAMETERIZATIONS FOR THE(?: CATEGORICAL LATENT VARIABLE REGRESSION)?",
       "CREDIBILITY INTERVALS OF MODEL RESULTS",
       "CONFIDENCE INTERVALS OF STANDARDIZED MODEL RESULTS",
       "CREDIBILITY INTERVALS OF STANDARDIZED MODEL RESULTS",
