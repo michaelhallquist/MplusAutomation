@@ -262,11 +262,12 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
       )
     }
 
-    is_efa <- any(grepl(
-        "(EXPLORATORY FACTOR ANALYSIS WITH \\d+ FACTOR\\(S\\):|EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND \\d+ BETWEEN FACTOR\\(S\\):)",
-        outfiletext,
-      perl = TRUE
-    ))
+    is_efa <- any(grepl(paste0(
+      "^\\s*(EXPLORATORY FACTOR ANALYSIS WITH \\d+ FACTOR\\(S\\):|",
+      "EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND \\d+ BETWEEN FACTOR\\(S\\):|",
+      "EXPLORATORY FACTOR ANALYSIS WITH \\d+ WITHIN FACTOR\\(S\\) AND UNRESTRICTED BETWEEN COVARIANCE:|",
+      "EXPLORATORY FACTOR ANALYSIS WITH UNRESTRICTED WITHIN COVARIANCE AND \\d+ BETWEEN FACTOR\\(S\\):)\\s*$"
+    ), outfiletext, perl = TRUE))
     
     if (isTRUE("parameters" %in% what)) {
       # Model parameters: the helper selects a complete H5RESULTS parse when

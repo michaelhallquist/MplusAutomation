@@ -673,3 +673,59 @@ test_that("mixtures without joint pattern tables retain the marginal class count
   m <- readModels(f, what = c("summaries", "class_counts"))
   expect_equal(m$summaries$NLatentClasses, 6L)
 })
+
+test_that("two-level EFA with only unrestricted covariance headers still extracts EFA parameters", {
+  outfile <- tempfile(fileext = ".out")
+  on.exit(unlink(outfile))
+  writeLines(c(
+    "Mplus VERSION 9.1",
+    "MUTHEN & MUTHEN",
+    "",
+    "INPUT INSTRUCTIONS",
+    "  TITLE: two-level UW EFA;",
+    "  ANALYSIS: TYPE = TWOLEVEL EFA 1 1 UW;",
+    "",
+    "INPUT READING TERMINATED NORMALLY",
+    "",
+    "SUMMARY OF ANALYSIS",
+    "Number of groups                                                 1",
+    "Number of observations                                         200",
+    "Number of dependent variables                                    3",
+    "Number of independent variables                                  0",
+    "Number of continuous latent variables                            0",
+    "",
+    "Estimator                                                      MLR",
+    "Type of analysis                                      TWOLEVEL EFA 1 1 UW",
+    "",
+    "THE MODEL ESTIMATION TERMINATED NORMALLY",
+    "",
+    "EXPLORATORY FACTOR ANALYSIS WITH 1 WITHIN FACTOR(S) AND UNRESTRICTED BETWEEN COVARIANCE:",
+    "",
+    "WITHIN LEVEL RESULTS",
+    "",
+    "     GEOMIN ROTATED LOADINGS (* significant at 5% level)",
+    "                  1",
+    "              ________",
+    " Y1             0.812*",
+    " Y2             0.745*",
+    " Y3             0.690*",
+    "",
+    "     GEOMIN FACTOR CORRELATIONS (* significant at 5% level)",
+    "                  1",
+    "              ________",
+    "      1         1.000",
+    "",
+    "     ESTIMATED RESIDUAL VARIANCES",
+    "              Estimates",
+    "              ________",
+    " Y1             0.341",
+    " Y2             0.445",
+    " Y3             0.524",
+    "",
+    "     Beginning Time:  10:00:00"
+  ), outfile)
+
+  m <- readModels(outfile, what = "parameters", quiet = TRUE)
+  expect_named(m$parameters$efa, "wi1_bw0_WITHIN")
+  expect_equal(m$parameters$efa$wi1_bw0_WITHIN$loadings$estimates["Y1", "1"], 0.812)
+})

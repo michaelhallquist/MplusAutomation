@@ -16,7 +16,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
   
   # R-SQUARE tables contain observed and latent rows without parameter subheaders.
   if (sectionName == "r2") {
-    values <- vapply(strsplit(thisChunk, "\\s+"), `[`, character(1L), 2L)
+    values <- vapply(strsplit(trimws(thisChunk), "\\s+"), `[`, character(1L), 2L)
     is_estimate <- !is.na(suppressWarnings(mplus_as.numeric(values))) |
       grepl("^(?:Undefined|NA|\\*{2,})$", values, ignore.case = TRUE, perl = TRUE)
     thisChunk <- thisChunk[is_estimate]
