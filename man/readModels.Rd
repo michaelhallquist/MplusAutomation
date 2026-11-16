@@ -73,11 +73,14 @@ message was found. A non-convergence message is retained in \code{errors}.
 \item \code{savedata_info}: File information about SAVEDATA files related to this output
 \item \code{savedata}: SAVEDATA file as an R \code{data.frame}, as described in \code{getSavedata_Data}
 \item \code{bparameters}: an \code{mcmc.list} object containing the draws from the MCMC chains for a Bayesian model that uses the SAVEDATA: BPARAMETERS command
-\item \code{tech1}: a list containing parameter specification and starting values from OUTPUT: TECH1
+\item \code{tech1}: parameter specification and starting values from OUTPUT: TECH1.
+ESEM results can also include \code{unrotated} and \code{rotated} entries.
 \item \code{tech3}: a list containing parameter covariance and correlation matrices from OUTPUT: TECH3
 \item \code{tech4}: a list containing estimates, standard errors, Est./S.E. values, and p-values for latent variable means, covariances, and correlations from OUTPUT: TECH4
 \item \code{tech7}: a list containing sample statistics for each latent class from OUTPUT: TECH7
-\item \code{tech8}: a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8
+\item \code{tech8}: Bayesian potential scale reduction and, when reported, the
+effective sample size table (\code{ess}). For values reported as less than
+a threshold, \code{ess} is missing and \code{upper_bound} contains the threshold.
 \item \code{tech9}: a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9
 \item \code{tech10}: a list containing model fit information from OUTPUT: TECH10
 \item \code{tech12}: a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12

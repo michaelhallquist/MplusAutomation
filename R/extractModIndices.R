@@ -79,14 +79,14 @@ extractModIndices_1file <- function(outfiletext, filename) {
   columnNames <- detectColumnNames(filename, MISection, "mod_indices")
   if (all(is.na(columnNames)) || is.null(columnNames)) stop("Missing column names for mod indices.\n  ", filename)
 
-  #support multiple group output
-  multipleGroupMatches <- grep("^\\s*Group \\w+\\s*$", MISection, ignore.case=TRUE, perl=TRUE)
+  #support multiple group output (including Mplus v8/v9 parenthesized group codes, e.g. Group G1 (1))
+  multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", MISection, ignore.case=TRUE, perl=TRUE)
   
   if (length(multipleGroupMatches) > 0L) {
     matchIndex <- 1
     allSectionMI <- c()
     for (match in multipleGroupMatches) {
-      groupName <- sub("^\\s*Group (\\w+)\\s*$", "\\1", MISection[match], perl=TRUE)
+      groupName <- sub("^\\s*Group (\\w+)(?:\\s+\\(\\d+\\))*\\s*$", "\\1", MISection[match], perl=TRUE)
 
       chunkToParse <- FALSE
       if (matchIndex < length(multipleGroupMatches) &&

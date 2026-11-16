@@ -14,40 +14,15 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
   if (isEmpty(columnNames)) stop("Missing column names for chunk.\n  ", filename)
   if (missing(sectionName)) sectionName <- "" #right now, just use sectionName for R-SQUARE section, where there are no subheaders per se
   
-  #R-SQUARE sections are not divided into the usual subheader sections, and the order of top-level headers is not comparable to typical output.
-  #Create a single match for the whole section
-  #In addition, the column names typically need to be filtered out because of the absence of subheaders
+  # R-SQUARE tables contain observed and latent rows without parameter subheaders.
   if (sectionName == "r2") {
-    splitRows <- strsplit(thisChunk, "\\s+")
-    headerRows <- sapply(splitRows, function(x) {
-          if (identical(x, c("Observed")) ||
-              identical(x, c("Latent")) ||
-              identical(x, c("Observed", "Scale")) ||
-              identical(x, c("Observed", "Two-Tailed", "Scale")) || 
-              identical(x, c("Latent", "Two-Tailed", "Scale")) ||
-              identical(x, c("Observed", "Two-Tailed", "Residual")) || 
-              identical(x, c("Latent", "Two-Tailed", "Residual")) ||
-              identical(x, c("Observed", "Two-Tailed")) ||
-              identical(x, c("Latent", "Two-Tailed")) ||
-              identical(x, c("Observed", "Residual")) ||
-              identical(x, c("Latent", "Residual")) ||
-              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Factors")) ||
-              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Variance")) ||
-              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value")) ||
-              identical(x, c("Variable", "Estimate")) ||
-              identical(x, c("Variable", "Estimate", "Factors")) ||
-              identical(x, c("Variable", "Estimate", "Variance")) ||
-              identical(x, c("Posterior", "One-Tailed", "95%", "C.I.")) ||
-              identical(x, c("Variable", "Estimate", "S.D.", "P-Value", "Lower", "2.5%", "Upper", "2.5%")) ||
-              identical(x, c("Observed", "Two-Tailed", "Rate", "of")) || #r2 output for MI v8 with rate of missing
-              identical(x, c("Latent", "Two-Tailed", "Rate", "of")) ||
-              identical(x, c("Variable", "Estimate", "S.E.", "Est./S.E.", "P-Value", "Missing"))
-          ) { TRUE } else { FALSE }
-        })
-
-    thisChunk <- thisChunk[!headerRows]
-      
-    convertMatches <- data.frame(element=1, keyword="R-SQUARE", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
+    values <- vapply(strsplit(trimws(thisChunk), "\\s+"), `[`, character(1L), 2L)
+    is_estimate <- !is.na(suppressWarnings(mplus_as.numeric(values))) |
+      grepl("^(?:Undefined|NA|\\*{2,})$", values, ignore.case = TRUE, perl = TRUE)
+    thisChunk <- thisChunk[is_estimate]
+    if (length(thisChunk) == 0L) return(NULL)
+    convertMatches <- data.frame(element=0L, keyword="R-SQUARE", varname=NA_character_,
+                                 operator=NA_character_, endline=length(thisChunk))
   } else if (sectionName=="probability.scale") {
     #Probability scale output tends to fall in one uniform chunk. If it has header (e.g., Latent Class 1), these are handled upstream before parsing into chunks processed here.
     convertMatches <- data.frame(element=1, keyword="Probability.Scale", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
@@ -185,12 +160,21 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     #rbind the split list as a data.frame
     parsedParams <- data.frame(do.call("rbind", splitParams), stringsAsFactors=FALSE)
 
-    # At present, parsedParams is a data.frame of all character variables.
-    # For each column, convert to numeric, logical, or character if it is. Otherwise, return as character
-    parsedParams[] <- lapply(parsedParams, type.convert, as.is=TRUE)  # Apply transformation to each column
-    
     #use the column names detected in extractParameters_1section
     names(parsedParams) <- columnNames
+
+    # Preserve column 1 (param) as character so variable/factor names like "F" or "T"
+    # are never coerced to logical FALSE/TRUE. Convert value columns cleanly and map
+    # Mplus Fortran overflow strings (*********) to NA_real_.
+    for (col_idx in seq_len(ncol(parsedParams))[-1L]) {
+      col_vals <- parsedParams[[col_idx]]
+      col_vals[grepl("^\\*{2,}$", col_vals, perl = TRUE)] <- NA_character_
+      if (identical(columnNames[col_idx], "sig")) {
+        parsedParams[[col_idx]] <- as.logical(col_vals)
+      } else {
+        parsedParams[[col_idx]] <- suppressWarnings(mplus_as.numeric(col_vals))
+      }
+    }
 
     #add the paramHeader to the data.frame
     parsedParams$paramHeader <- varTitle
@@ -277,6 +261,17 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   #  4) categorical latent variables: Categorical Latent Variables
   #  5) class proportions (only known class output?)
 
+  rbind_params <- function(df1, df2) {
+    if (is.null(df1) || nrow(df1) == 0L) return(df2)
+    if (is.null(df2) || nrow(df2) == 0L) return(df1)
+    missing_in_1 <- setdiff(names(df2), names(df1))
+    missing_in_2 <- setdiff(names(df1), names(df2))
+    for (nm in missing_in_1) df1[[nm]] <- NA_character_
+    for (nm in missing_in_2) df2[[nm]] <- NA_character_
+    df2 <- df2[, names(df1), drop = FALSE]
+    rbind(df1, df2)
+  }
+
   allSectionParameters <- c() #will hold extracted params for all sections
   betweenWithinMatches <- grep("^\\s*(Between (?:\\s*\\w+\\s+)*Level|Within (?:\\s*\\w+\\s+)*Level|Within-Level (Standardized Estimates|R-Square) Averaged (Over|Across) Clusters)\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
   #latent class patterns can be "1 1 3 1" or something like "C#1" (see ex8.15.out for a complicated example)
@@ -284,10 +279,11 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
   multipleGroupMatches <- grep("^\\s*Group \\w+(?:\\s+\\(\\d+\\))*\\s*$", modelSection, ignore.case=TRUE, perl=TRUE) #support Mplus v8 syntax Group G1 (0) with parentheses of numeric value
   catLatentMatches <- grep("^\\s*Categorical Latent Variables\\s*$", modelSection, ignore.case=TRUE)
   classPropMatches <- grep("^\\s*Class Proportions\\s*$", modelSection, ignore.case=TRUE)
-  classSpecificMatches <- grep("^\\s*(Results|Parameters) for Class-specific Model Parts of [\\w_\\.]+\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
+  overallPartMatches <- grep("^\\s*(Results|Parameters) in the Overall Part of the Model.*$", modelSection, ignore.case=TRUE, perl=TRUE)
+  classSpecificMatches <- grep("^\\s*(Results|Parameters) for Class-specific Model Parts(?:\\s+of\\s+[\\w_\\.]+)?\\s*$", modelSection, ignore.case=TRUE, perl=TRUE)
   referenceClassMatches <- grep("^\\s*Parameterization using Reference Class [0-9]+", modelSection, ignore.case=TRUE)
 
-  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches, classSpecificMatches, referenceClassMatches))
+  topLevelMatches <- sort(c(betweenWithinMatches, latentClassMatches, multipleGroupMatches, catLatentMatches, classPropMatches, overallPartMatches, classSpecificMatches, referenceClassMatches))
   
   if (length(topLevelMatches) > 0) {
 
@@ -302,6 +298,8 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         bwWi <- "Within.Std.Averaged.Over.Clusters"
       } else if (match %in% betweenWithinMatches) { 
         bwWi <- sub("\\s+Level\\s*$", "", modelSection[match], perl=TRUE)
+      } else if (match %in% overallPartMatches) {
+        lcNum <- "Overall"
       } else if (match %in% latentClassMatches) {
         if ((pos <- regexpr("Pattern", modelSection[match], ignore.case=TRUE)) > 0) {
           #need to pull out and concatenate all numerical values following pattern
@@ -379,27 +377,6 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         #parse the chunk into a data.frame      
         parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
         
-        #WORKAROUND: For confidence intervals in multilevel mixtures, the Categorical Latent Variables section does not
-        #follow the same formatting guidelines. Specifically, it does not print "Within Level" after "Categorical Latent Variables".
-        #As a result, the CI parser blows up because bwWi will be NULL. The inconsistent section is in my assessment always the within level
-        #See, for example CINTERVAL output for UG ex10.1. The first section pertains to the within level (e.g., -1.302 is the param estimate in MODEL RESULTS).
-        #
-        #  Categorical Latent Variables
-        #  
-        #  C#1      ON
-        #  X1              -1.979      -1.817      -1.734      -1.302      -0.869      -0.787      -0.625
-        #  
-        #  Intercepts
-        #  C#1             -0.692      -0.490      -0.386       0.153       0.692       0.795       0.997
-        #  
-        #  Between Level
-        #  
-        #  C#1      ON
-        #  W               -1.989      -1.785      -1.680      -1.134      -0.588      -0.484      -0.280
-        #  
-        #  Residual Variances
-        #  C#1             -0.325      -0.244      -0.203       0.013       0.230       0.271       0.352
-
         if (sectionName == "ci.unstandardized" && lcNum=="Categorical.Latent.Variables" && is.null(bwWi) && length(betweenWithinMatches) > 0L) {
           bwWi <- "Within"
         }
@@ -410,7 +387,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
           parsedChunk$BetweenWithin <- bwWi
           parsedChunk$Group <- groupName
           parsedChunk$ReferenceClass <- rcNum
-          allSectionParameters <- rbind(allSectionParameters, parsedChunk)
+          allSectionParameters <- rbind_params(allSectionParameters, parsedChunk)
         }
       }
 
@@ -461,6 +438,194 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         return(x)
       })
   return(listParameters)
+}
+
+# Extract Mplus 9.1 side-by-side STANDARDIZED SOLUTION for ESEM, SEFA, and DSEFA
+extractESEMStandardized <- function(outfiletext, filename) {
+  stdSol <- getSection("^STANDARDIZED SOLUTION$", outfiletext)
+  if (is.null(stdSol) || length(stdSol) == 0L) return(NULL)
+
+  bifactor_pat <- "^\\s*BI-FACTOR MODEL(?:\\s+FOR\\s+([\\w_.]+))?\\s*$"
+  loadings_pat <- "^\\s*(?:[A-Za-z\\-]+\\s+)?ROTATED LOADINGS(?:\\s*\\([^)]*\\))?(?:\\s+FOR\\s+([\\w_.]+))?\\s*$"
+  corrs_pat <- "^\\s*(?:[A-Za-z\\-]+\\s+)?FACTOR CORRELATIONS(?:\\s*\\([^)]*\\))?(?:\\s+FOR\\s+([\\w_.]+))?\\s*$"
+  simp_pat <- "^\\s*[A-Za-z\\-]+\\s+SIMPLICITY\\s+([0-9.\\-*]+)\\s*$"
+
+  # Segment stdSol into rotation units (each unit ends after its FACTOR CORRELATIONS block)
+  sub_idx <- grep(paste(bifactor_pat, loadings_pat, corrs_pat, sep = "|"), stdSol, perl = TRUE)
+  if (length(sub_idx) == 0L) return(NULL)
+
+  unit_starts <- integer(0L)
+  unit_groups <- character(0L)
+  seen_corrs <- TRUE
+
+  for (idx in sub_idx) {
+    line <- stdSol[idx]
+    is_bi <- grepl(bifactor_pat, line, perl = TRUE)
+    is_load <- grepl(loadings_pat, line, perl = TRUE)
+    is_corr <- grepl(corrs_pat, line, perl = TRUE)
+
+    grp <- NA_character_
+    for (pat in c(bifactor_pat, loadings_pat, corrs_pat)) {
+      m <- extract_pcre_groups(line, pat)[[1L]]
+      if (length(m) == 2L && nzchar(m[2L])) {
+        grp <- m[2L]
+        break
+      }
+    }
+
+    if (is_bi || (is_load && seen_corrs) ||
+        (length(unit_groups) > 0L && !identical(grp, tail(unit_groups, 1L)) && !is.na(grp))) {
+      unit_starts <- c(unit_starts, idx)
+      unit_groups <- c(unit_groups, grp)
+      seen_corrs <- FALSE
+    }
+    if (is_corr) seen_corrs <- TRUE
+  }
+
+  parse_unit <- function(unit_lines) {
+    simp_idx <- grep(simp_pat, unit_lines, perl = TRUE)
+    simp_vals <- if (length(simp_idx) > 0L) {
+      vapply(
+        extract_pcre_groups(unit_lines[simp_idx], simp_pat),
+        function(x) suppressWarnings(mplus_as.numeric(x[2L])),
+        numeric(1L)
+      )
+    } else {
+      numeric(0L)
+    }
+    clean_lines <- if (length(simp_idx) > 0L) unit_lines[-simp_idx] else unit_lines
+
+    bi_est <- matrixExtract(clean_lines, "BI-FACTOR MODEL(?:\\s+FOR\\s+[\\w_.]+)?", filename, expect_sig = TRUE)
+    bi_sig <- attr(bi_est, "sig")
+    if (!is.null(bi_est)) attr(bi_est, "sig") <- NULL
+
+    load_est <- matrixExtract(clean_lines, "(?:[A-Za-z\\-]+\\s+)?ROTATED LOADINGS.*", filename, expect_sig = TRUE)
+    load_sig <- attr(load_est, "sig")
+    if (!is.null(load_est)) attr(load_est, "sig") <- NULL
+
+    corr_est <- matrixExtract(clean_lines, "(?:[A-Za-z\\-]+\\s+)?FACTOR CORRELATIONS.*", filename, expect_sig = TRUE)
+    corr_sig <- attr(corr_est, "sig")
+    if (!is.null(corr_est)) attr(corr_est, "sig") <- NULL
+
+    res <- list(
+      loadings = list(estimates = load_est, sig = load_sig),
+      corrs = list(estimates = corr_est, sig = corr_sig)
+    )
+    if (!is.null(bi_est)) {
+      bi_simp <- if (length(simp_vals) >= 2L) simp_vals[1L] else NA_real_
+      rot_simp <- if (length(simp_vals) >= 2L) simp_vals[2L] else if (length(simp_vals) == 1L) simp_vals[1L] else NA_real_
+      res$bifactor <- list(estimates = bi_est, sig = bi_sig, simplicity = bi_simp)
+      if (!is.na(rot_simp)) res$simplicity <- rot_simp
+    } else if (length(simp_vals) >= 1L) {
+      res$simplicity <- simp_vals[1L]
+    }
+    res
+  }
+
+  units <- vector("list", length(unit_starts))
+  unit_labels <- character(length(unit_starts))
+  for (u in seq_along(unit_starts)) {
+    start_l <- unit_starts[u]
+    end_l <- if (u < length(unit_starts)) unit_starts[u + 1L] - 1L else length(stdSol)
+    units[[u]] <- parse_unit(stdSol[start_l:end_l])
+    if (!is.na(unit_groups[u])) {
+      unit_labels[u] <- unit_groups[u]
+    } else if (!is.null(units[[u]]$loadings$estimates)) {
+      unit_labels[u] <- paste(colnames(units[[u]]$loadings$estimates), collapse = "_")
+    } else {
+      unit_labels[u] <- paste0("set", u)
+    }
+  }
+
+  if (length(units) == 1L && is.na(unit_groups[1L])) {
+    return(units[[1L]])
+  }
+
+  # Handle multi-group or multiple EFA factor sets
+  if (any(!is.na(unit_groups))) {
+    unique_grps <- unique(unit_groups)
+    if (length(unique_grps) == length(units)) {
+      names(units) <- unique_grps
+      return(units)
+    }
+    out <- list()
+    for (g in unique_grps) {
+      idx_g <- which(unit_groups == g)
+      if (length(idx_g) == 1L) {
+        out[[g]] <- units[[idx_g]]
+      } else {
+        sub_list <- units[idx_g]
+        names(sub_list) <- vapply(sub_list, function(x) paste(colnames(x$loadings$estimates), collapse = "_"), character(1L))
+        out[[g]] <- sub_list
+      }
+    }
+    return(out)
+  }
+
+  names(units) <- make.unique(unit_labels, sep = "_")
+  units
+}
+
+# Extract Mplus 9.0+ EQUALITY TESTS OF ... ACROSS THE LATENT CLASSES
+extractClassEqualityTests <- function(outfiletext, filename) {
+  hdr_pat <- "^\\s*EQUALITY TESTS OF (MEANS|INTERCEPTS|THRESHOLDS|PROBABILITIES|INTERCEPTS/PROBABILITIES|MEANS/PROBABILITIES) ACROSS THE LATENT CLASSES\\s*$"
+  hdr_idx <- grep(hdr_pat, outfiletext, perl = TRUE)
+  if (length(hdr_idx) == 0L) return(NULL)
+
+  param_type <- tolower(sub(hdr_pat, "\\1", outfiletext[hdr_idx[1L]], perl = TRUE))
+  sec <- getSection(paste0("^\\s*", trimws(outfiletext[hdr_idx[1L]]), "\\s*$"), outfiletext)
+  if (is.null(sec) || length(sec) == 0L) return(NULL)
+
+  rows <- list()
+  current_var <- NA_character_
+  for (line in sec) {
+    var_m <- extract_pcre_groups(line, "^([A-Za-z0-9_.$#]+)\\s*$")[[1L]]
+    if (length(var_m) == 2L) {
+      current_var <- var_m[2L]
+      next
+    }
+    ov_m <- extract_pcre_groups(
+      line,
+      "^\\s*Overall test\\s+([0-9.\\-*]+)\\s+([0-9.\\-*]+)\\s+(\\d+)\\s*$"
+    )[[1L]]
+    if (length(ov_m) == 4L && !is.na(current_var)) {
+      rows[[length(rows) + 1L]] <- data.frame(
+        param = current_var,
+        test_type = "overall",
+        classA = NA_character_,
+        classB = NA_character_,
+        chisq = suppressWarnings(mplus_as.numeric(ov_m[2L])),
+        df = as.integer(ov_m[4L]),
+        pval = suppressWarnings(mplus_as.numeric(ov_m[3L])),
+        stringsAsFactors = FALSE
+      )
+      next
+    }
+    pw_m <- extract_pcre_groups(
+      line,
+      "^\\s*Class\\s+(\\w+)\\s+vs\\.\\s+(\\w+)\\s+([0-9.\\-*]+)\\s+([0-9.\\-*]+)\\s+(\\d+)\\s*$"
+    )[[1L]]
+    if (length(pw_m) == 6L && !is.na(current_var)) {
+      rows[[length(rows) + 1L]] <- data.frame(
+        param = current_var,
+        test_type = "pairwise",
+        classA = pw_m[2L],
+        classB = pw_m[3L],
+        chisq = suppressWarnings(mplus_as.numeric(pw_m[4L])),
+        df = as.integer(pw_m[6L]),
+        pval = suppressWarnings(mplus_as.numeric(pw_m[5L])),
+        stringsAsFactors = FALSE
+      )
+    }
+  }
+
+  if (length(rows) == 0L) return(NULL)
+  out <- do.call(rbind, rows)
+  rownames(out) <- NULL
+  class(out) <- c("mplus.params", "data.frame")
+  attr(out, "filename") <- filename
+  attr(out, "parameter_type") <- param_type
+  out
 }
 
 #' Extract Parameters for One File
@@ -545,11 +710,6 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     if (!is.null(stdSection)) {
       allSections <- appendListElements(allSections, extractParameters_1section(filename, stdSection, "std.standardized"))
     }
-
-    r2Section <- getSection("^R-SQUARE$", outfiletext)
-    if (!is.null(r2Section)) {
-      allSections <- appendListElements(allSections, extractParameters_1section(filename, r2Section, "r2"))
-    }
     
     #if all individual standardized sections are absent, but the standardized section is present, must be old-style
     #combined standardized section (affects WLS and MUML, too). Extract and process old section.
@@ -558,6 +718,12 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
       allSections <- appendListElements(allSections, extractParameters_1section(filename, standardizedSection, "standardized"))
     }
 
+  }
+
+  # Extract standalone R-SQUARE even when STANDARDIZED MODEL RESULTS is absent (e.g., WLSMV / categorical models)
+  r2Section <- getSection("^R-SQUARE$", outfiletext)
+  if (!is.null(r2Section)) {
+    allSections <- appendListElements(allSections, extractParameters_1section(filename, r2Section, "r2"))
   }
 
   #Mplus v8 within-level standardized model results by cluster (ex9.32.out)
@@ -626,10 +792,38 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     allSections <- appendListElements(allSections, probParsed)
   }
   
-  # odds ratios
-  oddsSection <- getSection("^LOGISTIC REGRESSION ODDS RATIO RESULTS.*$", outfiletext)
-  if (!is.null(oddsSection)) {
-    allSections <- appendListElements(allSections, extractParameters_1section(filename, oddsSection, "odds"))
+  align_rbind_sections <- function(tables) {
+    tables <- Filter(function(x) !is.null(x) && nrow(x) > 0L, tables)
+    if (length(tables) == 0L) return(NULL)
+    if (length(tables) == 1L) return(tables[[1L]])
+    all_cols <- unique(unlist(lapply(tables, names)))
+    aligned <- lapply(tables, function(df) {
+      for (nm in setdiff(all_cols, names(df))) df[[nm]] <- NA_character_
+      df[, all_cols, drop = FALSE]
+    })
+    out <- do.call(rbind, aligned)
+    rownames(out) <- NULL
+    class(out) <- c("mplus.params", "data.frame")
+    attr(out, "filename") <- filename
+    out
+  }
+
+  # odds ratios (Mplus 9.1 may emit separate FOR OBSERVED VARIABLES and FOR LATENT CLASS VARIABLES sections)
+  oddsHeaders <- grep("^\\s*LOGISTIC REGRESSION ODDS RATIO RESULTS.*$", outfiletext, perl=TRUE, value=TRUE)
+  if (length(oddsHeaders) > 0L) {
+    oddsTables <- lapply(oddsHeaders, function(hdr) {
+      sec <- getSection(paste0("^\\s*", trimws(hdr), "\\s*$"), outfiletext)
+      if (is.null(sec)) return(NULL)
+      tbl <- extractParameters_1section(filename, sec, "odds")[["odds"]]
+      if (!is.null(tbl) && nrow(tbl) > 0L && length(oddsHeaders) > 1L &&
+          grepl("FOR LATENT CLASS VARIABLES", hdr, fixed = TRUE) &&
+          !"LatentClass" %in% names(tbl)) {
+        tbl$LatentClass <- "Categorical.Latent.Variables"
+      }
+      tbl
+    })
+    combinedOdds <- align_rbind_sections(oddsTables)
+    if (!is.null(combinedOdds)) allSections$odds <- combinedOdds
   }
 
   #confidence intervals for usual output, credibility intervals for bayesian output
@@ -653,12 +847,35 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     if (!is.null(std.section)) allSections <- appendListElements(allSections, extractParameters_1section(filename, std.section, "ci.std.standardized"))
   }
   
-  # when the confidence intervals for logistic regression odds are present, the header line is not reprinted and must be copied from the 
-  ciOddsSection <- getSection("^CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS.*$", outfiletext)
-  if (!is.null(ciOddsSection)) {
-    ciOddsSection <- c(ciSection[attr(hline, "header_lines")], ciOddsSection)
-    allSections <- appendListElements(allSections, extractParameters_1section(filename, ciOddsSection, "ci.odds")) 
+  # when the confidence intervals for logistic regression odds are present, the header line is not reprinted and must be copied from ciSection
+  ciOddsHeaders <- grep("^\\s*CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS.*$", outfiletext, perl=TRUE, value=TRUE)
+  if (length(ciOddsHeaders) > 0L && !is.null(ciSection)) {
+    ciOddsTables <- lapply(ciOddsHeaders, function(hdr) {
+      sec <- getSection(paste0("^\\s*", trimws(hdr), "\\s*$"), outfiletext)
+      if (is.null(sec)) return(NULL)
+      sec <- c(ciSection[attr(hline, "header_lines")], sec)
+      tbl <- extractParameters_1section(filename, sec, "ci.odds")[["ci.odds"]]
+      if (!is.null(tbl) && nrow(tbl) > 0L && length(ciOddsHeaders) > 1L &&
+          grepl("FOR LATENT CLASS VARIABLES", hdr, fixed = TRUE) &&
+          !"LatentClass" %in% names(tbl)) {
+        tbl$LatentClass <- "Categorical.Latent.Variables"
+      }
+      tbl
+    })
+    combinedCiOdds <- align_rbind_sections(ciOddsTables)
+    if (!is.null(combinedCiOdds)) allSections$ci.odds <- combinedCiOdds
   }
+
+  # Mplus 9.0 / 9.1 sections: ESEM / SEFA / DSEFA STANDARDIZED SOLUTION,
+  # latent-class indicator equality tests, and LTA transition odds
+  esemStd <- extractESEMStandardized(outfiletext, filename)
+  if (!is.null(esemStd)) allSections$esem.standardized <- esemStd
+
+  classEq <- extractClassEqualityTests(outfiletext, filename)
+  if (!is.null(classEq)) allSections$class.equality <- classEq
+
+  transOdds <- extractTransitionOdds(outfiletext)
+  if (!is.null(transOdds)) allSections$transition.odds <- transOdds
 
   #extract EFA parameters if this is an EFA output
   if (efa) {
@@ -671,11 +888,12 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
 
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "unstandardized.alt", "r2", "ci.unstandardized",
-      "irt.parameterization", "probability.scale", "odds", "ci.odds",
+      "irt.parameterization", "probability.scale", "class.equality", "transition.odds",
+      "odds", "ci.odds",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",
       "std.standardized", "ci.std.standardized",
-      "wilevel.standardized", "efa")
+      "wilevel.standardized", "esem.standardized", "efa")
   listOrder <- listOrder[listOrder %in% names(allSections)]
 
 

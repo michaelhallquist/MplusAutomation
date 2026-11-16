@@ -1,7 +1,29 @@
 Version 1.4
-- feature:     readModels now parses VIF section in SAMPSTAT section of v9.1 outputs
+- feature:     readModels parses VIF from Mplus 9.1 sample statistics and keeps rows with overflowed VIF values.
 - feature:     readModels now reports explicit Mplus termination status in $converged (TRUE, FALSE, or NA); ML and Bayesian non-convergence messages are retained in $errors.
 - feature:     readModels now prefers full-precision MODEL RESULTS, standardized-results, odds-ratio, confidence-interval, Bayesian credibility-interval, IRT-parameterization, and probability-scale tables from SAVEDATA: H5RESULTS when available; set preferH5File = FALSE to use text parsing.
+- feature:     readModels extracts the side-by-side standardized solution for ESEM, SEFA, and DSEFA into
+               $parameters$esem.standardized. TECH1 includes rotated and unrotated results alongside the
+               existing parameter specification and starting values when both solutions are reported.
+- feature:     readModels extracts latent-class indicator equality tests and latent transition odds into
+               $parameters$class.equality and $parameters$transition.odds.
+- feature:     Bayesian TECH8 includes an effective sample size table in $tech8$ess. For a value reported
+               as less than a threshold, ess is missing and upper_bound records the threshold.
+- feature:     readModels returns generated MODEL syntax for measurement invariance analyses in
+               $invariance_testing$model_syntax when Mplus reports it.
+- bugfix:      R-SQUARE is read even when Mplus omits STANDARDIZED MODEL RESULTS. When using H5RESULTS,
+               readModels keeps the columns shown in the text, including residual variance, and uses
+               full-precision values when the H5 and text rows match.
+- bugfix:      Mixture EFA retains the loadings for each class, and multilevel EFA includes the final
+               solution. Mixture summaries count joint latent-class patterns when reported.
+- bugfix:      readModels recognizes the revised R3STEP headings and extracts first-to-last-step class
+               counts and classification probabilities into $lcCondMeans$step_shift when reported.
+               Observed and latent-class odds ratios and their confidence intervals are combined.
+- bugfix:      Parameter tables preserve variable names F and T as text and record overflowed estimates
+               as NA. Fit summaries recognize Penalized Loglikelihood.
+- bugfix:      Improved parsing of sample statistics, covariance coverage, and TECH9 for Monte Carlo
+               and imputation outputs. Wildcard imputation files can be read when the output also
+               lists a separate SAVEDATA file.
 - bugfix:      submitModels now correctly batches fractional walltimes, normalizes overflow in duration fields, and renders day-based durations as total hours for TORQUE/qsub.
 
 Version 1.3

@@ -174,8 +174,8 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
       "", #section-nonspecific parameters
       "Chi-Square Test of Model Fit",
 #      "Chi-Square Test of Model Fit for the Baseline Model",
-      "Loglikelihood::H0 Value",
-      "Loglikelihood::H1 Value",
+      "(Penalized )*Loglikelihood( Including the Auxiliary Part|\\s*\\(loglikelihood \\+ penalty\\))*::H0 Value",
+      "(Penalized )*Loglikelihood( Including the Auxiliary Part|\\s*\\(loglikelihood \\+ penalty\\))*::H1 Value",
       "CFI/TLI::CFI",
       "CFI/TLI::TLI",
       "Bayesian Posterior Predictive Checking using Chi-Square::Posterior Predictive P-Value",
@@ -318,7 +318,7 @@ extractSummaries_1section <- function(modelFitSection, arglist, filename, input=
       "Chi-Square Test for MCAR under the Unrestricted Latent Class Indicator Model::{+2b}Pearson Chi-Square", #use blank line to find pearson within section
       "Chi-Square Test for MCAR under the Unrestricted Latent Class Indicator Model::{+2b}Likelihood Ratio Chi-Square",
       "Chi-Square Test for Difference Testing",
-      "Loglikelihood( Including the Auxiliary Part)*",
+      "(Penalized )*Loglikelihood( Including the Auxiliary Part|\\s*\\(loglikelihood \\+ penalty\\))*",
       "CFI/TLI",
       "Information Criteria( Including the Auxiliary Part)*",
       "Information Criteria Including the Auxiliary Part",
@@ -529,7 +529,7 @@ extractConvergence_1file <- function(outfiletext) {
   nonconvergence_patterns <- c(
     max_iterations_exceeded = "NO\\s+CONVERGENCE\\.\\s*NUMBER\\s+OF\\s+ITERATIONS\\s+EXCEEDED\\.",
     bayes_criterion_not_satisfied = "THE\\s+CONVERGENCE\\s+CRITERION\\s+IS\\s+NOT\\s+(?:SATISFIED|MET)\\.",
-    abnormal_termination = "THE\\s+MODEL\\s+ESTIMATION\\s+DID\\s+NOT\\s+TERMINATE\\s+NORMALLY",
+    abnormal_termination = "(?:THE\\s+MODEL\\s+ESTIMATION|DATA\\s+IMPUTATION)\\s+DID\\s+NOT\\s+TERMINATE\\s+NORMALLY",
     likelihood_decreased = "THE\\s+LOGLIKELIHOOD\\s+DECREASED"
   )
 
@@ -546,7 +546,7 @@ extractConvergence_1file <- function(outfiletext) {
     return(new_mplus_convergence(FALSE, reason = reason, message = message))
   }
 
-  normal_termination <- "THE\\s+MODEL\\s+ESTIMATION\\s+TERMINATED\\s+NORMALLY"
+  normal_termination <- "(?:THE\\s+MODEL\\s+ESTIMATION|DATA\\s+IMPUTATION)\\s+TERMINATED\\s+NORMALLY"
   message <- trimws(outfiletext[grepl(
     normal_termination, outfiletext, ignore.case = TRUE, perl = TRUE
   )])
@@ -662,17 +662,17 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
   # Blank lines indicate a boundary in each message.
   
   #the end sections are more well behaved (esp. if there is Tech 9 output). Identify end first, then constrain start to precede end
-  endEstWarnErr <- grep("^\\s*(MODEL FIT INFORMATION|FINAL CLASS COUNTS|MODEL RESULTS|TESTS OF MODEL FIT)\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
+  endEstWarnErr <- grep("^\\s*(MODEL FIT INFORMATION|FINAL CLASS COUNTS|MODEL RESULTS|TESTS OF MODEL FIT|RESULTS FOR BASIC ANALYSIS|SUMMARY OF MODEL FIT INFORMATION)\\s*$", outfiletext, ignore.case=TRUE, perl=TRUE)
   
   if (length(endEstWarnErr) == 0L) { return(warnerr) } #unable to find section properly
-  startEstWarnErr <- grep("^\\s*(WARNING:.*|THE MODEL ESTIMATION DID NOT TERMINATE NORMALLY.*|THE LOGLIKELIHOOD DECREASED.*|THE MODEL ESTIMATION TERMINATED NORMALLY|NO CONVERGENCE\\.\\s+NUMBER OF ITERATIONS EXCEEDED\\..*|THE CONVERGENCE CRITERION IS NOT (?:SATISFIED|MET)\\..*)\\s*$",
+  startEstWarnErr <- grep("^\\s*(WARNING:.*|(?:THE MODEL ESTIMATION|DATA IMPUTATION) DID NOT TERMINATE NORMALLY.*|THE LOGLIKELIHOOD DECREASED.*|(?:THE MODEL ESTIMATION|DATA IMPUTATION) TERMINATED NORMALLY|NO CONVERGENCE\\.\\s+NUMBER OF ITERATIONS EXCEEDED\\..*|THE CONVERGENCE CRITERION IS NOT (?:SATISFIED|MET)\\..*)\\s*$",
     outfiletext[1:endEstWarnErr[1L]], ignore.case=TRUE, perl=TRUE)
   
   if (length(startEstWarnErr) > 0L && length(endEstWarnErr) > 0L) {
     warnerrtext <- outfiletext[startEstWarnErr[1L]:(endEstWarnErr[1L] - 1)]
     
     #if the model estimation terminated normally, delete this line from the text to parse (whereas the other start flags indicate a meaningful message)
-    if (length(normexit <- grep("^\\s*THE MODEL ESTIMATION TERMINATED NORMALLY\\s*$", warnerrtext, perl=TRUE, ignore.case=TRUE)) > 0L) {
+    if (length(normexit <- grep("^\\s*(?:THE MODEL ESTIMATION|DATA IMPUTATION) TERMINATED NORMALLY\\s*$", warnerrtext, perl=TRUE, ignore.case=TRUE)) > 0L) {
       warnerrtext <- warnerrtext[-normexit]
     }
     
@@ -699,7 +699,7 @@ extractWarningsErrors_1file <- function(outfiletext, filename, input) {
       if ((line %in% blanks && ! (line-1) %in% blanks) || line == length(warnerrtext)) {
         msg <- trimSpace(warnerrtext[startMsg:ifelse(line %in% blanks, line - 1, line)])
         
-        if (grepl("^\\s*WARNING:", msg[1L], ignore.case=TRUE, perl=TRUE)) {
+        if (grepl("^\\s*(WARNING:|USE THE FBITERATIONS OPTION|THE EFFECTIVE SAMPLE SIZE FOR THE POSTERIOR DISTRIBUTION|THE FOLLOWING DETERMINISTIC RELATIONSHIP HAS BEEN FOUND)", msg[1L], ignore.case=TRUE, perl=TRUE)) {
           warnerr$warnings[[w]] <- msg
           w <- w+1
         } else {
@@ -902,8 +902,15 @@ extractSummaries_1file <- function(outfiletext, filename, input)
     arglist$Observations <- extractValue(pattern="^\\s*Total sample size\\s*", analysisSummarySection, filename, type="int")
   }
   arglist$NGroups <- extractValue(pattern="^\\s*Number of groups\\s*", analysisSummarySection, filename, type="int")
-  arglist$NDependentVars <- extractValue(pattern="^\\s*Number of dependent variables\\s*", analysisSummarySection, filename, type="int")
-  arglist$NIndependentVars <- extractValue(pattern="^\\s*Number of independent variables\\s*", analysisSummarySection, filename, type="int")
+  # Anchor to column 0 so indented "Specifications for Data Imputation" lines in v9.1 do not double-match
+  arglist$NDependentVars <- extractValue(pattern="^Number of dependent variables\\s*", analysisSummarySection, filename, type="int")
+  if (is.na(arglist$NDependentVars)) {
+    arglist$NDependentVars <- extractValue(pattern="^\\s*Number of dependent variables\\s*", analysisSummarySection, filename, type="int")
+  }
+  arglist$NIndependentVars <- extractValue(pattern="^Number of independent variables\\s*", analysisSummarySection, filename, type="int")
+  if (is.na(arglist$NIndependentVars)) {
+    arglist$NIndependentVars <- extractValue(pattern="^\\s*Number of independent variables\\s*", analysisSummarySection, filename, type="int")
+  }
   arglist$NContinuousLatentVars <- extractValue(pattern="^\\s*Number of continuous latent variables\\s*", analysisSummarySection, filename, type="int")
   arglist$NCategoricalLatentVars <- extractValue(pattern="^\\s*Number of categorical latent variables\\s*", analysisSummarySection, filename, type="int")
   arglist$InformationMatrix <- extractValue(pattern="^\\s*Information matrix\\s*", analysisSummarySection, filename, type="int")
@@ -1286,22 +1293,8 @@ extractResiduals <- function(outfiletext, filename) {
   return(new_mplus_residuals(residList))
 }
 
-#' Extract Technical 1 matrix from Mplus
-#'
-#' Function that extracts the Tech1 matrix
-#'
-#' @param outfiletext the text of the output file
-#' @param filename The name of the file
-#' @return A list of class \dQuote{mplus.tech1}
-#' @keywords internal
-#' @seealso \code{\link{matrixExtract}}
-#' @examples
-#' # make me!!!
-extractTech1 <- function(outfiletext, filename) {
-  tech1Section <- getSection("^TECHNICAL 1 OUTPUT$", outfiletext)
-  if (is.null(tech1Section)) return(new_mplus_tech1()) #no tech1 output
-  
-  tech1List <- list()
+extractTech1_1section <- function(tech1Section, filename) {
+  if (is.null(tech1Section)) return(new_mplus_tech1())
   
   paramSpecSubsections <- getMultilineSection("PARAMETER SPECIFICATION( FOR [\\w\\d\\s\\.,_]+)*",
     tech1Section, filename, allowMultiple=TRUE)
@@ -1315,7 +1308,7 @@ extractTech1 <- function(outfiletext, filename) {
   } else #just one section, no groups
     groupNames <- ""
   
-  for (g in 1:length(paramSpecSubsections)) {
+  for (g in seq_along(paramSpecSubsections)) {
     targetList <- list()
     
     targetList[["tau"]] <- matrixExtract(paramSpecSubsections[[g]], "TAU", filename)
@@ -1363,7 +1356,7 @@ extractTech1 <- function(outfiletext, filename) {
   } else
     groupNames <- ""
   
-  for (g in 1:length(startValSubsections)) {
+  for (g in seq_along(startValSubsections)) {
     targetList <- list()
     
     targetList[["tau"]] <- matrixExtract(startValSubsections[[g]], "TAU", filename)
@@ -1399,13 +1392,52 @@ extractTech1 <- function(outfiletext, filename) {
   startValList <- new_mplus_starting_values(startValList)
   if (length(startValSubsections) > 1) attr(startValList, "group.names") <- groupNames
   
-  tech1List <- new_mplus_tech1(
+  new_mplus_tech1(
     parameterSpecification = paramSpecList,
     startingValues = startValList
   )
-  
-  return(tech1List)
-  
+}
+
+#' Extract Technical 1 matrix from Mplus
+#'
+#' Function that extracts the Tech1 matrix
+#'
+#' @param outfiletext the text of the output file
+#' @param filename The name of the file
+#' @return A list of class \dQuote{mplus.tech1}
+#' @keywords internal
+#' @seealso \code{\link{matrixExtract}}
+#' @examples
+#' # make me!!!
+extractTech1 <- function(outfiletext, filename) {
+  # Support measurement invariance outputs with per-model TECH1 sections
+  multiTech1 <- grep("^\\s*TECHNICAL 1 OUTPUT FOR THE .+ MODEL\\s*$", outfiletext, perl=TRUE, value=TRUE)
+  if (length(multiTech1) > 0L) {
+    modelNames <- make.names(sub("^\\s*TECHNICAL 1 OUTPUT FOR THE (.+?) MODEL\\s*$", "\\1", multiTech1, perl=TRUE))
+    out <- list()
+    for (i in seq_along(multiTech1)) {
+      sec <- getSection(trimSpace(multiTech1[i]), outfiletext)
+      if (!is.null(sec)) out[[modelNames[i]]] <- extractTech1_1section(sec, filename)
+    }
+    class(out) <- c("mplus.tech1", "list")
+    return(out)
+  }
+
+  tech1Section <- getSection("^TECHNICAL 1 OUTPUT$", outfiletext)
+  if (is.null(tech1Section)) return(new_mplus_tech1()) #no tech1 output
+  out <- extractTech1_1section(tech1Section, filename)
+
+  # Support ESEM outputs containing both UNROTATED and ROTATED SOLUTION blocks
+  solIdx <- grep("^\\s*TECHNICAL 1 OUTPUT FOR THE (UNROTATED|ROTATED) SOLUTION\\s*$", tech1Section, perl=TRUE)
+  if (length(solIdx) > 1L) {
+    solNames <- tolower(sub("^\\s*TECHNICAL 1 OUTPUT FOR THE (UNROTATED|ROTATED) SOLUTION\\s*$", "\\1", tech1Section[solIdx], perl=TRUE))
+    for (i in seq_along(solIdx)) {
+      start_l <- solIdx[i] + 1L
+      end_l <- if (i < length(solIdx)) solIdx[i + 1L] - 1L else length(tech1Section)
+      out[[solNames[i]]] <- extractTech1_1section(tech1Section[start_l:end_l], filename)
+    }
+  }
+  out
 }
 
 #' Helper function to extract the sample statistics from Mplus output
@@ -1416,12 +1448,12 @@ extractTech1 <- function(outfiletext, filename) {
 #' @importFrom utils tail
 #' @keywords internal
 extractSampstat <- function(outfiletext, filename) {
-  sampstatSection <- getSection("^SAMPLE STATISTICS$", outfiletext)
+  sampstatSection <- getSection("^SAMPLE STATISTICS( FOR THE FIRST REPLICATION)?$", outfiletext)
   if (is.null(sampstatSection)) {
     #try output from TYPE=BASIC, which places these in a section of a different name
     sampstatSection <- getSection("^RESULTS FOR BASIC ANALYSIS$", outfiletext)
   }
-  univariateCountsSection <- getSection("^UNIVARIATE PROPORTIONS AND COUNTS FOR CATEGORICAL VARIABLES$", outfiletext)
+  univariateCountsSection <- getSection("^UNIVARIATE PROPORTIONS( AND COUNTS)? FOR CATEGORICAL VARIABLES$", outfiletext)
   univariate_sampstat <- getSection("^UNIVARIATE SAMPLE STATISTICS$", outfiletext)
   
   sampstatList <- list()
@@ -1468,9 +1500,9 @@ extractSampstat <- function(outfiletext, filename) {
     targetList[["between.level.variance.covariance"]] <- matrixExtract(sampstatSubsections[[g]], "BETWEEN LEVEL VARIANCE/COVARIANCE", filename, ignore.case=TRUE)
     targetList[["between.level.correlation"]] <- matrixExtract(sampstatSubsections[[g]], "BETWEEN LEVEL CORRELATION", filename, ignore.case=TRUE)
     
-    #I think these are only in older outputs
+    #I think these are only in older outputs / Monte Carlo outputs
     targetList[["covariances.correlations.resid_correlations"]] <- matrixExtract(sampstatSubsections[[g]], "Covariances/Correlations/Residual Correlations", filename)
-    targetList[["slopes"]] <- matrixExtract(sampstatSubsections[[g]], "Slopes", filename)
+    targetList[["slopes"]] <- matrixExtract(sampstatSubsections[[g]], "Slopes", filename, ignore.case=TRUE)
     
     #latent class indicator part includes subsections for each latent class, such as class-varying thresholds
 #    if (groupNames[g] == "LATENT.CLASS.INDICATOR.MODEL.PART") {
@@ -1491,10 +1523,12 @@ extractSampstat <- function(outfiletext, filename) {
   }
   
   ##Extract Univariate counts and proportions
-  #remove warning lines, which throw off the parser (e.g., ex6.15.out)
-  univariateCountsSection <- univariateCountsSection[!grepl("\\s*WARNING:.*", univariateCountsSection, perl=TRUE)]
-  
+  #remove warning and note lines, which throw off the parser (e.g., ex6.15.out, ex11.8part2.out)
   if (!is.null(univariateCountsSection)) {
+    univariateCountsSection <- univariateCountsSection[!grepl("^\\s*(WARNING|NOTE):", univariateCountsSection, perl=TRUE)]
+  }
+  
+  if (!is.null(univariateCountsSection) && any(nzchar(trimws(univariateCountsSection)))) {
     countSubsections <- getMultilineSection("Group\\s+([\\w\\d\\.,_]+)*",
       univariateCountsSection, filename, allowMultiple=TRUE)
 
@@ -1511,7 +1545,12 @@ extractSampstat <- function(outfiletext, filename) {
       targetList <- list()
       
       df <- data.frame(do.call(rbind, strsplit(trimSpace(parseCatOutput(countSubsections[[g]])), "\\s+", perl=TRUE)), stringsAsFactors=FALSE)
-      names(df) <- c("variable", "proportion", "count")
+      if (ncol(df) == 2L) {
+        names(df) <- c("variable", "proportion")
+        df$count <- NA_real_
+      } else {
+        names(df) <- c("variable", "proportion", "count")
+      }
       df$proportion <- as.numeric(df$proportion)
       df$count <- as.numeric(df$count)
       
@@ -1572,6 +1611,12 @@ extractSampstat <- function(outfiletext, filename) {
       vif_header <- "^\\s*VIF \\(VARIANCE INFLATION FACTOR\\) FOR EXPLORING MULTICOLLINEARITY OF INDEPENDENT VARIABLES\\s*$"
       vif_start <- grep(vif_header, thisSub, perl=TRUE)
       statsSub <- if (length(vif_start) > 0L) thisSub[seq_len(vif_start[1L] - 1L)] else thisSub
+      # Exclude trailing estimation WARNING/ERROR blocks (e.g., ex9.32.out) whose
+      # cluster ID lines end in digits and would make length(stats) odd.
+      warn_start <- grep("^\\s*(WARNING|ERROR):", statsSub, perl=TRUE)
+      if (length(warn_start) > 0L) {
+        statsSub <- statsSub[seq_len(warn_start[1L] - 1L)]
+      }
 
       stats <- lapply(statsSub[grepl("\\d$", statsSub)], function(x) { strsplit(trimws(x), split = "\\s+")[[1]] })
       if(length(stats) %% 2 == 0) {
@@ -1615,8 +1660,10 @@ extractSampstat <- function(outfiletext, filename) {
           if (length(fields) == 0L || length(fields) %% 2L != 0L ||
               identical(fields[1L], "Variable")) return(NULL)
 
-          values <- suppressWarnings(mplus_as.numeric(fields[seq(2L, length(fields), by=2L)]))
-          if (anyNA(values)) return(NULL)
+          raw_vals <- fields[seq(2L, length(fields), by=2L)]
+          is_overflow <- grepl("^\\*{2,}$", raw_vals, perl=TRUE)
+          values <- suppressWarnings(mplus_as.numeric(raw_vals))
+          if (any(is.na(values) & !is_overflow)) return(NULL)
 
           data.frame(
             variable=fields[seq(1L, length(fields), by=2L)],
@@ -1647,7 +1694,7 @@ extractSampstat <- function(outfiletext, filename) {
 
 extractCovarianceCoverage <- function(outfiletext, filename) {
   #TODO: Return type is sometimes list, sometimes matrix; a bit inconsistent
-  covcoverageSection <- getSection("^COVARIANCE COVERAGE OF DATA$", outfiletext)
+  covcoverageSection <- getSection("^COVARIANCE COVERAGE OF DATA( FOR THE FIRST (DATA SET|REPLICATION))?$", outfiletext)
   if (is.null(covcoverageSection)) { return(list()) } #no COVARIANCE COVERAGE OF DATA output
   
   covcoverageList <- list()
@@ -1656,7 +1703,9 @@ extractCovarianceCoverage <- function(outfiletext, filename) {
     covcoverageSection, filename, allowMultiple=TRUE)
 
   if (section_is_missing(covcoverageSubsections)) { #See UG ex9.7.out
-    message("No PROPORTION OF DATA PRESENT sections found within COVARIANCE COVERAGE OF DATA output.")
+    if (!any(grepl("Minimum covariance coverage value", covcoverageSection, fixed=TRUE))) {
+      message("No PROPORTION OF DATA PRESENT sections found within COVARIANCE COVERAGE OF DATA output.")
+    }
     return(covcoverageList)
   } else if (length(covcoverageSubsections) > 1) {
     matchlines <- section_matchlines(covcoverageSubsections)
@@ -1971,6 +2020,34 @@ extractTech8 <- function(outfiletext, filename) {
       tech8List[["psr"]] <- extractPSR(bayesPSR)
     }
   }
+
+  # Mplus 9.0+: MCMC EFFECTIVE SAMPLE SIZE (ESS) IN ASCENDING ORDER
+  ess_hdr <- grep("^\\s*MCMC EFFECTIVE SAMPLE SIZE \\(ESS\\)", tech8Section, perl = TRUE)
+  if (length(ess_hdr) > 0L) {
+    col_hdr <- grep("^\\s*PARAMETER\\s+ESS\\s*$", tech8Section, perl = TRUE)
+    col_hdr <- col_hdr[col_hdr > ess_hdr[1L]]
+    if (length(col_hdr) > 0L && col_hdr[1L] < length(tech8Section)) {
+      ess_lines <- tech8Section[(col_hdr[1L] + 1L):length(tech8Section)]
+      blanks <- which(trimws(ess_lines) == "")
+      if (length(blanks) > 0L) {
+        ess_lines <- if (blanks[1L] > 1L) ess_lines[seq_len(blanks[1L] - 1L)] else character(0)
+      }
+      ess_matches <- extract_pcre_groups(ess_lines, "^\\s*(\\d+)\\s+(<?)([0-9.\\-*]+)\\s*$")
+      ess_matches <- Filter(function(x) length(x) == 4L, ess_matches)
+      if (length(ess_matches) > 0L) {
+        mat <- do.call(rbind, lapply(ess_matches, `[`, 2:4))
+        value <- suppressWarnings(mplus_as.numeric(mat[, 3L]))
+        censored <- mat[, 2L] == "<"
+        ess_df <- data.frame(
+          parameter = as.integer(mat[, 1L]),
+          ess = replace(value, censored, NA_real_),
+          upper_bound = replace(value, !censored, NA_real_),
+          stringsAsFactors = FALSE
+        )
+        tech8List[["ess"]] <- new_mplus_ess(ess_df)
+      }
+    }
+  }
   
   return(tech8List)
 }
@@ -1995,17 +2072,25 @@ extractTech9 <- function(outfiletext, filename) {
   
   tech9Reps <- grep("^\\s*REPLICATION \\d+:\\s*$", tech9Section, perl=TRUE)
   
-  repNums <- as.numeric(gsub("^\\s*REPLICATION (\\d+):\\s*$", "\\1", tech9Section[tech9Reps], perl=TRUE))
-  
   if (length(tech9Reps) > 0L) {
-    for (l in 1:length(tech9Reps)) {
-      if (l < length(tech9Reps)) {
-        msg <- paste(tech9Section[ (tech9Reps[l]+1):(tech9Reps[l+1]-1) ], collapse=" ")
-      } else {
-        msg <- paste(tech9Section[ (tech9Reps[l]+1):length(tech9Section) ], collapse=" ")
-      }
+    repNums <- as.numeric(gsub("^\\s*REPLICATION (\\d+):\\s*$", "\\1", tech9Section[tech9Reps], perl=TRUE))
+    for (l in seq_along(tech9Reps)) {
+      end_l <- if (l < length(tech9Reps)) tech9Reps[l + 1L] - 1L else length(tech9Section)
+      msg <- paste(tech9Section[(tech9Reps[l] + 1L):end_l], collapse=" ")
       msg <- trimSpace(gsub("\\s+", " ", msg, perl=TRUE))
-      tech9List[[ paste0("rep", repNums[l]) ]] <- list(rep=repNums[l], error=msg)
+      tech9List[[paste0("rep", repNums[l])]] <- list(rep=repNums[l], error=msg)
+    }
+  } else {
+    # External Monte Carlo format (e.g., ex12.6step2.out): "Errors for replication with data file <file>:"
+    extReps <- grep("^\\s*Errors for replication with data file .+:.*$", tech9Section, perl=TRUE)
+    if (length(extReps) > 0L) {
+      repFiles <- sub("^\\s*Errors for replication with data file ([^:]+):.*$", "\\1", tech9Section[extReps], perl=TRUE)
+      for (l in seq_along(extReps)) {
+        end_l <- if (l < length(extReps)) extReps[l + 1L] - 1L else length(tech9Section)
+        msg <- paste(tech9Section[(extReps[l] + 1L):end_l], collapse=" ")
+        msg <- trimSpace(gsub("\\s+", " ", msg, perl=TRUE))
+        tech9List[[paste0("rep", l)]] <- list(rep=l, file=trimSpace(repFiles[l]), error=msg)
+      }
     }
   }
   
@@ -2128,6 +2213,98 @@ extractFacScoreStats <- function(outfiletext, filename) {
 }
 
 
+extractTransitionOdds <- function(outfiletext) {
+  parse_tables <- function(section_lines, value_name, has_covariate = FALSE) {
+    if (is.null(section_lines) || length(section_lines) == 0L) return(NULL)
+
+    eval_line <- grep("^\\s*EVALUATED AT\\s+", section_lines, perl = TRUE, value = TRUE)
+    rows <- list()
+    current_cov <- NA_character_
+
+    i <- 1L
+    n <- length(section_lines)
+    while (i <= n) {
+      line <- section_lines[i]
+      if (has_covariate) {
+        cov_m <- extract_pcre_groups(line, "^\\s*EFFECT OF\\s+([\\w_.#&^]+)\\s*$")[[1L]]
+        if (length(cov_m) == 2L) {
+          current_cov <- cov_m[2L]
+          i <- i + 1L
+          next
+        }
+      }
+
+      tbl_m <- extract_pcre_groups(
+        line,
+        "^\\s*TRANSITION TABLE ODDS(?: RATIO)? AND ([0-9.]+)% CONFIDENCE INTERVALS FOR ([\\w_.#]+) TO ([\\w_.#]+)\\s*$"
+      )[[1L]]
+      if (length(tbl_m) == 4L) {
+        from_var <- tbl_m[3L]
+        to_var <- tbl_m[4L]
+        i <- i + 1L
+        r_idx <- 0L
+        while (i <= n && nzchar(trimws(section_lines[i]))) {
+          cell_str <- section_lines[i]
+          cell_locs <- gregexpr(
+            "([0-9.\\-*]+)\\(\\s*([0-9.\\-*]+)\\s*,\\s*([0-9.\\-*]+)\\s*\\)",
+            cell_str, perl = TRUE
+          )[[1L]]
+          if (cell_locs[1L] < 0L) break
+          cells <- regmatches(cell_str, list(cell_locs))[[1L]]
+          r_idx <- r_idx + 1L
+          for (c_idx in seq_along(cells)) {
+            parts <- extract_pcre_groups(
+              cells[c_idx],
+              "^([0-9.\\-*]+)\\(\\s*([0-9.\\-*]+)\\s*,\\s*([0-9.\\-*]+)\\s*\\)$"
+            )[[1L]]
+            df_row <- if (has_covariate) {
+              data.frame(
+                covariate = current_cov,
+                from = paste0(from_var, ".", r_idx),
+                to = paste0(to_var, ".", c_idx),
+                val = suppressWarnings(mplus_as.numeric(parts[2L])),
+                lower_2.5ci = suppressWarnings(mplus_as.numeric(parts[3L])),
+                upper_2.5ci = suppressWarnings(mplus_as.numeric(parts[4L])),
+                stringsAsFactors = FALSE
+              )
+            } else {
+              data.frame(
+                from = paste0(from_var, ".", r_idx),
+                to = paste0(to_var, ".", c_idx),
+                val = suppressWarnings(mplus_as.numeric(parts[2L])),
+                lower_2.5ci = suppressWarnings(mplus_as.numeric(parts[3L])),
+                upper_2.5ci = suppressWarnings(mplus_as.numeric(parts[4L])),
+                stringsAsFactors = FALSE
+              )
+            }
+            names(df_row)[names(df_row) == "val"] <- value_name
+            rows[[length(rows) + 1L]] <- df_row
+          }
+          i <- i + 1L
+        }
+        next
+      }
+      i <- i + 1L
+    }
+
+    if (length(rows) == 0L) return(NULL)
+    out <- do.call(rbind, rows)
+    rownames(out) <- NULL
+    if (length(eval_line) > 0L) attr(out, "evaluated_at") <- trimws(eval_line[1L])
+    out
+  }
+
+  overall_sec <- getSection("^TRANSITION PROBABILITY ODDS$", outfiletext)
+  cov_sec <- getSection("^COVARIATE EFFECTS ON TRANSITION PROBABILITY ODDS RATIOS$", outfiletext)
+
+  out <- list()
+  overall_df <- parse_tables(overall_sec, "odds", has_covariate = FALSE)
+  cov_df <- parse_tables(cov_sec, "odds_ratio", has_covariate = TRUE)
+  if (!is.null(overall_df)) out$overall <- overall_df
+  if (!is.null(cov_df)) out$covariate.effects <- cov_df
+  if (length(out) == 0L) NULL else out
+}
+
 #' Extract Latent Class Counts
 #'
 #' Function for extracting counts of latent classes
@@ -2139,6 +2316,25 @@ extractFacScoreStats <- function(outfiletext, filename) {
 #' @examples
 #' # make me!!!
 extractClassCounts <- function(outfiletext, filename, summaries) {
+  # Handle multi-factor TYPE = MIXTURE EFA outputs (e.g., ex4.4.out), where class
+  # counts and classification tables are printed separately for each factor solution
+  efa_headers <- grep("^\\s*EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):\\s*$", outfiletext, perl=TRUE)
+  if (length(efa_headers) > 1L && any(grepl("^\\s*FINAL CLASS COUNTS", outfiletext, perl=TRUE))) {
+    n_fac <- as.vector(get_efa_nfactors(outfiletext[efa_headers]))
+    fac_names <- paste0("f", n_fac)
+    unique_fac <- unique(fac_names)
+    if (length(unique_fac) > 1L) {
+      first_idx <- match(unique_fac, fac_names)
+      out <- list()
+      for (i in seq_along(unique_fac)) {
+        start_l <- efa_headers[first_idx[i]] + 1L
+        end_l <- if (i < length(unique_fac)) efa_headers[first_idx[i + 1L]] - 1L else length(outfiletext)
+        slice_txt <- parse_into_sections(outfiletext[start_l:end_l])
+        out[[unique_fac[i]]] <- extractClassCounts(slice_txt, filename, summaries)
+      }
+      return(out)
+    }
+  }
   
   #helper function for three-column class output
   getClassCols <- function(sectiontext) {
@@ -2177,6 +2373,13 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
       modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON THE ESTIMATED MODEL$", outfiletext)
       ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
       mostLikelyCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
+      if (is.null(mostLikelyCounts)) {
+        mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
+      }
+      if (is.null(mostLikelyCounts)) {
+        # Mixture EFA wraps this header across two lines (e.g., ex4.4.out)
+        mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY$::^LATENT CLASS MEMBERSHIP$", outfiletext)
+      }
     }
     
     countlist[["modelEstimated"]] <- getClassCols(modelCounts)
@@ -2243,13 +2446,16 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
       }
     }
     
+    pattern_header <- "^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT (?:CLASS PATTERNS|CLASSES)$"
+    pattern_section <- function(subheading) {
+      getSection(paste0(pattern_header, "::^", subheading, "$"), outfiletext)
+    }
+    posteriorProb.patterns <- pattern_section("BASED ON ESTIMATED POSTERIOR PROBABILITIES")
     if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
-      posteriorProb.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
       mostLikely.patterns <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
       mostLikelyCounts <- getSection("CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN", outfiletext)
     } else {
-      posteriorProb.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON ESTIMATED POSTERIOR PROBABILITIES$", outfiletext)
-      mostLikely.patterns <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
+      mostLikely.patterns <- pattern_section("BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN")
       mostLikelyCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR EACH LATENT CLASS VARIABLE$::^BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
     }
     
@@ -2274,13 +2480,7 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
         c("variable", "class", "count", "proportion"))
     
     # Patterns
-    countlist[["modelEstimated.patterns"]] <-
-      getClassCols_lta(
-        getSection(
-          "^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$::^BASED ON THE ESTIMATED MODEL$",
-          outfiletext
-        )
-      )
+    countlist[["modelEstimated.patterns"]] <- getClassCols_lta(pattern_section("BASED ON THE ESTIMATED MODEL"))
     
     countlist[["posteriorProb.patterns"]] <- getClassCols_lta(posteriorProb.patterns)
     countlist[["mostLikely.patterns"]] <- getClassCols_lta(mostLikely.patterns)
@@ -2291,14 +2491,18 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
       first_present <- which(morder != "")[1]
       catvar_names <- strsplit(trimSpace(morder[first_present]), "\\s+")[[1]]
     } else {
-      catvar_names <- unique(countlist[["mostLikely"]]$variable) #fall back approximation
-      #stop("Unable to determine names of categorical latent variables.")
+      catvar_names <- unique(countlist[["modelEstimated"]]$variable)
+      if (!length(catvar_names)) catvar_names <- unique(countlist[["mostLikely"]]$variable)
     }
     
     rename_sections <- which(names(countlist) %in% c("modelEstimated.patterns", "posteriorProb.patterns", "mostLikely.patterns"))
     if (length(rename_sections) > 0L) {
       for (s in rename_sections) {
-        countlist[[s]] <- setNames(countlist[[s]], c(catvar_names, "count", "proportion"))
+        nvars <- ncol(countlist[[s]]) - 2L
+        names(countlist[[s]]) <- c(
+          if (length(catvar_names) == nvars) catvar_names else paste0("class", seq_len(nvars)),
+          "count", "proportion"
+        )
       }
     }
     
@@ -2356,6 +2560,10 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
       transitionProbs$probability <- as.numeric(transitionProbs$probability)
     }
     countlist[["transitionProbs"]] <- transitionProbs
+    trans_odds <- extractTransitionOdds(outfiletext)
+    if (!is.null(trans_odds) && !is.null(trans_odds$overall)) {
+      countlist[["transitionOdds"]] <- trans_odds$overall
+    }
   }
   return(countlist)
 }
@@ -2420,8 +2628,10 @@ unlabeledMatrixExtract <- function(outfiletext, filename) {
           # a blank line followed by a non-blank line followed by a blank line...
           # check that it represents an integer sequence (this may need to be removed in more general cases)
           intLine <- strsplit(trimSpace(outfiletext[blankLines[b]+1]), "\\s+", perl=TRUE)[[1L]]
-          firstCol <- as.numeric(intLine[1L]) #number of the class in the first column
-          if (all(intLine == firstCol:(firstCol + length(intLine) - 1) )) {
+          firstCol <- suppressWarnings(as.numeric(intLine[1L])) #number of the class in the first column
+          intVals <- suppressWarnings(as.numeric(intLine))
+          if (!is.na(firstCol) && !anyNA(intVals) &&
+              all(intVals == firstCol:(firstCol + length(intLine) - 1))) {
             headerLines <- c(headerLines, blankLines[b])
           }
         }
@@ -2585,16 +2795,21 @@ matrixExtract <- function(outfiletext, headerLine, filename, ignore.case=FALSE, 
 #' @param filename the name of the file containing textToScan. Used to make more intelligible warning messages.
 #' @keywords internal
 extractDataSummary <- function(outfiletext, filename) {
-  dataSummarySection <- getSection("^\\s*SUMMARY OF DATA( FOR THE FIRST DATA SET)*\\s*$", outfiletext)
+  dataSummarySection <- getSection("^\\s*SUMMARY OF DATA( FOR THE FIRST (DATA SET|REPLICATION))*\\s*$", outfiletext)
   if (is.null(dataSummarySection)) {
     return(new_mplus_data_summary())
   }
   
   #detect three-level outputs, which have 2 cluster size sections, ICCs, etc.
   clus_check <- grepl("Number of [^\\s]+ clusters", dataSummarySection, perl=TRUE)
-  is_three_level <- any(clus_check)
+  avg_clus_check <- grepl("Average cluster size for [^\\s]+ level", dataSummarySection, perl=TRUE)
+  is_three_level <- any(clus_check) || any(avg_clus_check)
   if (isTRUE(is_three_level)) { 
-    level_names <- sub(".*Number of ([^\\s]+) clusters.*", "\\1", dataSummarySection[clus_check]) 
+    level_names <- if (any(clus_check)) {
+      sub(".*Number of ([^\\s]+) clusters.*", "\\1", dataSummarySection[clus_check])
+    } else {
+      sub(".*Average cluster size for ([^\\s]+) level.*", "\\1", dataSummarySection[avg_clus_check])
+    }
   }
   
   # cross-classified outputs have subsections
@@ -2736,33 +2951,52 @@ extractDataSummary <- function(outfiletext, filename) {
 
 #Caspar van Lissa code for extract invariance testing section
 extractInvarianceTesting <- function(outfiletext, filename) {
-  inv_test_firstline <- grep("^Invariance Testing$", outfiletext)
-  if (length(inv_test_firstline) == 0L) { return(list()) } #invariance section not found
-  
-  inv_test_endline <- grep("^MODEL FIT INFORMATION", outfiletext)
-  
   retlist <- list()
-  inv_test_endline <- inv_test_endline[inv_test_endline > inv_test_firstline][1]
-  
-  inv_test <- outfiletext[(inv_test_firstline+2):(inv_test_endline-3)]
+  inv_test_firstline <- grep("^Invariance Testing$", outfiletext)
 
-  #match words followed by four groups of numbers (Number of parameters, Chi-Square, Degrees of Freedom, P-Value)
-  model_rows <- grep("^\\s+?\\w+(\\s{2,}[0-9.]+){4}$", inv_test, value = TRUE)
-  model_rows <- t(sapply(model_rows, function(x){strsplit(trimws(x), "\\s+")[[1]]}, USE.NAMES = FALSE))
-  model_rownames <- model_rows[, 1]
-  model_rows <- apply(model_rows[, -1, drop=FALSE], c(1,2), as.numeric)
-  row.names(model_rows) <- model_rownames
-  colnames(model_rows) <- c("Parameters", "Chi-Square", "DF", "Pvalue")
-  retlist$models <- model_rows
-  
-  
-  test_rows <- grep("^\\s+?(\\w+\\s){3}(\\s{2,}[0-9.]+){3}$", inv_test, value = TRUE)
-  test_rows <- t(sapply(test_rows, function(x){strsplit(trimws(x), "\\s{2,}")[[1]]}, USE.NAMES = FALSE))
-  test_rownames <- test_rows[, 1]
-  test_rows <- apply(test_rows[, -1, drop=FALSE], c(1,2), as.numeric)
-  row.names(test_rows) <- test_rownames
-  colnames(test_rows) <- c("Chi-Square", "DF", "Pvalue")
-  retlist$compared <- test_rows
-  
+  if (length(inv_test_firstline) > 0L) {
+    inv_test_endline <- grep("^MODEL FIT INFORMATION", outfiletext)
+    inv_test_endline <- inv_test_endline[inv_test_endline > inv_test_firstline[1L]][1L]
+
+    inv_test <- outfiletext[(inv_test_firstline[1L] + 2L):(inv_test_endline - 3L)]
+
+    #match words followed by four groups of numbers (Number of parameters, Chi-Square, Degrees of Freedom, P-Value)
+    model_rows <- grep("^\\s+?\\w+(\\s{2,}[0-9.]+){4}$", inv_test, value = TRUE)
+    model_rows <- t(sapply(model_rows, function(x){strsplit(trimws(x), "\\s+")[[1]]}, USE.NAMES = FALSE))
+    model_rownames <- model_rows[, 1]
+    model_rows <- apply(model_rows[, -1, drop=FALSE], c(1,2), as.numeric)
+    row.names(model_rows) <- model_rownames
+    colnames(model_rows) <- c("Parameters", "Chi-Square", "DF", "Pvalue")
+    retlist$models <- model_rows
+
+    test_rows <- grep("^\\s+?(\\w+\\s){3}(\\s{2,}[0-9.]+){3}$", inv_test, value = TRUE)
+    test_rows <- t(sapply(test_rows, function(x){strsplit(trimws(x), "\\s{2,}")[[1]]}, USE.NAMES = FALSE))
+    test_rownames <- test_rows[, 1]
+    test_rows <- apply(test_rows[, -1, drop=FALSE], c(1,2), as.numeric)
+    row.names(test_rows) <- test_rownames
+    colnames(test_rows) <- c("Chi-Square", "DF", "Pvalue")
+    retlist$compared <- test_rows
+  }
+
+  # Mplus 9.1: MODEL = CONFIGURAL METRIC SCALAR (MODEL) syntax output
+  cmd_headers <- grep("^\\s*[A-Z0-9_.-]+\\s+MODEL COMMAND FOR INVARIANCE ANALYSIS\\s*$", outfiletext, perl = TRUE, value = TRUE)
+  if (length(cmd_headers) > 0L) {
+    model_syntax <- list()
+    for (hdr in cmd_headers) {
+      mname <- sub("^\\s*([A-Z0-9_.-]+)\\s+MODEL COMMAND FOR INVARIANCE ANALYSIS\\s*$", "\\1", hdr, perl = TRUE)
+      sec <- getSection(paste0("^\\s*", trimws(hdr), "\\s*$"), outfiletext)
+      if (!is.null(sec)) {
+        non_empty <- which(nzchar(trimws(sec)))
+        if (length(non_empty) > 0L) {
+          sec <- as.character(sec[min(non_empty):max(non_empty)])
+        } else {
+          sec <- character(0)
+        }
+        model_syntax[[mname]] <- sec
+      }
+    }
+    if (length(model_syntax) > 0L) retlist$model_syntax <- model_syntax
+  }
+
   return(retlist)
 }

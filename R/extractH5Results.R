@@ -39,7 +39,8 @@ extractH5ResultTable <- function(result_section, filename,
     c("Left-hand variable/Variable/Parameter label", "Left-hand variable", "Variable", "Parameter label"),
     statement_headings
   )
-  if (length(lhs_heading) != 1L) return(NULL)
+  extra_statements <- setdiff(statement_headings, c("Section", lhs_heading, "Keyword", "Right-hand variable"))
+  if (length(lhs_heading) != 1L || length(extra_statements) > 0L) return(NULL)
 
   statement_values <- matrix(
     trimws(as.character(statements)), nrow = nrow(statements), ncol = ncol(statements)
@@ -79,20 +80,31 @@ extractH5ResultTable <- function(result_section, filename,
     match <- grep(pattern, result_headings, ignore.case = TRUE, perl = TRUE)
     if (length(match) == 1L) result_values[, match] else rep(NA_real_, nrow(result_values))
   }
-  fixed_variance <- section %in% c("Variances", "Residual Variances") &
-    !nzchar(keyword) & !nzchar(rhs) & value_column("^S\\.E\\.$") == 0
-  param[fixed_variance] <- "FALSE"
 
-  if ("Posterior S.D." %in% result_headings) {
+  if (any(grepl("^Posterior S\\.\\s*D\\.$", result_headings, ignore.case = TRUE, perl = TRUE))) {
+    est_col <- value_column("^(Estimate|Posterior Estimate)$")
+    psd_col <- value_column("^Posterior S\\.\\s*D\\.$")
+    pval_col <- value_column("P-Value$")
+    low_ci <- value_column("^Lower 2\\.5% C\\.?I\\.?$")
+    up_ci <- value_column("^Upper 2\\.5% C\\.?I\\.?$")
+    sig_col <- if (any(grepl("^Significance$", result_headings, ignore.case = TRUE, perl = TRUE))) {
+      as.logical(value_column("^Significance$"))
+    } else {
+      ifelse(
+        is.na(psd_col) | is.na(low_ci) | is.na(up_ci),
+        NA,
+        (psd_col > 0) & (low_ci > 0 | up_ci < 0)
+      )
+    }
     params <- data.frame(
       paramHeader = as.character(param_header),
       param = as.character(param),
-      est = value_column("^(Estimate|Posterior Estimate)$"),
-      posterior_sd = value_column("^Posterior S\\.D\\.$"),
-      pval = value_column("P-Value$"),
-      lower_2.5ci = value_column("^Lower 2\\.5% C\\.I\\.$"),
-      upper_2.5ci = value_column("^Upper 2\\.5% C\\.I\\.$"),
-      sig = as.logical(value_column("^Significance$")),
+      est = est_col,
+      posterior_sd = psd_col,
+      pval = pval_col,
+      lower_2.5ci = low_ci,
+      upper_2.5ci = up_ci,
+      sig = sig_col,
       stringsAsFactors = FALSE
     )
   } else {
@@ -100,7 +112,7 @@ extractH5ResultTable <- function(result_section, filename,
       paramHeader = as.character(param_header),
       param = as.character(param),
       est = value_column("^(Estimate|Posterior Estimate)$"),
-      se = value_column("^(S\\.E\\.|Posterior S\\.D\\.)$"),
+      se = value_column("^(S\\.E\\.|Posterior S\\.\\s*D\\.)$"),
       est_se = value_column("^(Estimate|Est\\.)/S\\.E\\.$"),
       pval = value_column("P-Value$"),
       stringsAsFactors = FALSE
@@ -225,7 +237,9 @@ extractH5OddsRatioTable <- function(result_section, filename,
     statement_headings
   )
   required_results <- c("Estimate", "S.E.", "Lower 2.5%", "Upper 2.5%")
-  if (length(lhs_heading) != 1L || !all(required_results %in% result_headings) ||
+  extra_statements <- setdiff(statement_headings, c("Section", lhs_heading, "Keyword", "Right-hand variable"))
+  if (length(lhs_heading) != 1L || length(extra_statements) > 0L ||
+      !all(required_results %in% result_headings) ||
       !all(c("Keyword", "Right-hand variable") %in% statement_headings)) {
     return(NULL)
   }
@@ -337,8 +351,9 @@ extractH5ProbabilityScaleTable <- function(result_section, filename,
     c("Left-hand variable/Variable/Parameter label", "Left-hand variable", "Variable", "Parameter label"),
     statement_headings
   )
-  if (length(lhs_heading) != 1L || !"Section" %in% statement_headings ||
-      !"Estimate" %in% result_headings) {
+  extra_statements <- setdiff(statement_headings, c("Class", "Section", lhs_heading, "Keyword", "Right-hand variable"))
+  if (length(lhs_heading) != 1L || length(extra_statements) > 0L ||
+      !"Section" %in% statement_headings || !"Estimate" %in% result_headings) {
     return(NULL)
   }
 
@@ -538,22 +553,40 @@ extractH5StandardizedModelResults_1file <- function(h5results, h5file, filename)
     if (!is.null(params)) out[[section_name]] <- params
   }
 
-  r2_result_attributes <- read_h5_attributes(h5file, "R-Square/Results")
-  r2_statement_attributes <- read_h5_attributes(h5file, "R-Square/Statements")
-  r2_table <- extractH5ResultTable(
-    h5results[["R-Square"]],
-    filename = filename,
-    result_headings = r2_result_attributes$Headings,
-    statement_headings = r2_statement_attributes$Headings
-  )
-  if (!is.null(r2_table)) {
-    r2 <- r2_table[, c("param", "est", "se", "est_se", "pval"), drop = FALSE]
-    class(r2) <- c("mplus.params", "data.frame")
-    attr(r2, "filename") <- filename
-    out$r2 <- r2
-  }
-
   if (length(out) == 0L) NULL else out
+}
+
+# Keep the text table's layout and use full-precision values where the H5 rows align.
+extractH5RSquare_1file <- function(section, h5results, h5file, filename) {
+  r2 <- extractParameters_1section(filename, section, "r2")$r2
+  if (is.null(r2)) return(NULL)
+
+  h5_section <- h5results[["R-Square"]]
+  headings <- h5_result_headings(h5file, "R-Square")
+  h5_rows <- extractH5ResultTable(
+    h5_section, filename, headings, h5_statement_headings(h5file, "R-Square")
+  )
+  if (is.null(h5_rows) || !identical(r2$param, h5_rows$param)) return(r2)
+
+  # Undefined text estimates can have numeric sentinels in H5.
+  for (col in intersect(names(r2), c("est", "se", "est_se", "pval", "posterior_sd",
+                                     "lower_2.5ci", "upper_2.5ci"))) {
+    if (is.null(h5_rows[[col]])) next
+    replace <- !is.na(r2[[col]]) & is.finite(h5_rows[[col]])
+    r2[[col]][replace] <- h5_rows[[col]][replace]
+  }
+  extra_columns <- c(resid_var = "Residual Variance", scale_f = "Scale Factors")
+  for (col in intersect(names(r2), names(extra_columns))) {
+    idx <- which(tolower(trimws(headings)) == tolower(extra_columns[[col]]))
+    if (length(idx) == 1L) {
+      values <- as.numeric(h5_section$Results[, idx])
+      # Mplus 9.1 THETA H5RESULTS can leave Scale Factors uninitialized (~1.36e-19);
+      # only adopt H5 values that agree with the 3-decimal text value.
+      replace <- !is.na(r2[[col]]) & is.finite(values) & abs(values - r2[[col]]) <= 5e-3
+      r2[[col]][replace] <- values[replace]
+    }
+  }
+  r2
 }
 
 h5results_file_path <- function(savedata_info, outfile) {
@@ -612,10 +645,12 @@ output_interval_type <- function(outfiletext, standardized = FALSE) {
 order_h5_parameters <- function(parameters) {
   section_order <- c(
     "unstandardized", "unstandardized.alt", "r2", "ci.unstandardized",
-    "irt.parameterization", "probability.scale", "odds", "ci.odds",
+    "irt.parameterization", "probability.scale", "class.equality", "transition.odds",
+    "odds", "ci.odds",
     "stdyx.standardized", "ci.stdyx.standardized",
     "stdy.standardized", "ci.stdy.standardized",
-    "std.standardized", "ci.std.standardized", "wilevel.standardized", "efa"
+    "std.standardized", "ci.std.standardized",
+    "wilevel.standardized", "esem.standardized", "efa"
   )
   parameters[intersect(section_order, names(parameters))]
 }
@@ -662,11 +697,14 @@ extractH5Parameters_1file <- function(outfiletext, filename, h5results, h5file,
     )
     expected <- expected_standardized_sections(outfiletext)
     if (is.null(standardized) || length(expected) == 0L ||
-        !all(expected %in% names(standardized)) ||
-        (has_output_section(outfiletext, "R-SQUARE") && !"r2" %in% names(standardized))) {
+        !all(expected %in% names(standardized))) {
       return(NULL)
     }
     parameters <- c(parameters, standardized)
+  }
+  r2_section <- getSection("^R-SQUARE$", outfiletext)
+  if (!is.null(r2_section)) {
+    parameters$r2 <- extractH5RSquare_1file(r2_section, h5results, h5file, filename)
   }
 
   interval_type <- output_interval_type(outfiletext)
@@ -720,11 +758,10 @@ extractH5Parameters_1file <- function(outfiletext, filename, h5results, h5file,
     parameters <- c(parameters, probability_scale)
   }
 
-  has_odds <- has_output_prefix(outfiletext, "LOGISTIC REGRESSION ODDS RATIO RESULTS")
-  has_odds_ci <- has_output_section(
-    outfiletext, "CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS"
-  )
-  if (has_odds) {
+  odds_section_count <- sum(grepl("^\\s*LOGISTIC REGRESSION ODDS RATIO RESULTS", outfiletext, perl = TRUE))
+  has_odds_ci <- has_output_prefix(outfiletext, "CONFIDENCE INTERVALS FOR THE LOGISTIC REGRESSION ODDS RATIO RESULTS")
+  if (odds_section_count > 0L) {
+    if (odds_section_count > 1L) return(NULL) # H5 may omit one of the split tables
     odds <- tryCatch(
       extractH5OddsRatioResults_1file(
         h5results, h5file, filename,
@@ -751,6 +788,12 @@ extractParameters_1file_with_h5 <- function(outfiletext, filename, h5results,
   if (is.null(h5_parameters)) {
     extractParameters_1file(outfiletext, filename, efa = efa)
   } else {
-    h5_parameters
+    esem_std <- extractESEMStandardized(outfiletext, filename)
+    if (!is.null(esem_std)) h5_parameters$esem.standardized <- esem_std
+    class_eq <- extractClassEqualityTests(outfiletext, filename)
+    if (!is.null(class_eq)) h5_parameters$class.equality <- class_eq
+    trans_odds <- extractTransitionOdds(outfiletext)
+    if (!is.null(trans_odds)) h5_parameters$transition.odds <- trans_odds
+    order_h5_parameters(h5_parameters)
   }
 }

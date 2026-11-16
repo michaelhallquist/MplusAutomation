@@ -31,10 +31,14 @@ extractEFAparameters <- function(outfiletext, filename) {
   
   complete_params <- list()
   
-  last_boundary <- h[ h > header_lines[length(header_lines)] ]
-  if (outfiletext[last_boundary[1L]] == "MODEL FIT INFORMATION") {
-    last_boundary <- last_boundary[2L] #skip model fit as boundary, since that is still part of the section
-  } else { last_boundary <- last_boundary[1L] } #next substantive section
+  # Fit, classification, and rotation headings can occur inside an EFA solution.
+  # The next EFA heading or a section that follows all solutions ends the block.
+  follow_efa <- "^(?:(?:MODEL )?MODIFICATION INDICES|TECHNICAL .*OUTPUT|SAVEDATA INFORMATION|PLOT INFORMATION|Beginning Time:|MUTHEN & MUTHEN)"
+  after_last <- h[h > tail(header_lines, 1L)]
+  last_boundary <- c(after_last[grepl(follow_efa, trimws(outfiletext[after_last]), perl = TRUE)],
+                     length(outfiletext) + 1L)[1L]
+  class_header <- "^\\s*RESULTS FOR CLASS (\\d+)\\s*$"
+  has_class_results <- any(grepl(class_header, outfiletext, perl = TRUE))
   
   for(i in seq_along(header_lines)) {
     search_init <- header_lines[i]
@@ -42,6 +46,13 @@ extractEFAparameters <- function(outfiletext, filename) {
     
     #full output of this efa section
     lines_to_search <- outfiletext[search_init:search_end]
+
+    class_suffix <- ""
+    if (has_class_results) {
+      class_line <- grep(class_header, lines_to_search, perl = TRUE, value = TRUE)
+      if (length(class_line) == 0L) next # skip random starts and fit tables
+      class_suffix <- paste0("_CLASS", sub(class_header, "\\1", class_line[1L], perl = TRUE))
+    }
     
     #not the most elegant solution, but we need to deal with the fact that multilevel EFA 
     #returns two independent sections for WITHIN and BETWEEN results. To keep these clear, add
@@ -58,18 +69,22 @@ extractEFAparameters <- function(outfiletext, filename) {
       if (is_wi && is_bw) { stop("EFA section contains both within and between level results. Don't know how to proceed.") }
     }
     
-    loadings_est <- matrixExtract(lines_to_search, "[A-z\\-]+ ROTATED LOADINGS\\s*.*", filename, expect_sig=TRUE)
+    bifactor_est <- matrixExtract(lines_to_search, "BI-FACTOR MODEL", filename, expect_sig=TRUE)
+    bifactor_sig <- attr(bifactor_est, "sig")
+    if (!is.null(bifactor_est)) attr(bifactor_est, "sig") <- NULL
+
+    loadings_est <- matrixExtract(lines_to_search, "(?!(?:S\\.E\\.|Est\\./S\\.E\\.)\\s)(?:[A-Za-z\\-]+\\s+)?ROTATED LOADINGS\\s*.*", filename, expect_sig=TRUE)
     loadings_sig <- attr(loadings_est, "sig")
     attr(loadings_est, "sig") <- NULL
-    corrs_est <- matrixExtract(lines_to_search, "[A-z\\-]+ FACTOR CORRELATIONS\\s*.*", filename, expect_sig=TRUE)
+    corrs_est <- matrixExtract(lines_to_search, "(?!(?:S\\.E\\.|Est\\./S\\.E\\.)\\s)(?:[A-Za-z\\-]+\\s+)?FACTOR CORRELATIONS\\s*.*", filename, expect_sig=TRUE)
     corrs_sig <- attr(corrs_est, "sig")
     attr(corrs_est, "sig") <- NULL
     residuals_est <- matrixExtract(lines_to_search, "ESTIMATED RESIDUAL VARIANCES", filename)
-    loadings_se <- matrixExtract(lines_to_search, "S\\.E\\. [A-z\\-]+ ROTATED LOADINGS", filename)
-    corrs_se <- matrixExtract(lines_to_search, "S\\.E\\. [A-z\\-]+ FACTOR CORRELATIONS\\s*.*", filename)
+    loadings_se <- matrixExtract(lines_to_search, "S\\.E\\.\\s+(?:[A-Za-z\\-]+\\s+)?ROTATED LOADINGS", filename)
+    corrs_se <- matrixExtract(lines_to_search, "S\\.E\\.\\s+(?:[A-Za-z\\-]+\\s+)?FACTOR CORRELATIONS\\s*.*", filename)
     residuals_se <- matrixExtract(lines_to_search, "S\\.E\\. ESTIMATED RESIDUAL VARIANCES", filename)
-    loadings_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\. [A-z\\-]+ ROTATED LOADINGS", filename)
-    corrs_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\. [A-z\\-]+ FACTOR CORRELATIONS\\s*.*", filename)
+    loadings_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\.\\s+(?:[A-Za-z\\-]+\\s+)?ROTATED LOADINGS", filename)
+    corrs_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\.\\s+(?:[A-Za-z\\-]+\\s+)?FACTOR CORRELATIONS\\s*.*", filename)
     residuals_est_se <- matrixExtract(lines_to_search, "Est\\./S\\.E\\. ESTIMATED RESIDUAL VARIANCES", filename)
     loadings_structure <- matrixExtract(lines_to_search, "FACTOR STRUCTURE", filename)
     
@@ -92,9 +107,15 @@ extractEFAparameters <- function(outfiletext, filename) {
         est_se    = residuals_est_se
       )
     )
+    if (!is.null(bifactor_est)) {
+      parameters$bifactor <- list(
+        estimates = bifactor_est,
+        sig = bifactor_sig
+      )
+    }
     
     complete_params <- append(complete_params, list(parameters))
-    names(complete_params)[length(complete_params)] <- paste0(n_factors[i], mlefa_suffix)
+    names(complete_params)[length(complete_params)] <- paste0(n_factors[i], mlefa_suffix, class_suffix)
   }
   
   result <- list(efa = complete_params)

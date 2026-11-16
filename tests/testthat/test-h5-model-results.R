@@ -100,6 +100,32 @@ test_that("unsupported H5 MODEL RESULTS layouts fall back to text parsing", {
   expect_null(MplusAutomation:::extractH5ModelResults(unsupported, "model.out"))
 })
 
+test_that("H5 R-square retains the columns shown in text output", {
+  filename <- "probit.out"
+  section <- c(
+    "    Observed                   Residual",
+    "    Variable        Estimate   Variance",
+    "    U1                 0.877      1.000",
+    "    U2             Undefined"
+  )
+  h5 <- list("R-Square" = list(
+    Results = rbind(c(0.8773808, 1), c(999, 999)),
+    Statements = rbind(
+      c("Observed Variable", "U1", "", ""),
+      c("Observed Variable", "U2", "", "")
+    )
+  ))
+  r2 <- testthat::with_mocked_bindings(
+    MplusAutomation:::extractH5RSquare_1file(section, h5, "probit.h5", filename),
+    h5_result_headings = function(...) c("Estimate", "Residual Variance"),
+    h5_statement_headings = function(...) c("Section", "Variable", "Keyword", "Right-hand variable")
+  )
+  expect_named(r2, c("param", "est", "resid_var"))
+  expect_equal(r2$param, c("U1", "U2"))
+  expect_equal(r2$est, c(0.8773808, NA_real_))
+  expect_equal(r2$resid_var, c(1, NA_real_))
+})
+
 test_that("H5 odds-ratio results agree with the text-parsed output", {
   skip_if_not_installed("rhdf5")
   outfile <- testthat::test_path("mplus_ug", "8.11", "ch3", "ex3.6.out")
@@ -204,6 +230,99 @@ test_that("H5 probability-scale and IRT tables preserve parameter fields", {
     result_headings, statement_headings
   )$irt.parameterization
   expect_equal(irt$paramHeader, c("F.BY", "Item.Difficulties", "Variances"))
-  expect_equal(irt$param, c("U1", "U1", "FALSE"))
+  expect_equal(irt$param, c("U1", "U1", "F"))
   expect_equal(irt$est[1L], 0.918273, tolerance = 1e-12)
+})
+
+test_that("stratified H5 statement headings fall back instead of dropping Group/Class/Level", {
+  result_headings <- c("Estimate", "S.E.", "Estimate/S.E.", "Two-Tailed P-Value")
+  base_stmt <- c("Section", "Left-hand variable/Variable/Parameter label", "Keyword", "Right-hand variable")
+  stratified_section <- list(
+    Results = matrix(c(-2.063, 0.373, -5.536, 0,
+                       2.091, 0.182, 11.502, 0), ncol = 4L, byrow = TRUE),
+    Statements = matrix(c("Latent Class 1", "Thresholds", "U1$1", "", "",
+                          "Latent Class 2", "Thresholds", "U1$1", "", ""), ncol = 5L, byrow = TRUE)
+  )
+
+  for (col in c("Class", "Group", "Level")) {
+    expect_null(MplusAutomation:::extractH5ModelResults(
+      list("Model Results" = stratified_section),
+      "stratified.out",
+      result_headings = result_headings,
+      statement_headings = c(col, base_stmt)
+    ))
+  }
+
+  odds_section <- list(
+    Results = matrix(c(2.15, 0.31, 1.62, 2.85), nrow = 1L),
+    Statements = matrix(c("Group G1", "", "U1", "ON", "X1"), nrow = 1L)
+  )
+  expect_null(MplusAutomation:::extractH5OddsRatioResults(
+    list("Logistic Regression Odds Ratio Results" = odds_section),
+    "grouped_odds.out",
+    result_headings = c("Estimate", "S.E.", "Lower 2.5%", "Upper 2.5%"),
+    statement_headings = c("Group", base_stmt)
+  ))
+
+  prob_grouped <- list(
+    Results = matrix(c(0.65, 0.04, 16.25, 0), nrow = 1L),
+    Statements = matrix(c("Group G1", "U1", "Category 1", "", ""), nrow = 1L)
+  )
+  expect_null(MplusAutomation:::extractH5ProbabilityScaleResults(
+    list("Results in Probability Scale" = prob_grouped),
+    "grouped_prob.out",
+    result_headings = result_headings,
+    statement_headings = c("Group", base_stmt)
+  ))
+})
+
+test_that("H5 R-square guards uninitialized THETA Scale Factors and parses Bayesian R-square headings", {
+  theta_section <- c(
+    "    Observed                                        Two-Tailed     Scale",
+    "    Variable    Estimate       S.E.  Est./S.E.   P-Value        Factors",
+    "    U1             0.800      0.046     17.436      0.000          0.447"
+  )
+  h5_theta <- list("R-Square" = list(
+    Results = matrix(c(0.7999982, 0.04588321, 17.43553, 0, 1.356316e-19), nrow = 1L),
+    Statements = matrix(c("Observed Variable", "U1", "", "U1"), nrow = 1L)
+  ))
+  r2_theta <- testthat::with_mocked_bindings(
+    MplusAutomation:::extractH5RSquare_1file(theta_section, h5_theta, "theta.h5", "theta.out"),
+    h5_result_headings = function(...) c("Estimate", "S.E.", "Estimate/S.E.", "Two-Tailed P-Value", "Scale Factors"),
+    h5_statement_headings = function(...) c("Section", "Left-hand variable/Variable/Parameter label", "Keyword", "Right-hand variable")
+  )
+  expect_equal(r2_theta$est, 0.7999982, tolerance = 1e-7)
+  expect_equal(r2_theta$scale_f, 0.447)
+
+  bayes_section <- c(
+    "                                Posterior  One-Tailed         95% C.I.",
+    "    Variable        Estimate       S.D.      P-Value   Lower 2.5%  Upper 2.5%",
+    "    Y1                 0.457       0.044      0.000       0.374       0.553"
+  )
+  h5_bayes <- list("R-Square" = list(
+    Results = matrix(c(0.4572245, 0.04361657, 0, 0.3735053, 0.5531552), nrow = 1L),
+    Statements = matrix(c("Observed Variable", "Y1", "", "Y1"), nrow = 1L)
+  ))
+  r2_bayes <- testthat::with_mocked_bindings(
+    MplusAutomation:::extractH5RSquare_1file(bayes_section, h5_bayes, "bayes.h5", "bayes.out"),
+    h5_result_headings = function(...) c("Estimate", "Posterior S. D.", "One-Tailed P-Value", "Lower 2.5% CI", "Upper 2.5% CI"),
+    h5_statement_headings = function(...) c("Section", "Left-hand variable/Variable/Parameter label", "Keyword", "Right-hand variable")
+  )
+  expect_equal(r2_bayes$est, 0.4572245, tolerance = 1e-7)
+  expect_equal(r2_bayes$posterior_sd, 0.04361657, tolerance = 1e-8)
+  expect_equal(r2_bayes$lower_2.5ci, 0.3735053, tolerance = 1e-7)
+  expect_equal(r2_bayes$upper_2.5ci, 0.5531552, tolerance = 1e-7)
+
+  bayes_std <- MplusAutomation:::extractH5ResultTable(
+    list(
+      Results = matrix(c(0.6761838, 0.03223832, 0, 0.6111508, 0.7437440,
+                         0.0500000, 0.08000000, 0.26, -0.1000000, 0.2000000), ncol = 5L, byrow = TRUE),
+      Statements = matrix(c("", "F1", "BY", "Y1",
+                            "", "F1", "BY", "Y2"), ncol = 4L, byrow = TRUE)
+    ),
+    "bayes_std.out",
+    c("Estimate", "Posterior S.D.", "One-Tailed P-Value", "Lower 2.5% C.I.", "Upper 2.5% C.I."),
+    c("Section", "Left-hand variable/Variable/Parameter label", "Keyword", "Right-hand variable")
+  )
+  expect_equal(bayes_std$sig, c(TRUE, FALSE))
 })
