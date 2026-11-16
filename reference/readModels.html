@@ -136,11 +136,14 @@ message was found. A non-convergence message is retained in <code>errors</code>.
 <li><p><code>savedata_info</code>: File information about SAVEDATA files related to this output</p></li>
 <li><p><code>savedata</code>: SAVEDATA file as an R <code>data.frame</code>, as described in <code>getSavedata_Data</code></p></li>
 <li><p><code>bparameters</code>: an <code>mcmc.list</code> object containing the draws from the MCMC chains for a Bayesian model that uses the SAVEDATA: BPARAMETERS command</p></li>
-<li><p><code>tech1</code>: a list containing parameter specification and starting values from OUTPUT: TECH1</p></li>
+<li><p><code>tech1</code>: parameter specification and starting values from OUTPUT: TECH1.
+ESEM results can also include <code>unrotated</code> and <code>rotated</code> entries.</p></li>
 <li><p><code>tech3</code>: a list containing parameter covariance and correlation matrices from OUTPUT: TECH3</p></li>
 <li><p><code>tech4</code>: a list containing estimates, standard errors, Est./S.E. values, and p-values for latent variable means, covariances, and correlations from OUTPUT: TECH4</p></li>
 <li><p><code>tech7</code>: a list containing sample statistics for each latent class from OUTPUT: TECH7</p></li>
-<li><p><code>tech8</code>: a list containing optimization history of the model. Currently only supports potential scale reduction in BAYES. OUTPUT: TECH8</p></li>
+<li><p><code>tech8</code>: Bayesian potential scale reduction and, when reported, the
+effective sample size table (<code>ess</code>). For values reported as less than
+a threshold, <code>ess</code> is missing and <code>upper_bound</code> contains the threshold.</p></li>
 <li><p><code>tech9</code>: a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9</p></li>
 <li><p><code>tech10</code>: a list containing model fit information from OUTPUT: TECH10</p></li>
 <li><p><code>tech12</code>: a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12</p></li>

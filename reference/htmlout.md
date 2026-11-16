@@ -35,5 +35,5 @@ Joshua F. Wiley <jwiley.psych@gmail.com>
 ``` r
 
 MplusAutomation:::htmlout("https://statmodel.com/usersguide/chap3/ex3.1.html")
-#> [1] "/tmp/RtmpMxp6To/UserGuide3aa63e4eff40.out"
+#> [1] "/tmp/RtmpIwr3qy/UserGuide1cf02b7047cc.out"
 ```

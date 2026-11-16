@@ -127,8 +127,9 @@ a single mplus.model object, not a list of files. Specific elements are:
   MCMC chains for a Bayesian model that uses the SAVEDATA: BPARAMETERS
   command
 
-- `tech1`: a list containing parameter specification and starting values
-  from OUTPUT: TECH1
+- `tech1`: parameter specification and starting values from OUTPUT:
+  TECH1. ESEM results can also include `unrotated` and `rotated`
+  entries.
 
 - `tech3`: a list containing parameter covariance and correlation
   matrices from OUTPUT: TECH3
@@ -140,9 +141,10 @@ a single mplus.model object, not a list of files. Specific elements are:
 - `tech7`: a list containing sample statistics for each latent class
   from OUTPUT: TECH7
 
-- `tech8`: a list containing optimization history of the model.
-  Currently only supports potential scale reduction in BAYES. OUTPUT:
-  TECH8
+- `tech8`: Bayesian potential scale reduction and, when reported, the
+  effective sample size table (`ess`). For values reported as less than
+  a threshold, `ess` is missing and `upper_bound` contains the
+  threshold.
 
 - `tech9`: a list containing warnings/errors from replication runs for
   MONTECARLO analyses from OUTPUT: TECH9
