@@ -126,11 +126,11 @@ is_decimal_summary_field <- function(name, values = NULL) {
     return(unname(decimals[[name]]))
   }
 
-  if (grepl("(_DF|_NumComputations|_SuccessfulDraws|_ParamDiff|_Starts|_Final)$", name)) {
+  if (grepl("(_DF|_NumComputations|_SuccessfulDraws|_ParamDiff|Starts|Final)$", name)) {
     return(FALSE)
   }
 
-  if (grepl("^N[A-Z]", name)) {
+  if (grepl("^(N[A-Z]|NumFactors)", name)) {
     return(FALSE)
   }
 
