@@ -101,13 +101,13 @@ packages.
 sessionInfo()
 ```
 
-    ## R version 4.6.1 (2026-06-24)
+    ## R version 4.6.2 (2026-10-29)
     ## Platform: x86_64-pc-linux-gnu
-    ## Running under: Ubuntu 24.04.4 LTS
+    ## Running under: Ubuntu 26.04.1 LTS
     ## 
     ## Matrix products: default
     ## BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
-    ## LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so;  LAPACK version 3.12.0
+    ## LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.32.so;  LAPACK version 3.12.0
     ## 
     ## locale:
     ##  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
@@ -125,26 +125,30 @@ sessionInfo()
     ## [1] MplusAutomation_1.4
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.1     Rcpp_1.1.2        
-    ##  [5] parallel_4.6.1     jquerylib_0.1.4    systemfonts_1.3.2  scales_1.4.0      
-    ##  [9] textshaping_1.0.5  boot_1.3-32        yaml_2.3.12        fastmap_1.2.0     
-    ## [13] lattice_0.22-9     coda_0.19-4.1      ggplot2_4.0.3      R6_2.6.1          
-    ## [17] plyr_1.8.9         knitr_1.51         backports_1.5.1    checkmate_2.3.4   
-    ## [21] pander_0.6.6       gsubfn_0.7         proto_1.0.0        desc_1.4.3        
-    ## [25] bslib_0.11.0       RColorBrewer_1.1-3 rlang_1.3.0        cachem_1.1.0      
-    ## [29] xfun_0.60          fs_2.1.0           sass_0.4.10        S7_0.2.2          
-    ## [33] otel_0.2.0         cli_3.6.6          pkgdown_2.2.1      fastDummies_1.7.6 
-    ## [37] digest_0.6.39      grid_4.6.1         xtable_1.8-8       texreg_1.39.5     
-    ## [41] lifecycle_1.0.5    vctrs_0.7.3        data.table_1.18.4  evaluate_1.0.5    
-    ## [45] glue_1.8.1         farver_2.1.2       ragg_1.5.2         rmarkdown_2.31    
-    ## [49] httr_1.4.8         tools_4.6.1        htmltools_0.5.9
+    ##  [1] gtable_0.3.6        jsonlite_2.0.0      compiler_4.6.2     
+    ##  [4] Rcpp_1.1.2          parallel_4.6.2      jquerylib_0.1.4    
+    ##  [7] systemfonts_1.3.2   scales_1.4.0        textshaping_1.0.5  
+    ## [10] boot_1.3-32         yaml_2.3.12         fastmap_1.2.0      
+    ## [13] lattice_0.23-1      coda_0.19-4.1       ggplot2_4.0.4      
+    ## [16] R6_2.6.1            plyr_1.8.9          knitr_1.52         
+    ## [19] backports_1.5.1     checkmate_2.3.4     pander_0.6.6       
+    ## [22] gsubfn_0.7          proto_1.0.0         desc_1.4.3         
+    ## [25] bslib_0.12.0        RColorBrewer_1.1-3  rlang_1.3.0        
+    ## [28] cachem_1.1.0        xfun_0.62           fs_2.1.0           
+    ## [31] sass_0.4.10         S7_0.2.2            otel_0.3.0         
+    ## [34] cli_3.6.6           pkgdown_2.2.1       fastDummies_1.7.6  
+    ## [37] digest_0.6.39       grid_4.6.2          xtable_1.8-8       
+    ## [40] texreg_1.40         lifecycle_1.0.5     vctrs_0.7.3        
+    ## [43] data.table_1.18.6.1 evaluate_1.0.5      glue_1.8.1         
+    ## [46] farver_2.1.2        ragg_1.5.2          rmarkdown_2.32     
+    ## [49] httr_1.4.9          tools_4.6.2         htmltools_0.5.9
 
 ### Updating the package to the latest version
 
 As is conventional for `R` packages, the latest version of
 `MplusAutomation` may be obtained from CRAN using the
 [`update.packages()`](https://rdrr.io/r/utils/update.packages.html)
-function in an `R` session. As of 2026-08-03, the current version of the
+function in an `R` session. As of 2026-11-16, the current version of the
 package is 1.4.
 
 ``` r
