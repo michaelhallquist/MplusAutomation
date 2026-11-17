@@ -5,7 +5,7 @@ Function for extracting counts of latent classes
 ## Usage
 
 ``` r
-extractClassCounts(outfiletext, filename, summaries)
+extractClassCounts(outfiletext, filename, summaries = NULL)
 ```
 
 ## Arguments
@@ -17,6 +17,10 @@ extractClassCounts(outfiletext, filename, summaries)
 - filename:
 
   The name of the output file
+
+- summaries:
+
+  Parsed model summaries, or `NULL` when unavailable.
 
 ## Value
 

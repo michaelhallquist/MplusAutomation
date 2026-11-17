@@ -6,7 +6,7 @@ the user, but the parsing function can be used by `readModels`
 ## Usage
 
 ``` r
-l_getSavedata_Fileinfo(outfile, outfiletext, summaries)
+l_getSavedata_Fileinfo(outfile, outfiletext, summaries = NULL)
 ```
 
 ## Arguments
@@ -18,6 +18,10 @@ l_getSavedata_Fileinfo(outfile, outfiletext, summaries)
 - outfiletext:
 
   The contents of the output file, for example as read by `scan`
+
+- summaries:
+
+  Parsed model summaries, or `NULL` when unavailable.
 
 ## Value
 

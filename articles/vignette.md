@@ -127,7 +127,7 @@ sessionInfo()
     ## loaded via a namespace (and not attached):
     ##  [1] gtable_0.3.6        jsonlite_2.0.0      compiler_4.6.2     
     ##  [4] Rcpp_1.1.2          parallel_4.6.2      jquerylib_0.1.4    
-    ##  [7] systemfonts_1.3.2   scales_1.4.0        textshaping_1.0.5  
+    ##  [7] systemfonts_1.3.3   scales_1.4.0        textshaping_1.0.5  
     ## [10] boot_1.3-32         yaml_2.3.12         fastmap_1.2.0      
     ## [13] lattice_0.23-1      coda_0.19-4.1       ggplot2_4.0.4      
     ## [16] R6_2.6.1            plyr_1.8.9          knitr_1.52         
@@ -148,7 +148,7 @@ sessionInfo()
 As is conventional for `R` packages, the latest version of
 `MplusAutomation` may be obtained from CRAN using the
 [`update.packages()`](https://rdrr.io/r/utils/update.packages.html)
-function in an `R` session. As of 2026-11-16, the current version of the
+function in an `R` session. As of 2026-11-17, the current version of the
 package is 1.4.
 
 ``` r
