@@ -53,6 +53,7 @@ getSavedata_Fileinfo <- function(outfile) {
 #' @param outfile A character string giving the name of the Mplus
 #'   output file.
 #' @param outfiletext The contents of the output file, for example as read by \code{scan}
+#' @param summaries Parsed model summaries, or \code{NULL} when unavailable.
 #' @return A list that includes:
 #' * `fileName`: The name of the file containing the analysis dataset created by the Mplus SAVEDATA command.
 #' * `fileVarNames`: A character vector containing the names of variables in the dataset.
@@ -66,7 +67,7 @@ getSavedata_Fileinfo <- function(outfile) {
 #' @examples
 #' # make me!
 #' @keywords internal
-l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
+l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries = NULL) {
 
   sectionStarts <- c("Estimates", #estimates
       "Estimated Covariance Matrix for the Parameter Estimates", #tech3
@@ -204,7 +205,7 @@ l_getSavedata_Fileinfo <- function(outfile, outfiletext, summaries) {
       #15Mar2012: Workaround for bug: means for categorical latent variables are in output file listing
       #but these are not actually present in bparameters. Filter these out.
       #12Oct2015: This appears to have been fixed in Mplus 7 and beyond, so check version if available.    
-      if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7) {
+      if (mplus_version_before(summaries$Mplus.version, "7")) {
         paramOrderSection <- paramOrderSection[!grepl("Parameter\\s+\\d+, \\[ [^#]#\\d+ \\]", paramOrderSection, perl=TRUE)]
       }
       

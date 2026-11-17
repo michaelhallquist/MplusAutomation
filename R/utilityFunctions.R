@@ -1265,6 +1265,12 @@ trimSpace <- function(string) {
   return(stringTrim)
 }
 
+mplus_version_before <- function(version, threshold) {
+  version <- numeric_version(trimws(as.character(version[1L])), strict = FALSE)
+  # Use the existing legacy-format fallback when a version is unavailable.
+  length(version) == 0L || is.na(version) || version < numeric_version(threshold)
+}
+
 #' Convert Mplus Number to Numeric
 #'
 #' Helper function to convert strings formatted in Mplus
