@@ -1099,6 +1099,21 @@ extractSummaries_1file <- function(outfiletext, filename, input)
   section_alerts <- attr(arglist, "section_alerts", exact=TRUE)
   
   arglist <- as.data.frame(arglist, stringsAsFactors=FALSE)
+  condition_header <- "^QUALITY OF NUMERICAL RESULTS"
+  quality_headers <- grep(condition_header, outfiletext, value = TRUE)
+  condition_number <- function(header) {
+    section <- getSection(paste0("^", trimws(header), "$"), outfiletext)
+    value <- extractValue("^\\s*Condition Number for the Information Matrix\\s*", section, filename, type = "str")
+    suppressWarnings(mplus_as.numeric(trimws(value)))
+  }
+  if (length(quality_headers) == 1L && nrow(arglist) == 1L) {
+    arglist$ConditionNumber <- condition_number(quality_headers)
+  } else if (length(quality_headers) > 0L && !is.null(arglist$Model)) {
+    arglist$ConditionNumber <- vapply(
+      paste("QUALITY OF NUMERICAL RESULTS FOR THE", sub("\\s+MODEL$", "", arglist$Model), "MODEL"),
+      condition_number, numeric(1L), USE.NAMES = FALSE
+    )
+  }
   class(arglist) <- c("mplus.summaries", "data.frame")
   attr(arglist, "filename") <- arglist$Filename
   if (!is.null(section_alerts)) attr(arglist, "section_alerts") <- section_alerts
@@ -1455,11 +1470,13 @@ extractSampstat <- function(outfiletext, filename) {
   }
   univariateCountsSection <- getSection("^UNIVARIATE PROPORTIONS( AND COUNTS)? FOR CATEGORICAL VARIABLES$", outfiletext)
   univariate_sampstat <- getSection("^UNIVARIATE SAMPLE STATISTICS$", outfiletext)
+  censored <- getSection("^SUMMARY OF CENSORED LIMITS$", outfiletext)
+  counts <- getSection("^COUNT PROPORTION OF ZERO, MINIMUM AND MAXIMUM VALUES$", outfiletext)
   
   sampstatList <- list()
   if (is.null(sampstatSection) &&
       is.null(univariateCountsSection) &&
-      is.null(univariate_sampstat)) {
+      is.null(univariate_sampstat) && is.null(censored) && is.null(counts)) {
     return(new_mplus_sampstat())
   }
   
@@ -1685,8 +1702,29 @@ extractSampstat <- function(outfiletext, filename) {
     }
     
   }
+  additional_stats <- list(
+    censored.limits = extractVariableStatistics(censored, c("variable", "limit")),
+    count.summary = extractVariableStatistics(counts, c("variable", "zero_proportion", "minimum", "maximum"))
+  )
+  additional_groups <- character()
+  for (name in names(additional_stats)) {
+    table <- additional_stats[[name]]
+    if (is.null(table)) next
+    if ("Group" %in% names(table)) {
+      grouped <- split(table, table$Group)
+      additional_groups <- union(additional_groups, names(grouped))
+      for (group in names(grouped)) {
+        grouped[[group]]$Group <- NULL
+        rownames(grouped[[group]]) <- NULL
+        sampstatList[[make.names(group)]][[name]] <- grouped[[group]]
+      }
+    } else {
+      sampstatList[[name]] <- table
+    }
+  }
   sampstatList <- new_mplus_sampstat(sampstatList)
   if (length(sampstatSubsections) > 1) attr(sampstatList, "group.names") <- groupNames
+  if (length(additional_groups) > 1L) attr(sampstatList, "group.names") <- make.names(additional_groups)
   
   return(sampstatList)
   
@@ -2202,11 +2240,28 @@ extractFacScoreStats <- function(outfiletext, filename) {
     outfiletext, filename, allowMultiple=FALSE)
   fssList <- new_mplus_facscorestats()
   
-  if (section_is_missing(fssSection)) return(fssList) #no factor scores output
-  
-  fssList[["Means"]] <- matrixExtract(fssSection, "Means", filename)
-  fssList[["Covariances"]] <- matrixExtract(fssSection, "Covariances", filename)
-  fssList[["Correlations"]] <- matrixExtract(fssSection, "Correlations", filename)
+  if (!section_is_missing(fssSection)) {
+    fssList[["Means"]] <- matrixExtract(fssSection, "Means", filename)
+    fssList[["Covariances"]] <- matrixExtract(fssSection, "Covariances", filename)
+    fssList[["Correlations"]] <- matrixExtract(fssSection, "Correlations", filename)
+  }
+  plausible_headers <- c(
+    plausible.values = "^SUMMARIES OF PLAUSIBLE VALUES \\(N = NUMBER OF OBSERVATIONS \\* NUMBER OF IMPUTATIONS\\)$",
+    plausible.sd = "^SUMMARY OF PLAUSIBLE STANDARD DEVIATION \\(N = NUMBER OF OBSERVATIONS\\)$"
+  )
+  # SAMPLE STATISTICS is nested inside these summaries.
+  plausible_text <- outfiletext
+  headers <- attr(outfiletext, "headerlines")
+  attr(plausible_text, "headerlines") <- headers[trimws(outfiletext[headers]) != "SAMPLE STATISTICS"]
+  for (name in names(plausible_headers)) {
+    section <- getSection(plausible_headers[[name]], plausible_text)
+    if (is.null(section)) next
+    fssList[[name]] <- list(
+      Means = matrixExtract(section, "Means", filename),
+      Covariances = matrixExtract(section, "Covariances", filename),
+      Correlations = matrixExtract(section, "Correlations", filename)
+    )
+  }
   
   return(fssList)
   

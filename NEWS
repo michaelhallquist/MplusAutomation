@@ -1,4 +1,10 @@
 Version 1.4
+- feature:     readModels extracts probability-scale confidence and credibility intervals, latent-class
+               indicator profiles and odds ratios, Brant proportional-odds tests, and logrank tests
+               into $parameters. Supported H5 tables supply full-precision values when their rows match.
+- feature:     readModels includes the information-matrix ConditionNumber in $summaries, censoring
+               limits and count summaries in $sampstat, and plausible-value summary matrices in
+               $fac_score_stats.
 - feature:     readModels parses VIF from Mplus 9.1 sample statistics and keeps rows with overflowed VIF values.
 - feature:     readModels now reports explicit Mplus termination status in $converged (TRUE, FALSE, or NA); ML and Bayesian non-convergence messages are retained in $errors.
 - feature:     readModels now prefers full-precision MODEL RESULTS, standardized-results, odds-ratio, confidence-interval, Bayesian credibility-interval, IRT-parameterization, and probability-scale tables from SAVEDATA: H5RESULTS when available; set preferH5File = FALSE to use text parsing.

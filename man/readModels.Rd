@@ -59,11 +59,17 @@ a single mplus.model object, not a list of files. Specific elements are:
 non-convergence, \code{TRUE} for normal termination, and \code{NA} when neither
 message was found. A non-convergence message is retained in \code{errors}.
 \item \code{data_summary}: Output of SUMMARY OF DATA section, including cluster sizes and ICCs
-\item \code{sampstat}: Sample statistics provided by OUTPUT: SAMPSTAT, if specified
+\item \code{sampstat}: Sample statistics provided by OUTPUT: SAMPSTAT, if specified.
+Includes \code{censored.limits} and \code{count.summary} when reported.
 \item \code{covariance_coverage}: Covariance coverage matrix for checking missingness patterns
-\item \code{summaries}: Summary statistics from \code{extractModelSummaries}, having structure as specified by that function
+\item \code{summaries}: Summary statistics from \code{extractModelSummaries}, having structure as specified by that function.
+\code{ConditionNumber} contains the information-matrix condition number when reported.
 \item \code{random_starts}: Parsed random starts results, including final-stage loglikelihoods and random start specifications
-\item \code{parameters}: Model parameters from \code{extractModelParameters}, having structure as specified by that function
+\item \code{parameters}: Model parameters from \code{extractModelParameters}, having structure as specified by that function.
+Additional tables include \code{ci.probability.scale} (confidence or credibility intervals),
+\code{indicator.profiles} (means and probabilities evaluated at the reported covariate values),
+\code{indicator.odds} and \code{ci.indicator.odds} (with category comparisons and \code{classA}/\code{classB}),
+\code{brant} (proportional-odds tests), and \code{logrank} (survival comparisons).
 \item \code{svalues}: Raw text from the SVALUES section, if present
 \item \code{model_table}: Parsed model syntax from the input \code{MODEL} sections as a data.frame
 \item \code{class_counts}: Latent class counts and proportions for models that include a categorical latent variable
@@ -84,7 +90,9 @@ a threshold, \code{ess} is missing and \code{upper_bound} contains the threshold
 \item \code{tech9}: a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9
 \item \code{tech10}: a list containing model fit information from OUTPUT: TECH10
 \item \code{tech12}: a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12
-\item \code{fac_score_stats}: factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section
+\item \code{fac_score_stats}: factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section.
+\code{plausible.values} and \code{plausible.sd} contain the reported Means, Covariances,
+and Correlations matrices for plausible values and their standard deviations.
 \item \code{lcCondMeans}: conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models
 \item \code{r3step}: predictors of latent class membership using the 3-step procedure (R3STEP)
 \item \code{gh5}: a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)
