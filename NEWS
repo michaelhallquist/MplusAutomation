@@ -24,6 +24,9 @@ Version 1.4
 - bugfix:      Improved parsing of sample statistics, covariance coverage, and TECH9 for Monte Carlo
                and imputation outputs. Wildcard imputation files can be read when the output also
                lists a separate SAVEDATA file.
+- bugfix:      Compare Mplus versions by numeric components so patch releases such as 9.1.1 preserve
+               latent-class counts and BPARAMETERS metadata, and minor releases such as 7.10 select
+               the appropriate output format. Fixes #230.
 - bugfix:      submitModels now correctly batches fractional walltimes, normalizes overflow in duration fields, and renders day-based durations as total hours for TORQUE/qsub.
 
 Version 1.3

@@ -2311,11 +2311,12 @@ extractTransitionOdds <- function(outfiletext) {
 #'
 #' @param outfiletext The text of the output file
 #' @param filename The name of the output file
+#' @param summaries Parsed model summaries, or \code{NULL} when unavailable.
 #' @return a list
 #' @keywords internal
 #' @examples
 #' # make me!!!
-extractClassCounts <- function(outfiletext, filename, summaries) {
+extractClassCounts <- function(outfiletext, filename, summaries = NULL) {
   # Handle multi-factor TYPE = MIXTURE EFA outputs (e.g., ex4.4.out), where class
   # counts and classification tables are printed separately for each factor solution
   efa_headers <- grep("^\\s*EXPLORATORY FACTOR ANALYSIS WITH [1-9]\\d* FACTOR\\(S\\):\\s*$", outfiletext, perl=TRUE)
@@ -2362,10 +2363,10 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
   
   countlist <- list()
   
-  if (is.null(summaries) || missing(summaries) || isTRUE(summaries$NCategoricalLatentVars[1L]==1) || all(is.na(summaries$NCategoricalLatentVars))) {
+  if (is.null(summaries) || isTRUE(summaries$NCategoricalLatentVars[1L]==1) || all(is.na(summaries$NCategoricalLatentVars))) {
     #Starting in Mplus v7.3 and above, formatting of the class counts appears to have changed...
     #Capture the alternatives here
-    if (is.null(summaries) || missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version[1L]) < 7.3) {
+    if (mplus_version_before(summaries$Mplus.version, "7.3")) {
       modelCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASSES$", outfiletext)
       ppCounts <- getSection("^FINAL CLASS COUNTS AND PROPORTIONS FOR THE LATENT CLASS PATTERNS$", outfiletext)
       mostLikelyCounts <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS MEMBERSHIP$", outfiletext)
@@ -2451,7 +2452,7 @@ extractClassCounts <- function(outfiletext, filename, summaries) {
       getSection(paste0(pattern_header, "::^", subheading, "$"), outfiletext)
     }
     posteriorProb.patterns <- pattern_section("BASED ON ESTIMATED POSTERIOR PROBABILITIES")
-    if (missing(summaries) || is.null(summaries$Mplus.version) || as.numeric(summaries$Mplus.version) < 7.3) {
+    if (mplus_version_before(summaries$Mplus.version, "7.3")) {
       mostLikely.patterns <- getSection("^CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN$", outfiletext)
       mostLikelyCounts <- getSection("CLASSIFICATION OF INDIVIDUALS BASED ON THEIR MOST LIKELY LATENT CLASS PATTERN", outfiletext)
     } else {

@@ -4,12 +4,14 @@
 \alias{extractClassCounts}
 \title{Extract Latent Class Counts}
 \usage{
-extractClassCounts(outfiletext, filename, summaries)
+extractClassCounts(outfiletext, filename, summaries = NULL)
 }
 \arguments{
 \item{outfiletext}{The text of the output file}
 
 \item{filename}{The name of the output file}
+
+\item{summaries}{Parsed model summaries, or \code{NULL} when unavailable.}
 }
 \value{
 a list

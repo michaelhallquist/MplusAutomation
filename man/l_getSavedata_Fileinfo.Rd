@@ -4,13 +4,15 @@
 \alias{l_getSavedata_Fileinfo}
 \title{local function that does the work of getSaveData_Fileinfo}
 \usage{
-l_getSavedata_Fileinfo(outfile, outfiletext, summaries)
+l_getSavedata_Fileinfo(outfile, outfiletext, summaries = NULL)
 }
 \arguments{
 \item{outfile}{A character string giving the name of the Mplus
 output file.}
 
 \item{outfiletext}{The contents of the output file, for example as read by \code{scan}}
+
+\item{summaries}{Parsed model summaries, or \code{NULL} when unavailable.}
 }
 \value{
 A list that includes:
