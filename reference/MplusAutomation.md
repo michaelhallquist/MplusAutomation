@@ -78,8 +78,8 @@ This converts the data.frame to a tab-delimited file and provides an
 |-----------|-----------------|
 | Package:  | MplusAutomation |
 | Type:     | Package         |
-| Version:  | 1.2             |
-| Date:     | 2025-08-25      |
+| Version:  | 1.4             |
+| Date:     | 2026-11-17      |
 | License:  | LGPL-3          |
 | LazyLoad: | yes             |
 
