@@ -44,7 +44,10 @@ test_that("readModels prefers supported H5 MODEL RESULTS tables", {
     list(Headings = if (grepl("Results$", dataset)) result_headings else statement_headings)
   }
   h5_reader <- function(file) {
-    expect_identical(file, h5file)
+    expect_identical(
+      normalizePath(file, winslash = "/", mustWork = TRUE),
+      normalizePath(h5file, winslash = "/", mustWork = TRUE)
+    )
     h5results
   }
 
