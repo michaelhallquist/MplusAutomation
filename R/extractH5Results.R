@@ -10,7 +10,7 @@ extractH5ResultTable <- function(result_section, filename,
   results <- result_section$Results
   statements <- result_section$Statements
   if (is.null(results) || is.null(statements) ||
-      !is.matrix(results) || !is.matrix(statements) ||
+      !is.matrix(results) || !is.numeric(results) || !is.matrix(statements) ||
       nrow(results) == 0L || nrow(results) != nrow(statements)) {
     return(NULL)
   }
@@ -29,6 +29,8 @@ extractH5ResultTable <- function(result_section, filename,
 
   result_headings <- trimws(as.character(result_headings))
   statement_headings <- trimws(as.character(statement_headings))
+  if (length(result_headings) != ncol(results) || length(statement_headings) != ncol(statements) ||
+      anyDuplicated(result_headings) || anyDuplicated(statement_headings)) return(NULL)
   needed_statements <- c("Section", "Keyword", "Right-hand variable")
   if (!all(needed_statements %in% statement_headings) ||
       !any(grepl("^(Estimate|Posterior Estimate)$", result_headings, ignore.case = TRUE))) {
@@ -590,13 +592,10 @@ extractH5RSquare_1file <- function(section, h5results, h5file, filename) {
 }
 
 h5results_file_path <- function(savedata_info, outfile) {
-  if (is.null(savedata_info) || is.null(savedata_info$h5resultsFile) ||
-      length(savedata_info$h5resultsFile) == 0L || is.na(savedata_info$h5resultsFile[1L])) {
-    return(NA_character_)
-  }
   h5file <- savedata_info$h5resultsFile[1L]
-  if (is.na(splitFilePath(h5file)$directory)) h5file <- file.path(dirname(outfile), h5file)
-  h5file
+  if (length(h5file) == 0L || is.na(h5file) || !nzchar(h5file)) return(NA_character_)
+  h5file <- path.expand(chartr("\\", "/", h5file))
+  if (grepl("^(/|[[:alpha:]]:/)", h5file)) h5file else file.path(dirname(outfile), h5file)
 }
 
 # Decide whether H5RESULTS completely covers the parameter sections displayed
@@ -682,7 +681,7 @@ extractH5Parameters_1file <- function(outfiletext, filename, h5results, h5file,
     outfiletext, perl = TRUE
   ))
   has_multiple_model_results <- any(grepl("^\\s*MODEL RESULTS FOR ", outfiletext, perl = TRUE))
-  if (is.null(h5results) || isTRUE(efa) || has_multiple_model_results || has_unsupported_sections) {
+  if (length(h5results) == 0L || isTRUE(efa) || has_multiple_model_results || has_unsupported_sections) {
     return(NULL)
   }
 
@@ -798,11 +797,10 @@ extractParameters_1file_with_h5 <- function(outfiletext, filename, h5results,
   parameters <- if (is.null(h5_parameters)) {
     extractParameters_1file(outfiletext, filename, efa = efa)
   } else {
-    h5_parameters
+    c(h5_parameters, extractAdditionalParameters(outfiletext, filename))
   }
-  if (isTRUE(prefer_h5) && !is.null(h5results)) {
+  if (isTRUE(prefer_h5) && length(h5results) > 0L) {
     # Supplemental tables can use H5 even when the core model requires text.
-    additional <- extractAdditionalParameters(outfiletext, filename)
     h5_sections <- c(
       ci.probability.scale = "Confidence Intervals in Probability Scale",
       indicator.odds = "Latent Class Indicator Odds Ratios for the Latent Classes",
@@ -811,12 +809,8 @@ extractParameters_1file_with_h5 <- function(outfiletext, filename, h5results,
     if (has_output_section(outfiletext, "CREDIBILITY INTERVALS IN PROBABILITY SCALE")) {
       h5_sections["ci.probability.scale"] <- "Credibility Intervals in Probability Scale"
     }
-    for (name in names(additional)) {
-      table <- additional[[name]]
-      if (name %in% names(h5_sections)) {
-        table <- preferH5AdditionalTable(table, h5_sections[[name]], h5results, h5file)
-      }
-      parameters[[name]] <- table
+    for (name in intersect(names(parameters), names(h5_sections))) {
+      parameters[[name]] <- preferH5AdditionalTable(parameters[[name]], h5_sections[[name]], h5results, h5file)
     }
   }
   order_h5_parameters(parameters)
@@ -873,8 +867,10 @@ preferH5AdditionalTable <- function(table, section, h5results, h5file) {
     column <- values[[heading]]
     if (!column %in% names(table)) next
     # Undefined and overflowed text cells retain their missing values.
-    replace <- !is.na(table[[column]])
-    table[[column]][replace] <- h5$Results[replace, match(heading, headings)]
+    h5_values <- h5$Results[, match(heading, headings)]
+    replace <- !is.na(table[[column]]) & is.finite(h5_values) &
+      abs(h5_values - table[[column]]) <= 5.1e-4
+    table[[column]][replace] <- h5_values[replace]
   }
   table
 }

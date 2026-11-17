@@ -64,7 +64,8 @@ mplusModel <- function(syntax=NULL, data=NULL, inp_file=NULL, out_file=NULL, dir
 #'   Wrapped by `mplusModel`
 #' @name mplusModel_r6
 #' @keywords internal
-mplusModel_r6 <- R6::R6Class(
+#' @importFrom R6 R6Class
+mplusModel_r6 <- R6Class(
   classname = "mplusModel_r6",
   lock_objects=FALSE,
   private = c(

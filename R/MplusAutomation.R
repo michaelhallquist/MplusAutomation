@@ -52,7 +52,7 @@
 #' Package: \tab MplusAutomation\cr
 #' Type: \tab Package\cr
 #' Version: \tab 1.4\cr
-#' Date: \tab 2026-07-19\cr
+#' Date: \tab 2026-11-17\cr
 #' License: \tab LGPL-3\cr
 #' LazyLoad: \tab yes\cr
 #' }
@@ -64,7 +64,6 @@
 #' Maintainer: Michael Hallquist \email{michael.hallquist@@gmail.com}
 #' @keywords package
 #' @import plyr
-#' @importFrom utils packageDescription
 #' @seealso See \code{\link{runModels}} for an example running a model.
 #' @references Mplus software. Muthen and Muthen. \url{https://www.statmodel.com}
 NULL
@@ -76,11 +75,9 @@ if (getRversion() >= "2.15.1") utils::globalVariables(c("cnum", "V1", "sched", "
 # display version number and citation when the package is loaded
 .onAttach <- function(libname, pkgname) {
 
-  desc  <- packageDescription(pkgname, libname)
-
   packageStartupMessage(
 
-      'Version:  ', desc$Version, '\n',
+      'Version:  ', getNamespaceVersion(pkgname), '\n',
 
     'We work hard to write this free software. Please help us get credit by citing: \n\n',
 

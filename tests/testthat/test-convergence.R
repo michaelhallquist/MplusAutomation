@@ -53,3 +53,19 @@ test_that("convergence is unknown when Mplus provides no termination message", {
   expect_true(is.na(model$reason))
   expect_length(model$message, 0L)
 })
+
+test_that("convergence describes the run and retains errors without a fit table", {
+  file <- tempfile(fileext = ".out")
+  on.exit(unlink(file))
+  failure <- "NO CONVERGENCE.  NUMBER OF ITERATIONS EXCEEDED."
+  header <- c("Mplus VERSION 9.1", "", "INPUT INSTRUCTIONS", "",
+              paste0("  TITLE: ", failure), "", "INPUT READING TERMINATED NORMALLY", "")
+  writeLines(c(header, "THE MODEL ESTIMATION TERMINATED NORMALLY", "",
+               "TECHNICAL 9 OUTPUT", failure), file)
+  expect_true(readModels(file, what = "converged")$converged)
+
+  writeLines(c(header, failure), file)
+  model <- readModels(file, what = c("converged", "warn_err"))
+  expect_false(model$converged)
+  expect_identical(model$errors[[1L]], failure)
+})
