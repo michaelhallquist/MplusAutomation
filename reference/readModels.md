@@ -85,19 +85,26 @@ a single mplus.model object, not a list of files. Specific elements are:
   sizes and ICCs
 
 - `sampstat`: Sample statistics provided by OUTPUT: SAMPSTAT, if
-  specified
+  specified. Includes `censored.limits` and `count.summary` when
+  reported.
 
 - `covariance_coverage`: Covariance coverage matrix for checking
   missingness patterns
 
 - `summaries`: Summary statistics from `extractModelSummaries`, having
-  structure as specified by that function
+  structure as specified by that function. `ConditionNumber` contains
+  the information-matrix condition number when reported.
 
 - `random_starts`: Parsed random starts results, including final-stage
   loglikelihoods and random start specifications
 
 - `parameters`: Model parameters from `extractModelParameters`, having
-  structure as specified by that function
+  structure as specified by that function. Additional tables include
+  `ci.probability.scale` (confidence or credibility intervals),
+  `indicator.profiles` (means and probabilities evaluated at the
+  reported covariate values), `indicator.odds` and `ci.indicator.odds`
+  (with category comparisons and `classA`/`classB`), `brant`
+  (proportional-odds tests), and `logrank` (survival comparisons).
 
 - `svalues`: Raw text from the SVALUES section, if present
 
@@ -155,7 +162,10 @@ a single mplus.model object, not a list of files. Specific elements are:
   statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12
 
 - `fac_score_stats`: factor score mean, correlation, and covariance
-  structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section
+  structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section.
+  `plausible.values` and `plausible.sd` contain the reported Means,
+  Covariances, and Correlations matrices for plausible values and their
+  standard deviations.
 
 - `lcCondMeans`: conditional latent class means and pairwise
   comparisons, obtained using auxiliary(e) syntax in latent class models

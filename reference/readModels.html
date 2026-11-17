@@ -122,11 +122,17 @@ a single mplus.model object, not a list of files. Specific elements are:</p><ul>
 non-convergence, <code>TRUE</code> for normal termination, and <code>NA</code> when neither
 message was found. A non-convergence message is retained in <code>errors</code>.</p></li>
 <li><p><code>data_summary</code>: Output of SUMMARY OF DATA section, including cluster sizes and ICCs</p></li>
-<li><p><code>sampstat</code>: Sample statistics provided by OUTPUT: SAMPSTAT, if specified</p></li>
+<li><p><code>sampstat</code>: Sample statistics provided by OUTPUT: SAMPSTAT, if specified.
+Includes <code>censored.limits</code> and <code>count.summary</code> when reported.</p></li>
 <li><p><code>covariance_coverage</code>: Covariance coverage matrix for checking missingness patterns</p></li>
-<li><p><code>summaries</code>: Summary statistics from <code>extractModelSummaries</code>, having structure as specified by that function</p></li>
+<li><p><code>summaries</code>: Summary statistics from <code>extractModelSummaries</code>, having structure as specified by that function.
+<code>ConditionNumber</code> contains the information-matrix condition number when reported.</p></li>
 <li><p><code>random_starts</code>: Parsed random starts results, including final-stage loglikelihoods and random start specifications</p></li>
-<li><p><code>parameters</code>: Model parameters from <code>extractModelParameters</code>, having structure as specified by that function</p></li>
+<li><p><code>parameters</code>: Model parameters from <code>extractModelParameters</code>, having structure as specified by that function.
+Additional tables include <code>ci.probability.scale</code> (confidence or credibility intervals),
+<code>indicator.profiles</code> (means and probabilities evaluated at the reported covariate values),
+<code>indicator.odds</code> and <code>ci.indicator.odds</code> (with category comparisons and <code>classA</code>/<code>classB</code>),
+<code>brant</code> (proportional-odds tests), and <code>logrank</code> (survival comparisons).</p></li>
 <li><p><code>svalues</code>: Raw text from the SVALUES section, if present</p></li>
 <li><p><code>model_table</code>: Parsed model syntax from the input <code>MODEL</code> sections as a data.frame</p></li>
 <li><p><code>class_counts</code>: Latent class counts and proportions for models that include a categorical latent variable</p></li>
@@ -147,7 +153,9 @@ a threshold, <code>ess</code> is missing and <code>upper_bound</code> contains t
 <li><p><code>tech9</code>: a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9</p></li>
 <li><p><code>tech10</code>: a list containing model fit information from OUTPUT: TECH10</p></li>
 <li><p><code>tech12</code>: a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12</p></li>
-<li><p><code>fac_score_stats</code>: factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section</p></li>
+<li><p><code>fac_score_stats</code>: factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section.
+<code>plausible.values</code> and <code>plausible.sd</code> contain the reported Means, Covariances,
+and Correlations matrices for plausible values and their standard deviations.</p></li>
 <li><p><code>lcCondMeans</code>: conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models</p></li>
 <li><p><code>r3step</code>: predictors of latent class membership using the 3-step procedure (R3STEP)</p></li>
 <li><p><code>gh5</code>: a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)</p></li>
