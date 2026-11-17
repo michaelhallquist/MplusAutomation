@@ -645,7 +645,9 @@ output_interval_type <- function(outfiletext, standardized = FALSE) {
 order_h5_parameters <- function(parameters) {
   section_order <- c(
     "unstandardized", "unstandardized.alt", "r2", "ci.unstandardized",
-    "irt.parameterization", "probability.scale", "class.equality", "transition.odds",
+    "irt.parameterization", "probability.scale", "ci.probability.scale",
+    "indicator.profiles", "indicator.odds", "ci.indicator.odds", "brant", "logrank",
+    "class.equality", "transition.odds",
     "odds", "ci.odds",
     "stdyx.standardized", "ci.stdyx.standardized",
     "stdy.standardized", "ci.stdy.standardized",
@@ -785,15 +787,94 @@ extractParameters_1file_with_h5 <- function(outfiletext, filename, h5results,
   } else {
     NULL
   }
-  if (is.null(h5_parameters)) {
-    extractParameters_1file(outfiletext, filename, efa = efa)
-  } else {
+  if (!is.null(h5_parameters)) {
     esem_std <- extractESEMStandardized(outfiletext, filename)
     if (!is.null(esem_std)) h5_parameters$esem.standardized <- esem_std
     class_eq <- extractClassEqualityTests(outfiletext, filename)
     if (!is.null(class_eq)) h5_parameters$class.equality <- class_eq
     trans_odds <- extractTransitionOdds(outfiletext)
     if (!is.null(trans_odds)) h5_parameters$transition.odds <- trans_odds
-    order_h5_parameters(h5_parameters)
   }
+  parameters <- if (is.null(h5_parameters)) {
+    extractParameters_1file(outfiletext, filename, efa = efa)
+  } else {
+    h5_parameters
+  }
+  if (isTRUE(prefer_h5) && !is.null(h5results)) {
+    # Supplemental tables can use H5 even when the core model requires text.
+    additional <- extractAdditionalParameters(outfiletext, filename)
+    h5_sections <- c(
+      ci.probability.scale = "Confidence Intervals in Probability Scale",
+      indicator.odds = "Latent Class Indicator Odds Ratios for the Latent Classes",
+      brant = "Brant Wald Test For Proportional Odds"
+    )
+    if (has_output_section(outfiletext, "CREDIBILITY INTERVALS IN PROBABILITY SCALE")) {
+      h5_sections["ci.probability.scale"] <- "Credibility Intervals in Probability Scale"
+    }
+    for (name in names(additional)) {
+      table <- additional[[name]]
+      if (name %in% names(h5_sections)) {
+        table <- preferH5AdditionalTable(table, h5_sections[[name]], h5results, h5file)
+      }
+      parameters[[name]] <- table
+    }
+  }
+  order_h5_parameters(parameters)
+}
+
+preferH5AdditionalTable <- function(table, section, h5results, h5file) {
+  h5 <- h5results[[section]]
+  if (is.null(h5) || !is.matrix(h5$Results) || !is.numeric(h5$Results) || !is.matrix(h5$Statements) ||
+      nrow(h5$Results) != nrow(table) || nrow(h5$Statements) != nrow(table)) return(table)
+  headings <- trimws(h5_result_headings(h5file, section))
+  statement_headings <- trimws(h5_statement_headings(h5file, section))
+  if (length(headings) != ncol(h5$Results) ||
+      length(statement_headings) != ncol(h5$Statements) ||
+      anyDuplicated(headings) || anyDuplicated(statement_headings)) return(table)
+  statements <- as.data.frame(h5$Statements, stringsAsFactors = FALSE)
+  statements[] <- lapply(statements, trimws)
+  names(statements) <- statement_headings
+  lhs <- "Left-hand variable/Variable/Parameter label"
+  if (section == "Brant Wald Test For Proportional Odds") {
+    if (!setequal(c("Variable", "Test/Variable"), names(statements))) return(table)
+    keys <- data.frame(param = statements$Variable, test = statements[["Test/Variable"]])
+  } else {
+    if (!all(c("Section", lhs) %in% names(statements))) return(table)
+    allowed <- c("Class", "Comparison", "Section", lhs, "Keyword", "Right-hand variable")
+    if (length(setdiff(names(statements), allowed))) return(table)
+    keys <- data.frame(
+      param = statements$Section,
+      category = sub("^Category\\s+", "", statements[[lhs]])
+    )
+    if ("Comparison" %in% names(statements)) {
+      labels <- extract_pcre_groups(statements$Comparison, "^Latent Class (.+?) Compared to Latent Class (.+?)$")
+      if (any(lengths(labels) != 3L)) return(table)
+      keys$classA <- vapply(labels, `[`, character(1L), 2L)
+      keys$classB <- vapply(labels, `[`, character(1L), 3L)
+    } else if ("Class" %in% names(statements)) {
+      keys$LatentClass <- sub("^Latent Class ", "", statements$Class)
+    }
+  }
+  # Check every identifying column, including dimensions not represented in H5.
+  values <- c(
+    Estimate = "est", "S.E." = "se", "Lower 2.5%" = "lower_2.5ci", "Upper 2.5%" = "upper_2.5ci",
+    "Lower .5%" = "low.5", "Lower 5%" = "low5", "Upper 5%" = "up5", "Upper .5%" = "up.5",
+    "Chi-Square" = "chisq", "Degrees of Freedom" = "df", "P-Value" = "pval"
+  )
+  if (grepl("Intervals in Probability Scale$", section)) {
+    values[c("Lower 2.5%", "Upper 2.5%")] <- c("low2.5", "up2.5")
+  }
+  key_names <- setdiff(names(table), unname(values))
+  if (!setequal(key_names, names(keys))) return(table)
+  for (name in key_names) {
+    if (!identical(as.character(table[[name]]), as.character(keys[[name]]))) return(table)
+  }
+  for (heading in intersect(names(values), headings)) {
+    column <- values[[heading]]
+    if (!column %in% names(table)) next
+    # Undefined and overflowed text cells retain their missing values.
+    replace <- !is.na(table[[column]])
+    table[[column]][replace] <- h5$Results[replace, match(heading, headings)]
+  }
+  table
 }

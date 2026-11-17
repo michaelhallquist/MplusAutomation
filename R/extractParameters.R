@@ -23,7 +23,7 @@ extractParameters_1chunk <- function(filename, thisChunk, columnNames, sectionNa
     if (length(thisChunk) == 0L) return(NULL)
     convertMatches <- data.frame(element=0L, keyword="R-SQUARE", varname=NA_character_,
                                  operator=NA_character_, endline=length(thisChunk))
-  } else if (sectionName=="probability.scale") {
+  } else if (sectionName %in% c("probability.scale", "ci.probability.scale")) {
     #Probability scale output tends to fall in one uniform chunk. If it has header (e.g., Latent Class 1), these are handled upstream before parsing into chunks processed here.
     convertMatches <- data.frame(element=1, keyword="Probability.Scale", varname=NA_character_, operator=NA_character_, endline=length(thisChunk))
   } else {
@@ -224,7 +224,7 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
 
   #detectColumnNames sub-divides (perhaps unnecessarily) the matches based on the putative section type of the output
   #current distinctions include modification indices, confidence intervals, and model results.
-  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized", "ci.odds")) { 
+  if (sectionName %in% c("ci.unstandardized", "ci.stdyx.standardized", "ci.stdy.standardized", "ci.std.standardized", "ci.odds", "ci.probability.scale")) {
     sectionType <- "confidence_intervals"
   } else if (sectionName == "irt.parameterization" || sectionName == "probability.scale") {
     #the IRT section follows from the MODEL RESULTS section, and column headers are not reprinted.
@@ -784,11 +784,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
   if (!is.null(probSection)) {
     probParsed <- extractParameters_1section(filename, probSection, "probability.scale")
     #slight modification of typical output for $parameters to put category in separate column
-    probParsed[[1]]$paramHeader <- NULL
-    probParsed[[1]]$category <- sub("^.*\\.Cat\\.(\\d+)$", "\\1", probParsed[[1]]$param, perl=TRUE)
-    probParsed[[1]]$param <- sub("^(.*)\\.Cat\\.\\d+$", "\\1", probParsed[[1]]$param, perl=TRUE)
-    other_cols <- names(probParsed[[1]])[!names(probParsed[[1]]) %in% c("param", "category", "est")] #append any other columns after primary 3
-    probParsed[[1]] <- probParsed[[1]][,c("param", "category", "est", other_cols)] #reorder columns
+    probParsed[[1]] <- format_probability_parameters(probParsed[[1]])
     allSections <- appendListElements(allSections, probParsed)
   }
   
@@ -877,6 +873,8 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
   transOdds <- extractTransitionOdds(outfiletext)
   if (!is.null(transOdds)) allSections$transition.odds <- transOdds
 
+  allSections <- appendListElements(allSections, extractAdditionalParameters(outfiletext, filename))
+
   #extract EFA parameters if this is an EFA output
   if (efa) {
     
@@ -888,7 +886,9 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
 
   # cleaner equivalent of above
   listOrder <- c("unstandardized", "unstandardized.alt", "r2", "ci.unstandardized",
-      "irt.parameterization", "probability.scale", "class.equality", "transition.odds",
+      "irt.parameterization", "probability.scale", "ci.probability.scale",
+      "indicator.profiles", "indicator.odds", "ci.indicator.odds", "brant", "logrank",
+      "class.equality", "transition.odds",
       "odds", "ci.odds",
       "stdyx.standardized", "ci.stdyx.standardized",
       "stdy.standardized", "ci.stdy.standardized",

@@ -53,11 +53,17 @@
 #'   non-convergence, `TRUE` for normal termination, and `NA` when neither
 #'   message was found. A non-convergence message is retained in `errors`.
 #' * `data_summary`: Output of SUMMARY OF DATA section, including cluster sizes and ICCs
-#' * `sampstat`: Sample statistics provided by OUTPUT: SAMPSTAT, if specified
+#' * `sampstat`: Sample statistics provided by OUTPUT: SAMPSTAT, if specified.
+#'   Includes `censored.limits` and `count.summary` when reported.
 #' * `covariance_coverage`: Covariance coverage matrix for checking missingness patterns
-#' * `summaries`: Summary statistics from \code{extractModelSummaries}, having structure as specified by that function
+#' * `summaries`: Summary statistics from \code{extractModelSummaries}, having structure as specified by that function.
+#'   `ConditionNumber` contains the information-matrix condition number when reported.
 #' * `random_starts`: Parsed random starts results, including final-stage loglikelihoods and random start specifications
-#' * `parameters`: Model parameters from \code{extractModelParameters}, having structure as specified by that function
+#' * `parameters`: Model parameters from \code{extractModelParameters}, having structure as specified by that function.
+#'   Additional tables include `ci.probability.scale` (confidence or credibility intervals),
+#'   `indicator.profiles` (means and probabilities evaluated at the reported covariate values),
+#'   `indicator.odds` and `ci.indicator.odds` (with category comparisons and `classA`/`classB`),
+#'   `brant` (proportional-odds tests), and `logrank` (survival comparisons).
 #' * `svalues`: Raw text from the SVALUES section, if present
 #' * `model_table`: Parsed model syntax from the input `MODEL` sections as a data.frame
 #' * `class_counts`: Latent class counts and proportions for models that include a categorical latent variable
@@ -78,7 +84,9 @@
 #' * `tech9`: a list containing warnings/errors from replication runs for MONTECARLO analyses from OUTPUT: TECH9
 #' * `tech10`: a list containing model fit information from OUTPUT: TECH10
 #' * `tech12`: a list containing observed versus estimated sample statistics for TYPE=MIXTURE analyses from OUTPUT: TECH12
-#' * `fac_score_stats`: factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section
+#' * `fac_score_stats`: factor score mean, correlation, and covariance structure from SAMPLE STATISTICS FOR ESTIMATED FACTOR SCORES section.
+#'   `plausible.values` and `plausible.sd` contain the reported Means, Covariances,
+#'   and Correlations matrices for plausible values and their standard deviations.
 #' * `lcCondMeans`: conditional latent class means and pairwise comparisons, obtained using auxiliary(e) syntax in latent class models
 #' * `r3step`: predictors of latent class membership using the 3-step procedure (R3STEP)
 #' * `gh5`: a list containing data from the gh5 (graphics) file corresponding to this output. (Requires rhdf5 package)
