@@ -56,8 +56,8 @@ data.frame to a tab-delimited file and provides an 'Mplus' syntax stub for varia
 \tabular{ll}{
 Package: \tab MplusAutomation\cr
 Type: \tab Package\cr
-Version: \tab 1.2\cr
-Date: \tab 2025-08-25\cr
+Version: \tab 1.4\cr
+Date: \tab 2026-11-17\cr
 License: \tab LGPL-3\cr
 LazyLoad: \tab yes\cr
 }

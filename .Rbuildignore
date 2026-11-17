@@ -1,10 +1,10 @@
-.gitignore
-.git
+^\.gitignore$
+^\.git$
 
-products
-local
-examples
-pkg_build
+^products$
+^local$
+^examples$
+^pkg_build$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^_pkgdown\.yml$
@@ -14,11 +14,11 @@ pkg_build
 ^.*\.dgm$
 ^man-roxygen
 
-vignettes/README.md
-vignettes/precompile.R
+^vignettes/README\.md$
+^vignettes/precompile\.R$
 ^vignettes/.*\.orig$
 ^vignettes/.*\.inp$
 ^vignettes/.*\.out$
 ^vignettes/.*\.dat$
-.vscode
+^\.vscode$
 ^\.github$

@@ -359,13 +359,13 @@ test_that("v9.1 mixture class equality tests, LTA transition odds, Overall Part,
     "",
     "LOGISTIC REGRESSION ODDS RATIO RESULTS FOR OBSERVED VARIABLES",
     "",
-    "                                                95% C.I.",
-    "                    Estimate       S.E.  Lower 2.5% Upper 2.5%",
+    "                                  (Est. - 1)   Two-Tailed",
+    "                    Estimate       S.E. / S.E.    P-Value",
     "",
     "Latent Class 1",
     "",
     " U4         ON",
-    "    X                  1.784      0.229      1.387      2.293",
+    "    X                  1.784      0.229      3.424      0.001",
     "",
     "LOGISTIC REGRESSION ODDS RATIO RESULTS FOR LATENT CLASS VARIABLES",
     "",
@@ -426,8 +426,37 @@ test_that("v9.1 mixture class equality tests, LTA transition odds, Overall Part,
   expect_equal(nrow(params$odds), 2L)
   expect_equal(params$odds$param, c("X", "F"))
   expect_equal(params$odds$LatentClass, c("1", "Categorical.Latent.Variables"))
+  expect_equal(params$odds$pval, c(0.001, NA_real_))
+  expect_equal(params$odds$lower_2.5ci, c(NA_real_, 0.267))
   expect_equal(params$ci.odds$paramHeader, "C1#1.ON")
   expect_equal(params$ci.odds$est, 0.359)
+})
+
+test_that("wildcard imputation files resolve when read through a relative output path", {
+  directory <- tempfile()
+  dir.create(file.path(directory, "imputations"), recursive = TRUE)
+  old_dir <- setwd(directory)
+  on.exit({
+    setwd(old_dir)
+    unlink(directory, recursive = TRUE)
+  })
+  writeLines("1 2", "imputations/imp1.dat")
+  writeLines("3 4", "imputations/imp2.dat")
+  writeLines("5 6", "imputations/other_imp3.dat")
+  writeLines(c(
+    "Mplus VERSION 9.1", "", "INPUT INSTRUCTIONS", "",
+    "  DATA IMPUTATION: SAVE = imputations/imp*.dat;",
+    "", "INPUT READING TERMINATED NORMALLY", "",
+    "SAVEDATA INFORMATION", "",
+    "  Save file", "    imp*.dat", "",
+    "  Order of variables", "", "    X", "    Y", "",
+    "  Save file", "    plausible.dat", "",
+    "  Order and format of variables", "", "    Z F10.3", ""
+  ), "model.out")
+
+  expect_silent(model <- readModels("model.out", what = "savedata"))
+  expect_named(model$savedata, c("imp1.dat", "imp2.dat"))
+  expect_equal(model$savedata$imp2.dat, data.frame(X = 3L, Y = 4L))
 })
 
 test_that("v9.1 Bayes TECH8 ESS, Penalized LL, VIF overflow, standalone R-SQUARE, and invariance (MODEL) syntax work", {

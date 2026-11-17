@@ -28,20 +28,28 @@ test_that("readModels prefers supported H5 MODEL RESULTS tables", {
     )
   )
 
-  outfile <- tempfile(fileext = ".out")
-  h5file <- tempfile(fileext = ".h5")
+  root <- tempfile()
+  dir.create(file.path(root, "results"), recursive = TRUE)
+  outfile <- file.path(root, "model.out")
+  h5file <- file.path(root, "results", "model.h5")
   file.create(h5file)
-  on.exit(unlink(c(outfile, h5file)))
+  on.exit(unlink(root, recursive = TRUE))
   writeLines(c(
     readLines(testthat::test_path("ex3.1.out")),
     "", "SAVEDATA INFORMATION", "", "  Results in H5 Format", "",
-    "  Save file", paste0("    ", basename(h5file))
+    "  Save file", "    results/model.h5"
   ), outfile)
 
   h5_attributes <- function(file, dataset) {
     list(Headings = if (grepl("Results$", dataset)) result_headings else statement_headings)
   }
-  h5_reader <- function(file) h5results
+  h5_reader <- function(file) {
+    expect_identical(
+      normalizePath(file, winslash = "/", mustWork = TRUE),
+      normalizePath(h5file, winslash = "/", mustWork = TRUE)
+    )
+    h5results
+  }
 
   preferred <- testthat::with_mocked_bindings(
     MplusAutomation::readModels(outfile, what = "parameters", quiet = TRUE),
@@ -98,6 +106,11 @@ test_that("unsupported H5 MODEL RESULTS layouts fall back to text parsing", {
   ))
 
   expect_null(MplusAutomation:::extractH5ModelResults(unsupported, "model.out"))
+  expect_null(MplusAutomation:::extractH5ModelResults(
+    unsupported, "model.out",
+    result_headings = c("Estimate", "S.E.", "Two-Tailed P-Value"),
+    statement_headings = c("Section", "Variable", "Keyword", "Right-hand variable")
+  ))
 })
 
 test_that("H5 R-square retains the columns shown in text output", {

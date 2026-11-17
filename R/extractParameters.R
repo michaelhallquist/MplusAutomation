@@ -266,8 +266,8 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
     if (is.null(df2) || nrow(df2) == 0L) return(df1)
     missing_in_1 <- setdiff(names(df2), names(df1))
     missing_in_2 <- setdiff(names(df1), names(df2))
-    for (nm in missing_in_1) df1[[nm]] <- NA_character_
-    for (nm in missing_in_2) df2[[nm]] <- NA_character_
+    for (nm in missing_in_1) df1[[nm]] <- NA
+    for (nm in missing_in_2) df2[[nm]] <- NA
     df2 <- df2[, names(df1), drop = FALSE]
     rbind(df1, df2)
   }
@@ -377,7 +377,8 @@ extractParameters_1section <- function(filename, modelSection, sectionName) {
         #parse the chunk into a data.frame      
         parsedChunk <- extractParameters_1chunk(filename, thisChunk, columnNames, sectionName)
         
-        if (sectionName == "ci.unstandardized" && lcNum=="Categorical.Latent.Variables" && is.null(bwWi) && length(betweenWithinMatches) > 0L) {
+        if (sectionName == "ci.unstandardized" && identical(lcNum, "Categorical.Latent.Variables") &&
+            is.null(bwWi) && length(betweenWithinMatches) > 0L) {
           bwWi <- "Within"
         }
   
@@ -794,7 +795,7 @@ extractParameters_1file <- function(outfiletext, filename, resultType, efa = FAL
     if (length(tables) == 1L) return(tables[[1L]])
     all_cols <- unique(unlist(lapply(tables, names)))
     aligned <- lapply(tables, function(df) {
-      for (nm in setdiff(all_cols, names(df))) df[[nm]] <- NA_character_
+      for (nm in setdiff(all_cols, names(df))) df[[nm]] <- NA
       df[, all_cols, drop = FALSE]
     })
     out <- do.call(rbind, aligned)

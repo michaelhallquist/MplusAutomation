@@ -587,10 +587,7 @@ getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileNa
       #where to look for saved data should be overridden. In particular, we should use
       #the path from MONTECARLO: SAVE or DATA IMPUTATION: SAVE = and ignore where the output file is located.
 
-      #if save command is present in montecarlo section and there is a directory specified, then use that.
-      #resplit now that outfileDir and savedataDir are assembled to setup wildcard matching using list.files.
-
-      split.above <- splitFilePath(savedataFile) #get info the directory for the output file, as determined above
+      search_dir <- dirname(savedataFile)
 
       if (!is.null(input$montecarlo$save)) {
         mcmi.savesplit <- splitFilePath(input$montecarlo$save)
@@ -603,34 +600,25 @@ getSavedata_readRawFile <- function(outfile, outfiletext, format="fixed", fileNa
       if (!is.null(mcmi.savesplit) &&
           !is.na(mcmi.savesplit$directory)) {
 
-        if (mcmi.savesplit$absolute) {
-          resplit <- splitFilePath(file.path(mcmi.savesplit$directory, split.above$filename)) #concat absolute montecarlo: save dir with rep filename
-        } else {
-          #mc save directory is present, but relative
-          #thus, need to combine it with directory above
-          if (!is.na(split.above$directory)) {
-            resplit <- splitFilePath(file.path(split.above$directory, mcmi.savesplit$directory, split.above$filename))
-          }
+        search_dir <- if (mcmi.savesplit$absolute) mcmi.savesplit$directory else {
+          file.path(dirname(outfile), mcmi.savesplit$directory)
         }
-      } else {
-        resplit <- splitFilePath(savedataFile)
       }
 
 
       #patch file pattern to match perl syntax
-      pat <- gsub("\\.", "\\\\.", resplit$filename, perl=TRUE)
-      pat <- gsub("\\*", "\\\\d+", pat, perl=TRUE)
-      fileNames <- list.files(path=resplit$directory, pattern=pat, full.names=FALSE) #very klunky way to handle this
-      fileList <- list.files(path=resplit$directory, pattern=pat, full.names=TRUE)
+      pat <- gsub("\\.", "\\\\.", savedataSplit$filename, perl=TRUE)
+      pat <- gsub("\\*", "[0-9]+", pat, perl=TRUE)
+      fileNames <- list.files(path = search_dir, pattern = paste0("^", pat, "$"))
 
       dataset <- list()
 
-      if (length(fileList) == 0L) {
+      if (length(fileNames) == 0L) {
         #function was generating error when files could not be found
-        warning("Unable to locate SAVEDATA files for filename: ", resplit$filename)
+        warning("Unable to locate SAVEDATA files for filename: ", savedataSplit$filename)
       } else {
-        for (f in 1:length(fileList)) {
-          dataset[[make.names(fileNames[f])]] <- fread(file=fileList[f], header=FALSE,
+        for (name in fileNames) {
+          dataset[[make.names(name)]] <- fread(file=file.path(search_dir, name), header=FALSE,
               na.strings="*", col.names=varNames, strip.white=TRUE, data.table=FALSE)
         }
       }

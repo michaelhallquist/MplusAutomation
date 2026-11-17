@@ -188,6 +188,10 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
       h5results <- read_h5(h5resultsfile)
     }
     
+    if (any(c("warn_err", "converged") %in% what)) {
+      convergence <- extractConvergence_1file(rawtext, input_end = attr(inp, "end.line"))
+    }
+
     if (isTRUE("warn_err" %in% what)) {
       #Parse warnings and errors in output file
       warn_err <- tryCatch(extractWarningsErrors_1file(outfiletext, curfile, input=inp), error=function(e) {
@@ -195,12 +199,19 @@ readModels <- function(target=getwd(), recursive=FALSE, filefilter, pathfilter, 
             return(list())
           })
 
+      if (identical(convergence$converged, FALSE)) {
+        missing_messages <- setdiff(convergence$message, unlist(warn_err$errors, use.names = FALSE))
+        if (length(missing_messages) > 0L) {
+          warn_err$errors <- structure(c(warn_err$errors, as.list(missing_messages)),
+                                       class = c("mplus.errors", "list"))
+        }
+      }
       allFiles[[listID]]$warnings <- warn_err$warnings
       allFiles[[listID]]$errors <- warn_err$errors
     }
 
     if (isTRUE("converged" %in% what)) {
-      allFiles[[listID]]$converged <- extractConvergence_1file(rawtext)$converged
+      allFiles[[listID]]$converged <- convergence$converged
     }
 
     if (isTRUE("data_summary" %in% what)) {

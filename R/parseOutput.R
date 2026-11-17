@@ -522,10 +522,15 @@ divideIntoFields <- function(section.text, required) {
 #' themselves change a model's convergence status.
 #'
 #' @param outfiletext The text of the output file.
+#' @param input_end Last line of the echoed input, if known.
 #' @return A `mplus.convergence` object.
 #' @keywords internal
 #' @noRd
-extractConvergence_1file <- function(outfiletext) {
+extractConvergence_1file <- function(outfiletext, input_end = 0L) {
+  # Exclude echoed input and replication diagnostics from the run status.
+  tech9 <- grep("^\\s*TECHNICAL 9 OUTPUT\\s*$", outfiletext, perl = TRUE)
+  if (length(tech9) > 0L) outfiletext <- head(outfiletext, tech9[1L] - 1L)
+  if (isTRUE(input_end > 0L)) outfiletext <- tail(outfiletext, max(0L, length(outfiletext) - input_end))
   nonconvergence_patterns <- c(
     max_iterations_exceeded = "NO\\s+CONVERGENCE\\.\\s*NUMBER\\s+OF\\s+ITERATIONS\\s+EXCEEDED\\.",
     bayes_criterion_not_satisfied = "THE\\s+CONVERGENCE\\s+CRITERION\\s+IS\\s+NOT\\s+(?:SATISFIED|MET)\\.",
@@ -533,16 +538,10 @@ extractConvergence_1file <- function(outfiletext) {
     likelihood_decreased = "THE\\s+LOGLIKELIHOOD\\s+DECREASED"
   )
 
-  matched <- vapply(
-    nonconvergence_patterns,
-    function(pattern) any(grepl(pattern, outfiletext, ignore.case = TRUE, perl = TRUE)),
-    logical(1L)
-  )
-  if (any(matched)) {
-    reason <- names(nonconvergence_patterns)[which(matched)[1L]]
-    message <- trimws(outfiletext[grepl(
-      nonconvergence_patterns[[reason]], outfiletext, ignore.case = TRUE, perl = TRUE
-    )])
+  matched <- lapply(nonconvergence_patterns, grep, x = outfiletext, ignore.case = TRUE, perl = TRUE)
+  if (any(lengths(matched) > 0L)) {
+    reason <- names(matched)[which(lengths(matched) > 0L)[1L]]
+    message <- trimws(outfiletext[sort(unique(unlist(matched, use.names = FALSE)))])
     return(new_mplus_convergence(FALSE, reason = reason, message = message))
   }
 
@@ -1544,7 +1543,7 @@ extractSampstat <- function(outfiletext, filename) {
   if (!is.null(univariateCountsSection)) {
     univariateCountsSection <- univariateCountsSection[!grepl("^\\s*(WARNING|NOTE):", univariateCountsSection, perl=TRUE)]
   }
-  
+
   if (!is.null(univariateCountsSection) && any(nzchar(trimws(univariateCountsSection)))) {
     countSubsections <- getMultilineSection("Group\\s+([\\w\\d\\.,_]+)*",
       univariateCountsSection, filename, allowMultiple=TRUE)

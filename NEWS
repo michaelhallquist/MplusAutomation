@@ -34,6 +34,10 @@ Version 1.4
                latent-class counts and BPARAMETERS metadata, and minor releases such as 7.10 select
                the appropriate output format. Fixes #230.
 - bugfix:      submitModels now correctly batches fractional walltimes, normalizes overflow in duration fields, and renders day-based durations as total hours for TORQUE/qsub.
+- bugfix:      Relative H5RESULTS and wildcard imputation paths resolve alongside the output file.
+               Combined odds-ratio tables retain numeric columns when tables report different statistics.
+               Convergence reflects the main run and retains failure messages even without fit statistics.
+- bugfix:      Source builds include the summary-table rounding tests and local-job help page.
 
 Version 1.3
  - feature:     readModels now parses input MODEL sections into $model_table, a syntax-oriented data.frame with parameter headers, labels, modifiers, values, fixed/free status, and source sections
